@@ -1,0 +1,56 @@
+.personal-info-container {
+  padding: 1rem;
+}
+
+.info-card {
+  margin-bottom: 1rem;
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.section-title {
+  color: #2c3e50;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.info-item {
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: flex-start;
+}
+
+.info-label {
+  min-width: 120px;
+  color: #7f8c8d;
+  font-weight: 500;
+}
+
+.info-value {
+  color: #2c3e50;
+  flex: 1;
+}
+
+.certificates-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.certificate-item {
+  background-color: #e9ecef;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  color: #2c3e50;
+}
+
+.bio-text {
+  color: #2c3e50;
+  line-height: 1.6;
+  text-align: justify;
+} 

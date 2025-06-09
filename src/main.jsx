@@ -18,6 +18,7 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AuthWrapper } from './components/context/auth.context';
 import App from './pages/client/App';
 import PrivateRoute from './pages/private-route';
+import Resources from './pages/client/resources';
 
 
 
@@ -42,6 +43,11 @@ const router = createBrowserRouter([
         errorElement: <Errors />,
       },
     ]
+  },
+  {
+    path: '/resources',
+    element: <Resources />,
+    errorElement: <Errors />,
   },
   {
     path: '/login',

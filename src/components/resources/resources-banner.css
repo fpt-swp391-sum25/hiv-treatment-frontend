@@ -1,0 +1,37 @@
+/* src/components/banner.css */
+
+.hiv-banner {
+  background: linear-gradient(135deg, #e0fdf4 0%, #f4fefc 100%);
+  border-radius: 20px;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.hiv-banner-content {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.hiv-banner-title {
+  font-size: 32px;
+  font-weight: bold;
+  color: #3b82f6;
+  margin-bottom: 16px;
+}
+
+.hiv-banner-subtitle {
+  font-size: 18px;
+  color: #555;
+  margin-bottom: 24px;
+}
+
+/* Responsive tweaks */
+@media (max-width: 600px) {
+  .hiv-banner-title {
+    font-size: 24px;
+  }
+
+  .hiv-banner-subtitle {
+    font-size: 16px;
+  }
+}

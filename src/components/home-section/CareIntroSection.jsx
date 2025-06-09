@@ -54,16 +54,12 @@ function CareIntroSection() {
         <p>Hệ thống đặt lịch thông minh 24/7, dễ dàng chọn bác sĩ và thời gian phù hợp.</p>
       </li>
       <li>
-        <strong>👨‍⚕️ Đội ngũ chuyên gia</strong>
-        <p>Bác sĩ được đào tạo quốc tế, giàu kinh nghiệm và tận tâm.</p>
+        <strong>🧾 Nhận kết quả nhanh chóng, tiện lợi</strong>
+        <p>Tối ưu thời gian và thuận tiện trong việc tiếp cận kết quả khám và xét nghiệm.</p>
       </li>
       <li>
         <strong>📈 Theo dõi điều trị</strong>
         <p>Giám sát toàn diện quá trình chữa trị với báo cáo cập nhật liên tục.</p>
-      </li>
-      <li>
-        <strong>🧬 Khám và xét nghiệm</strong>
-        <p>Trang thiết bị hiện đại, kết quả nhanh chóng, chính xác.</p>
       </li>
       <li>
         <strong>📚 Hỗ trợ giáo dục sức khỏe</strong>
