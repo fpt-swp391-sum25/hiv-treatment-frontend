@@ -1,0 +1,96 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f4;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.header h1 {
+    color: #3b82f6;
+}
+
+.card-container {
+    display: flex;
+    flex-wrap: wrap; /* Cho phép các thẻ card xuống dòng khi không đủ chỗ */
+    justify-content: space-between; /* Căn giữa các thẻ card */
+    margin: 20px; /* Khoảng cách bên ngoài cho container */
+}
+
+.card {
+    flex: 0 0 48%; /* Mỗi thẻ chiếm 48% chiều rộng của container */
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    margin: 10px 0; /* Khoảng cách giữa các thẻ theo chiều dọc */
+    background: linear-gradient(135deg, #e0fdf4 0%, #f4fefc 100%);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.card h3 {
+    color: #4B5563;
+}
+
+.card p {
+    color: #6B7280;
+}
+
+.card li{
+    text-align: left;
+}
+.in-card ul {
+  padding-left: 20px;
+  margin: 0;
+  list-style-type: disc;
+  flex: 1;
+}
+.in-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+.in-card ul li {
+    align-self: stretch; 
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+
+.button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background: linear-gradient(90deg, #6ee7b7, #3b82f6);
+    color: white;
+    box-shadow: 0 6px 12px rgba(59, 130, 246, 0.4);
+    cursor: pointer;
+    transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.1s ease;
+    user-select: none;
+}
+
+.button:hover {
+    background: linear-gradient(90deg, #3b82f6, #06b6d4);
+    box-shadow: 0 8px 20px rgba(14, 165, 233, 0.6);
+    transform: translateY(-2px);
+}
+.button:active {
+  transform: translateY(0);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+}

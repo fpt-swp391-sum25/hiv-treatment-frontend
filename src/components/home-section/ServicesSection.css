@@ -1,0 +1,40 @@
+.services-section {
+  padding: 20px;
+  background-color: #f9f9f9;
+  text-align: center;
+}
+
+.services-container {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.service-card {
+  background: white;
+  border-radius: 8px;
+  margin: 15px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  flex: 1 0 calc(25% - 30px);
+  max-width: calc(25% - 30px);
+}
+
+.service-icon {
+  font-size: 40px;
+}
+
+h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+h3 {
+  font-size: 20px;
+  margin: 10px 0;
+}
+
+p {
+  font-size: 16px;
+  color: #555;
+}

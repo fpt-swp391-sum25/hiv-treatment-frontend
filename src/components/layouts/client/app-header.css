@@ -1,0 +1,83 @@
+/* src/components/layout/app-header.css */
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  width: 100%;
+  padding: 0 24px !important;
+  height: 64px;
+  background: #2056df;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.header-content {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.app-logo {
+  width: 160px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+
+  background-color: #fff;
+  border-radius: 70px / 50px;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+
+.app-logo img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  margin-top: 35px;
+}
+
+.main-menu {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  border-bottom: none;
+  margin: 0 48px;
+  background: #2056df;
+}
+
+.main-menu .ant-menu-item {
+  padding: 0 16px;
+  margin: 0 4px !important;
+  color: #fff;
+}
+
+.main-menu .ant-menu-item .anticon {
+  margin-right: 8px;
+}
+
+.auth-buttons .ant-btn {
+  border-radius: 4px;
+}
+
+.ant-menu-item-selected {
+  border-bottom: 3px solid burlywood !important;
+  color: burlywood !important;
+}
+
+& .ant-menu-item:hover {
+  border-bottom: 3px solid burlywood !important;
+  color: burlywood !important;
+}
+
+
+/* Override Ant Design menu styles */
+.ant-menu-horizontal {
+  border: none !important;
+}
+
+.ant-menu-horizontal>.ant-menu-item::after,
+.ant-menu-horizontal>.ant-menu-submenu::after {
+  display: none !important;
+}
