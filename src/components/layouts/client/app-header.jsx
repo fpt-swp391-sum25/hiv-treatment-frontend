@@ -1,7 +1,8 @@
 // src/components/layout/AppHeader.jsx
 import {Layout,Menu,Avatar,Dropdown,Typography,Button,Space,theme,} from 'antd';
 import {UserOutlined,DownOutlined,LogoutOutlined,CalendarOutlined,FileSearchOutlined,HistoryOutlined,} from '@ant-design/icons';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import appLogo from '../../../assets/appLogo.png';
 import './app-header.css';
 
@@ -14,12 +15,53 @@ const AppHeader = ({ isAuthenticated = false, username = 'User' }) => {
   } = theme.useToken();
 
   const location = useLocation();
+  const [activeSection, setActiveSection] = useState('home');
 
- 
-  const topMenuItems = [    { key: 'home', label: 'Trang chủ', path: '/' },
-    { key: 'services', label: 'Dịch vụ', path: '/services' },
-    { key: 'doctors', label: 'Bác sĩ', path: '/doctors' },
-    { key: 'resources', label: 'Tài liệu', path: '/resources' },
+  // Thêm event listener để theo dõi scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      const sections = [
+        { id: 'care-section', key: 'home' },
+        { id: 'services-section', key: 'services' },
+        { id: 'doctor-section', key: 'doctors' },
+        { id: 'document-section', key: 'resources' }
+      ];      const scrollPosition = window.scrollY + 200; // Tăng offset để thấy tiêu đề rõ hơn
+
+      for (const section of sections) {
+        const element = document.getElementById(section.id);
+        if (element) {
+          const offsetTop = element.offsetTop;
+          const offsetBottom = offsetTop + element.offsetHeight;
+
+          if (scrollPosition >= offsetTop && scrollPosition < offsetBottom) {
+            setActiveSection(section.key);
+            break;
+          }
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);   const scrollToSection = (sectionId) => {
+    const section = document.getElementById(sectionId);
+    if (section) {
+      const headerOffset = 120; // Điều chỉnh offset để thấy tiêu đề
+      const elementPosition = section.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  const topMenuItems = [
+    { key: 'home', label: 'Trang chủ', scrollTo: 'care-section' },
+    { key: 'services', label: 'Dịch vụ', scrollTo: 'services-section' },
+    { key: 'doctors', label: 'Bác sĩ', scrollTo: 'doctor-section' },
+    { key: 'resources', label: 'Tài liệu', scrollTo: 'document-section' },
   ];
 
  
@@ -42,14 +84,33 @@ const AppHeader = ({ isAuthenticated = false, username = 'User' }) => {
       path: '/history',
       icon: <HistoryOutlined />,
     },
-  ];
+  ];   const navigate = useNavigate();
 
- 
-  const mapMenuItems = (items) =>
+   const handleMenuClick = (scrollTo) => {
+    // Nếu đang không ở trang chủ, chuyển về trang chủ trước
+    if (location.pathname !== '/') {
+      navigate('/');
+      // Đợi một chút để đảm bảo DOM đã load xong
+      setTimeout(() => {
+        scrollToSection(scrollTo);
+      }, 100);
+    } else {
+      // Nếu đã ở trang chủ thì chỉ cần scroll
+      scrollToSection(scrollTo);
+    }
+   };
+
+   const mapMenuItems = (items) =>
     items.map((item) => ({
       key: item.key,
       icon: item.icon || null,
-      label: <Link to={item.path}>{item.label}</Link>,
+      label: item.scrollTo ? (
+        <a onClick={() => handleMenuClick(item.scrollTo)} style={{ cursor: 'pointer' }}>
+          {item.label}
+        </a>
+      ) : (
+        <Link to={item.path}>{item.label}</Link>
+      ),
     }));
 
   // Lấy key menu đang được chọn
@@ -89,8 +150,7 @@ const AppHeader = ({ isAuthenticated = false, username = 'User' }) => {
           </Link>
         </div>
 
-        <div className="app-menu">
-          <Menu
+        <div className="app-menu">          <Menu
             mode="horizontal"
             selectedKeys={[getActiveMenu(topMenuItems)]}
             items={mapMenuItems(topMenuItems)}

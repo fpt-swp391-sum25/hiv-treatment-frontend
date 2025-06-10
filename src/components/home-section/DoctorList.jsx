@@ -20,8 +20,7 @@ function DoctorList() {
 
   const visibleDoctors = showAll ? doctors : doctors.slice(0, 4);
 
-  return (
-    <section className="doctor-section">
+  return (    <section className="doctor-section" id="doctor-section">
       <h2 className="title">
         Đội ngũ <span className="highlight">bác sĩ chuyên khoa</span>
       </h2>
