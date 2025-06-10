@@ -1,0 +1,122 @@
+.doctor-profile-container {
+  min-height: 100vh;
+  background-color: #fff;
+  position: relative;
+}
+
+.app-logo {
+  position: absolute;
+  top: 20px;
+  left: 30px;
+  height: 50px;
+  width: auto;
+}
+
+.profile-content {
+  width: 100%;
+  padding: 80px 40px 40px;
+}
+
+.profile-card {
+  background: #fff;
+  border: none;
+  border-radius: 0;
+  margin: 0;
+}
+
+.profile-header {
+  display: flex;
+  padding: 30px 40px;
+  background: #fff;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.profile-image-section {
+  display: flex;
+  align-items: center;
+  padding: 0 40px 0 0;
+  border-right: 1px solid #e9ecef;
+}
+
+.profile-image {
+  width: 140px;
+  height: 140px;
+  object-fit: cover;
+  border: 1px solid #e9ecef;
+}
+
+.profile-basic-info {
+  padding-left: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.doctor-name {
+  font-size: 1.8rem;
+  color: #212529;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.doctor-specialty {
+  color: #6c757d;
+  font-size: 1.1rem;
+  margin-bottom: 15px;
+}
+
+.contact-info {
+  display: flex;
+  gap: 30px;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #495057;
+}
+
+.contact-item i {
+  color: #495057;
+}
+
+/* Tab styling */
+.profile-tabs {
+  margin-top: 0;
+}
+
+.nav-tabs {
+  padding: 0 40px;
+  background: #fff;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.nav-tabs .nav-link {
+  color: #495057;
+  font-weight: 500;
+  padding: 15px 30px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-size: 1rem;
+  background: transparent;
+  transition: none;
+}
+
+.nav-tabs .nav-link:hover {
+  color: #495057;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+}
+
+.nav-tabs .nav-link.active {
+  color: #212529;
+  font-weight: 600;
+  border-bottom: 2px solid #212529;
+  background: transparent;
+}
+
+.tab-content {
+  padding: 40px;
+  background: #fff;
+} 

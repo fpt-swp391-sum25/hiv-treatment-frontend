@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card } from 'react-bootstrap';
-import './Statistics.css';
+import '../../styles/doctor/Statistics.css';
 
 const Statistics = ({ doctorId }) => {
   return (

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Row, Col, Card } from 'react-bootstrap';
-import './PersonalInfo.css';
+import '../../styles/doctor/PersonalInfo.css';
 
 const PersonalInfo = ({ doctorData }) => {
   if (!doctorData) return null;

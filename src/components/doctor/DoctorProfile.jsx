@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Row, Col, Tabs, Tab } from 'react-bootstrap';
-import './DoctorProfile.css';
+import '../../styles/doctor/DoctorProfile.css';
 
 // Components
 import PersonalInfo from './PersonalInfo';
 import Schedule from './Schedule';
 import Feedback from './Feedback';
 import Statistics from './Statistics';
+
+// Assets
+import appLogo from '../../assets/appLogo.png';
 
 // Data giả tạm thời
 const mockDoctorData = {
@@ -50,39 +53,49 @@ const DoctorProfile = () => {
 
   return (
     <div className="doctor-profile-container">
-      <Card className="profile-card">
-        <Card.Body>
-          <Row>
-            <Col md={3}>
-              <div className="profile-image-section">
-                <img 
-                  src={doctorData?.imageUrl || '/default-doctor.png'} 
-                  alt="Doctor profile" 
-                  className="profile-image"
-                />
-                <h3 className="doctor-name">{doctorData?.name}</h3>
-                <p className="doctor-specialty">{doctorData?.specialty}</p>
+      <img src={appLogo} alt="App Logo" className="app-logo" />
+      <div className="profile-content">
+        <Card className="profile-card">
+          <div className="profile-header">
+            <div className="profile-image-section">
+              <img 
+                src={doctorData?.imageUrl || '/default-doctor.png'} 
+                alt="Doctor profile" 
+                className="profile-image"
+              />
+            </div>
+            <div className="profile-basic-info">
+              <h2 className="doctor-name">{doctorData?.name}</h2>
+              <p className="doctor-specialty">{doctorData?.specialty}</p>
+              <div className="contact-info">
+                <div className="contact-item">
+                  <i className="fas fa-envelope"></i>
+                  <span>{doctorData?.email}</span>
+                </div>
+                <div className="contact-item">
+                  <i className="fas fa-phone"></i>
+                  <span>{doctorData?.phoneNumber}</span>
+                </div>
               </div>
-            </Col>
-            <Col md={9}>
-              <Tabs defaultActiveKey="personal-info" className="profile-tabs">
-                <Tab eventKey="personal-info" title="Thông tin cá nhân">
-                  <PersonalInfo doctorData={doctorData} />
-                </Tab>
-                <Tab eventKey="schedule" title="Lịch làm việc">
-                  <Schedule doctorId={doctorData?.id} />
-                </Tab>
-                <Tab eventKey="feedback" title="Đánh giá">
-                  <Feedback doctorId={doctorData?.id} />
-                </Tab>
-                <Tab eventKey="statistics" title="Thống kê">
-                  <Statistics doctorId={doctorData?.id} />
-                </Tab>
-              </Tabs>
-            </Col>
-          </Row>
-        </Card.Body>
-      </Card>
+            </div>
+          </div>
+
+          <Tabs defaultActiveKey="personal-info" className="profile-tabs">
+            <Tab eventKey="personal-info" title="Thông tin cá nhân">
+              <PersonalInfo doctorData={doctorData} />
+            </Tab>
+            <Tab eventKey="schedule" title="Lịch làm việc">
+              <Schedule doctorId={doctorData?.id} />
+            </Tab>
+            <Tab eventKey="feedback" title="Đánh giá">
+              <Feedback doctorId={doctorData?.id} />
+            </Tab>
+            <Tab eventKey="statistics" title="Thống kê">
+              <Statistics doctorId={doctorData?.id} />
+            </Tab>
+          </Tabs>
+        </Card>
+      </div>
     </div>
   );
 };

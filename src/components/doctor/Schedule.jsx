@@ -8,7 +8,7 @@ import vi from 'date-fns/locale/vi';
 import { Card, Row, Col, Badge, Form, InputGroup, Button } from 'react-bootstrap';
 import { motion, AnimatePresence } from 'framer-motion';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import './Schedule.css';
+import '../../styles/doctor/Schedule.css';
 
 const locales = {
   'vi': vi,
