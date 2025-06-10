@@ -18,7 +18,7 @@ const mockDoctorData = {
   degree: 'Tiến sĩ Y khoa',
   experience: 10,
   certificates: ['Chứng chỉ hành nghề bác sĩ', 'Chuyên khoa HIV/AIDS'],
-  bio: 'Là bác sĩ với hơn 10 năm kinh nghiệm trong lĩnh vực điều trị HIV/AIDS. Chuyên môn sâu về quản lý và điều trị các bệnh nhiễm trùng cơ hội liên quan đến HIV.',
+  bio: 'Là bác sĩ với hơn 10 năm kinh nghiệm trong lĩnh vực điều trị HIV/AIDS. Chuyên môn sâu về quản lý và điều trị các bệnh liên quan đến HIV.',
   imageUrl: 'https://via.placeholder.com/150'
 };
 

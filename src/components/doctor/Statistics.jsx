@@ -8,7 +8,7 @@ const Statistics = ({ doctorId }) => {
       <Card>
         <Card.Body>
           <h4 className="section-title">Thống kê</h4>
-          <p className="text-muted">Chức năng thống kê đang được phát triển...</p>
+          <p className="text-muted">Comming soon......</p>
         </Card.Body>
       </Card>
     </div>

@@ -8,7 +8,7 @@ const Feedback = ({ doctorId }) => {
       <Card>
         <Card.Body>
           <h4 className="section-title">Đánh giá từ bệnh nhân</h4>
-          <p className="text-muted">Chức năng đánh giá đang được phát triển...</p>
+          <p className="text-muted">Coming soon......</p>
         </Card.Body>
       </Card>
     </div>
