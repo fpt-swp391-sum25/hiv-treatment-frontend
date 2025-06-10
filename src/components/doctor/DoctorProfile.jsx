@@ -3,10 +3,10 @@ import { Card, Row, Col, Tabs, Tab } from 'react-bootstrap';
 import './DoctorProfile.css';
 
 // Components
-import PersonalInfo from '../../components/doctor/PersonalInfo';
-import Schedule from '../../components/doctor/Schedule';
-import Feedback from '../../components/doctor/Feedback';
-import Statistics from '../../components/doctor/Statistics';
+import PersonalInfo from './PersonalInfo';
+import Schedule from './Schedule';
+import Feedback from './Feedback';
+import Statistics from './Statistics';
 
 // Data giả tạm thời
 const mockDoctorData = {
@@ -36,14 +36,6 @@ const DoctorProfile = () => {
           setDoctorData(mockDoctorData);
           setLoading(false);
         }, 500);
-        
-        // Khi API thực sự sẵn sàng, bỏ comment phần này
-        /*
-        const response = await fetch('/api/doctor-profile/doctor-id/1'); // Replace 1 with actual doctor ID
-        const data = await response.json();
-        setDoctorData(data);
-        setLoading(false);
-        */
       } catch (err) {
         setError('Failed to fetch doctor profile');
         setLoading(false);

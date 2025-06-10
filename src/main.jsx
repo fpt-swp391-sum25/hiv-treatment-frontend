@@ -1,9 +1,13 @@
 import ReactDOM from 'react-dom/client'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import Home from './pages/client/home';
 import Login from './pages/auth/login';
 import Register from './pages/auth/register';
 import Admin from './pages/admin/admin-page';
+
+import DoctorApp from './components/doctor/App';
+import DoctorProfile from './components/doctor/DoctorProfile';
 
 import BookingCheckupForm from './pages/client/booking';
 import NotFound from './pages/error/not-found';
@@ -46,6 +50,18 @@ const router = createBrowserRouter([
     ]
   },
   {
+    path: '/doctor',
+    element: <DoctorApp />,
+    children: [
+      {
+        path: 'profile',
+        element: <DoctorProfile />,
+        errorElement: <Errors />,
+      }
+    ],
+    errorElement: <Errors />,
+  },
+  {
     path: '/doctors',
     element: <Doctors />,
     errorElement: <Errors />,
@@ -65,7 +81,6 @@ const router = createBrowserRouter([
     element: <Register />,
     errorElement: <Errors />,
   },
-
   {
     path: '/admin',
     element: <Admin />,

@@ -1,0 +1,15 @@
+.feedback-container {
+  padding: 15px;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  color: #333;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 10px;
+}
+
+.text-muted {
+  color: #6c757d;
+} 

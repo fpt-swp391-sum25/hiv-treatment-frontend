@@ -22,6 +22,80 @@ const localizer = dateFnsLocalizer({
   locales,
 });
 
+// Dữ liệu giả cho lịch làm việc
+const mockAppointments = [
+  {
+    id: 1,
+    title: 'Nguyễn Văn X',
+    start: new Date(2023, 10, 15, 9, 0),
+    end: new Date(2023, 10, 15, 10, 0),
+    status: 'CONFIRMED',
+    patientInfo: 'Nam, 35 tuổi, Điều trị theo dõi HIV giai đoạn 2'
+  },
+  {
+    id: 2,
+    title: 'Trần Thị Y',
+    start: new Date(2023, 10, 15, 11, 0),
+    end: new Date(2023, 10, 15, 12, 0),
+    status: 'PENDING',
+    patientInfo: 'Nữ, 28 tuổi, Tư vấn điều trị dự phòng'
+  },
+  {
+    id: 3,
+    title: 'Lê Văn Z',
+    start: new Date(2023, 10, 16, 14, 0),
+    end: new Date(2023, 10, 16, 15, 0),
+    status: 'CANCELLED',
+    patientInfo: 'Nam, 42 tuổi, Khám định kỳ'
+  },
+  {
+    id: 4,
+    title: 'Phạm Thị A',
+    start: new Date(2023, 10, 17, 10, 0),
+    end: new Date(2023, 10, 17, 11, 0),
+    status: 'CONFIRMED',
+    patientInfo: 'Nữ, 32 tuổi, Tư vấn sức khỏe'
+  },
+  {
+    id: 5,
+    title: 'Hoàng Văn B',
+    start: new Date(2023, 10, 18, 9, 0),
+    end: new Date(2023, 10, 18, 10, 0),
+    status: 'CONFIRMED',
+    patientInfo: 'Nam, 45 tuổi, Điều trị theo dõi'
+  }
+];
+
+// Cập nhật ngày giờ của các cuộc hẹn để luôn hiển thị trong tuần hiện tại
+const updateAppointmentDates = (appointments) => {
+  const today = new Date();
+  const dayOfWeek = today.getDay(); // 0 = Chủ Nhật, 1-6 = Thứ 2 - Thứ 7
+  const mondayThisWeek = new Date(today);
+  mondayThisWeek.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+  
+  return appointments.map((apt, index) => {
+    const newStart = new Date(apt.start);
+    const newEnd = new Date(apt.end);
+    
+    // Phân bố các cuộc hẹn trong tuần hiện tại
+    const daysToAdd = index % 5; // 0-4 tương ứng với Thứ 2 - Thứ 6
+    
+    newStart.setFullYear(today.getFullYear());
+    newStart.setMonth(today.getMonth());
+    newStart.setDate(mondayThisWeek.getDate() + daysToAdd);
+    
+    newEnd.setFullYear(today.getFullYear());
+    newEnd.setMonth(today.getMonth());
+    newEnd.setDate(mondayThisWeek.getDate() + daysToAdd);
+    
+    return {
+      ...apt,
+      start: newStart,
+      end: newEnd
+    };
+  });
+};
+
 const Schedule = ({ doctorId }) => {
   const [appointments, setAppointments] = useState([]);
   const [filteredAppointments, setFilteredAppointments] = useState([]);
@@ -42,7 +116,17 @@ const Schedule = ({ doctorId }) => {
   const fetchAppointments = async () => {
     try {
       setLoading(true);
-      // TODO: Replace with actual API call
+      
+      // Giả lập API call với dữ liệu mẫu
+      setTimeout(() => {
+        const updatedAppointments = updateAppointmentDates(mockAppointments);
+        setAppointments(updatedAppointments);
+        setFilteredAppointments(updatedAppointments);
+        setLoading(false);
+      }, 800);
+      
+      // TODO: Khi API thực sự sẵn sàng, bỏ comment phần này
+      /*
       const response = await fetch(`/api/appointments/doctor/${doctorId}`);
       const data = await response.json();
       
@@ -57,6 +141,7 @@ const Schedule = ({ doctorId }) => {
       
       setAppointments(formattedAppointments);
       setFilteredAppointments(formattedAppointments);
+      */
     } catch (err) {
       setError('Failed to fetch appointments');
     } finally {

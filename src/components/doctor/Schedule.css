@@ -1,83 +1,47 @@
 .schedule-container {
-  padding: 1rem;
+  padding: 15px;
 }
 
-.calendar-card,
-.appointment-details-card,
-.stats-card {
-  border: none;
-  border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  margin-bottom: 1rem;
+.calendar-card {
+  margin-bottom: 20px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-/* Calendar customization */
-.rbc-calendar {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+.appointment-details-card {
+  margin-bottom: 20px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  height: 100%;
 }
 
-.rbc-header {
-  padding: 10px;
-  font-weight: 500;
-  background-color: #f8f9fa;
-}
-
-.rbc-event {
-  padding: 5px;
-  font-size: 0.9rem;
-  border-radius: 3px !important;
-}
-
-.rbc-today {
-  background-color: #e8f4f8;
-}
-
-.rbc-toolbar button {
-  color: #2c3e50;
-  border: 1px solid #dee2e6;
-}
-
-.rbc-toolbar button:hover {
-  background-color: #e9ecef;
-  color: #2c3e50;
-}
-
-.rbc-toolbar button.rbc-active {
-  background-color: #3498db;
-  color: white;
-}
-
-/* Appointment details styling */
-.appointment-details {
-  padding: 1rem 0;
+.section-title {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  color: #333;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 10px;
 }
 
 .detail-item {
-  margin-bottom: 1rem;
-  display: flex;
-  align-items: center;
+  margin-bottom: 10px;
 }
 
 .detail-label {
-  min-width: 100px;
-  color: #7f8c8d;
-  font-weight: 500;
+  font-weight: bold;
+  margin-right: 5px;
 }
 
 .detail-value {
-  color: #2c3e50;
-  flex: 1;
+  color: #333;
 }
 
 .patient-info {
   border-top: 1px solid #eee;
-  padding-top: 1rem;
+  padding-top: 15px;
 }
 
 .patient-info h5 {
-  color: #2c3e50;
-  font-size: 1rem;
-  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+  margin-bottom: 10px;
 }
 
 .patient-info p {
@@ -85,50 +49,53 @@
   margin: 0;
 }
 
-/* Stats card styling */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 500px;
 }
 
-.stat-item {
-  text-align: center;
-  padding: 1rem;
-  background-color: #f8f9fa;
-  border-radius: 8px;
+.error-message {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 500px;
+  color: #e74c3c;
 }
 
-.stat-label {
-  display: block;
-  color: #7f8c8d;
-  font-size: 0.9rem;
-  margin-bottom: 0.5rem;
+/* Tùy chỉnh styles cho react-big-calendar */
+.rbc-event {
+  border-radius: 5px !important;
 }
 
-.stat-value {
-  display: block;
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #2c3e50;
+.rbc-today {
+  background-color: rgba(0, 120, 255, 0.05) !important;
 }
 
-.stat-value.confirmed {
-  color: #2ecc71;
+.rbc-toolbar button {
+  border-radius: 4px !important;
 }
 
-.stat-value.pending {
-  color: #f1c40f;
+.rbc-toolbar button.rbc-active {
+  background-color: #007bff !important;
+  color: white !important;
 }
 
-/* Responsive adjustments */
+.rbc-header {
+  padding: 10px 3px !important;
+  font-weight: bold !important;
+}
+
+.rbc-event-content {
+  font-size: 0.9rem !important;
+}
+
+/* Responsive Adjustments */
 @media (max-width: 768px) {
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
-  
   .rbc-toolbar {
     flex-direction: column;
+    align-items: flex-start;
   }
   
   .rbc-toolbar-label {
