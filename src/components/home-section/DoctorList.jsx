@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import './DoctorList.css';
 
 // Dùng ảnh từ thư mục public
@@ -51,13 +52,10 @@ function DoctorList() {
 
       {doctors.length > 4 && (
         <div className="view-all-container">
-          <button
-            className="btn-outline"
-            onClick={() => setShowAll(!showAll)}
-          >
-            {showAll ? 'Thu gọn danh sách' : 'Xem tất cả bác sĩ'}
-          </button>
-        </div>
+                  <Link to="/doctors" className="btn-outline">
+                    Xem tất cả bác sĩ
+                  </Link>
+                </div>
       )}
     </section>
   );
