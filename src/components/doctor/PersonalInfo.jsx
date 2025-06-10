@@ -9,9 +9,9 @@ const PersonalInfo = ({ doctorData }) => {
     <div className="personal-info-container">
       <Row>
         <Col md={6}>
-          <Card className="info-card">
-            <Card.Body>
-              <h4 className="section-title">Thông tin cá nhân</h4>
+          <div className="info-section">
+            <h5 className="section-title">Thông tin cá nhân</h5>
+            <div className="info-group">
               <div className="info-item">
                 <span className="info-label">Họ và tên:</span>
                 <span className="info-value">{doctorData.name}</span>
@@ -28,13 +28,13 @@ const PersonalInfo = ({ doctorData }) => {
                 <span className="info-label">Số điện thoại:</span>
                 <span className="info-value">{doctorData.phoneNumber}</span>
               </div>
-            </Card.Body>
-          </Card>
+            </div>
+          </div>
         </Col>
         <Col md={6}>
-          <Card className="info-card">
-            <Card.Body>
-              <h4 className="section-title">Thông tin chuyên môn</h4>
+          <div className="info-section">
+            <h5 className="section-title">Thông tin chuyên môn</h5>
+            <div className="info-group">
               <div className="info-item">
                 <span className="info-label">Bằng cấp:</span>
                 <span className="info-value">{doctorData.degree}</span>
@@ -47,26 +47,21 @@ const PersonalInfo = ({ doctorData }) => {
                 <span className="info-label">Chứng chỉ:</span>
                 <div className="certificates-list">
                   {doctorData.certificates?.map((cert, index) => (
-                    <div key={index} className="certificate-item">
+                    <span key={index} className="certificate-badge">
                       {cert}
-                    </div>
+                    </span>
                   ))}
                 </div>
               </div>
-            </Card.Body>
-          </Card>
+            </div>
+          </div>
         </Col>
       </Row>
-      <Row className="mt-4">
-        <Col md={12}>
-          <Card className="info-card">
-            <Card.Body>
-              <h4 className="section-title">Giới thiệu</h4>
-              <p className="bio-text">{doctorData.bio}</p>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
+
+      <div className="bio-section">
+        <h5 className="bio-title">Giới thiệu</h5>
+        <p className="bio-text">{doctorData.bio}</p>
+      </div>
     </div>
   );
 };
