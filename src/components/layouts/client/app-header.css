@@ -15,7 +15,7 @@
 .header-content {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: space-around;
   flex-wrap: wrap;
   min-height: 64px;
 }
@@ -93,8 +93,8 @@
   border: none !important;
 }
 
-.ant-menu-horizontal > .ant-menu-item::after,
-.ant-menu-horizontal > .ant-menu-submenu::after {
+.ant-menu-horizontal>.ant-menu-item::after,
+.ant-menu-horizontal>.ant-menu-submenu::after {
   display: none !important;
 }
 
@@ -117,7 +117,8 @@
     align-items: flex-start;
   }
 
-  .main-menu, .sub-menu {
+  .main-menu,
+  .sub-menu {
     width: 100%;
     justify-content: flex-start;
     margin: 8px 0;
