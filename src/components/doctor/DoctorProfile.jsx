@@ -32,7 +32,11 @@ const testData = {
   name: 'Bs. minh',
   specialty: 'Chuyên khoa HIV/AIDS',
   email: 'doctor@fpt.edu.vn',
+
+  phoneNumber: '0987654321',
+
   phoneNumber: '0987654322',
+
   degree: 'Tiến sĩ Y khoa',
   experience: 10,
   certificates: ['Chứng chỉ hành nghề bác sĩ', ' Chuyên khoa HIV/AIDS'],
