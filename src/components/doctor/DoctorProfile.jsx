@@ -10,6 +10,7 @@ import Statistics from './Statistics';
 
 // Assets
 import appLogo from '../../assets/appLogo.png';
+import doctorProfileImage from '../../assets/doctorProfile.png';
 
 // Data giả tạm thời
 const mockDoctorData = {
@@ -20,9 +21,9 @@ const mockDoctorData = {
   phoneNumber: '0987654321',
   degree: 'Tiến sĩ Y khoa',
   experience: 10,
-  certificates: ['Chứng chỉ hành nghề bác sĩ', 'Chuyên khoa HIV/AIDS'],
+  certificates: ['Chứng chỉ hành nghề bác sĩ', ' Chuyên khoa HIV/AIDS'],
   bio: 'Là bác sĩ với hơn 10 năm kinh nghiệm trong lĩnh vực điều trị HIV/AIDS. Chuyên môn sâu về quản lý và điều trị các bệnh liên quan đến HIV.',
-  imageUrl: 'https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg'
+  imageUrl: doctorProfileImage
 };
 
 const DoctorProfile = () => {
