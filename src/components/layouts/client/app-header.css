@@ -15,7 +15,7 @@
 .header-content {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: space-around;
   flex-wrap: wrap;
   min-height: 64px;
 }
@@ -31,22 +31,26 @@
 
 /* Logo app */
 .app-logo {
-  width: 160px;
-  height: 50px;
+  width: 180px;
+  height: 55px;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   background-color: #fff;
   border-radius: 70px / 50px;
-  padding: 0 20px;
+  padding: 8px 20px;
   box-sizing: border-box;
+  margin: 10px 0;
+  overflow: hidden;
 }
 
 .app-logo img {
-  max-width: 100%;
-  max-height: 100%;
+  width: 160px;
+  height: 75px;
   object-fit: contain;
-  margin-top: 35px;
+  margin: 0;
+  
+  display:center;
 }
 
 /* Menu trên */
@@ -93,8 +97,8 @@
   border: none !important;
 }
 
-.ant-menu-horizontal > .ant-menu-item::after,
-.ant-menu-horizontal > .ant-menu-submenu::after {
+.ant-menu-horizontal>.ant-menu-item::after,
+.ant-menu-horizontal>.ant-menu-submenu::after {
   display: none !important;
 }
 
@@ -117,7 +121,8 @@
     align-items: flex-start;
   }
 
-  .main-menu, .sub-menu {
+  .main-menu,
+  .sub-menu {
     width: 100%;
     justify-content: flex-start;
     margin: 8px 0;
