@@ -58,11 +58,11 @@
 }
 
 .profile-image {
-  width: 140px;
-  height: 140px;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  border: 1px solid #e9ecef;
-  border-radius: 50%;
+  /* border: 1px solid #e9ecef;
+  border-radius: 50%; */
 }
 
 .profile-basic-info {

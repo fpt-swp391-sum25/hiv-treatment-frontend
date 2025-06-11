@@ -20,10 +20,36 @@ ChartJS.register(
   BarElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
 );
 
-// Dữ liệu mẫu cho feedback
+/**
+ * Interface cho dữ liệu feedback từ API
+ * @typedef {Object} FeedbackData
+ * @property {number} id - ID của feedback
+ * @property {string} patientName - Tên bệnh nhân
+ * @property {number} rating - Số sao đánh giá (1-5)
+ * @property {string} comment - Nội dung đánh giá
+ * @property {string} date - Ngày đánh giá (format: YYYY-MM-DD)
+ * @property {string} treatmentType - Loại điều trị
+ */
+
+/**
+ * Interface cho response từ API
+ * @typedef {Object} FeedbackResponse
+ * @property {FeedbackData[]} data - Mảng các feedback
+ * @property {number} total - Tổng số feedback
+ * @property {number} page - Trang hiện tại
+ * @property {number} pageSize - Số lượng feedback mỗi trang
+ */
+
+// TODO: Thay thế bằng API endpoint thực tế
+const API_ENDPOINTS = {
+  GET_FEEDBACKS: '/api/feedbacks/doctor', // GET /api/feedbacks/doctor/{doctorId}?page={page}&pageSize={pageSize}&rating={rating}&sortBy={sortBy}
+  GET_FEEDBACK_STATS: '/api/feedbacks/doctor/stats', // GET /api/feedbacks/doctor/{doctorId}/stats
+};
+
+// Dữ liệu mẫu - sẽ được thay thế bằng dữ liệu từ API
 const mockFeedbacks = [
   {
     id: 1,
@@ -41,10 +67,15 @@ const mockFeedbacks = [
     date: '2023-11-14',
     treatmentType: 'Tư vấn sức khỏe',
   },
-  // Thêm nhiều feedback mẫu khác...
 ];
 
+/**
+ * Component hiển thị đánh giá của bệnh nhân cho bác sĩ
+ * @param {Object} props - Component props
+ * @param {number} props.doctorId - ID của bác sĩ
+ */
 const Feedback = ({ doctorId }) => {
+  // State management
   const [feedbacks, setFeedbacks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -61,16 +92,39 @@ const Feedback = ({ doctorId }) => {
 
   useEffect(() => {
     fetchFeedbacks();
-  }, [doctorId]);
+  }, [doctorId, currentPage, filterRating, sortBy]); // Re-fetch khi các filter thay đổi
 
   useEffect(() => {
     calculateStats();
   }, [feedbacks]);
 
+  /**
+   * Hàm lấy danh sách feedback từ API
+   * TODO: Implement API call
+   * Expected API Response:
+   * {
+   *   data: Array<FeedbackData>,
+   *   total: number,
+   *   page: number,
+   *   pageSize: number
+   * }
+   */
   const fetchFeedbacks = async () => {
     try {
       setLoading(true);
-      // Giả lập API call
+      // TODO: Thay thế mock data bằng API call thực tế
+      // const response = await fetch(
+      //   `${API_ENDPOINTS.GET_FEEDBACKS}/${doctorId}?` + 
+      //   `page=${currentPage}&` +
+      //   `pageSize=${itemsPerPage}&` +
+      //   `rating=${filterRating}&` +
+      //   `sortBy=${sortBy}`
+      // );
+      // const data = await response.json();
+      // setFeedbacks(data.data);
+      // setTotalPages(Math.ceil(data.total / data.pageSize));
+
+      // Mock API call
       setTimeout(() => {
         setFeedbacks(mockFeedbacks);
         setLoading(false);
@@ -81,8 +135,17 @@ const Feedback = ({ doctorId }) => {
     }
   };
 
+  /**
+   * Hàm tính toán thống kê từ danh sách feedback
+   * TODO: Có thể chuyển sang lấy từ API endpoint riêng để tối ưu performance
+   */
   const calculateStats = () => {
     if (feedbacks.length === 0) return;
+
+    // TODO: Thay thế bằng API call thực tế
+    // const response = await fetch(`${API_ENDPOINTS.GET_FEEDBACK_STATS}/${doctorId}`);
+    // const stats = await response.json();
+    // setStats(stats);
 
     const totalRating = feedbacks.reduce((sum, fb) => sum + fb.rating, 0);
     const distribution = [0, 0, 0, 0, 0];
@@ -95,6 +158,10 @@ const Feedback = ({ doctorId }) => {
     });
   };
 
+  /**
+   * Hàm lọc feedback theo các tiêu chí
+   * @returns {Array<FeedbackData>} Danh sách feedback đã được lọc
+   */
   const filteredFeedbacks = () => {
     let result = [...feedbacks];
 
@@ -112,6 +179,10 @@ const Feedback = ({ doctorId }) => {
     return result;
   };
 
+  /**
+   * Hàm phân trang danh sách feedback
+   * @returns {Array<FeedbackData>} Danh sách feedback của trang hiện tại
+   */
   const paginatedFeedbacks = () => {
     const filtered = filteredFeedbacks();
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -120,6 +191,11 @@ const Feedback = ({ doctorId }) => {
 
   const totalPages = Math.ceil(filteredFeedbacks().length / itemsPerPage);
 
+  /**
+   * Hàm render hệ thống sao đánh giá
+   * @param {number} rating - Số sao (1-5)
+   * @returns {JSX.Element[]} Mảng các component sao
+   */
   const renderStars = (rating) => {
     return [...Array(5)].map((_, index) => (
       <FaStar
@@ -129,6 +205,10 @@ const Feedback = ({ doctorId }) => {
     ));
   };
 
+  /**
+   * Hàm render phân trang
+   * @returns {JSX.Element} Component phân trang
+   */
   const renderPagination = () => {
     const items = [];
     for (let number = 1; number <= totalPages; number++) {
@@ -145,6 +225,7 @@ const Feedback = ({ doctorId }) => {
     return <Pagination>{items}</Pagination>;
   };
 
+  // Cấu hình cho biểu đồ thống kê
   const chartData = {
     labels: ['1 sao', '2 sao', '3 sao', '4 sao', '5 sao'],
     datasets: [
@@ -179,6 +260,7 @@ const Feedback = ({ doctorId }) => {
     },
   };
 
+  // Loading state
   if (loading) {
     return (
       <div className="feedback-loading">
@@ -189,10 +271,12 @@ const Feedback = ({ doctorId }) => {
     );
   }
 
+  // Error state
   if (error) {
     return <div className="feedback-error">{error}</div>;
   }
 
+  // Main render
   return (
     <div className="feedback-container">
       {/* Tổng quan đánh giá */}
