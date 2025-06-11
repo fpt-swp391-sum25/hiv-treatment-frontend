@@ -1,5 +1,138 @@
 .feedback-container {
-  padding: 15px;
+  padding: 20px;
+}
+
+/* Loading và Error states */
+.feedback-loading,
+.feedback-error {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.feedback-error {
+  color: #dc3545;
+}
+
+/* Rating Overview */
+.rating-average {
+  font-size: 48px;
+  font-weight: bold;
+  color: #2c3e50;
+  margin-bottom: 10px;
+}
+
+.rating-stars {
+  margin-bottom: 15px;
+}
+
+.star-filled {
+  color: #ffc107;
+  margin-right: 2px;
+}
+
+.star-empty {
+  color: #e4e5e9;
+  margin-right: 2px;
+}
+
+.rating-distribution {
+  height: 200px;
+  padding: 10px;
+}
+
+/* Feedback Items - Override Bootstrap hover effects */
+.feedback-item,
+.feedback-item:hover {
+  border: 1px solid #e0e0e0;
+  margin-bottom: 15px;
+  box-shadow: none !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+.feedback-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.feedback-patient-name {
+  margin: 0;
+  color: #2c3e50;
+}
+
+.feedback-date {
+  font-size: 0.9em;
+  margin-bottom: 10px;
+}
+
+.feedback-treatment-type {
+  font-size: 0.95em;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.feedback-comment {
+  color: #2c3e50;
+  line-height: 1.5;
+  margin-bottom: 0;
+}
+
+/* Pagination - Override Bootstrap hover effects */
+.pagination {
+  margin-bottom: 20px;
+}
+
+.page-item .page-link,
+.page-item .page-link:hover,
+.page-item .page-link:focus {
+  color: #0d6efd;
+  background-color: #fff;
+  border-color: #dee2e6;
+  transition: none !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.page-item.active .page-link,
+.page-item.active .page-link:hover,
+.page-item.active .page-link:focus {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+  color: #fff;
+  transform: none !important;
+}
+
+/* Form controls - Override Bootstrap hover effects */
+.form-control,
+.form-control:hover,
+.form-control:focus,
+.form-select,
+.form-select:hover,
+.form-select:focus {
+  transition: none !important;
+  box-shadow: none !important;
+  border-color: #dee2e6;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .rating-distribution {
+    height: 250px;
+    margin-top: 20px;
+  }
+
+  .feedback-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .feedback-rating {
+    margin-top: 10px;
+  }
 }
 
 .section-title {
