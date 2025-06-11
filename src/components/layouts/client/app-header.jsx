@@ -166,7 +166,7 @@ const AppHeader = ({ isAuthenticated = false, username = 'User' }) => {
 
         {isAuthenticated ? (
           <Space align="center" size={8} style={{ cursor: 'default' }}>
-            <Dropdown overlay={userMenu} placement="bottomLeft" arrow>
+            <Dropdown menu={userMenu} placement="bottomLeft" arrow>
               <Space style={{ cursor: 'pointer' }} align="center">
                 <Avatar icon={<UserOutlined />} />
                 <Text style={{ marginLeft: 4, marginRight: 4 }}>{username}</Text>
