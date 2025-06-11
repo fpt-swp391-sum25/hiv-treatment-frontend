@@ -34,7 +34,7 @@ const AdminHeader = () => {
         <Header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
                 <Avatar icon={<UserOutlined />} />
-                <Text style={{ color: '#fff', marginLeft: 4, marginRight: 4, color: "white" }}>{user.username}</Text>
+                <Text style={{ color: '#fff', marginLeft: 4, marginRight: 4}}>{user.username}</Text>
             </div>
             <Button type="primary" icon={<LogoutOutlined />} onClick={handleLogout} danger>
                 Đăng xuất
