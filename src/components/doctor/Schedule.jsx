@@ -27,7 +27,7 @@ const mockAppointments = [
   {
     id: 1,
     title: 'Nguyễn Văn X',
-    start: new Date(2023, 10, 15, 9, 0),
+    start: new Date(2023, 12, 15, 9, 0),
     end: new Date(2023, 10, 15, 10, 0),
     status: 'CONFIRMED',
     patientInfo: 'Nam, 35 tuổi, Điều trị theo dõi HIV giai đoạn 2'
@@ -72,22 +72,22 @@ const updateAppointmentDates = (appointments) => {
   const dayOfWeek = today.getDay(); // 0 = Chủ Nhật, 1-6 = Thứ 2 - Thứ 7
   const mondayThisWeek = new Date(today);
   mondayThisWeek.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
-  
+
   return appointments.map((apt, index) => {
     const newStart = new Date(apt.start);
     const newEnd = new Date(apt.end);
-    
+
     // Phân bố các cuộc hẹn trong tuần hiện tại
     const daysToAdd = index % 5; // 0-4 tương ứng với Thứ 2 - Thứ 6
-    
+
     newStart.setFullYear(today.getFullYear());
     newStart.setMonth(today.getMonth());
     newStart.setDate(mondayThisWeek.getDate() + daysToAdd);
-    
+
     newEnd.setFullYear(today.getFullYear());
     newEnd.setMonth(today.getMonth());
     newEnd.setDate(mondayThisWeek.getDate() + daysToAdd);
-    
+
     return {
       ...apt,
       start: newStart,
@@ -116,7 +116,7 @@ const Schedule = ({ doctorId }) => {
   const fetchAppointments = async () => {
     try {
       setLoading(true);
-      
+
       // Giả lập API call với dữ liệu mẫu
       setTimeout(() => {
         const updatedAppointments = updateAppointmentDates(mockAppointments);
@@ -124,7 +124,7 @@ const Schedule = ({ doctorId }) => {
         setFilteredAppointments(updatedAppointments);
         setLoading(false);
       }, 800);
-      
+
       // TODO: Khi API thực sự sẵn sàng, bỏ comment phần này
       /*
       const response = await fetch(`/api/appointments/doctor/${doctorId}`);
@@ -151,20 +151,20 @@ const Schedule = ({ doctorId }) => {
 
   const filterAppointments = () => {
     let filtered = [...appointments];
-    
+
     // Apply search filter
     if (searchTerm) {
-      filtered = filtered.filter(apt => 
+      filtered = filtered.filter(apt =>
         apt.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         apt.patientInfo?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-    
+
     // Apply status filter
     if (statusFilter !== 'ALL') {
       filtered = filtered.filter(apt => apt.status === statusFilter);
     }
-    
+
     setFilteredAppointments(filtered);
   };
 
@@ -220,7 +220,7 @@ const Schedule = ({ doctorId }) => {
               <option value="PENDING">Đang chờ</option>
               <option value="CANCELLED">Đã hủy</option>
             </Form.Select>
-            <Button 
+            <Button
               variant="outline-secondary"
               onClick={() => {
                 setSearchTerm('');
@@ -304,11 +304,11 @@ const Schedule = ({ doctorId }) => {
                       </div>
                       <div className="detail-item">
                         <span className="detail-label">Trạng thái:</span>
-                        <Badge 
+                        <Badge
                           bg={
                             selectedAppointment.status === 'CONFIRMED' ? 'success' :
-                            selectedAppointment.status === 'PENDING' ? 'warning' :
-                            'danger'
+                              selectedAppointment.status === 'PENDING' ? 'warning' :
+                                'danger'
                           }
                         >
                           {selectedAppointment.status}
@@ -342,7 +342,7 @@ const Schedule = ({ doctorId }) => {
                     <div className="stat-item">
                       <span className="stat-label">Tổng cuộc hẹn</span>
                       <span className="stat-value">
-                        {appointments.filter(apt => 
+                        {appointments.filter(apt =>
                           format(apt.start, 'dd/MM/yyyy') === format(new Date(), 'dd/MM/yyyy')
                         ).length}
                       </span>
@@ -350,7 +350,7 @@ const Schedule = ({ doctorId }) => {
                     <div className="stat-item">
                       <span className="stat-label">Đã xác nhận</span>
                       <span className="stat-value confirmed">
-                        {appointments.filter(apt => 
+                        {appointments.filter(apt =>
                           format(apt.start, 'dd/MM/yyyy') === format(new Date(), 'dd/MM/yyyy') &&
                           apt.status === 'CONFIRMED'
                         ).length}
@@ -359,7 +359,7 @@ const Schedule = ({ doctorId }) => {
                     <div className="stat-item">
                       <span className="stat-label">Đang chờ</span>
                       <span className="stat-value pending">
-                        {appointments.filter(apt => 
+                        {appointments.filter(apt =>
                           format(apt.start, 'dd/MM/yyyy') === format(new Date(), 'dd/MM/yyyy') &&
                           apt.status === 'PENDING'
                         ).length}
