@@ -18,7 +18,7 @@ const mockDoctorData = {
   name: 'Bs. Trần Tấn Phát',
   specialty: 'Chuyên khoa HIV/AIDS',
   email: 'doctor@fpt.edu.vn',
-  phoneNumber: '0987654321',
+  phoneNumber: '0987654323',
   degree: 'Tiến sĩ Y khoa',
   experience: 10,
   certificates: ['Chứng chỉ hành nghề bác sĩ', ' Chuyên khoa HIV/AIDS'],
