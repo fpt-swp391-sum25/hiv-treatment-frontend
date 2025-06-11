@@ -34,4 +34,30 @@ const Doctors= () => {
   )
 }
 
-export default Doctors
+
+const Doctors = () => {
+    const {
+        token: { colorBgContainer, borderRadiusLG },
+    } = theme.useToken();
+    return (
+        <Layout>
+            <AppHeader />
+             <DoctorsBanner/>
+            <Content style={{ padding: '15px' }}>
+                <div
+                    style={{
+                        background: colorBgContainer,
+                        minHeight: 1080,
+                        padding: 24,
+                        borderRadius: borderRadiusLG,
+                    }}
+                >
+                   
+                </div>
+                <Outlet />
+            </Content>
+            <AppFooter />         
+        </Layout>
+    );
+};
+export default Doctors;

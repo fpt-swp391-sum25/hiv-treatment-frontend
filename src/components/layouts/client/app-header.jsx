@@ -3,8 +3,12 @@ import { Layout, Menu, Avatar, Dropdown, Typography, Button, Space, theme, } fro
 import { UserOutlined, DownOutlined, LogoutOutlined, CalendarOutlined, FileSearchOutlined, HistoryOutlined, } from '@ant-design/icons';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+
 import appLogo from '../../../assets/appLogo.png';
 import './app-header.css';
+import { useContext } from 'react';
+import { AuthContext } from '../../context/auth.context';
+import { logoutAPI } from '../../../services/api.service';
 
 const { Header } = Layout;
 const { Text } = Typography;
@@ -137,8 +141,21 @@ const AppHeader = ({ isAuthenticated = false, username = 'User' }) => {
     />
   );
 
-  const handleLogout = () => {
-    console.log('Logout clicked');
+  const handleLogout = async () => {
+    const response = await logoutAPI()
+    if (response.data) {
+      localStorage.removeItem("access_token")
+      setUser({
+        id: '',
+        username: '',
+        email: '',
+        fullName: '',
+        status: '',
+        role: ''
+      })
+      message.success("Đăng xuất thành công")
+      navigate("/")
+    }
   };
 
   return (
@@ -164,12 +181,12 @@ const AppHeader = ({ isAuthenticated = false, username = 'User' }) => {
           />
         </div>
 
-        {isAuthenticated ? (
+        {user.username ? (
           <Space align="center" size={8} style={{ cursor: 'default' }}>
             <Dropdown menu={userMenu} placement="bottomLeft" arrow>
               <Space style={{ cursor: 'pointer' }} align="center">
                 <Avatar icon={<UserOutlined />} />
-                <Text style={{ marginLeft: 4, marginRight: 4 }}>{username}</Text>
+                <Text style={{ marginLeft: 4, marginRight: 4, color: "white" }}>{user.username}</Text>
                 <DownOutlined />
               </Space>
             </Dropdown>
