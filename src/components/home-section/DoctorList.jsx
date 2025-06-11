@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import './DoctorList.css';
 
 // Dùng ảnh từ thư mục public
@@ -6,7 +7,6 @@ import defaultDoctorImage from '../../assets/doctor.png';
 
 function DoctorList() {
   const [doctors, setDoctors] = useState([]);
-  const [showAll, setShowAll] = useState(false);
   
   useEffect(() => {
     //fetch('/api/doctors')// có data thì gỡ cmt dòng này
@@ -17,7 +17,7 @@ function DoctorList() {
       .catch((error) => console.error('Lỗi khi tải danh sách bác sĩ:', error));
   }, []);
 
-  const visibleDoctors = showAll ? doctors : doctors.slice(0, 4);
+  const visibleDoctors = doctors.slice(0, 4);
 
   return (
     <section className="doctor-section">
@@ -43,20 +43,17 @@ function DoctorList() {
               <p>🕒 {doctor.experience} năm kinh nghiệm</p>
               <p>{doctor.qualifications}</p>
              
-              <button className="btn-primary">Đặt lịch</button>
+              <Link to="/doctors" className="btn-primary">
+                Đặt lịch
+              </Link>
             </div>
           </div>
         ))}
-      </div>
-
-      {doctors.length > 4 && (
+      </div>      {doctors.length > 4 && (
         <div className="view-all-container">
-          <button
-            className="btn-outline"
-            onClick={() => setShowAll(!showAll)}
-          >
-            {showAll ? 'Thu gọn danh sách' : 'Xem tất cả bác sĩ'}
-          </button>
+          <Link to="/doctors" className="btn-outline">
+            Xem tất cả bác sĩ
+          </Link>
         </div>
       )}
     </section>

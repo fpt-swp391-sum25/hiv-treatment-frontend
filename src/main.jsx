@@ -19,6 +19,7 @@ import { AuthWrapper } from './components/context/auth.context';
 import App from './pages/client/App';
 import PrivateRoute from './pages/private-route';
 import Resources from './pages/client/resources';
+import Doctors from './pages/client/doctors';
 
 
 
@@ -43,6 +44,11 @@ const router = createBrowserRouter([
         errorElement: <Errors />,
       },
     ]
+  },
+  {
+    path: '/doctors',
+    element: <Doctors />,
+    errorElement: <Errors />,
   },
   {
     path: '/resources',

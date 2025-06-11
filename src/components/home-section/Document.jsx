@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import './document.css';
 
 const Document = () => {
@@ -54,12 +55,9 @@ const Document = () => {
 
       {documents.length > 6 && (
         <div className="view-all-container">
-          <button
-            className="btn-outline"
-            onClick={() => setShowAll(!showAll)}
-          >
+          <Link to="/resources" className="btn-outline">
             {showAll ? 'Thu gọn danh sách' : 'Xem tất cả tài liệu'}
-          </button>
+          </Link>
         </div>
       )}
     </section>

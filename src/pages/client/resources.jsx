@@ -13,6 +13,7 @@ const Resources = () => {
     return (
         <Layout>
             <AppHeader />
+             <ResourcesBanner />
             <Content style={{ padding: '15px' }}>
                 <div
                     style={{
@@ -22,7 +23,7 @@ const Resources = () => {
                         borderRadius: borderRadiusLG,
                     }}
                 >
-                    <ResourcesBanner />
+                   
                 </div>
                 <Outlet />
             </Content>
