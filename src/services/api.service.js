@@ -69,7 +69,7 @@ const deleteAccountAPI = (id) => {
 }
 
 const fetchDoctorProfileAPI = () => {
-    const URL_BACKEND = ''
+    const URL_BACKEND = '/api/doctor-profile'
     return axios.get(URL_BACKEND)
 }
 

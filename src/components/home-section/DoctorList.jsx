@@ -19,8 +19,7 @@ function DoctorList() {
 
   const visibleDoctors = doctors.slice(0, 4);
 
-  return (
-    <section className="doctor-section">
+  return (    <section className="doctor-section" id="doctor-section">
       <h2 className="title">
         Đội ngũ <span className="highlight">bác sĩ chuyên khoa</span>
       </h2>
@@ -51,10 +50,10 @@ function DoctorList() {
         ))}
       </div>      {doctors.length > 4 && (
         <div className="view-all-container">
-          <Link to="/doctors" className="btn-outline">
-            Xem tất cả bác sĩ
-          </Link>
-        </div>
+                  <Link to="/doctors" className="btn-outline">
+                    Xem tất cả bác sĩ
+                  </Link>
+                </div>
       )}
     </section>
   );

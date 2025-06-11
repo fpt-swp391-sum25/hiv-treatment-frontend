@@ -2,8 +2,7 @@ import React from 'react';
 import './CareIntroSection.css';
 
 function CareIntroSection() {
-  return (
-    <section className="care-intro-section">
+  return (    <section className="care-intro-section" id="care-section">
       <div className="care-grid">
         {/* Cột trái */}
         <div className="care-left">

@@ -2,8 +2,7 @@ import React from 'react';
 import './FullServicesSection2.css';
 
 const FullServicesSection2 = () => {
-    return (
-        <div className="container">
+    return (        <div className="container" id="services-section">
             <div className="header">
                 <h1>Dịch vụ chăm sóc HIV toàn diện</h1>
                 <p>Chúng tôi cung cấp đầy đủ các dịch vụ tư vấn, điều trị đến chăm sóc tâm lý cho người nhiễm HIV và người có nguy cơ cao với tiêu chuẩn quốc tế.</p>

@@ -20,8 +20,7 @@ const Document = () => {
     setExpandedId(expandedId === id ? null : id);
   };
 
-  return (
-    <section className="document-section">
+  return (    <section className="document-section" id="document-section">
       <h2 className="document-title">
         Tài liệu về <span className="highlight">HIV</span>
       </h2>
@@ -53,9 +52,10 @@ const Document = () => {
         ))}
       </div>
 
-      {documents.length > 6 && (
+      {documents.length > 4 && (
         <div className="view-all-container">
           <Link to="/resources" className="btn-outline">
+            Xem tất cả tài liệu
             {showAll ? 'Thu gọn danh sách' : 'Xem tất cả tài liệu'}
           </Link>
         </div>

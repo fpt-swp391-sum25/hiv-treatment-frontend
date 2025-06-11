@@ -5,7 +5,7 @@
   z-index: 1;
   width: 100%;
   padding: 0 24px !important;
-  min-height: 130px;
+  min-height: 140px;
   height: auto;
   background: #2056df;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -15,49 +15,62 @@
 .header-content {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: space-around;
   flex-wrap: wrap;
   min-height: 64px;
 }
 
+/* Phần menu */
+.app-menu {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
 /* Logo app */
 .app-logo {
-  width: 160px;
-  height: 50px;
+  width: 180px;
+  height: 55px;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   background-color: #fff;
   border-radius: 70px / 50px;
-  padding: 0 20px;
+  padding: 8px 20px;
   box-sizing: border-box;
+  margin: 10px 0;
+  overflow: hidden;
 }
 
 .app-logo img {
-  max-width: 100%;
-  max-height: 100%;
+  width: 160px;
+  height: 75px;
   object-fit: contain;
-  margin-top: 35px;
+  margin: 0;
+  
+  display:center;
 }
 
 /* Menu trên */
 .main-menu {
-  flex: 1;
   display: flex;
   justify-content: center;
   border-bottom: none;
-  margin: 0 48px;
+  margin: 0;
   background: #2056df;
+  min-width: 600px;
 }
 
 /* Menu dưới — thêm nền giống main-menu */
 .sub-menu {
-  flex: 1;
   display: flex;
   justify-content: center;
   border-bottom: none;
-  margin: 0 48px;
+  margin: 0;
   background: #2056df;
+  min-width: 600px;
 }
 
 /* Cài đặt item menu */
@@ -84,8 +97,8 @@
   border: none !important;
 }
 
-.ant-menu-horizontal > .ant-menu-item::after,
-.ant-menu-horizontal > .ant-menu-submenu::after {
+.ant-menu-horizontal>.ant-menu-item::after,
+.ant-menu-horizontal>.ant-menu-submenu::after {
   display: none !important;
 }
 
@@ -108,7 +121,8 @@
     align-items: flex-start;
   }
 
-  .main-menu, .sub-menu {
+  .main-menu,
+  .sub-menu {
     width: 100%;
     justify-content: flex-start;
     margin: 8px 0;

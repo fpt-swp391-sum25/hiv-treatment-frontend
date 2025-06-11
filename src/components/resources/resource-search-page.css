@@ -1,0 +1,217 @@
+.resource-page {
+  padding: 60px 20px;
+  background-color: #f7f9fc;
+  text-align: center;
+}
+
+.resource-title {
+  font-size: 28px;
+  font-weight: bold;
+  color: #333;
+}
+
+.highlight {
+  color: #35a6c7;
+}
+
+.resource-subtitle {
+  text-align: center;
+  font-size: 16px;
+  color: #555;
+  margin-bottom: 32px;
+}
+
+.search-input {
+  display: block;
+  margin: 0 auto 32px;
+  padding: 10px 16px;
+  width: 80%;
+  max-width: 600px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  text-transform: none; /* Giữ nguyên định dạng chữ người dùng nhập */
+}
+
+.document-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+  justify-content: center;
+  padding: 0 10px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.document-card {
+  background: linear-gradient(135deg, #e0fdf4 0%, #f4fefc 100%);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  border-radius: 12px;
+  padding: 20px;
+  max-width: 300px;
+  width: 100%;
+  transition: transform 0.2s;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 320px;
+}
+
+.document-card:hover {
+  transform: translateY(-4px);
+}
+
+.doc-title {
+  font-size: 18px;
+  color: #222;
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.document-author {
+  font-size: 14px;
+  font-weight: 500;
+  color: #2a93b0;
+  margin-bottom: 6px;
+}
+
+.document-snippet {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.document-date {
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 12px;
+}
+
+.btn-read {
+  margin-top: 16px;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  background: linear-gradient(90deg, #6ee7b7, #3b82f6);
+  color: white;
+  box-shadow: 0 6px 12px rgba(59, 130, 246, 0.4);
+  cursor: pointer;
+  transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.1s ease;
+  user-select: none;
+}
+
+.btn-read:hover {
+  background: linear-gradient(90deg, #3b82f6, #06b6d4);
+  box-shadow: 0 8px 20px rgba(14, 165, 233, 0.6);
+  transform: translateY(-2px);
+}
+
+.btn-read:active {
+  transform: translateY(0);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+}
+
+.document-full-content {
+  margin-top: 12px;
+  font-size: 14px;
+  color: #333;
+  background-color: #f4f6f9;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.view-all-container {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.btn-outline {
+  padding: 10px 18px;
+  background-color: transparent;
+  border: 2px solid #35a6c7;
+  color: #35a6c7;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-outline:hover {
+  background-color: #35a6c7;
+  color: white;
+}
+
+/* Modal styles */
+.modal-content {
+  padding: 20px;
+}
+
+.modal-content .document-author {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 12px;
+}
+
+.modal-content .document-date {
+  color: #888;
+  margin-bottom: 20px;
+}
+
+.modal-content .document-content {
+  font-size: 16px;
+  line-height: 1.8;
+  color: #333;
+  white-space: pre-wrap;
+}
+
+/* Customize Ant Design Modal */
+.ant-modal-title {
+  color: #3b82f6 !important;
+  font-size: 20px !important;
+  font-weight: bold;
+}
+
+.ant-modal-header {
+  border-bottom: 1px solid #eee;
+  padding: 16px 24px;
+}
+
+.ant-modal-close-x {
+  color: #666;
+}
+
+.ant-modal-body {
+  padding: 24px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+/* Responsive design for phones */
+@media screen and (max-width: 768px) {
+  .document-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .search-input {
+    width: 90%;
+  }
+
+  .resource-title {
+    font-size: 22px;
+  }
+
+  .doc-title {
+    font-size: 16px;
+  }
+}

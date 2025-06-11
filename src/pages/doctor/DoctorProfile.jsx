@@ -8,6 +8,20 @@ import Schedule from '../../components/doctor/Schedule';
 import Feedback from '../../components/doctor/Feedback';
 import Statistics from '../../components/doctor/Statistics';
 
+// Data giả tạm thời
+const mockDoctorData = {
+  id: 1,
+  name: 'Bs. Nguyễn Văn A',
+  specialty: 'Chuyên khoa HIV/AIDS',
+  email: 'doctor@example.com',
+  phoneNumber: '0987654321',
+  degree: 'Tiến sĩ Y khoa',
+  experience: 10,
+  certificates: ['Chứng chỉ hành nghề bác sĩ', 'Chuyên khoa HIV/AIDS'],
+  bio: 'Là bác sĩ với hơn 10 năm kinh nghiệm trong lĩnh vực điều trị HIV/AIDS. Chuyên môn sâu về quản lý và điều trị các bệnh nhiễm trùng cơ hội liên quan đến HIV.',
+  imageUrl: 'https://via.placeholder.com/150'
+};
+
 const DoctorProfile = () => {
   const [doctorData, setDoctorData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -17,10 +31,19 @@ const DoctorProfile = () => {
     // TODO: Fetch doctor profile data
     const fetchDoctorProfile = async () => {
       try {
+        // Giả lập API call
+        setTimeout(() => {
+          setDoctorData(mockDoctorData);
+          setLoading(false);
+        }, 500);
+        
+        // Khi API thực sự sẵn sàng, bỏ comment phần này
+        /*
         const response = await fetch('/api/doctor-profile/doctor-id/1'); // Replace 1 with actual doctor ID
         const data = await response.json();
         setDoctorData(data);
         setLoading(false);
+        */
       } catch (err) {
         setError('Failed to fetch doctor profile');
         setLoading(false);

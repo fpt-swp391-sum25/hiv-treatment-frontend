@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Form, Input, Select, DatePicker, Button, Typography, Col, Row, Layout, theme } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import moment from 'moment';
 import { useNavigate } from 'react-router-dom';
-import { bookingAPI } from '../../services/api.service';
+import { bookingAPI, fetchDoctorProfileAPI } from '../../services/api.service';
 
 
 const { Link } = Typography;
@@ -14,27 +14,46 @@ const dateFormat = 'DD-MM-YYYY';
 const Booking = () => {
     const [form] = Form.useForm();
     const [availableTimes, setAvailableTimes] = useState(generateTimeSlots());
+    const [doctors, setDoctors] = useState([])
+
     const navigate = useNavigate();
 
-    const handleSubmit = async (values) => {
+    useEffect(() => {
+        loadDoctors()
+        console.log(">>>>", doctors)
+    }, [])
 
-        try {
-            console.log(values)
-            const response = await bookingAPI(values)
-            if (response.data) {
-                notification.success({
-                    message: 'Đăng kí thành công'
-                })
-            }
-            navigate('/booking')
-            form.resetFields()
-        } catch (error) {
-            message.error('Có lỗi xảy ra khi đặt lịch. Vui lòng thử lại.');
-            console.error('Booking error:', error);
-        }
+    const handleSubmit = async (values) => {
+        console.log(values)
+
+        // try {
+
+        //     const response = await bookingAPI(values)
+        //     if (response.data) {
+        //         notification.success({
+        //             message: 'Đăng kí thành công'
+        //         })
+        //     }
+        //     // navigate('/booking')
+        //     form.resetFields()
+        // } catch (error) {
+        //     message.error('Có lỗi xảy ra khi đặt lịch. Vui lòng thử lại.');
+        //     console.error('Booking error:', error);
+        // }
 
 
     };
+
+    const loadDoctors = async () => {
+        const response = await fetchDoctorProfileAPI()
+        console.log(response.data)
+        if (response.data) {
+            setDoctors(response.data)
+        }
+
+
+    }
+
 
     const disabledDate = (current) => {
         const isBeforeToday = current && current < moment().startOf('day');
@@ -102,8 +121,9 @@ const Booking = () => {
                                         rules={[{ required: true, message: 'Vui lòng chọn loại dịch vụ' }]}
                                     >
                                         <Select placeholder="Chọn loại dịch vụ">
-                                            <Option value="service1">Dịch vụ 1</Option>
-                                            <Option value="service2">Dịch vụ 2</Option>
+                                            <Option value="Khám">Đặt khám</Option>
+                                            <Option value="Tái khám">Tái khám</Option>
+                                            <Option value="Tư vấn">Tư vấn</Option>
                                         </Select>
                                     </Form.Item>
                                     <Form.Item
@@ -114,13 +134,13 @@ const Booking = () => {
                                         <Select placeholder="Chọn bác sĩ" filterOption={(input, option) =>
                                             option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
                                         }>
-                                            {/* {doctors.map(doctor => (
-                                            <Option key={doctor.id} value={doctor.id}>
-                                                {doctor.name} - {doctor.specialty}
-                                            </Option>
-                                        ))} */}
+                                            {doctors.map(doctor => (
+                                                <Option key={doctor.id} value={doctor.id}>
+                                                    {doctor.user.fullName}
+                                                </Option>
+                                            ))}
                                             {/* <Option value="doctor1">Bác sĩ 1</Option>
-                                        <Option value="doctor2">Bác sĩ 2</Option> */}
+                                            <Option value="doctor2">Bác sĩ 2</Option> */}
                                         </Select>
                                     </Form.Item>
                                     <Row gutter={8} >
