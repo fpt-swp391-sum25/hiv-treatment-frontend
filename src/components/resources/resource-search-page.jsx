@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { Modal } from 'antd';
 import './resource-search-page.css';
 
 const ResourceSearchPage = () => {
   const [documents, setDocuments] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredDocs, setFilteredDocs] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedDoc, setSelectedDoc] = useState(null);
 
   useEffect(() => {
     fetch('/api/documents.json')
@@ -29,12 +32,15 @@ const ResourceSearchPage = () => {
     );
 
     setFilteredDocs(filtered);
-  };
-  const [expandedId, setExpandedId] = useState(null);
-  const [showAll, setShowAll] = useState(false);
+  };  const [showAll, setShowAll] = useState(false);
 
-  const toggleExpand = (id) => {
-    setExpandedId(expandedId === id ? null : id);
+  const showModal = (doc) => {
+    setSelectedDoc(doc);
+    setModalVisible(true);
+  };
+
+  const handleCancel = () => {
+    setModalVisible(false);
   };
 
   const visibleDocs = showAll ? filteredDocs : filteredDocs.slice(0, 8);
@@ -59,19 +65,32 @@ const ResourceSearchPage = () => {
             </p>
             <p className="document-date">
               📅 {new Date(doc.created_at).toLocaleDateString('vi-VN')}
-            </p>
-            <button className="btn-read" onClick={() => toggleExpand(doc.id)}>
-              {expandedId === doc.id ? '🔽 Thu gọn' : '📖 Đọc bài viết'}
+            </p>            <button className="btn-read" onClick={() => showModal(doc)}>
+              📖 Đọc bài viết
             </button>
-            {expandedId === doc.id && (
-              <div className="document-full-content">
-                <hr />
-                <p>{doc.content}</p>
-              </div>
-            )}
           </div>
         ))}
       </div>
+
+      <Modal
+        title={selectedDoc?.title}
+        open={modalVisible}
+        onCancel={handleCancel}
+        footer={null}
+        width={800}
+      >
+        {selectedDoc && (
+          <div className="modal-content">
+            <p className="document-author">👨‍⚕️ {selectedDoc.author}</p>
+            <p className="document-date">
+              📅 {new Date(selectedDoc.created_at).toLocaleDateString('vi-VN')}
+            </p>
+            <div className="document-content">
+              {selectedDoc.content}
+            </div>
+          </div>
+        )}
+      </Modal>
 
       {filteredDocs.length > 8 && (
         <div className="view-all-container">

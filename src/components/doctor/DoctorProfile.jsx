@@ -14,15 +14,15 @@ import appLogo from '../../assets/appLogo.png';
 // Data giả tạm thời
 const mockDoctorData = {
   id: 1,
-  name: 'Bs. Nguyễn Văn A',
+  name: 'Bs. Trần Tấn Phát',
   specialty: 'Chuyên khoa HIV/AIDS',
-  email: 'doctor@example.com',
+  email: 'doctor@fpt.edu.vn',
   phoneNumber: '0987654321',
   degree: 'Tiến sĩ Y khoa',
   experience: 10,
   certificates: ['Chứng chỉ hành nghề bác sĩ', 'Chuyên khoa HIV/AIDS'],
   bio: 'Là bác sĩ với hơn 10 năm kinh nghiệm trong lĩnh vực điều trị HIV/AIDS. Chuyên môn sâu về quản lý và điều trị các bệnh liên quan đến HIV.',
-  imageUrl: 'https://via.placeholder.com/150'
+  imageUrl: 'https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg'
 };
 
 const DoctorProfile = () => {
@@ -48,8 +48,21 @@ const DoctorProfile = () => {
     fetchDoctorProfile();
   }, []);
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>{error}</div>;
+  if (loading) return (
+    <div className="loading-container">
+      <div className="spinner-border text-primary" role="status">
+        <span className="visually-hidden">Đang tải...</span>
+      </div>
+    </div>
+  );
+  
+  if (error) return (
+    <div className="error-container">
+      <div className="alert alert-danger" role="alert">
+        {error}
+      </div>
+    </div>
+  );
 
   return (
     <div className="doctor-profile-container">
@@ -59,9 +72,13 @@ const DoctorProfile = () => {
           <div className="profile-header">
             <div className="profile-image-section">
               <img 
-                src={doctorData?.imageUrl || '/default-doctor.png'} 
+                src={doctorData?.imageUrl} 
                 alt="Doctor profile" 
                 className="profile-image"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = 'https://www.pngitem.com/pimgs/m/146-1468479_my-profile-icon-blank-profile-picture-circle-hd.png';
+                }}
               />
             </div>
             <div className="profile-basic-info">

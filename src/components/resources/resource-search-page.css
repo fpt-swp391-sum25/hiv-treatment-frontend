@@ -151,6 +151,51 @@
   color: white;
 }
 
+/* Modal styles */
+.modal-content {
+  padding: 20px;
+}
+
+.modal-content .document-author {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 12px;
+}
+
+.modal-content .document-date {
+  color: #888;
+  margin-bottom: 20px;
+}
+
+.modal-content .document-content {
+  font-size: 16px;
+  line-height: 1.8;
+  color: #333;
+  white-space: pre-wrap;
+}
+
+/* Customize Ant Design Modal */
+.ant-modal-title {
+  color: #3b82f6 !important;
+  font-size: 20px !important;
+  font-weight: bold;
+}
+
+.ant-modal-header {
+  border-bottom: 1px solid #eee;
+  padding: 16px 24px;
+}
+
+.ant-modal-close-x {
+  color: #666;
+}
+
+.ant-modal-body {
+  padding: 24px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
 /* Responsive design for phones */
 @media screen and (max-width: 768px) {
   .document-grid {

@@ -1,6 +1,6 @@
 // src/components/layout/AppHeader.jsx
-import {Layout,Menu,Avatar,Dropdown,Typography,Button,Space,theme,} from 'antd';
-import {UserOutlined,DownOutlined,LogoutOutlined,CalendarOutlined,FileSearchOutlined,HistoryOutlined,} from '@ant-design/icons';
+import { Layout, Menu, Avatar, Dropdown, Typography, Button, Space, theme, } from 'antd';
+import { UserOutlined, DownOutlined, LogoutOutlined, CalendarOutlined, FileSearchOutlined, HistoryOutlined, } from '@ant-design/icons';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import appLogo from '../../../assets/appLogo.png';
@@ -25,7 +25,7 @@ const AppHeader = ({ isAuthenticated = false, username = 'User' }) => {
         { id: 'services-section', key: 'services' },
         { id: 'doctor-section', key: 'doctors' },
         { id: 'document-section', key: 'resources' }
-      ];      const scrollPosition = window.scrollY + 200; // Tăng offset để thấy tiêu đề rõ hơn
+      ]; const scrollPosition = window.scrollY + 200; // Tăng offset để thấy tiêu đề rõ hơn
 
       for (const section of sections) {
         const element = document.getElementById(section.id);
@@ -43,7 +43,7 @@ const AppHeader = ({ isAuthenticated = false, username = 'User' }) => {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);   const scrollToSection = (sectionId) => {
+  }, []); const scrollToSection = (sectionId) => {
     const section = document.getElementById(sectionId);
     if (section) {
       const headerOffset = 120; // Điều chỉnh offset để thấy tiêu đề
@@ -64,7 +64,7 @@ const AppHeader = ({ isAuthenticated = false, username = 'User' }) => {
     { key: 'resources', label: 'Tài liệu', scrollTo: 'document-section' },
   ];
 
- 
+
   const bottomMenuItems = [
     {
       key: 'booking',
@@ -84,9 +84,9 @@ const AppHeader = ({ isAuthenticated = false, username = 'User' }) => {
       path: '/history',
       icon: <HistoryOutlined />,
     },
-  ];   const navigate = useNavigate();
+  ]; const navigate = useNavigate();
 
-   const handleMenuClick = (scrollTo) => {
+  const handleMenuClick = (scrollTo) => {
     // Nếu đang không ở trang chủ, chuyển về trang chủ trước
     if (location.pathname !== '/') {
       navigate('/');
@@ -98,9 +98,9 @@ const AppHeader = ({ isAuthenticated = false, username = 'User' }) => {
       // Nếu đã ở trang chủ thì chỉ cần scroll
       scrollToSection(scrollTo);
     }
-   };
+  };
 
-   const mapMenuItems = (items) =>
+  const mapMenuItems = (items) =>
     items.map((item) => ({
       key: item.key,
       icon: item.icon || null,
@@ -151,11 +151,11 @@ const AppHeader = ({ isAuthenticated = false, username = 'User' }) => {
         </div>
 
         <div className="app-menu">          <Menu
-            mode="horizontal"
-            selectedKeys={[getActiveMenu(topMenuItems)]}
-            items={mapMenuItems(topMenuItems)}
-            className="main-menu"
-          />
+          mode="horizontal"
+          selectedKeys={[getActiveMenu(topMenuItems)]}
+          items={mapMenuItems(topMenuItems)}
+          className="main-menu"
+        />
           <Menu
             mode="horizontal"
             selectedKeys={[getActiveMenu(bottomMenuItems)]}
@@ -166,7 +166,7 @@ const AppHeader = ({ isAuthenticated = false, username = 'User' }) => {
 
         {isAuthenticated ? (
           <Space align="center" size={8} style={{ cursor: 'default' }}>
-            <Dropdown overlay={userMenu} placement="bottomLeft" arrow>
+            <Dropdown menu={userMenu} placement="bottomLeft" arrow>
               <Space style={{ cursor: 'pointer' }} align="center">
                 <Avatar icon={<UserOutlined />} />
                 <Text style={{ marginLeft: 4, marginRight: 4 }}>{username}</Text>
