@@ -5,7 +5,7 @@
   z-index: 1;
   width: 100%;
   padding: 0 24px !important;
-  min-height: 130px;
+  min-height: 140px;
   height: auto;
   background: #2056df;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -18,6 +18,15 @@
   justify-content: space-between;
   flex-wrap: wrap;
   min-height: 64px;
+}
+
+/* Phần menu */
+.app-menu {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
 }
 
 /* Logo app */
@@ -42,22 +51,22 @@
 
 /* Menu trên */
 .main-menu {
-  flex: 1;
   display: flex;
   justify-content: center;
   border-bottom: none;
-  margin: 0 48px;
+  margin: 0;
   background: #2056df;
+  min-width: 600px;
 }
 
 /* Menu dưới — thêm nền giống main-menu */
 .sub-menu {
-  flex: 1;
   display: flex;
   justify-content: center;
   border-bottom: none;
-  margin: 0 48px;
+  margin: 0;
   background: #2056df;
+  min-width: 600px;
 }
 
 /* Cài đặt item menu */
