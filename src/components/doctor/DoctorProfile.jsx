@@ -12,7 +12,7 @@ import Statistics from './Statistics';
 import appLogo from '../../assets/appLogo.png';
 import doctorProfileImage from '../../assets/doctorProfile.png';
 
-// Data giả tạm thời
+// Daa giả tạm thời
 const mockDoctorData = {
   id: 1,
   name: 'Bs. Trần Tấn Phát',
@@ -32,7 +32,7 @@ const testData = {
   name: 'Bs. minh',
   specialty: 'Chuyên khoa HIV/AIDS',
   email: 'doctor@fpt.edu.vn',
-  phoneNumber: '0987654321',
+  phoneNumber: '0987654322',
   degree: 'Tiến sĩ Y khoa',
   experience: 10,
   certificates: ['Chứng chỉ hành nghề bác sĩ', ' Chuyên khoa HIV/AIDS'],
