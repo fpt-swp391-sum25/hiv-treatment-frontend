@@ -10,6 +10,36 @@
   min-height: 400px;
 }
 
+/* Styling cho bộ lọc thời gian và nút xuất báo cáo */
+.statistics-filters .filter-card,
+.statistics-filters .export-card {
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  height: 100%;
+}
+
+.time-range-buttons {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.time-range-buttons .btn {
+  margin-right: 5px;
+  margin-bottom: 5px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+}
+
+.custom-date-range {
+  border-top: 1px solid #eee;
+  padding-top: 15px;
+}
+
+.custom-date-range .form-control {
+  width: 140px;
+}
+
 /* Styling cho các card thống kê */
 .stat-card {
   transition: transform 0.2s;
@@ -18,6 +48,11 @@
   border: none;
   border-radius: 10px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
 
 .stat-title {
@@ -48,7 +83,46 @@
   font-weight: 500;
 }
 
+/* Dropdown xuất báo cáo */
+.dropdown-toggle {
+  border-radius: 5px;
+}
+
+.dropdown-menu {
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  border: none;
+  border-radius: 5px;
+}
+
+.dropdown-item {
+  padding: 8px 15px;
+  font-size: 0.9rem;
+}
+
+.dropdown-item:hover {
+  background-color: #f8f9fa;
+}
+
 /* Responsive styling */
+@media (max-width: 992px) {
+  .statistics-filters .col-md-8,
+  .statistics-filters .col-md-4 {
+    margin-bottom: 15px;
+  }
+  
+  .time-range-buttons {
+    flex-wrap: wrap;
+  }
+  
+  .custom-date-range .d-flex {
+    flex-wrap: wrap;
+  }
+  
+  .custom-date-range .form-control {
+    margin-bottom: 10px;
+  }
+}
+
 @media (max-width: 768px) {
   .statistics-cards .col-md-3 {
     margin-bottom: 15px;
@@ -60,6 +134,19 @@
   
   .stat-value {
     font-size: 1.5rem;
+  }
+  
+  .custom-date-range .d-flex {
+    flex-direction: column;
+    align-items: flex-start !important;
+  }
+  
+  .custom-date-range h6 {
+    margin-bottom: 10px;
+  }
+  
+  .custom-date-range .form-control {
+    width: 100%;
   }
 }
 
@@ -81,5 +168,12 @@
 }
 
 .text-muted {
+  color: #6c757d;
+}
+
+/* Icons styling */
+.fa-calendar-alt,
+.fa-filter,
+.fa-file-download {
   color: #6c757d;
 } 
