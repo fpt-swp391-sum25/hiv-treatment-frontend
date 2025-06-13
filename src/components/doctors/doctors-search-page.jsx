@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import './DoctorList.css';
+import './doctors-search-page.css';
 
 // Dùng ảnh từ thư mục public
 import defaultDoctorImage from '../../assets/doctor.png';
 
-function DoctorList() {
+function DoctorsSearchPage() {
   const [doctors, setDoctors] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
   
   useEffect(() => {
     //fetch('/api/doctors')// có data thì gỡ cmt dòng này
@@ -17,19 +18,29 @@ function DoctorList() {
       .catch((error) => console.error('Lỗi khi tải danh sách bác sĩ:', error));
   }, []);
 
-  const visibleDoctors = doctors.slice(0, 4);
+  // Filter doctors based on search term
+  const filteredDoctors = doctors.filter((doctor) =>
+    doctor.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  useEffect(() => {
+    // Scroll to top when the component mounts
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
 
   return (    
-    <section className="doctor-section" id="doctor-section">
-      <h2 className="title">
-        Đội ngũ <span className="highlight">bác sĩ chuyên khoa</span>
-      </h2>
-      <p className="subtitle">
-        Các bác sĩ của chúng tôi đều là những chuyên gia hàng đầu trong lĩnh vực điều trị HIV với nhiều năm kinh nghiệm và được đào tạo bài bản quốc tế.
-      </p>
+    <section className="doctor-section" id="doctors-top">
+      <div className="search-container">
+        <input
+          type="text"
+          placeholder="Tìm kiếm bác sĩ..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="search-input"
+        />
+      </div>
 
       <div className="doctor-grid">
-        {visibleDoctors.map((doctor) => (
+        {filteredDoctors.map((doctor) => (
           <div className="doctor-card" key={doctor.id}>
             <img
               src={doctor.image || defaultDoctorImage}
@@ -39,29 +50,17 @@ function DoctorList() {
             />
             <div className="doctor-info">
               <h3>{doctor.name}</h3>
-              
               <p>🕒 {doctor.experience} năm kinh nghiệm</p>
               <p>{doctor.qualifications}</p>
-             
               <Link to="/doctors" className="btn-primary">
                 Đặt lịch
               </Link>
             </div>
           </div>
         ))}
-      </div>      <div className="view-all-container">
-        <Link 
-          to="/doctors" 
-          className="btn-outline"
-          onClick={() => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
-        >
-          Xem tất cả bác sĩ
-        </Link>
-      </div>
+      </div>      
     </section>
   );
 }
 
-export default DoctorList;
+export default DoctorsSearchPage;

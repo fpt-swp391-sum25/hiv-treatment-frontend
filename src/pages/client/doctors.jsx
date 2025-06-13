@@ -6,6 +6,7 @@ import { Layout, theme } from 'antd'
 import { Content } from 'antd/es/layout/layout'
 import { Outlet } from 'react-router-dom'
 import DoctorsBanner from '../../components/doctors/doctors-banner'
+import DoctorsSearchPage from '../../components/doctors/doctors-search-page'
 
 
 
@@ -27,7 +28,7 @@ const Doctors= () => {
                         borderRadius: borderRadiusLG,
                     }}
                 >
-                    <h1> Comming Soon </h1>
+                    <DoctorsSearchPage />
                 </div>
                 <Outlet />
             </Content>

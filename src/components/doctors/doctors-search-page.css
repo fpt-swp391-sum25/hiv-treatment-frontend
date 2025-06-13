@@ -93,22 +93,6 @@
   text-align: center;
 }
 
-.view-all-button {
-  display: inline-block;
-  padding: 12px 24px;
-  background-color: #2056df;
-  color: white;
-  text-decoration: none;
-  border-radius: 25px;
-  font-weight: 500;
-  transition: all 0.3s ease;
-}
-
-.view-all-button:hover {
-  background-color: #1545c0;
-  transform: translateY(-2px);
-}
-
 .btn-outline {
   padding: 10px 18px;
   background-color: transparent;
