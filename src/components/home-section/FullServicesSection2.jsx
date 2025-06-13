@@ -32,30 +32,6 @@ const FullServicesSection2 = () => {
                     <button className="button">Sử dụng dịch vụ &rarr;</button>
                     </div>
                 </div>
-                <div className="card">
-                    <h3>Xét nghiệm</h3>
-                    <p>Xét nghiệm HIV và các chỉ số liên quan với công nghệ tiên tiến, kết quả chính xác.</p>
-                    <div className="in-card">
-                    <ul>
-                        <li>Kết quả nhanh</li>
-                        <li>Độ chính xác cao</li>
-                        <li>Bảo mật tuyệt đối</li>
-                    </ul>
-                    <button className="button">Sử dụng dịch vụ &rarr;</button>
-                    </div>
-                </div>
-                <div className="card">
-                    <h3>Theo dõi điều trị</h3>
-                    <p>Theo dõi quá trình điều trị và đánh giá hiệu quả của phác đồ một cách khoa học.</p>
-                    <div className="in-card">
-                    <ul>
-                        <li>Báo cáo chi tiết</li>
-                        <li>Đối tác trực quan</li>
-                        <li>Cảnh báo thông minh</li>
-                    </ul>
-                    <button className="button">Sử dụng dịch vụ &rarr;</button>
-                    </div>
-                </div>
             </div>
         </div>
     );

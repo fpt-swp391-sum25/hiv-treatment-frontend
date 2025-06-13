@@ -27,30 +27,32 @@
   flex-direction: column;
   align-items: center;
   gap: 5px;
+  margin-left: 80px;
 }
 
 /* Logo app */
 .app-logo {
-  width: 180px;
+  width: 170px;
   height: 55px;
   display: flex;
   align-items: center;
   justify-content: center;
   background-color: #fff;
   border-radius: 70px / 50px;
-  padding: 8px 20px;
+  padding: 5px 15px;
   box-sizing: border-box;
-  margin: 10px 0;
+  margin: 10px auto 10px;
   overflow: hidden;
 }
 
 .app-logo img {
-  width: 160px;
-  height: 75px;
-  object-fit: contain;
-  margin: 0;
-  
-  display:center;
+  width: 135px;
+  height: 50px;
+  object-fit: cover;
+  display: block;
+  margin: auto;
+  margin-top: 10px;
+  transform: scale(1.05);
 }
 
 /* Menu trên */
