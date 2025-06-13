@@ -23,14 +23,13 @@ const AppHeader = ({ isAuthenticated = false, username = 'User' }) => {
   const { user, setUser } = useContext(AuthContext);
 
   // Thêm event listener để theo dõi scroll
-  useEffect(() => {
-    const handleScroll = () => {
+  useEffect(() => {    const handleScroll = () => {
       const sections = [
         { id: 'care-section', key: 'home' },
-        { id: 'services-section', key: 'services' },
+        { id: 'why-services-section', key: 'services' },
         { id: 'doctor-section', key: 'doctors' },
         { id: 'document-section', key: 'resources' }
-      ]; const scrollPosition = window.scrollY + 200; // Tăng offset để thấy tiêu đề rõ hơn
+      ]; const scrollPosition = window.scrollY + 200;// Tăng offset để thấy tiêu đề rõ hơn
 
       for (const section of sections) {
         const element = document.getElementById(section.id);
@@ -64,7 +63,7 @@ const AppHeader = ({ isAuthenticated = false, username = 'User' }) => {
 
   const topMenuItems = [
     { key: 'home', label: 'Trang chủ', scrollTo: 'care-section' },
-    { key: 'services', label: 'Dịch vụ', scrollTo: 'services-section' },
+    { key: 'services', label: 'Dịch vụ', scrollTo: 'why-services-section' },
     { key: 'doctors', label: 'Bác sĩ', scrollTo: 'doctor-section' },
     { key: 'resources', label: 'Tài liệu', scrollTo: 'document-section' },
   ];
