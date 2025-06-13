@@ -14,17 +14,19 @@ const PersonalInfo = ({ doctorData }) => {
           <div className="qualification-details">
             <div className="info-item">
               <span className="info-label">Bằng cấp:</span>
-              <span className="info-value">• {doctorData.degree}</span>
+
+              <span className="info-value">{doctorData.degree}</span>
             </div>
             <div className="info-item">
               <span className="info-label">Kinh nghiệm:</span>
-              <span className="info-value">• {doctorData.experience} năm</span>
+              <span className="info-value">{doctorData.experience} năm</span>
             </div>
             <div className="info-item">
               <span className="info-label">Chứng chỉ:</span>
               <div className="info-value certificates-list">
                 {doctorData.certificates.map((cert, index) => (
-                  <div key={index} className="certificate-item"> {cert}</div>
+
+                  <div key={index} className="certificate-item">• {cert}</div>
                 ))}
               </div>
             </div>

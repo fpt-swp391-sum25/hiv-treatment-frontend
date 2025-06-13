@@ -36,6 +36,8 @@
   padding-top: 10px;
 }
 
+=======
+
 .info-title {
   font-size: 1.5rem;
   color: #333;
@@ -53,6 +55,7 @@
 
 .info-card {
   background: #a1eaf0;
+
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
@@ -61,6 +64,7 @@
 .card-title {
   font-size: 1.2rem;
   color: #8cc4ce;
+
   margin-bottom: 20px;
   padding-bottom: 10px;
   border-bottom: 2px solid #f0f0f0;
@@ -85,12 +89,14 @@
   text-align: left;  /* Căn trái cho label */
   padding-right: 0;
   margin: 8px 0;  /* Thêm margin để tạo khoảng cách đều */
+
 }
 
 .info-value {
   color: #333;
   margin: 8px 0;  /* Thêm margin để tạo khoảng cách đều */
   text-align: left;  /* Căn trái cho value */
+
 }
 
 .certificates-list {
@@ -163,4 +169,5 @@
     margin: 4px 0;
     padding-left: 16px;  /* Thêm padding để tạo indent trên mobile */
   }
+
 }
