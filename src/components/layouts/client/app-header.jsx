@@ -1,5 +1,5 @@
 // src/components/layout/AppHeader.jsx
-import { Layout, Menu, Avatar, Dropdown, Typography, Button, Space, theme, } from 'antd';
+import { Layout, Menu, Avatar, Dropdown, Typography, Button, Space, theme, message } from 'antd';
 import { UserOutlined, DownOutlined, LogoutOutlined, CalendarOutlined, FileSearchOutlined, HistoryOutlined, } from '@ant-design/icons';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
@@ -20,7 +20,7 @@ const AppHeader = ({ isAuthenticated = false, username = 'User' }) => {
 
   const location = useLocation();
   const [activeSection, setActiveSection] = useState('home');
-  const { user, setUser } = useContext(AuthContext);
+  const { user } = useContext(AuthContext)
 
   // Thêm event listener để theo dõi scroll
   useEffect(() => {    const handleScroll = () => {

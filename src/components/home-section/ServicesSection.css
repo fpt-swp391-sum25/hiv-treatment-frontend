@@ -4,6 +4,11 @@
   text-align: center;
 }
 
+.services-section h1 {
+  color: #3b82f6;
+  margin-bottom: 20px;
+}
+
 .services-container {
   display: flex;
   justify-content: center;
