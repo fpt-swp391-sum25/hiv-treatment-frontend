@@ -43,7 +43,7 @@ const ResourceSearchPage = () => {
     setModalVisible(false);
   };
 
-  const visibleDocs = showAll ? filteredDocs : filteredDocs.slice(0, 8);
+  const visibleDocs = showAll ? filteredDocs : filteredDocs.slice(0, 12);
 
   return (
     <section className="resource-page">
@@ -92,7 +92,7 @@ const ResourceSearchPage = () => {
         )}
       </Modal>
 
-      {filteredDocs.length > 8 && (
+      {filteredDocs.length > 12 && (
         <div className="view-all-container">
           <button className="btn-outline" onClick={() => setShowAll(!showAll)}>
             {showAll ? 'Thu gọn danh sách' : 'Xem tất cả tài liệu'}

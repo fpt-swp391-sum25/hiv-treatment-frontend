@@ -117,6 +117,36 @@
   color: #fff !important;
 }
 
+/* Phần đăng nhập/đăng ký */
+.auth-buttons {
+  padding: 8px 0;
+}
+
+.auth-buttons .ant-btn {
+  min-width: 100px;
+}
+
+/* Phần thông tin user đã đăng nhập */
+.user-actions {
+  padding: 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-actions .ant-avatar {
+  background-color: #fff;
+  color: #2056df;
+}
+
+.user-actions .ant-btn {
+  min-width: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
 @media (max-width: 768px) {
   .header-content {
     flex-direction: column;

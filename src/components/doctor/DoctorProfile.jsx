@@ -28,7 +28,21 @@ const mockDoctorData = {
   name: 'Bs. Trần Tấn Phát',
   specialty: 'Chuyên khoa HIV/AIDS',
   email: 'doctor@fpt.edu.vn',
-  phoneNumber: '0987654321',
+  phoneNumber: '0987654323',
+  degree: 'Tiến sĩ Y khoa',
+  experience: 10,
+  certificates: ['Chứng chỉ hành nghề bác sĩ', ' Chuyên khoa HIV/AIDS'],
+  bio: 'Là bác sĩ với hơn 10 năm kinh nghiệm trong lĩnh vực điều trị HIV/AIDS. Chuyên môn sâu về quản lý và điều trị các bệnh liên quan đến HIV.',
+  imageUrl: doctorProfileImage
+};
+
+// Data giả tạm thời
+const testData = {
+  id: 1,
+  name: 'Bs. minh',
+  specialty: 'Chuyên khoa HIV/AIDS',
+  email: 'doctor@fpt.edu.vn',
+  phoneNumber: '0987654399',
   degree: 'Tiến sĩ Y khoa',
   experience: 10,
   certificates: ['Chứng chỉ hành nghề bác sĩ', 'Chuyên khoa HIV/AIDS'],
