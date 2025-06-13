@@ -34,7 +34,7 @@ jobs:
           username: ${{ secrets.EMAIL_USERNAME }}
           password: ${{ secrets.EMAIL_PASSWORD }}
           subject: " CI Failed for ${{ github.repository }}"
-          to: Ptt24032004@gmail.com, vominhson310805@gmail.com, Phamvanminh150204@gmail.com
+          to: ptt24032004@gmail.com, vominhson310805@gmail.com, phamvanminh150204@gmail.com, tranngockhiet22062005@gmail.com
           from: "CI Bot <tranngockhiet22062005@gmail.com>"
           body: |
             CI build failed for commit ${{ github.sha }}.
