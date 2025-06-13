@@ -1,7 +1,24 @@
+/* Font settings */
+:root {
+  --font-primary: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-size-base: 16px;
+  --font-size-lg: 1.25rem;
+  --font-size-xl: 2rem;
+  --font-size-md: 1.1rem;
+  --font-size-sm: 0.95rem;
+  --line-height-base: 1.5;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 600;
+}
+
 .doctor-profile-container {
   min-height: 100vh;
   background-color: #ffffff;
   position: relative;
+  font-family: var(--font-primary);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
 }
 
 .loading-container,
@@ -45,7 +62,7 @@
 
 .profile-header {
   display: flex;
-  padding: 30px 40px;
+  padding: 40px 50px;
   background: #ffffff;
   border-bottom: 1px solid #75b8f0;
 }
@@ -64,39 +81,44 @@
 }
 
 .profile-basic-info {
-  padding-left: 40px;
+  padding-left: 50px;
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
 
 .doctor-name {
-  font-size: 1.8rem;
-  color: #50a7ee;
-  font-weight: 600;
-  margin-bottom: 10px;
+  font-size: var(--font-size-xl);
+  color: #2c7bbf;
+  font-weight: var(--font-weight-bold);
+  margin-bottom: 15px;
+  letter-spacing: -0.02em;
 }
 
 .doctor-specialty {
-  color: #6c757d;
-  font-size: 1.1rem;
-  margin-bottom: 15px;
+  color: #2d3436;
+  font-size: var(--font-size-lg);
+  margin-bottom: 20px;
+  font-weight: var(--font-weight-medium);
 }
 
 .contact-info {
   display: flex;
-  gap: 30px;
+  gap: 40px;
+  margin-top: 5px;
 }
 
 .contact-item {
+  font-size: var(--font-size-md);
   display: flex;
   align-items: center;
-  gap: 8px;
-  color: #495057;
+  gap: 10px;
+  color: #2d3436;
 }
 
 .contact-item i {
-  color: #495057;
+  color: #2c7bbf;
+  font-size: var(--font-size-lg);
 }
 
 /* Tab styling with !important to override Bootstrap */
@@ -135,9 +157,28 @@
   transform: none !important;
 }
 
+.nav-tabs .nav-link {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  color: #2d3436;
+  padding: 12px 24px;
+}
+
+.nav-tabs .nav-link.active {
+  font-weight: var(--font-weight-bold);
+  color: #2c7bbf;
+}
+
 .tab-content {
   padding: 40px;
   background: #fff;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+  color: #2d3436;
+}
+
+.tab-pane {
+  padding: 30px;
 }
 
 /* Override any Bootstrap button hover effects */
@@ -151,25 +192,24 @@
 }
 
 /* Responsive adjustments */
-/* @media (max-width: 768px) {
-  .profile-header {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
+@media (max-width: 768px) {
+  :root {
+    --font-size-xl: 1.75rem;
+    --font-size-lg: 1.15rem;
+    --font-size-base: 15px;
   }
 
-  .profile-image-section {
-    padding: 0 0 20px 0;
-    border-right: none;
-    border-bottom: 1px solid #e9ecef;
+  .profile-header {
+    padding: 30px;
   }
 
   .profile-basic-info {
-    padding: 20px 0 0 0;
+    padding-left: 30px;
   }
 
   .contact-info {
-    justify-content: center;
+    flex-direction: column;
+    gap: 15px;
   }
 
   .nav-tabs {
@@ -183,7 +223,37 @@
   .tab-content {
     padding: 20px;
   }
-}  */
+}
+
+@media (max-width: 576px) {
+  :root {
+    --font-size-xl: 1.5rem;
+    --font-size-lg: 1.1rem;
+    --font-size-base: 14px;
+  }
+
+  .profile-header {
+    flex-direction: column;
+    text-align: center;
+    padding: 20px;
+  }
+
+  .profile-image-section {
+    border-right: none;
+    border-bottom: 1px solid #72c6ec;
+    padding: 0 0 20px 0;
+    margin-bottom: 20px;
+  }
+
+  .profile-basic-info {
+    padding-left: 0;
+    align-items: center;
+  }
+
+  .contact-info {
+    justify-content: center;
+  }
+}
 
 /* Loading Skeleton Styles */
 .skeleton-container {
