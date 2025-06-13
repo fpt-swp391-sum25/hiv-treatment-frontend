@@ -52,7 +52,7 @@
 }
 
 .info-card {
-  background: #fff;
+  background: #a1eaf0;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
@@ -60,7 +60,7 @@
 
 .card-title {
   font-size: 1.2rem;
-  color: #333;
+  color: #8cc4ce;
   margin-bottom: 20px;
   padding-bottom: 10px;
   border-bottom: 2px solid #f0f0f0;
@@ -68,36 +68,49 @@
 
 /* Common Info Items */
 .info-details, .qualification-details {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
+  display: grid;
+  grid-template-columns: 160px 1fr;  /* Cố định width cho cột label */
+  gap: 20px;
+  padding: 20px;
+  align-items: start;
 }
 
 .info-item {
-  display: flex;
-  gap: 10px;
-  line-height: 1.6;
+  display: contents;
 }
 
 .info-label {
-  min-width: 120px;
   color: #666;
   font-weight: 500;
+  text-align: left;  /* Căn trái cho label */
+  padding-right: 0;
+  margin: 8px 0;  /* Thêm margin để tạo khoảng cách đều */
 }
 
 .info-value {
   color: #333;
-  flex: 1;
+  margin: 8px 0;  /* Thêm margin để tạo khoảng cách đều */
+  text-align: left;  /* Căn trái cho value */
 }
 
 .certificates-list {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 8px;  /* Khoảng cách giữa các chứng chỉ */
+  margin: 0;
+  padding: 0;
 }
 
 .certificate-item {
-  padding-left: 5px;
+  display: flex;
+  align-items: center;
+  padding-left: 0;
+}
+
+.certificate-item::before {
+  content: "•";
+  margin-right: 8px;  /* Khoảng cách giữa bullet và text */
+  color: #666;
 }
 
 .introduction-text {
@@ -135,5 +148,19 @@
 
   .basic-info-section {
     width: 100%;
+  }
+
+  .qualification-details {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .info-label {
+    margin: 4px 0;
+  }
+
+  .info-value {
+    margin: 4px 0;
+    padding-left: 16px;  /* Thêm padding để tạo indent trên mobile */
   }
 }

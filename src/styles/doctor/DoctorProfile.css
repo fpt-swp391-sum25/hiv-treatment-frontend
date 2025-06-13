@@ -46,15 +46,15 @@
 .profile-header {
   display: flex;
   padding: 30px 40px;
-  background: #fff;
-  border-bottom: 1px solid #000000;
+  background: #ffffff;
+  border-bottom: 1px solid #75b8f0;
 }
 
 .profile-image-section {
   display: flex;
   align-items: center;
   padding: 0 40px 0 0;
-  border-right: 1px solid #000000;
+  border-right: 1px solid #72c6ec;
 }
 
 .profile-image {
@@ -72,7 +72,7 @@
 
 .doctor-name {
   font-size: 1.8rem;
-  color: #212529;
+  color: #50a7ee;
   font-weight: 600;
   margin-bottom: 10px;
 }

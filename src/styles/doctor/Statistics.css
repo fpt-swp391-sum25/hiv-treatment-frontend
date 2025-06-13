@@ -22,22 +22,66 @@
 .time-range-buttons {
   display: flex;
   flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
 }
 
 .time-range-buttons .btn {
-  margin-right: 5px;
-  margin-bottom: 5px;
-  border-radius: 20px;
-  font-size: 0.85rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  padding: 8px 16px;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  color: #495057;
+}
+
+.time-range-buttons .btn:hover {
+  background-color: #e9ecef;
+  border-color: #dee2e6;
+  color: #212529;
+}
+
+.time-range-buttons .btn.btn-primary {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+  color: white;
+}
+
+.time-range-buttons .btn.btn-primary:hover {
+  background-color: #0b5ed7;
+  border-color: #0a58ca;
+}
+
+/* Remove all export-related styles */
+.statistics-filters .export-card,
+.dropdown-toggle,
+.dropdown-menu,
+.dropdown-item {
+  display: none;
 }
 
 .custom-date-range {
-  border-top: 1px solid #eee;
-  padding-top: 15px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e9ecef;
 }
 
 .custom-date-range .form-control {
   width: 140px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+}
+
+.custom-date-range .btn {
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-left: 8px;
 }
 
 /* Styling cho các card thống kê */
@@ -148,6 +192,25 @@
   .custom-date-range .form-control {
     width: 100%;
   }
+  
+  .time-range-buttons {
+    gap: 6px;
+  }
+  
+  .time-range-buttons .btn {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+  }
+  
+  .custom-date-range .form-control {
+    width: 120px;
+    padding: 6px 10px;
+  }
+  
+  .custom-date-range .btn {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+  }
 }
 
 /* Animation cho loading spinner */
@@ -176,4 +239,4 @@
 .fa-filter,
 .fa-file-download {
   color: #6c757d;
-} 
+}
