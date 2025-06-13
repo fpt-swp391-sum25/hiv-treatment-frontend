@@ -179,36 +179,37 @@ const AppHeader = ({ isAuthenticated = false, username = 'User' }) => {
             items={mapMenuItems(bottomMenuItems)}
             className="sub-menu"
           />
+        </div>        
+        <div className="auth-section">
+          {user.username ? (
+            <Space align="center" size={8} className="user-actions">
+              <Dropdown menu={userMenu} placement="bottomLeft" arrow>
+                <Space style={{ cursor: 'pointer' }} align="center">
+                  <Avatar icon={<UserOutlined />} />
+                  <Text style={{ marginLeft: 4, marginRight: 4, color: "white" }}>{user.username}</Text>
+                  <DownOutlined />
+                </Space>
+              </Dropdown>
+              <Button
+                type="primary"
+                icon={<LogoutOutlined />}
+                onClick={handleLogout}
+                danger
+              >
+                Đăng xuất
+              </Button>
+            </Space>
+          ) : (
+            <Space size="middle" className="auth-buttons">
+              <Link to="/login">
+                <Button type="primary">Đăng nhập</Button>
+              </Link>
+              <Link to="/register">
+                <Button>Đăng kí</Button>
+              </Link>
+            </Space>
+          )}
         </div>
-
-        {user.username ? (
-          <Space align="center" size={8} style={{ cursor: 'default' }}>
-            <Dropdown menu={userMenu} placement="bottomLeft" arrow>
-              <Space style={{ cursor: 'pointer' }} align="center">
-                <Avatar icon={<UserOutlined />} />
-                <Text style={{ marginLeft: 4, marginRight: 4, color: "white" }}>{user.username}</Text>
-                <DownOutlined />
-              </Space>
-            </Dropdown>
-            <Button
-              type="primary"
-              icon={<LogoutOutlined />}
-              onClick={handleLogout}
-              danger
-            >
-              Đăng xuất
-            </Button>
-          </Space>
-        ) : (
-          <Space size="middle" className="auth-buttons">
-            <Link to="/login">
-              <Button type="primary">Đăng nhập</Button>
-            </Link>
-            <Link to="/register">
-              <Button>Đăng kí</Button>
-            </Link>
-          </Space>
-        )}
       </div>
     </Header>
   );

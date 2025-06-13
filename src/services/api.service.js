@@ -88,6 +88,11 @@ const logoutAPI = () => {
     return axios.post(URL_BACKEND)
 }
 
+const fetchAllDoctorsAPI = () => {
+    const URL_BACKEND = '/api/doctors'
+    return axios.get(URL_BACKEND)
+}
+
 export {
     loginAPI,
     registerAPI,
@@ -99,5 +104,6 @@ export {
     fetchDoctorProfileAPI,
     fetchScheduleAPI,
     fetchAccountAPI,
-    logoutAPI
+    logoutAPI,
+    fetchAllDoctorsAPI
 }
