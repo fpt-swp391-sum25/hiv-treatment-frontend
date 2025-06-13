@@ -5,12 +5,10 @@ import '../../styles/doctor/DoctorProfile.css';
 // Assets
 import appLogo from '../../assets/appLogo.png';
 import doctorProfileImage from '../../assets/doctorProfile.png';
-import AppFooter from '../layouts/client/app-footer';
 
 // Lazy loading components
 const PersonalInfo = lazy(() => import('./PersonalInfo'));
 const Schedule = lazy(() => import('./Schedule'));
-const Feedback = lazy(() => import('./Feedback'));
 const Statistics = lazy(() => import('./Statistics'));
 
 // Loading Skeleton component
@@ -98,7 +96,7 @@ const DoctorProfile = () => {
             <div className="profile-image-section">
               <img 
                 src={doctorData?.imageUrl} 
-                alt="Doctor profile" 
+                alt={doctorData?.name} 
                 className="profile-image"
                 onError={(e) => {
                   e.target.onerror = null;
@@ -106,57 +104,50 @@ const DoctorProfile = () => {
                 }}
               />
             </div>
-            
             <div className="profile-basic-info">
-              <h2 className="doctor-name">{doctorData?.name}</h2>
-              <p className="doctor-specialty">{doctorData?.specialty}</p>
+              <h1 className="doctor-name">{doctorData?.name}</h1>
+              <div className="doctor-specialty">{doctorData?.specialty}</div>
               <div className="contact-info">
                 <div className="contact-item">
                   <i className="fas fa-envelope"></i>
-                  <span>{doctorData?.email}</span>
+                  {doctorData?.email}
                 </div>
                 <div className="contact-item">
                   <i className="fas fa-phone"></i>
-                  <span>{doctorData?.phoneNumber}</span>
+                  {doctorData?.phoneNumber}
                 </div>
               </div>
             </div>
           </div>
 
-          <Tabs 
-            defaultActiveKey="personal-info" 
-            className="profile-tabs"
-            activeKey={activeTab}
-            onSelect={handleTabChange}
-          >
-            <Tab eventKey="personal-info" title="Thông tin cá nhân">
-              <Suspense fallback={<TabContentSkeleton />}>
-                <PersonalInfo doctorData={doctorData} />
-              </Suspense>
-            </Tab>
-            <Tab eventKey="schedule" title="Lịch làm việc">
-              <Suspense fallback={<TabContentSkeleton />}>
-                <Schedule doctorId={doctorData?.id} />
-              </Suspense>
-            </Tab>
-            <Tab eventKey="feedback" title="Đánh giá">
-              <Suspense fallback={<TabContentSkeleton />}>
-                <Feedback doctorId={doctorData?.id} />
-              </Suspense>
-            </Tab>
-            <Tab eventKey="statistics" title="Thống kê">
-              <Suspense fallback={<TabContentSkeleton />}>
-                <Statistics doctorId={doctorData?.id} />
-              </Suspense>
-            </Tab>
-          </Tabs>
+          <div className="profile-tabs">
+            <Tabs
+              activeKey={activeTab}
+              onSelect={handleTabChange}
+              className="mb-3"
+            >
+              <Tab eventKey="personal-info" title="Thông tin cá nhân">
+                <Suspense fallback={<TabContentSkeleton />}>
+                  <PersonalInfo doctorData={doctorData} />
+                </Suspense>
+              </Tab>
+              <Tab eventKey="schedule" title="Lịch làm việc">
+                <Suspense fallback={<TabContentSkeleton />}>
+                  <Schedule />
+                </Suspense>
+              </Tab>
+              <Tab eventKey="statistics" title="Thống kê">
+                <Suspense fallback={<TabContentSkeleton />}>
+                  <Statistics />
+                </Suspense>
+              </Tab>
+            </Tabs>
+          </div>
         </Card>
       </div>
-      <AppFooter />
     </div>
-
   );
 
 };
 
-export default DoctorProfile; 
+export default DoctorProfile;
