@@ -20,6 +20,7 @@ const AppHeader = ({ isAuthenticated = false, username = 'User' }) => {
 
   const location = useLocation();
   const [activeSection, setActiveSection] = useState('home');
+  const { user, setUser } = useContext(AuthContext);
 
   // Thêm event listener để theo dõi scroll
   useEffect(() => {
