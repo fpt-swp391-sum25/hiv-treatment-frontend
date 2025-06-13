@@ -56,7 +56,6 @@ const Document = () => {
         <div className="view-all-container">
           <Link to="/resources" className="btn-outline">
             Xem tất cả tài liệu
-            {showAll ? 'Thu gọn danh sách' : 'Xem tất cả tài liệu'}
           </Link>
         </div>
       )}
