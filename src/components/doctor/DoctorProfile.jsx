@@ -6,7 +6,23 @@ import '../../styles/doctor/DoctorProfile.css';
 import appLogo from '../../assets/appLogo.png';
 import doctorProfileImage from '../../assets/doctorProfile.png';
 
-// Daa giả tạm thời
+// Lazy loading components
+const PersonalInfo = lazy(() => import('./PersonalInfo'));
+const Schedule = lazy(() => import('./Schedule'));
+const Statistics = lazy(() => import('./Statistics'));
+
+// Loading Skeleton component
+const TabContentSkeleton = () => (
+  <div className="skeleton-container">
+    <div className="skeleton-row"></div>
+    <div className="skeleton-row"></div>
+    <div className="skeleton-row"></div>
+    <div className="skeleton-row"></div>
+    <div className="skeleton-row"></div>
+  </div>
+);
+
+// Mock data
 const mockDoctorData = {
   id: 1,
   name: 'Bs. Trần Tấn Phát',
@@ -15,61 +31,40 @@ const mockDoctorData = {
   phoneNumber: '0987654321',
   degree: 'Tiến sĩ Y khoa',
   experience: 10,
-  certificates: ['Chứng chỉ hành nghề bác sĩ', ' Chuyên khoa HIV/AIDS'],
+  certificates: ['Chứng chỉ hành nghề bác sĩ', 'Chuyên khoa HIV/AIDS'],
   bio: 'Là bác sĩ với hơn 10 năm kinh nghiệm trong lĩnh vực điều trị HIV/AIDS. Chuyên môn sâu về quản lý và điều trị các bệnh liên quan đến HIV.',
   imageUrl: doctorProfileImage
 };
 
-
 const DoctorProfile = () => {
-  const [doctorData, setDoctorData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [doctorData, setDoctorData] = useState(mockDoctorData);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('personal-info');
 
-  useEffect(() => {
-    // Fetch doctor profile data
-    const fetchDoctorProfile = async () => {
-      try {
-        // TODO: Thay thế bằng API call thực tế
-        // const response = await fetch(`/api/doctors/${doctorId}`);
-        // const data = await response.json();
-        // setDoctorData(data);
-
-        // Giả lập API call
-        setTimeout(() => {
-          setDoctorData(mockDoctorData);
-          setLoading(false);
-        }, 500);
-      } catch (err) {
-        setError('Không thể tải thông tin bác sĩ');
-        setLoading(false);
-      }
-    };
-
-    fetchDoctorProfile();
-  }, []);
-
-  // Xử lý khi thay đổi tab
   const handleTabChange = (tab) => {
     setActiveTab(tab);
   };
 
-  if (loading) return (
-    <div className="loading-container">
-      <div className="spinner-border text-primary" role="status">
-        <span className="visually-hidden">Đang tải...</span>
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Đang tải...</span>
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
   
-  if (error) return (
-    <div className="error-container">
-      <div className="alert alert-danger" role="alert">
-        {error}
+  if (error) {
+    return (
+      <div className="error-container">
+        <div className="alert alert-danger" role="alert">
+          {error}
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
 
   return (
     <div className="doctor-profile-container">
@@ -82,13 +77,8 @@ const DoctorProfile = () => {
                 src={doctorData?.imageUrl} 
                 alt={doctorData?.name} 
                 className="profile-image"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = 'https://www.pngitem.com/pimgs/m/146-1468479_my-profile-icon-blank-profile-picture-circle-hd.png';
-                }}
               />
             </div>
-            
             <div className="profile-basic-info">
               <h1 className="doctor-name">{doctorData?.name}</h1>
               <div className="doctor-specialty">{doctorData?.specialty}</div>
@@ -105,27 +95,33 @@ const DoctorProfile = () => {
             </div>
           </div>
 
-          <Tabs defaultActiveKey="personal-info" className="profile-tabs">
-            <Tab eventKey="personal-info" title="Thông tin cá nhân">
-              <PersonalInfo doctorData={doctorData} />
-            </Tab>
-            <Tab eventKey="schedule" title="Lịch làm việc">
-              <Schedule doctorId={doctorData?.id} />
-            </Tab>
-            <Tab eventKey="feedback" title="Đánh giá">
-              <Feedback doctorId={doctorData?.id} />
-            </Tab>
-            <Tab eventKey="statistics" title="Thống kê">
-              <Statistics doctorId={doctorData?.id} />
-            </Tab>
-          </Tabs>
+          <div className="profile-tabs">
+            <Tabs
+              activeKey={activeTab}
+              onSelect={handleTabChange}
+              className="mb-3"
+            >
+              <Tab eventKey="personal-info" title="Thông tin cá nhân">
+                <Suspense fallback={<TabContentSkeleton />}>
+                  <PersonalInfo doctorData={doctorData} />
+                </Suspense>
+              </Tab>
+              <Tab eventKey="schedule" title="Lịch làm việc">
+                <Suspense fallback={<TabContentSkeleton />}>
+                  <Schedule />
+                </Suspense>
+              </Tab>
+              <Tab eventKey="statistics" title="Thống kê">
+                <Suspense fallback={<TabContentSkeleton />}>
+                  <Statistics />
+                </Suspense>
+              </Tab>
+            </Tabs>
+          </div>
         </Card>
       </div>
-      <AppFooter />
     </div>
-
   );
-
 };
 
 export default DoctorProfile;
