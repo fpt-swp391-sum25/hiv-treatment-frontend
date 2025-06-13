@@ -14,7 +14,6 @@ const Resources = () => {
         <Layout>
             <AppHeader />
             <ResourcesBanner />
-             <ResourcesBanner />
             <Content style={{ padding: '15px' }}>
                 <div
                     style={{

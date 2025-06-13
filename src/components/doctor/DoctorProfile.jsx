@@ -6,22 +6,6 @@ import '../../styles/doctor/DoctorProfile.css';
 import appLogo from '../../assets/appLogo.png';
 import doctorProfileImage from '../../assets/doctorProfile.png';
 
-// Lazy loading components
-const PersonalInfo = lazy(() => import('./PersonalInfo'));
-const Schedule = lazy(() => import('./Schedule'));
-const Statistics = lazy(() => import('./Statistics'));
-
-// Loading Skeleton component
-const TabContentSkeleton = () => (
-  <div className="skeleton-container">
-    <div className="skeleton-row"></div>
-    <div className="skeleton-row"></div>
-    <div className="skeleton-row"></div>
-    <div className="skeleton-row"></div>
-    <div className="skeleton-row"></div>
-  </div>
-);
-
 // Daa giả tạm thời
 const mockDoctorData = {
   id: 1,
@@ -104,6 +88,7 @@ const DoctorProfile = () => {
                 }}
               />
             </div>
+            
             <div className="profile-basic-info">
               <h1 className="doctor-name">{doctorData?.name}</h1>
               <div className="doctor-specialty">{doctorData?.specialty}</div>
@@ -120,32 +105,25 @@ const DoctorProfile = () => {
             </div>
           </div>
 
-          <div className="profile-tabs">
-            <Tabs
-              activeKey={activeTab}
-              onSelect={handleTabChange}
-              className="mb-3"
-            >
-              <Tab eventKey="personal-info" title="Thông tin cá nhân">
-                <Suspense fallback={<TabContentSkeleton />}>
-                  <PersonalInfo doctorData={doctorData} />
-                </Suspense>
-              </Tab>
-              <Tab eventKey="schedule" title="Lịch làm việc">
-                <Suspense fallback={<TabContentSkeleton />}>
-                  <Schedule />
-                </Suspense>
-              </Tab>
-              <Tab eventKey="statistics" title="Thống kê">
-                <Suspense fallback={<TabContentSkeleton />}>
-                  <Statistics />
-                </Suspense>
-              </Tab>
-            </Tabs>
-          </div>
+          <Tabs defaultActiveKey="personal-info" className="profile-tabs">
+            <Tab eventKey="personal-info" title="Thông tin cá nhân">
+              <PersonalInfo doctorData={doctorData} />
+            </Tab>
+            <Tab eventKey="schedule" title="Lịch làm việc">
+              <Schedule doctorId={doctorData?.id} />
+            </Tab>
+            <Tab eventKey="feedback" title="Đánh giá">
+              <Feedback doctorId={doctorData?.id} />
+            </Tab>
+            <Tab eventKey="statistics" title="Thống kê">
+              <Statistics doctorId={doctorData?.id} />
+            </Tab>
+          </Tabs>
         </Card>
       </div>
+      <AppFooter />
     </div>
+
   );
 
 };

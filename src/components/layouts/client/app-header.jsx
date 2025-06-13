@@ -62,9 +62,8 @@ const AppHeader = ({ isAuthenticated = false, username = 'User' }) => {
     }
   };
 
-  const topMenuItems = [
-    { key: 'home', label: 'Trang chủ', scrollTo: 'care-section' },
-    { key: 'services', label: 'Dịch vụ', scrollTo: 'services-section' },
+  const topMenuItems = [    { key: 'home', label: 'Trang chủ', scrollTo: 'care-section' },
+    { key: 'services', label: 'Dịch vụ', scrollTo: 'why-services-section' },
     { key: 'doctors', label: 'Bác sĩ', scrollTo: 'doctor-section' },
     { key: 'resources', label: 'Tài liệu', scrollTo: 'document-section' },
   ];
