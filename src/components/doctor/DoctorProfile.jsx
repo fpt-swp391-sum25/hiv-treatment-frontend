@@ -106,11 +106,11 @@ const DoctorProfile = () => {
                   <PersonalInfo doctorData={doctorData} />
                 </Suspense>
               </Tab>
-              <Tab eventKey="schedule" title="Lịch làm việc">
+              {/* <Tab eventKey="schedule" title="Lịch làm việc">
                 <Suspense fallback={<TabContentSkeleton />}>
                   <Schedule />
                 </Suspense>
-              </Tab>
+              </Tab> */}
               <Tab eventKey="statistics" title="Thống kê">
                 <Suspense fallback={<TabContentSkeleton />}>
                   <Statistics />
