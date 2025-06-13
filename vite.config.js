@@ -7,4 +7,26 @@ export default defineConfig({
   server: {
     port: 3000,
   },
+  optimizeDeps: {
+    exclude: [
+      'chunk-VW5OPMQA',
+      'chunk-YPEMTGFV',
+      'chunk-FPBZWFJX'
+    ]
+  },
+  build: {
+    // Improve build performance and handle dynamic imports better
+    commonjsOptions: {
+      include: [/node_modules/],
+      transformMixedEsModules: true
+    },
+    rollupOptions: {
+      // Ensure proper code splitting
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'antd']
+        }
+      }
+    }
+  }
 })
