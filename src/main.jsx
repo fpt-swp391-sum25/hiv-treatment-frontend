@@ -5,6 +5,8 @@ import Home from './pages/client/home';
 import Login from './pages/auth/login';
 import Register from './pages/auth/register';
 import Admin from './pages/admin/admin-page';
+import ManagerLayout from './pages/manager/manager-page';
+import ManagerDashboard from './components/manager/Dashboard';
 
 import DoctorApp from './components/doctor/App';
 import DoctorProfile from './components/doctor/DoctorProfile';
@@ -112,6 +114,37 @@ const router = createBrowserRouter([
         errorElement: <Errors />,
       }
     ]
+  },  {    
+    path: '/manager',
+    element: <ManagerLayout />,
+    children: [
+      {
+        index: true,
+        element: <ManagerDashboard />,
+        errorElement: <Errors />,
+      },
+      {
+        path: 'schedule',
+        element: <ManagerDashboard />,
+        errorElement: <Errors />,
+      },
+      {
+        path: 'doctors',
+        element: <ManagerDashboard />,
+        errorElement: <Errors />,
+      },
+      {
+        path: 'staff',
+        element: <ManagerDashboard />,
+        errorElement: <Errors />,
+      },
+      {
+        path: 'reports',
+        element: <ManagerDashboard />,
+        errorElement: <Errors />,
+      }
+    ],
+    errorElement: <Errors />,
   },
 
 ])
