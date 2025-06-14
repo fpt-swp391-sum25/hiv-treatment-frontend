@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Row, Col, Form, Button, Dropdown } from 'react-bootstrap';
+import { Card, Row, Col, Form, Button } from 'react-bootstrap';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -13,7 +13,7 @@ import {
   ArcElement,
 } from 'chart.js';
 import { Line, Bar, Pie } from 'react-chartjs-2';
-import { FaFileDownload, FaCalendarAlt, FaFilter } from 'react-icons/fa';
+import { FaCalendarAlt } from 'react-icons/fa';
 import '../../styles/doctor/Statistics.css';
 
 // Đăng ký các components của Chart.js
@@ -234,15 +234,9 @@ const Statistics = ({ doctorId }) => {
     try {
       setLoading(true);
       // TODO: Thay thế bằng API call thực tế
-      // const response = await fetch(`/api/statistics/doctor/${doctorId}?timeRange=${timeRange}`);
-      // const data = await response.json();
-      // setStatistics(data);
-
-      // Mock API call với dữ liệu theo khoảng thời gian
       setTimeout(() => {
         if (timeRange === 'custom') {
-          // Xử lý khoảng thời gian tùy chỉnh
-          setStatistics(mockStatistics); // Tạm thời sử dụng dữ liệu mặc định
+          setStatistics(mockStatistics);
         } else {
           setStatistics(mockStatisticsByTimeRange[timeRange] || mockStatistics);
         }
@@ -271,18 +265,6 @@ const Statistics = ({ doctorId }) => {
       setTimeRange('custom');
       fetchStatistics();
     }
-  };
-
-  const exportToPDF = () => {
-    // TODO: Implement PDF export
-    alert('Đang xuất báo cáo PDF...');
-    // Trong thực tế, sẽ sử dụng thư viện như jsPDF hoặc gọi API để tạo PDF
-  };
-
-  const exportToExcel = () => {
-    // TODO: Implement Excel export
-    alert('Đang xuất báo cáo Excel...');
-    // Trong thực tế, sẽ sử dụng thư viện như xlsx hoặc gọi API để tạo Excel
   };
 
   // Chuẩn bị dữ liệu biểu đồ an toàn
@@ -316,42 +298,37 @@ const Statistics = ({ doctorId }) => {
 
   return (
     <div className="statistics-container">
-      {/* Bộ lọc thời gian và nút xuất báo cáo */}
+      {/* Bộ lọc thời gian */}
       <Row className="statistics-filters mb-4">
-        <Col md={8}>
+        <Col md={12}>
           <Card className="filter-card">
             <Card.Body>
-              <div className="d-flex align-items-center">
-                <FaCalendarAlt className="me-2" />
-                <h6 className="mb-0 me-3">Khoảng thời gian:</h6>
+              <div className="d-flex align-items-center flex-wrap">
+                <div className="d-flex align-items-center mb-2 me-3">
+                  <FaCalendarAlt className="me-2" />
+                  <h6 className="mb-0">Khoảng thời gian:</h6>
+                </div>
                 <div className="time-range-buttons">
                   <Button 
-                    variant={timeRange === '30days' ? 'primary' : 'outline-primary'} 
-                    size="sm"
-                    className="me-2"
+                    variant={timeRange === '30days' ? 'primary' : 'light'} 
                     onClick={() => handleTimeRangeChange('30days')}
                   >
                     30 ngày
                   </Button>
                   <Button 
-                    variant={timeRange === '90days' ? 'primary' : 'outline-primary'} 
-                    size="sm"
-                    className="me-2"
+                    variant={timeRange === '90days' ? 'primary' : 'light'} 
                     onClick={() => handleTimeRangeChange('90days')}
                   >
                     3 tháng
                   </Button>
                   <Button 
-                    variant={timeRange === '180days' ? 'primary' : 'outline-primary'} 
-                    size="sm"
-                    className="me-2"
+                    variant={timeRange === '180days' ? 'primary' : 'light'} 
                     onClick={() => handleTimeRangeChange('180days')}
                   >
                     6 tháng
                   </Button>
                   <Button 
-                    variant={timeRange === '365days' ? 'primary' : 'outline-primary'} 
-                    size="sm"
+                    variant={timeRange === '365days' ? 'primary' : 'light'} 
                     onClick={() => handleTimeRangeChange('365days')}
                   >
                     1 năm
@@ -359,8 +336,8 @@ const Statistics = ({ doctorId }) => {
                 </div>
               </div>
               
-              <div className="custom-date-range mt-3">
-                <div className="d-flex align-items-center">
+              <div className="custom-date-range">
+                <div className="d-flex align-items-center flex-wrap">
                   <h6 className="mb-0 me-3">Tùy chỉnh:</h6>
                   <Form.Group className="me-2">
                     <Form.Control 
@@ -368,7 +345,6 @@ const Statistics = ({ doctorId }) => {
                       name="startDate"
                       value={customDateRange.startDate}
                       onChange={handleCustomDateChange}
-                      size="sm"
                     />
                   </Form.Group>
                   <span className="mx-2">đến</span>
@@ -378,40 +354,15 @@ const Statistics = ({ doctorId }) => {
                       name="endDate"
                       value={customDateRange.endDate}
                       onChange={handleCustomDateChange}
-                      size="sm"
                     />
                   </Form.Group>
                   <Button 
-                    variant="outline-primary" 
-                    size="sm"
+                    variant="outline-primary"
                     onClick={applyCustomDateRange}
                   >
                     Áp dụng
                   </Button>
                 </div>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col md={4}>
-          <Card className="export-card">
-            <Card.Body>
-              <div className="d-flex align-items-center">
-                <FaFileDownload className="me-2" />
-                <h6 className="mb-0 me-3">Xuất báo cáo:</h6>
-                <Dropdown>
-                  <Dropdown.Toggle variant="success" id="dropdown-export">
-                    Xuất báo cáo
-                  </Dropdown.Toggle>
-                  <Dropdown.Menu>
-                    <Dropdown.Item onClick={exportToPDF}>
-                      <i className="far fa-file-pdf me-2"></i>PDF
-                    </Dropdown.Item>
-                    <Dropdown.Item onClick={exportToExcel}>
-                      <i className="far fa-file-excel me-2"></i>Excel
-                    </Dropdown.Item>
-                  </Dropdown.Menu>
-                </Dropdown>
               </div>
             </Card.Body>
           </Card>
@@ -519,4 +470,4 @@ const Statistics = ({ doctorId }) => {
   );
 };
 
-export default Statistics; 
+export default Statistics;
