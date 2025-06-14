@@ -36,7 +36,7 @@
   padding-top: 10px;
 }
 
-=======
+
 
 .info-title {
   font-size: 1.5rem;
@@ -94,9 +94,49 @@
 
 .info-value {
   color: #333;
-  margin: 8px 0;  /* Thêm margin để tạo khoảng cách đều */
-  text-align: left;  /* Căn trái cho value */
+  margin: 8px 0;
+  text-align: left;
+}
 
+/* Edit mode styles */
+.edit-button {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.edit-input {
+  margin-top: 0.5rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  padding: 0.5rem;
+  width: 100%;
+  background-color: white;
+}
+
+.edit-input:focus {
+  border-color: #80bdff;
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Toast styles */
+.toast {
+  min-width: 250px;
+}
+
+.toast-header {
+  background-color: #D4EDDA;
+  color: #155724;
+  border-bottom: 1px solid #C3E6CB;
+}
+
+.toast-body {
+  background-color: #D4EDDA;
+  color: #155724;
+  padding: 0.75rem;
 }
 
 .certificates-list {
