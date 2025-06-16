@@ -90,27 +90,23 @@ const DoctorProfile = () => {
         </div>
       </div>
 
-      <div className="profile-tabs">
-        <Nav variant="tabs" className="doctor-nav-tabs">
-          <Nav.Item>
-            <Nav.Link 
-              className={activeTab === 'personal-info' ? 'active' : ''} 
-              onClick={() => handleTabChange('personal-info')}
-            >
-              Thông tin cá nhân
-            </Nav.Link>
-          </Nav.Item>
-          <Nav.Item>
-            <Nav.Link 
-              className={activeTab === 'statistics' ? 'active' : ''} 
-              onClick={() => handleTabChange('statistics')}
-            >
-              Thống kê
-            </Nav.Link>
-          </Nav.Item>
-        </Nav>
+      <div className="custom-tabs-container">
+        <div className="custom-tabs">
+          <div 
+            className={`custom-tab ${activeTab === 'personal-info' ? 'active' : ''}`}
+            onClick={() => handleTabChange('personal-info')}
+          >
+            Thông tin cá nhân
+          </div>
+          <div 
+            className={`custom-tab ${activeTab === 'statistics' ? 'active' : ''}`}
+            onClick={() => handleTabChange('statistics')}
+          >
+            Thống kê
+          </div>
+        </div>
 
-        <div className="tab-content-container">
+        <div className="tab-content-area">
           {activeTab === 'personal-info' && (
             <Suspense fallback={<TabContentSkeleton />}>
               <PersonalInfo doctorData={doctorData} />
