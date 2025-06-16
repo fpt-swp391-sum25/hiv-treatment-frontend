@@ -115,7 +115,6 @@ const Booking = () => {
                 scheduleId: schedule.id,
                 amount: selectedAmount,
             });
-            console.log(paymentResponse.data)
             window.location.href = paymentResponse.data;
         } catch (error) {
             message.error(error.message);
