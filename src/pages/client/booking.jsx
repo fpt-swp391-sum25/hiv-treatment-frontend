@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Form, Input, Select, DatePicker, Button, Typography, Col, Row, Layout, theme, message, Descriptions } from 'antd';
 import { ArrowLeftOutlined, SoundTwoTone } from '@ant-design/icons';
 import moment from 'moment';
 import { useNavigate } from 'react-router-dom';
-import { bookingAPI, fetchAllScheduleAPI, fetchAvailableSlotAPI, fetchDoctorProfileAPI, initiatePaymentAPI } from '../../services/api.service';
+import { bookingAPI, fetchAllScheduleAPI, fetchAvailableSlotAPI, fetchDoctorProfileAPI, initiatePaymentAPI, registerScheduleAPI } from '../../services/api.service';
+import { AuthContext } from '../../components/context/auth.context';
 
 
 const { Link } = Typography;
@@ -13,6 +14,7 @@ const dateFormat = 'DD-MM-YYYY';
 
 const Booking = () => {
     const [form] = Form.useForm();
+    const { user } = useContext(AuthContext)
     const [availableTimes, setAvailableTimes] = useState(generateTimeSlots());
     const [doctors, setDoctors] = useState([])
     const [availableSlots, setAvailableSlots] = useState([])
@@ -102,18 +104,17 @@ const Booking = () => {
                 throw new Error('Lịch không khả dụng');
             }
 
-            // const registerResponse = await registerScheduleAPI({
-            //     scheduleId: schedule.id,
-            //     patientId: user.id,
-            //     type: values.type
-            // });
-            // setScheduleId(registerResponse.id);
+            const registerResponse = await registerScheduleAPI({
+                scheduleId: schedule.id,
+                patientId: user.id,
+                type: type
+            });
+            setScheduleId(registerResponse.id);
 
             const paymentResponse = await initiatePaymentAPI({
                 scheduleId: schedule.id,
                 amount: selectedAmount,
             });
-
             window.location.href = paymentResponse.data;
         } catch (error) {
             message.error(error.message);

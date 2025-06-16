@@ -20,10 +20,11 @@ const AppHeader = ({ isAuthenticated = false, username = 'User' }) => {
 
   const location = useLocation();
   const [activeSection, setActiveSection] = useState('home');
-  const { user } = useContext(AuthContext)
+  const { user, setUser } = useContext(AuthContext)
 
   // Thêm event listener để theo dõi scroll
-  useEffect(() => {    const handleScroll = () => {
+  useEffect(() => {
+    const handleScroll = () => {
       const sections = [
         { id: 'care-section', key: 'home' },
         { id: 'why-services-section', key: 'services' },
@@ -128,18 +129,7 @@ const AppHeader = ({ isAuthenticated = false, username = 'User' }) => {
     );
   };
 
-  // Dropdown menu cho user
-  const userMenu = (
-    <Menu
-      items={[
-        { key: 'profile', label: 'Profile' },
-        { key: 'settings', label: 'Settings' },
-      ]}
-      onClick={({ key }) => {
-        console.log(`Clicked on ${key}`);
-      }}
-    />
-  );
+
 
   const handleLogout = async () => {
     const response = await logoutAPI()
@@ -179,17 +169,16 @@ const AppHeader = ({ isAuthenticated = false, username = 'User' }) => {
             items={mapMenuItems(bottomMenuItems)}
             className="sub-menu"
           />
-        </div>        
+        </div>
         <div className="auth-section">
           {user.username ? (
             <Space align="center" size={8} className="user-actions">
-              <Dropdown menu={userMenu} placement="bottomLeft" arrow>
+              <Link to='/profile' style={{ margin: '10px' }}>
                 <Space style={{ cursor: 'pointer' }} align="center">
                   <Avatar icon={<UserOutlined />} />
                   <Text style={{ marginLeft: 4, marginRight: 4, color: "white" }}>{user.username}</Text>
-                  <DownOutlined />
                 </Space>
-              </Dropdown>
+              </Link>
               <Button
                 type="primary"
                 icon={<LogoutOutlined />}

@@ -49,12 +49,12 @@ const fetchAllScheduleAPI = (doctorId, date) => {
 }
 
 const registerScheduleAPI = (registerData) => {
-    const URL_BACKEND = `/api/schedule/register/schedule-id/${registerData.scheduleId}`
-    return axios.post(URL_BACKEND, registerData)
+    const URL_BACKEND = `/api/schedule/register/schedule-id/${registerData.scheduleId}?patientId=${registerData.patientId}&type=${registerData.type}`
+    return axios.put(URL_BACKEND)
 }
 
 const initiatePaymentAPI = (params) => {
-    const URL_BACKEND = '/api/schedule/payment'
+    const URL_BACKEND = '/api/payment'
     return axios.post(URL_BACKEND, params)
 }
 
@@ -70,8 +70,13 @@ const createAccountAPI = (username, password, email, role) => {
 }
 
 const handlePaymentCallbackAPI = (params) => {
-    const URL_BACKEND = '/api/schedule/payment/callback'
+    const URL_BACKEND = '/api/payment/callback'
     return axios.get(URL_BACKEND, { params })
+}
+
+const fetchAllPatientScheduleAPI = (id) => {
+    const URL_BACKEND = `/api/schedule/patient-id/${id}`
+    return axios.get(URL_BACKEND)
 }
 
 const fetchAccountByRoleAPI = (role) => {
@@ -160,7 +165,7 @@ export {
     fetchDoctorProfileAPI,
     fetchScheduleAPI,
     fetchAccountAPI,
-
+    fetchAllPatientScheduleAPI,
     fetchAvailableSlotAPI,
     fetchAllScheduleAPI,
     initiatePaymentAPI,
