@@ -24,6 +24,9 @@ import AccountDoctors from './pages/admin/doctors';
 import AccountStaff from './pages/admin/staff';
 import AccountUsers from './pages/admin/users';
 
+import Staff from './pages/staff/staff-page'
+import PatientDetail from './pages/staff/patient-detail'
+
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AuthWrapper } from './components/context/auth.context';
 import App from './pages/client/App';
@@ -138,7 +141,9 @@ const router = createBrowserRouter([
         errorElement: <Errors />,
       }
     ]
-  }, {
+  },  
+  {    
+
     path: '/manager',
     element: <ManagerLayout />,
     children: [
@@ -168,7 +173,16 @@ const router = createBrowserRouter([
     ],
     errorElement: <Errors />,
   },
-
+  {
+    path: '/staff',
+    element: <Staff />,
+    errorElement: <Errors />,
+  },
+  {
+    path: '/staff/patient-detail/:id',
+    element: <PatientDetail />,
+    errorElement: <Errors />,
+  }
 ])
 
 
