@@ -20,10 +20,9 @@ const ServicesSection = () => {
     },
    
   ];
-
   return (
-    <section className="services-section">
-      <h2>Tại sao chọn dịch vụ của chúng tôi?</h2>
+    <section className="services-section" id="why-services-section">
+      <h1>Tại sao chọn dịch vụ của chúng tôi?</h1>
       <div className="services-container">
         {services.map((service, index) => (
           <div className="service-card" key={index}>

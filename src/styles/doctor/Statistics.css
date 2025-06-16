@@ -10,6 +10,80 @@
   min-height: 400px;
 }
 
+/* Styling cho bộ lọc thời gian và nút xuất báo cáo */
+.statistics-filters .filter-card,
+.statistics-filters .export-card {
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  height: 100%;
+}
+
+.time-range-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.time-range-buttons .btn {
+  border-radius: 8px;
+  font-size: 0.9rem;
+  padding: 8px 16px;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  color: #495057;
+}
+
+.time-range-buttons .btn:hover {
+  background-color: #e9ecef;
+  border-color: #dee2e6;
+  color: #212529;
+}
+
+.time-range-buttons .btn.btn-primary {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+  color: white;
+}
+
+.time-range-buttons .btn.btn-primary:hover {
+  background-color: #0b5ed7;
+  border-color: #0a58ca;
+}
+
+/* Remove all export-related styles */
+.statistics-filters .export-card,
+.dropdown-toggle,
+.dropdown-menu,
+.dropdown-item {
+  display: none;
+}
+
+.custom-date-range {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e9ecef;
+}
+
+.custom-date-range .form-control {
+  width: 140px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+}
+
+.custom-date-range .btn {
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-left: 8px;
+}
+
 /* Styling cho các card thống kê */
 .stat-card {
   transition: transform 0.2s;
@@ -18,6 +92,11 @@
   border: none;
   border-radius: 10px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
 
 .stat-title {
@@ -48,7 +127,46 @@
   font-weight: 500;
 }
 
+/* Dropdown xuất báo cáo */
+.dropdown-toggle {
+  border-radius: 5px;
+}
+
+.dropdown-menu {
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  border: none;
+  border-radius: 5px;
+}
+
+.dropdown-item {
+  padding: 8px 15px;
+  font-size: 0.9rem;
+}
+
+.dropdown-item:hover {
+  background-color: #f8f9fa;
+}
+
 /* Responsive styling */
+@media (max-width: 992px) {
+  .statistics-filters .col-md-8,
+  .statistics-filters .col-md-4 {
+    margin-bottom: 15px;
+  }
+  
+  .time-range-buttons {
+    flex-wrap: wrap;
+  }
+  
+  .custom-date-range .d-flex {
+    flex-wrap: wrap;
+  }
+  
+  .custom-date-range .form-control {
+    margin-bottom: 10px;
+  }
+}
+
 @media (max-width: 768px) {
   .statistics-cards .col-md-3 {
     margin-bottom: 15px;
@@ -60,6 +178,38 @@
   
   .stat-value {
     font-size: 1.5rem;
+  }
+  
+  .custom-date-range .d-flex {
+    flex-direction: column;
+    align-items: flex-start !important;
+  }
+  
+  .custom-date-range h6 {
+    margin-bottom: 10px;
+  }
+  
+  .custom-date-range .form-control {
+    width: 100%;
+  }
+  
+  .time-range-buttons {
+    gap: 6px;
+  }
+  
+  .time-range-buttons .btn {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+  }
+  
+  .custom-date-range .form-control {
+    width: 120px;
+    padding: 6px 10px;
+  }
+  
+  .custom-date-range .btn {
+    padding: 6px 12px;
+    font-size: 0.85rem;
   }
 }
 
@@ -82,4 +232,11 @@
 
 .text-muted {
   color: #6c757d;
-} 
+}
+
+/* Icons styling */
+.fa-calendar-alt,
+.fa-filter,
+.fa-file-download {
+  color: #6c757d;
+}

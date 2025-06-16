@@ -1,5 +1,5 @@
 // src/components/layout/AppHeader.jsx
-import { Layout, Menu, Avatar, Dropdown, Typography, Button, Space, theme, } from 'antd';
+import { Layout, Menu, Avatar, Dropdown, Typography, Button, Space, theme, message } from 'antd';
 import { UserOutlined, DownOutlined, LogoutOutlined, CalendarOutlined, FileSearchOutlined, HistoryOutlined, } from '@ant-design/icons';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
@@ -20,17 +20,17 @@ const AppHeader = ({ isAuthenticated = false, username = 'User' }) => {
 
   const location = useLocation();
   const [activeSection, setActiveSection] = useState('home');
-  const { user } = useContext(AuthContext)
+  const { user, setUser } = useContext(AuthContext)
 
   // Thêm event listener để theo dõi scroll
   useEffect(() => {
     const handleScroll = () => {
       const sections = [
         { id: 'care-section', key: 'home' },
-        { id: 'services-section', key: 'services' },
+        { id: 'why-services-section', key: 'services' },
         { id: 'doctor-section', key: 'doctors' },
         { id: 'document-section', key: 'resources' }
-      ]; const scrollPosition = window.scrollY + 200; // Tăng offset để thấy tiêu đề rõ hơn
+      ]; const scrollPosition = window.scrollY + 200;// Tăng offset để thấy tiêu đề rõ hơn
 
       for (const section of sections) {
         const element = document.getElementById(section.id);
@@ -64,7 +64,7 @@ const AppHeader = ({ isAuthenticated = false, username = 'User' }) => {
 
   const topMenuItems = [
     { key: 'home', label: 'Trang chủ', scrollTo: 'care-section' },
-    { key: 'services', label: 'Dịch vụ', scrollTo: 'services-section' },
+    { key: 'services', label: 'Dịch vụ', scrollTo: 'why-services-section' },
     { key: 'doctors', label: 'Bác sĩ', scrollTo: 'doctor-section' },
     { key: 'resources', label: 'Tài liệu', scrollTo: 'document-section' },
   ];
@@ -129,18 +129,7 @@ const AppHeader = ({ isAuthenticated = false, username = 'User' }) => {
     );
   };
 
-  // Dropdown menu cho user
-  const userMenu = (
-    <Menu
-      items={[
-        { key: 'profile', label: 'Profile' },
-        { key: 'settings', label: 'Settings' },
-      ]}
-      onClick={({ key }) => {
-        console.log(`Clicked on ${key}`);
-      }}
-    />
-  );
+
 
   const handleLogout = async () => {
     const response = await logoutAPI()
@@ -181,35 +170,35 @@ const AppHeader = ({ isAuthenticated = false, username = 'User' }) => {
             className="sub-menu"
           />
         </div>
-
-        {user.username ? (
-          <Space align="center" size={8} style={{ cursor: 'default' }}>
-            <Dropdown menu={userMenu} placement="bottomLeft" arrow>
-              <Space style={{ cursor: 'pointer' }} align="center">
-                <Avatar icon={<UserOutlined />} />
-                <Text style={{ marginLeft: 4, marginRight: 4, color: "white" }}>{user.username}</Text>
-                <DownOutlined />
-              </Space>
-            </Dropdown>
-            <Button
-              type="primary"
-              icon={<LogoutOutlined />}
-              onClick={handleLogout}
-              danger
-            >
-              Đăng xuất
-            </Button>
-          </Space>
-        ) : (
-          <Space size="middle" className="auth-buttons">
-            <Link to="/login">
-              <Button type="primary">Đăng nhập</Button>
-            </Link>
-            <Link to="/register">
-              <Button>Đăng kí</Button>
-            </Link>
-          </Space>
-        )}
+        <div className="auth-section">
+          {user.username ? (
+            <Space align="center" size={8} className="user-actions">
+              <Link to='/profile' style={{ margin: '10px' }}>
+                <Space style={{ cursor: 'pointer' }} align="center">
+                  <Avatar icon={<UserOutlined />} />
+                  <Text style={{ marginLeft: 4, marginRight: 4, color: "white" }}>{user.username}</Text>
+                </Space>
+              </Link>
+              <Button
+                type="primary"
+                icon={<LogoutOutlined />}
+                onClick={handleLogout}
+                danger
+              >
+                Đăng xuất
+              </Button>
+            </Space>
+          ) : (
+            <Space size="middle" className="auth-buttons">
+              <Link to="/login">
+                <Button type="primary">Đăng nhập</Button>
+              </Link>
+              <Link to="/register">
+                <Button>Đăng kí</Button>
+              </Link>
+            </Space>
+          )}
+        </div>
       </div>
     </Header>
   );

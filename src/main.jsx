@@ -5,6 +5,12 @@ import Home from './pages/client/home';
 import Login from './pages/auth/login';
 import Register from './pages/auth/register';
 import Admin from './pages/admin/admin-page';
+import ManagerLayout from './pages/manager/manager-page';
+import ManagerDashboard from './components/manager/Dashboard';
+import ManagerSchedule from './components/manager/Schedule/ManagerSchedule';
+import DoctorManagement from './components/manager/DoctorManagement/DoctorManagement';
+import StaffManagement from './components/manager/StaffManagement/StaffManagement';
+import Reports from './components/manager/Reports/Reports';
 
 import DoctorApp from './components/doctor/App';
 import DoctorProfile from './components/doctor/DoctorProfile';
@@ -18,12 +24,17 @@ import AccountDoctors from './pages/admin/doctors';
 import AccountStaff from './pages/admin/staff';
 import AccountUsers from './pages/admin/users';
 
+import Staff from './pages/staff/staff-page'
+import PatientDetail from './pages/staff/patient-detail'
+
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AuthWrapper } from './components/context/auth.context';
 import App from './pages/client/App';
 import PrivateRoute from './pages/private-route';
 import Resources from './pages/client/resources';
 import Doctors from './pages/client/doctors';
+import PaymentCallback from './pages/client/payment-callback';
+import ProfileDetail from './pages/client/profile';
 
 
 
@@ -43,6 +54,24 @@ const router = createBrowserRouter([
         element: (
           <PrivateRoute>
             <BookingCheckupForm />
+          </PrivateRoute>
+        ),
+        errorElement: <Errors />,
+      },
+      {
+        path: '/payment/callback',
+        element: (
+          <PrivateRoute>
+            <PaymentCallback />
+          </PrivateRoute>
+        ),
+        errorElement: <Errors />,
+      },
+      {
+        path: '/profile',
+        element: (
+          <PrivateRoute>
+            <ProfileDetail />
           </PrivateRoute>
         ),
         errorElement: <Errors />,
@@ -112,8 +141,48 @@ const router = createBrowserRouter([
         errorElement: <Errors />,
       }
     ]
-  },
+  },  
+  {    
 
+    path: '/manager',
+    element: <ManagerLayout />,
+    children: [
+      {
+        index: true,
+        element: <ManagerDashboard />,
+        errorElement: <Errors />,
+      }, {
+        path: 'schedule',
+        element: <ManagerSchedule />,
+        errorElement: <Errors />,
+      }, {
+        path: 'doctors',
+        element: <DoctorManagement />,
+        errorElement: <Errors />,
+      },
+      {
+        path: 'staff',
+        element: <StaffManagement />,
+        errorElement: <Errors />,
+      },
+      {
+        path: 'reports',
+        element: <Reports />,
+        errorElement: <Errors />,
+      }
+    ],
+    errorElement: <Errors />,
+  },
+  {
+    path: '/staff',
+    element: <Staff />,
+    errorElement: <Errors />,
+  },
+  {
+    path: '/staff/patient-detail/:id',
+    element: <PatientDetail />,
+    errorElement: <Errors />,
+  }
 ])
 
 
