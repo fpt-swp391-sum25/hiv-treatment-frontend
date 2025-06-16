@@ -1,42 +1,83 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { message, Spin } from 'antd';
-import { fetchAllDoctorsAPI } from '../../services/api.service';
+import { fetchDoctorProfileAPI, fetchAccountByRoleAPI } from '../../services/api.service';
 import './DoctorList.css';
 
 // Dùng ảnh từ thư mục public
 import defaultDoctorImage from '../../assets/doctor.png';
 
-function DoctorList() {
-  const [doctors, setDoctors] = useState([]);
-  const [loading, setLoading] = useState(true);
+// function DoctorList() {
+//   const [doctors, setDoctors] = useState([]);
   
+//   useEffect(() => {
+//     const fetchDoctors = async () => {
+//       try {
+//         const response = await fetchAllDoctorsAPI();
+//         if (response && response.data) {
+//           setDoctors(response.data);
+//         }
+//       } catch (error) {
+//         console.error('Lỗi khi tải danh sách bác sĩ:', error);
+//         message.error('Không thể tải danh sách bác sĩ');
+//         // Fallback to local data if API fails
+//         fetch('/api/doctors.json')
+//           .then((res) => res.json())
+//           .then((data) => setDoctors(data))
+//           .catch((err) => console.error('Lỗi khi tải dữ liệu local:', err));
+//       } 
+//     };
+
+//     fetchDoctors();
+//   }, []);
+const DoctorList = () => {
+  const [doctorAccounts, setDoctorAccounts] = useState([]);
+  const [doctorProfiles, setDoctorProfiles] = useState([]);
+  const [mergedDoctors, setMergedDoctors] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    const fetchDoctors = async () => {
+      loadDoctorData();
+  }, []);
+
+  const loadDoctorData = async () => {
       try {
-        setLoading(true);
-        const response = await fetchAllDoctorsAPI();
-        if (response && response.data) {
-          setDoctors(response.data);
-        }
+          setLoading(true);
+          const [accountRes, profileRes] = await Promise.all([
+              fetchAccountByRoleAPI("doctor"),
+              fetchDoctorProfileAPI()
+          ]);
+
+          const doctors = accountRes?.data || [];
+          const profiles = profileRes?.data || [];
+
+          setDoctorAccounts(doctors);
+          setDoctorProfiles(profiles);
+
+          console.log(doctors)
+          console.log(profiles)
+
+          const merged = doctors.map(account => {
+              const profile = profiles.find(p => p.user.id === account.id);
+              return {
+                  ...account,
+                  licenseNumber: profile?.licenseNumber || '',
+                  startYear: profile?.startYear || '',
+                  qualifications: profile?.qualifications || '',
+                  biography: profile?.biography || '',
+                  background: profile?.background || ''
+              };
+          });
+
+          setMergedDoctors(merged);
       } catch (error) {
-        console.error('Lỗi khi tải danh sách bác sĩ:', error);
-        message.error('Không thể tải danh sách bác sĩ');
-        // Fallback to local data if API fails
-        fetch('/api/doctors.json')
-          .then((res) => res.json())
-          .then((data) => setDoctors(data))
-          .catch((err) => console.error('Lỗi khi tải dữ liệu local:', err));
+        console.error("Lỗi khi tải thông tin bác sĩ:", error);
       } finally {
         setLoading(false);
       }
     };
-
-    fetchDoctors();
-  }, []);
-
   // Chỉ hiển thị 4 bác sĩ đầu tiên
-  const visibleDoctors = doctors.slice(0, 4);
+  const visibleDoctors = mergedDoctors.slice(0, 4);
 
   return (    
     <section className="doctor-section" id="doctor-section">
@@ -55,19 +96,19 @@ function DoctorList() {
       ) : (
         <>
           <div className="doctor-grid">
-            {visibleDoctors.map((doctor) => (
-              <div className="doctor-card" key={doctor.id}>
+            {visibleDoctors.map((mergedDoctors) => (
+              <div className="doctor-card" key={mergedDoctors.id}>
                 <img
-                  src={doctor.image || defaultDoctorImage}
-                  alt={`Ảnh bác sĩ ${doctor.name}`}
+                  src={mergedDoctors.image || defaultDoctorImage}
+                  alt={`Ảnh bác sĩ ${mergedDoctors.fullName}`}
                   className="doctor-avatar"
                   onError={(e) => (e.target.src = defaultDoctorImage)}
                 />
                 <div className="doctor-info">
-                  <h3>{doctor.name}</h3>
-                  <p>🕒 {doctor.experience} năm kinh nghiệm</p>
-                  <p>{doctor.qualifications}</p>
-                  <Link to={`/booking?doctorId=${doctor.id}`} className="btn-primary">
+                  <h3>{mergedDoctors.fullName}</h3>
+                  <p>🕒 {mergedDoctors.startYear} năm kinh nghiệm</p>
+                  <p>{mergedDoctors.qualifications}</p>
+                  <Link to={`/booking?doctorId=${mergedDoctors.id}`} className="btn-primary">
                     Đặt lịch
                   </Link>
                 </div>
@@ -75,7 +116,7 @@ function DoctorList() {
             ))}
           </div>
           
-          {doctors.length > 4 && (
+          {mergedDoctors.length > 4 && (
             <div className="view-all-container">
               <Link 
                 to="/doctors" 
@@ -91,7 +132,7 @@ function DoctorList() {
         </>
       )}
     </section>
-  );
+  )
 }
 
 export default DoctorList;
