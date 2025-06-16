@@ -41,7 +41,8 @@ const mockStatistics = {
       label: 'Số lượng bệnh nhân',
       data: [10, 15, 35, 25, 60, 100],
       borderColor: 'rgb(75, 192, 192)',
-      tension: 0.1
+      tension: 0.1,
+      fill: false
     }]
   },
   treatmentSuccess: {
@@ -371,7 +372,7 @@ const Statistics = ({ doctorId }) => {
 
       {/* Thẻ thống kê tổng quan */}
       <Row className="statistics-cards mb-4">
-        <Col md={3}>
+        <Col md={4}>
           <Card className="stat-card">
             <Card.Body>
               <h6 className="stat-title">Tổng số bệnh nhân</h6>
@@ -379,7 +380,7 @@ const Statistics = ({ doctorId }) => {
             </Card.Body>
           </Card>
         </Col>
-        <Col md={3}>
+        <Col md={4}>
           <Card className="stat-card">
             <Card.Body>
               <h6 className="stat-title">Bệnh nhân đang điều trị</h6>
@@ -387,19 +388,11 @@ const Statistics = ({ doctorId }) => {
             </Card.Body>
           </Card>
         </Col>
-        <Col md={3}>
+        <Col md={4}>
           <Card className="stat-card">
             <Card.Body>
               <h6 className="stat-title">Điều trị thành công</h6>
               <h3 className="stat-value">{statistics?.successfulTreatments || 0}</h3>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col md={3}>
-          <Card className="stat-card">
-            <Card.Body>
-              <h6 className="stat-title">Thời gian điều trị TB</h6>
-              <h3 className="stat-value">{statistics?.averageTreatmentDuration || "N/A"}</h3>
             </Card.Body>
           </Card>
         </Col>

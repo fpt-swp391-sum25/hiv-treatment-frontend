@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { Card, Button, Form, Toast } from 'react-bootstrap';
+import { Card, Button, Form } from 'react-bootstrap';
 import { FaEdit, FaSave, FaTimes } from 'react-icons/fa';
 import '../../styles/doctor/PersonalInfo.css';
 
 const PersonalInfo = ({ doctorData }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedData, setEditedData] = useState(doctorData);
-  const [showToast, setShowToast] = useState(false);
 
   if (!doctorData) return null;
 
@@ -23,8 +22,6 @@ const PersonalInfo = ({ doctorData }) => {
   const handleUpdate = () => {
     // TODO: Implement API call here
     setIsEditing(false);
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000); // Hide toast after 3 seconds
   };
 
   const handleChange = (field, value) => {
@@ -34,29 +31,9 @@ const PersonalInfo = ({ doctorData }) => {
     }));
   };
 
-  return (    <div className="personal-info-container">
-      {/* Success Toast */}      <Toast 
-        show={showToast} 
-        onClose={() => setShowToast(false)}
-        style={{ 
-          position: 'fixed', 
-          top: 20, 
-          right: 20, 
-          zIndex: 1000,
-          background: '#D4EDDA',
-          color: '#155724',
-          borderColor: '#C3E6CB',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-          minWidth: '300px'
-        }}
-      >
-        <Toast.Header closeButton={false}>
-          <strong className="me-auto">Thông báo</strong>
-        </Toast.Header>
-        <Toast.Body>Cập nhật thông tin thành công!</Toast.Body>
-      </Toast>
-
-      {/* Qualifications Card */}
+  return (
+    <div className="personal-info-container">
+      {/* Trình độ chuyên môn */}
       <Card className="info-card">
         <Card.Body>
           <div className="d-flex justify-content-between align-items-center mb-3">
@@ -66,6 +43,7 @@ const PersonalInfo = ({ doctorData }) => {
                 variant="outline-primary" 
                 onClick={handleEdit}
                 className="edit-button"
+                size="sm"
               >
                 <FaEdit /> Sửa
               </Button>
@@ -75,12 +53,14 @@ const PersonalInfo = ({ doctorData }) => {
                   variant="success" 
                   onClick={handleUpdate} 
                   className="me-2"
+                  size="sm"
                 >
                   <FaSave /> Cập nhật
                 </Button>
                 <Button 
                   variant="outline-secondary" 
                   onClick={handleCancel}
+                  size="sm"
                 >
                   <FaTimes /> Hủy
                 </Button>
@@ -134,14 +114,16 @@ const PersonalInfo = ({ doctorData }) => {
                   ))
                 ) : (
                   doctorData.certificates.map((cert, index) => (
-                    <div key={index} className="certificate-item"> {cert}</div>
+                    <div key={index} className="certificate-item">{cert}</div>
                   ))
                 )}
               </div>
             </div>
           </div>
         </Card.Body>
-      </Card>      {/* Introduction Card */}
+      </Card>
+      
+      {/* Giới thiệu */}
       <Card className="info-card">
         <Card.Body>
           <h3 className="card-title">Giới thiệu</h3>

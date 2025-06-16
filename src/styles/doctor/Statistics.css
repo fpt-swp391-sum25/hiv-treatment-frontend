@@ -86,12 +86,12 @@
 
 /* Styling cho các card thống kê */
 .stat-card {
-  transition: transform 0.2s;
   height: 100%;
-  background-color: #fff;
+  background-color: #e6f7f9;
   border: none;
-  border-radius: 10px;
+  border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: transform 0.2s;
 }
 
 .stat-card:hover {
@@ -106,7 +106,7 @@
 }
 
 .stat-value {
-  color: #2c3e50;
+  color: #2c7bbf;
   margin-bottom: 0;
   font-weight: bold;
   font-size: 1.8rem;
@@ -117,13 +117,13 @@
   position: relative;
   height: 300px;
   width: 100%;
-  margin: 20px 0;
+  margin: 10px 0;
 }
 
 .chart-title {
-  color: #2c3e50;
+  color: #2c7bbf;
   font-size: 1.2rem;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
   font-weight: 500;
 }
 
@@ -147,6 +147,38 @@
   background-color: #f8f9fa;
 }
 
+/* Styling cho nút lọc */
+.filter-buttons {
+  margin-top: 20px;
+}
+
+.filter-buttons .btn {
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.filter-buttons .btn-outline-primary {
+  color: #2c7bbf;
+  border-color: #2c7bbf;
+}
+
+.filter-buttons .btn-outline-primary:hover {
+  background-color: #e6f7f9;
+  color: #2c7bbf;
+}
+
+.filter-buttons .btn-primary {
+  background-color: #2c7bbf;
+  border-color: #2c7bbf;
+}
+
+.filter-buttons .btn-primary:hover {
+  background-color: #236aa8;
+  border-color: #236aa8;
+}
+
 /* Responsive styling */
 @media (max-width: 992px) {
   .statistics-filters .col-md-8,
@@ -165,12 +197,6 @@
   .custom-date-range .form-control {
     margin-bottom: 10px;
   }
-}
-
-@media (max-width: 768px) {
-  .statistics-cards .col-md-3 {
-    margin-bottom: 15px;
-  }
   
   .chart-container {
     height: 250px;
@@ -178,6 +204,21 @@
   
   .stat-value {
     font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .statistics-cards .col-md-4 {
+    margin-bottom: 15px;
+  }
+  
+  .chart-container {
+    height: 200px;
+  }
+  
+  .filter-buttons .btn {
+    padding: 6px 12px;
+    font-size: 0.8rem;
   }
   
   .custom-date-range .d-flex {
@@ -215,7 +256,8 @@
 
 /* Animation cho loading spinner */
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .spinner-border {
