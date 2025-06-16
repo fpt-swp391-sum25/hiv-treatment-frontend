@@ -5,12 +5,10 @@ import '../../styles/doctor/DoctorProfile.css';
 // Assets
 import appLogo from '../../assets/appLogo.png';
 import doctorProfileImage from '../../assets/doctorProfile.png';
-import AppFooter from '../layouts/client/app-footer';
 
 // Lazy loading components
 const PersonalInfo = lazy(() => import('./PersonalInfo'));
 const Schedule = lazy(() => import('./Schedule'));
-const Feedback = lazy(() => import('./Feedback'));
 const Statistics = lazy(() => import('./Statistics'));
 
 // Loading Skeleton component
@@ -24,13 +22,13 @@ const TabContentSkeleton = () => (
   </div>
 );
 
-// Daa giả tạm thời
+// Mock data
 const mockDoctorData = {
   id: 1,
   name: 'Bs. Trần Tấn Phát',
   specialty: 'Chuyên khoa HIV/AIDS',
   email: 'doctor@fpt.edu.vn',
-  phoneNumber: '0987654321',
+  phoneNumber: '0987654323',
   degree: 'Tiến sĩ Y khoa',
   experience: 10,
   certificates: ['Chứng chỉ hành nghề bác sĩ', ' Chuyên khoa HIV/AIDS'],
@@ -41,54 +39,34 @@ const mockDoctorData = {
 
 
 const DoctorProfile = () => {
-  const [doctorData, setDoctorData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [doctorData, setDoctorData] = useState(mockDoctorData);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('personal-info');
 
-  useEffect(() => {
-    // Fetch doctor profile data
-    const fetchDoctorProfile = async () => {
-      try {
-        // TODO: Thay thế bằng API call thực tế
-        // const response = await fetch(`/api/doctors/${doctorId}`);
-        // const data = await response.json();
-        // setDoctorData(data);
-
-        // Giả lập API call
-        setTimeout(() => {
-          setDoctorData(mockDoctorData);
-          setLoading(false);
-        }, 500);
-      } catch (err) {
-        setError('Không thể tải thông tin bác sĩ');
-        setLoading(false);
-      }
-    };
-
-    fetchDoctorProfile();
-  }, []);
-
-  // Xử lý khi thay đổi tab
   const handleTabChange = (tab) => {
     setActiveTab(tab);
   };
 
-  if (loading) return (
-    <div className="loading-container">
-      <div className="spinner-border text-primary" role="status">
-        <span className="visually-hidden">Đang tải...</span>
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Đang tải...</span>
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
 
-  if (error) return (
-    <div className="error-container">
-      <div className="alert alert-danger" role="alert">
-        {error}
+  if (error) {
+    return (
+      <div className="error-container">
+        <div className="alert alert-danger" role="alert">
+          {error}
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
 
   return (
     <div className="doctor-profile-container">
@@ -99,65 +77,53 @@ const DoctorProfile = () => {
             <div className="profile-image-section">
               <img
                 src={doctorData?.imageUrl}
-                alt="Doctor profile"
+                alt={doctorData?.name}
                 className="profile-image"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = 'https://www.pngitem.com/pimgs/m/146-1468479_my-profile-icon-blank-profile-picture-circle-hd.png';
-                }}
               />
             </div>
-
             <div className="profile-basic-info">
-              <h2 className="doctor-name">{doctorData?.name}</h2>
-              <p className="doctor-specialty">{doctorData?.specialty}</p>
+              <h1 className="doctor-name">{doctorData?.name}</h1>
+              <div className="doctor-specialty">{doctorData?.specialty}</div>
               <div className="contact-info">
                 <div className="contact-item">
                   <i className="fas fa-envelope"></i>
-                  <span>{doctorData?.email}</span>
+                  {doctorData?.email}
                 </div>
                 <div className="contact-item">
                   <i className="fas fa-phone"></i>
-                  <span>{doctorData?.phoneNumber}</span>
+                  {doctorData?.phoneNumber}
                 </div>
               </div>
             </div>
           </div>
 
-          <Tabs
-            defaultActiveKey="personal-info"
-            className="profile-tabs"
-            activeKey={activeTab}
-            onSelect={handleTabChange}
-          >
-            <Tab eventKey="personal-info" title="Thông tin cá nhân">
-              <Suspense fallback={<TabContentSkeleton />}>
-                <PersonalInfo doctorData={doctorData} />
-              </Suspense>
-            </Tab>
-            <Tab eventKey="schedule" title="Lịch làm việc">
-              <Suspense fallback={<TabContentSkeleton />}>
-                <Schedule doctorId={doctorData?.id} />
-              </Suspense>
-            </Tab>
-            <Tab eventKey="feedback" title="Đánh giá">
-              <Suspense fallback={<TabContentSkeleton />}>
-                <Feedback doctorId={doctorData?.id} />
-              </Suspense>
-            </Tab>
-            <Tab eventKey="statistics" title="Thống kê">
-              <Suspense fallback={<TabContentSkeleton />}>
-                <Statistics doctorId={doctorData?.id} />
-              </Suspense>
-            </Tab>
-          </Tabs>
+          <div className="profile-tabs">
+            <Tabs
+              activeKey={activeTab}
+              onSelect={handleTabChange}
+              className="mb-3"
+            >
+              <Tab eventKey="personal-info" title="Thông tin cá nhân">
+                <Suspense fallback={<TabContentSkeleton />}>
+                  <PersonalInfo doctorData={doctorData} />
+                </Suspense>
+              </Tab>
+              {/* <Tab eventKey="schedule" title="Lịch làm việc">
+                <Suspense fallback={<TabContentSkeleton />}>
+                  <Schedule />
+                </Suspense>
+              </Tab> */}
+              <Tab eventKey="statistics" title="Thống kê">
+                <Suspense fallback={<TabContentSkeleton />}>
+                  <Statistics />
+                </Suspense>
+              </Tab>
+            </Tabs>
+          </div>
         </Card>
       </div>
-      <AppFooter />
     </div>
-
   );
-
 };
 
-export default DoctorProfile; 
+export default DoctorProfile;

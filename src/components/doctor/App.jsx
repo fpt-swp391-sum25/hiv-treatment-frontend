@@ -1,6 +1,7 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { Container } from 'react-bootstrap';
+import AppFooter from '../layouts/client/app-footer';
 
 const DoctorApp = () => {
   return (
@@ -9,7 +10,7 @@ const DoctorApp = () => {
       <Container fluid className="py-4">
         <Outlet />
       </Container>
-      {/* Footer có thể thêm sau */}
+      {<AppFooter />}
     </div>
   );
 };

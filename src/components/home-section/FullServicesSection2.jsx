@@ -10,10 +10,10 @@ const FullServicesSection2 = () => {
             <div className="card-container">
                 <div className="card">
                     <h3>Đặt lịch khám</h3>
-                    <p>Đặt lịch khám với bác sĩ chuyên khoa HIV một cách dễ dàng và nhanh chóng qua hệ thống trực tuyến.</p>
+                    <p>Lên lịch khám với bác sĩ chuyên khoa HIV nhanh chóng và tiện lợi qua nền tảng trực tuyến.</p>
                     <div className="in-card">
                     <ul>
-                        <li>Đặt lịch 24/7</li>
+                        <li>Hỗ trợ 24/7, mọi lúc mọi nơi</li>
                         <li>Xác nhận tự thi</li>
                         <li>Nhắc lịch tự động</li>
                     </ul>
@@ -21,37 +21,25 @@ const FullServicesSection2 = () => {
                     </div>
                 </div>
                 <div className="card">
-                    <h3>Khám và điều trị</h3>
-                    <p>Khám sức khỏe định kỳ và điều trị HIV với phác đồ cập nhật theo tiêu chuẩn quốc tế.</p>
+                    <h3>Đặt lịch tái khám</h3>
+                    <p>Duy trì hiệu quả điều trị HIV với lộ trình khoa học, giám sát chặt chẽ theo chuẩn quốc tế.</p>
                     <div className="in-card">
                     <ul>
-                        <li>Phác đồ hiện đại</li>
-                        <li>Theo dõi chặt chẽ</li>
-                        <li>Tư vấn chuyên sâu</li>
+                        <li>Phác đồ điều trị tối ưu</li>
+                        <li>Theo dõi tiến trình điều trị</li>
+                        <li>Tư vấn chuyên môn định kỳ</li>
                     </ul>
                     <button className="button">Sử dụng dịch vụ &rarr;</button>
                     </div>
                 </div>
                 <div className="card">
-                    <h3>Xét nghiệm</h3>
-                    <p>Xét nghiệm HIV và các chỉ số liên quan với công nghệ tiên tiến, kết quả chính xác.</p>
+                    <h3>Đặt lịch tư vấn</h3>
+                    <p>Tư vấn sức khỏe cá nhân hóa, giải đáp thắc mắc và hỗ trợ điều trị HIV từ chuyên gia.</p>
                     <div className="in-card">
                     <ul>
-                        <li>Kết quả nhanh</li>
-                        <li>Độ chính xác cao</li>
-                        <li>Bảo mật tuyệt đối</li>
-                    </ul>
-                    <button className="button">Sử dụng dịch vụ &rarr;</button>
-                    </div>
-                </div>
-                <div className="card">
-                    <h3>Theo dõi điều trị</h3>
-                    <p>Theo dõi quá trình điều trị và đánh giá hiệu quả của phác đồ một cách khoa học.</p>
-                    <div className="in-card">
-                    <ul>
-                        <li>Báo cáo chi tiết</li>
-                        <li>Đối tác trực quan</li>
-                        <li>Cảnh báo thông minh</li>
+                        <li>Lộ trình điều trị phù hợp từng cá nhân</li>
+                        <li>Tư vấn dinh dưỡng & tâm lý</li>
+                        <li>Đồng hành lâu dài trong điều trị</li>
                     </ul>
                     <button className="button">Sử dụng dịch vụ &rarr;</button>
                     </div>
