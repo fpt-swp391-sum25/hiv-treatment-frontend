@@ -27,6 +27,7 @@ import PrivateRoute from './pages/private-route';
 import Resources from './pages/client/resources';
 import Doctors from './pages/client/doctors';
 import PaymentCallback from './pages/client/payment-callback';
+import ProfileDetail from './pages/client/profile';
 
 
 
@@ -55,6 +56,15 @@ const router = createBrowserRouter([
         element: (
           <PrivateRoute>
             <PaymentCallback />
+          </PrivateRoute>
+        ),
+        errorElement: <Errors />,
+      },
+      {
+        path: '/profile',
+        element: (
+          <PrivateRoute>
+            <ProfileDetail />
           </PrivateRoute>
         ),
         errorElement: <Errors />,
@@ -124,7 +134,7 @@ const router = createBrowserRouter([
         errorElement: <Errors />,
       }
     ]
-  },  {    
+  }, {
     path: '/manager',
     element: <ManagerLayout />,
     children: [
