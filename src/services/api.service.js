@@ -100,8 +100,8 @@ const fetchDoctorProfileAPI = () => {
 }
 
 const fetchScheduleAPI = () => {
-    const URL_BACKEDN = ''
-    return axios.get(URL_BACKEDN)
+    const URL_BACKEND = '/api/schedule/list'
+    return axios.get(URL_BACKEND)
 }
 
 const fetchAvailableSlotAPI = (doctorId, date) => {
@@ -125,8 +125,28 @@ const fetchAllDoctorsAPI = () => {
 }
 
 const fetchAllDocumentsAPI = () => {
-    const URL_BACKEND = '/api/documents'
+    const URL_BACKEND = '/api/document'
     return axios.get(URL_BACKEND)
+}
+
+const fetchUsersAPI = () => {
+    const URL_BACKEND = '/api/user/patient'
+    return axios.get(URL_BACKEND)
+}
+
+const fetchHealthRecordByScheduleIdAPI = (scheduleId) => {
+    const URL_BACKEND = `/api/health-record/schedule-id/${scheduleId}`
+    return axios.get(URL_BACKEND)
+}
+
+const fetchTestResultByHealthRecordIdAPI = (healthRecordId) => {
+    const URL_BACKEND = `/api/test-result/health-record-id/${healthRecordId}`
+    return axios.get(URL_BACKEND)
+}
+
+const updateHealthRecordAPI = (healthRecord) => {
+    const URL_BACKEND = `/api/health-record/${healthRecordId}`
+    return axios.put(URL_BACKEND)
 }
 
 export {
@@ -149,6 +169,11 @@ export {
     logoutAPI,
 
     fetchAllDoctorsAPI,
-    fetchAllDocumentsAPI
+    fetchAllDocumentsAPI,
+    fetchUsersAPI,
+    fetchHealthRecordByScheduleIdAPI,
+    fetchTestResultByHealthRecordIdAPI,
+    updateHealthRecordAPI
+
 
 }
