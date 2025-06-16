@@ -1,6 +1,6 @@
 .doctor-profile-container {
   min-height: 100vh;
-  background-color: #fff;
+  background-color: #ffffff;
   position: relative;
 }
 
@@ -20,7 +20,7 @@
 
 .app-logo {
   position: absolute;
-  top: 20px;
+  top: 10px;
   left: 30px;
   height: 50px;
   width: auto;
@@ -28,13 +28,13 @@
 
 .profile-content {
   width: 100%;
-  padding: 80px 40px 40px;
+  padding: 60px 40px 40px;
 }
 
 /* Override Bootstrap card hover effects */
 .profile-card,
 .profile-card:hover {
-  background: #fff;
+  background: #ffffff;
   border: none;
   border-radius: 0;
   margin: 0;
@@ -47,27 +47,20 @@
   display: flex;
   padding: 30px 40px;
   background: #fff;
-  border-bottom: 1px solid #e9ecef;
+  border-bottom: 1px solid #000000;
 }
 
 .profile-image-section {
   display: flex;
   align-items: center;
   padding: 0 40px 0 0;
-  border-right: 1px solid #e9ecef;
+  border-right: 1px solid #000000;
 }
 
 .profile-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
-<<<<<<< HEAD
-  border: 1px solid #e9ecef;
-  border-radius: 50%;
-=======
-  /* border: 1px solid #e9ecef;
-  border-radius: 50%; */
->>>>>>> e67217a6b48c04620ac1bce9c7092b5a4bfb2657
 }
 
 .profile-basic-info {
@@ -158,7 +151,7 @@
 }
 
 /* Responsive adjustments */
-@media (max-width: 768px) {
+/* @media (max-width: 768px) {
   .profile-header {
     flex-direction: column;
     align-items: center;
@@ -190,4 +183,48 @@
   .tab-content {
     padding: 20px;
   }
-} 
+}  */
+
+/* Loading Skeleton Styles */
+.skeleton-container {
+  padding: 20px;
+}
+
+.skeleton-row {
+  height: 20px;
+  margin-bottom: 15px;
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 25%,
+    #e0e0e0 50%,
+    #f0f0f0 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+}
+
+.skeleton-row:nth-child(2) {
+  width: 90%;
+}
+
+.skeleton-row:nth-child(3) {
+  width: 80%;
+}
+
+.skeleton-row:nth-child(4) {
+  width: 95%;
+}
+
+.skeleton-row:nth-child(5) {
+  width: 70%;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
