@@ -1,76 +1,94 @@
 import React, { useState } from 'react';
-import { Container, ButtonGroup, Button, Row, Col } from 'react-bootstrap';
-// TODO: Uncomment when Calendar component is ready
-// import Calendar from './Calendar';
+import Calendar from './Calendar';
+import DoctorFilter from './DoctorFilter';
+import StatusFilter from './StatusFilter';
+import ScheduleDetail from './ScheduleDetail';
+import './Schedule.css';
 
 const ManagerSchedule = () => {
-  const [viewMode, setViewMode] = useState('month'); // month, week, day
-  const [timeFilter, setTimeFilter] = useState('today'); // before, today, after
+  const [viewMode, setViewMode] = useState('month');
+  const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [selectedStatus, setSelectedStatus] = useState(null);
+  const [showScheduleDetail, setShowScheduleDetail] = useState(false);
+  const [selectedSchedule, setSelectedSchedule] = useState(null);
+
+  const handleDoctorChange = (doctor) => {
+    setSelectedDoctor(doctor);
+  };
+
+  const handleStatusChange = (status) => {
+    setSelectedStatus(status);
+  };
+
+  const handleScheduleClick = (schedule) => {
+    setSelectedSchedule(schedule);
+    setShowScheduleDetail(true);
+  };
+
+  const handleCreateSchedule = () => {
+    setSelectedSchedule(null);
+    setShowScheduleDetail(true);
+  };
 
   return (
-    <Container fluid className="p-4">
-      <Row className="mb-4">
-        <Col>
-          <ButtonGroup className="me-4">
-            <Button 
-              variant={timeFilter === 'before' ? 'primary' : 'outline-primary'}
-              onClick={() => setTimeFilter('before')}
-            >
-              Trước
-            </Button>
-            <Button 
-              variant={timeFilter === 'today' ? 'primary' : 'outline-primary'}
-              onClick={() => setTimeFilter('today')}
-            >
-              Hôm nay
-            </Button>
-            <Button 
-              variant={timeFilter === 'after' ? 'primary' : 'outline-primary'}
-              onClick={() => setTimeFilter('after')}
-            >
-              Sau
-            </Button>
-          </ButtonGroup>
-
-          <ButtonGroup>
-            <Button 
-              variant={viewMode === 'month' ? 'primary' : 'outline-primary'}
+    <div className="schedule-container">
+      <div className="schedule-controls">
+        <div className="schedule-filters">
+          <DoctorFilter
+            selectedDoctor={selectedDoctor}
+            onDoctorChange={handleDoctorChange}
+          />
+          <StatusFilter
+            selectedStatus={selectedStatus}
+            onStatusChange={handleStatusChange}
+          />
+        </div>
+        
+        <div className="schedule-actions">
+          <div className="view-toggle-group">
+            <button 
+              className={`view-toggle-button ${viewMode === 'month' ? 'active' : ''}`}
               onClick={() => setViewMode('month')}
             >
               Tháng
-            </Button>
-            <Button 
-              variant={viewMode === 'week' ? 'primary' : 'outline-primary'}
+            </button>
+            <button 
+              className={`view-toggle-button ${viewMode === 'week' ? 'active' : ''}`}
               onClick={() => setViewMode('week')}
             >
               Tuần
-            </Button>
-            <Button 
-              variant={viewMode === 'day' ? 'primary' : 'outline-primary'}
+            </button>
+            <button 
+              className={`view-toggle-button ${viewMode === 'day' ? 'active' : ''}`}
               onClick={() => setViewMode('day')}
             >
               Ngày
-            </Button>
-          </ButtonGroup>
-        </Col>
-      </Row>      <Row>
-        <Col>
-          <div className="border rounded p-3">
-            <h5>Calendar Placeholder</h5>
-            <p>Calendar component will be implemented here</p>
+            </button>
           </div>
-        </Col>
-      </Row>
+          
+          <button className="new-schedule-button" onClick={handleCreateSchedule}>
+            <i className="fas fa-plus"></i>
+            Đặt lịch mới
+          </button>
+        </div>
+      </div>
 
-      <Row className="mt-4">
-        <Col>
-          <div className="border rounded p-3">
-            <h5>Thống kê</h5>
-            {/* Add statistics or additional information here */}
-          </div>
-        </Col>
-      </Row>
-    </Container>
+      <div className="calendar-container">
+        <Calendar
+          viewMode={viewMode}
+          selectedDoctor={selectedDoctor}
+          selectedStatus={selectedStatus}
+          onScheduleClick={handleScheduleClick}
+        />
+      </div>
+
+      {showScheduleDetail && (
+        <ScheduleDetail
+          schedule={selectedSchedule}
+          onClose={() => setShowScheduleDetail(false)}
+        />
+      )}
+    </div>
   );
 };
 

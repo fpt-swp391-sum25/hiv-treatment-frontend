@@ -1,85 +1,57 @@
-import { BarChartOutlined, TeamOutlined } from "@ant-design/icons";
-import { Layout, Menu, theme } from "antd";
-import { NavLink, useLocation } from "react-router-dom";
-
-const { Sider } = Layout
-
-
-const items = [
-    {
-        key: '1',
-        label: <NavLink to='/admin'>Tổng quan</NavLink>,
-        icon: <BarChartOutlined />,
-        path: '/admin'
-    },
-    {
-        key: '2',
-        label: 'Quản lí người dùng',
-        icon: <TeamOutlined />,
-        children: [
-            {
-                key: '3',
-                label: <NavLink to='/admin/managers'>Quản lí</NavLink>,
-                path: '/admin/managers'
-            },
-            {
-                key: '4',
-                label: <NavLink to='/admin/doctors'>Bác sĩ</NavLink>,
-                path: '/admin/doctors'
-            },
-            {
-                key: '5',
-                label: <NavLink to='/admin/staff'>Nhân viên</NavLink>,
-                path: '/admin/staff'
-            },
-            {
-                key: '6',
-                label: <NavLink to='/admin/users'>Bệnh nhân</NavLink>,
-                path: '/admin/users'
-
-            },
-        ],
-    },
-
-];
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import './admin-sidebar.css';
 
 const AdminSidebar = () => {
+  const location = useLocation();
 
-    const location = useLocation();
+  const isActive = (path) => {
+    return location.pathname.startsWith(path);
+  };
 
-    const findActiveMenu = () => {
-        const activeItem = items.find(item =>
-            location.pathname === item.path
-        );
-        if (activeItem) return activeItem.key;
-        for (const item of items) {
-            if (item.children) {
-                const activeChild = item.children.find(child =>
-                    location.pathname === child.path ||
-                    (child.path && location.pathname.startsWith(child.path))
-                );
-                if (activeChild) return activeChild.key;
-            }
-        }
-        return '';
-    };
+  return (
+    <div className="sidebar">
+      <Link 
+        to="/manager/dashboard" 
+        className={`sidebar-item ${isActive('/manager/dashboard') ? 'active' : ''}`}
+      >
+        <i className="fas fa-tachometer-alt"></i>
+        Dashboard
+      </Link>
 
-    const selectedKeys = findActiveMenu();
+      <Link 
+        to="/manager/schedule" 
+        className={`sidebar-item ${isActive('/manager/schedule') ? 'active' : ''}`}
+      >
+        <i className="fas fa-calendar-alt"></i>
+        Quản lý lịch
+      </Link>
 
+      <Link 
+        to="/manager/doctors" 
+        className={`sidebar-item ${isActive('/manager/doctors') ? 'active' : ''}`}
+      >
+        <i className="fas fa-user-md"></i>
+        Quản lý bác sĩ
+      </Link>
 
-    const {
-        token: { colorBgContainer, borderRadiusLG },
-    } = theme.useToken();
-    return (
-        <Sider width={250} style={{ background: colorBgContainer, padding: '10px' }}>
-            <Menu
-                mode="inline"
-                selectedKeys={selectedKeys}
-                style={{ height: '100%', borderRight: 0 }}
-                items={items}
-            />
-        </Sider>
-    )
-}
+      <Link 
+        to="/manager/staff" 
+        className={`sidebar-item ${isActive('/manager/staff') ? 'active' : ''}`}
+      >
+        <i className="fas fa-users"></i>
+        Quản lý nhân viên
+      </Link>
+
+      <Link 
+        to="/manager/reports" 
+        className={`sidebar-item ${isActive('/manager/reports') ? 'active' : ''}`}
+      >
+        <i className="fas fa-chart-bar"></i>
+        Báo cáo
+      </Link>
+    </div>
+  );
+};
 
 export default AdminSidebar

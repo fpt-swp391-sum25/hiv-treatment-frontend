@@ -7,6 +7,10 @@ import Register from './pages/auth/register';
 import Admin from './pages/admin/admin-page';
 import ManagerLayout from './pages/manager/manager-page';
 import ManagerDashboard from './components/manager/Dashboard';
+import ManagerSchedule from './components/manager/Schedule/ManagerSchedule';
+import DoctorManagement from './components/manager/DoctorManagement/DoctorManagement';
+import StaffManagement from './components/manager/StaffManagement/StaffManagement';
+import Reports from './components/manager/Reports/Reports';
 
 import DoctorApp from './components/doctor/App';
 import DoctorProfile from './components/doctor/DoctorProfile';
@@ -122,25 +126,23 @@ const router = createBrowserRouter([
         index: true,
         element: <ManagerDashboard />,
         errorElement: <Errors />,
-      },
-      {
+      },      {
         path: 'schedule',
-        element: <ManagerDashboard />,
+        element: <ManagerSchedule />,
         errorElement: <Errors />,
-      },
-      {
+      },      {
         path: 'doctors',
-        element: <ManagerDashboard />,
+        element: <DoctorManagement />,
         errorElement: <Errors />,
       },
       {
         path: 'staff',
-        element: <ManagerDashboard />,
+        element: <StaffManagement />,
         errorElement: <Errors />,
       },
       {
         path: 'reports',
-        element: <ManagerDashboard />,
+        element: <Reports />,
         errorElement: <Errors />,
       }
     ],
