@@ -1,18 +1,33 @@
 import React from 'react';
-import { Navbar, Container } from 'react-bootstrap';
+import './ManagerHeader.css';
+import appLogo from '../../../assets/appLogo.png';
 
-const ManagerHeader = ({ managerName = 'Manager' }) => {
+const ManagerHeader = ({ user }) => {
   return (
-    <Navbar bg="white" className="border-bottom shadow-sm">
-      <Container fluid>
-        <Navbar.Brand>
-          Chào mừng quản lí {managerName}
-        </Navbar.Brand>
-        <div className="ms-auto">
-          {/* Add any additional header items here */}
+    <div className="manager-header">
+      <div className="header-left">
+        <div className="logo-container">
+          <img src={appLogo} alt="Logo" />
         </div>
-      </Container>
-    </Navbar>
+      </div>
+
+      <div className="header-center">
+        Chào mừng Quản lí
+      </div>
+
+      <div className="header-right">
+        <div className="user-avatar">
+          {user?.avatarUrl ? (
+            <img src={user.avatarUrl} alt="User avatar" />
+          ) : (
+            <img 
+              src="https://secure.gravatar.com/avatar/default?s=200&d=mp" 
+              alt="Default avatar" 
+            />
+          )}
+        </div>
+      </div>
+    </div>
   );
 };
 
