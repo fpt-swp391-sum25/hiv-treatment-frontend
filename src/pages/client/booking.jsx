@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Form, Input, Select, DatePicker, Button, Typography, Col, Row, Layout, theme } from 'antd';
-import { ArrowLeftOutlined } from '@ant-design/icons';
+import { Form, Input, Select, DatePicker, Button, Typography, Col, Row, Layout, theme, message, Descriptions } from 'antd';
+import { ArrowLeftOutlined, SoundTwoTone } from '@ant-design/icons';
 import moment from 'moment';
 import { useNavigate } from 'react-router-dom';
-import { bookingAPI, fetchDoctorProfileAPI } from '../../services/api.service';
+import { bookingAPI, fetchAllScheduleAPI, fetchAvailableSlotAPI, fetchDoctorProfileAPI, initiatePaymentAPI } from '../../services/api.service';
 
 
 const { Link } = Typography;
@@ -15,16 +15,65 @@ const Booking = () => {
     const [form] = Form.useForm();
     const [availableTimes, setAvailableTimes] = useState(generateTimeSlots());
     const [doctors, setDoctors] = useState([])
+    const [availableSlots, setAvailableSlots] = useState([])
+    const [availableSchedules, setAvailableSchedules] = useState([]);
+    const [scheduleId, setScheduleId] = useState(null);
+    const [selectedAmount, setSelectedAmount] = useState();
+    const [selectedSchedule, setSelectedSchedule] = useState(null);
+
+    const doctorId = Form.useWatch('doctor', form)
+    const date = Form.useWatch('date', form)
+    const slot = Form.useWatch('slot', form);
+    const type = Form.useWatch('type', form);
+
+    const typeMapping = {
+        APPOINTMENT: 'Đặt khám',
+        FOLLOW_UP: 'Tái khám',
+        CONSULTATION: 'Tư vấn',
+    };
 
     const navigate = useNavigate();
 
     useEffect(() => {
         loadDoctors()
-        console.log(">>>>", doctors)
     }, [])
 
+    useEffect(() => {
+        loadAvailableSlots()
+        loadSchedule()
+    }, [doctorId, date])
+
+    useEffect(() => {
+        if (slot) {
+            const schedule = availableSchedules.find(s => s.slot === slot);
+            setSelectedSchedule(schedule);
+        } else {
+            setSelectedSchedule(null);
+        }
+        // Gán amount dựa trên type từ form
+        if (type) {
+            let amount;
+            switch (type) {
+                case 'APPOINTMENT':
+                    amount = 200000;
+                    break;
+                case 'FOLLOW_UP':
+                    amount = 150000;
+                    break;
+                case 'CONSULTATION':
+                    amount = 100000;
+                    break;
+                default:
+                    amount = 0;
+            }
+            setSelectedAmount(amount);
+        } else {
+            setSelectedAmount(null);
+        }
+    }, [slot, type, availableSchedules]);
+
     const handleSubmit = async (values) => {
-        console.log(values)
+        // console.log(values)
 
         // try {
 
@@ -44,6 +93,33 @@ const Booking = () => {
 
     };
 
+    const onFinish = async (values) => {
+        try {
+            console.log("check available schedule ", availableSchedules)
+            const schedule = availableSchedules.find(s => s.slot === values.slot);
+            console.log("check schedule", selectedAmount)
+            if (!schedule) {
+                throw new Error('Lịch không khả dụng');
+            }
+
+            // const registerResponse = await registerScheduleAPI({
+            //     scheduleId: schedule.id,
+            //     patientId: user.id,
+            //     type: values.type
+            // });
+            // setScheduleId(registerResponse.id);
+
+            const paymentResponse = await initiatePaymentAPI({
+                scheduleId: schedule.id,
+                amount: selectedAmount,
+            });
+
+            window.location.href = paymentResponse.data;
+        } catch (error) {
+            message.error(error.message);
+        }
+    };
+
     const loadDoctors = async () => {
         const response = await fetchDoctorProfileAPI()
         console.log(response.data)
@@ -52,6 +128,22 @@ const Booking = () => {
         }
 
 
+    }
+
+    const loadAvailableSlots = async () => {
+        const response = await fetchAvailableSlotAPI(doctorId, date.format('YYYY-MM-DD'))
+        if (response.data) {
+            setAvailableSlots(response.data)
+        } else {
+            setAvailableSlots([])
+        }
+    }
+
+    const loadSchedule = async () => {
+        const response = await fetchAllScheduleAPI(doctorId, date)
+        if (response.data) {
+            setAvailableSchedules(response.data);
+        }
     }
 
 
@@ -92,7 +184,7 @@ const Booking = () => {
 
                                 <h1>Đặt lịch khám</h1>
                                 <p>Vui lòng điền thông tin dưới đây để đặt lịch khám với bác sĩ chuyên khoa HIV</p>
-                                <Form form={form} layout="vertical" onFinish={handleSubmit}>
+                                <Form form={form} layout="vertical" onFinish={onFinish}>
                                     <Row gutter={8}>
                                         <Col span={12}>
                                             <Form.Item
@@ -115,17 +207,14 @@ const Booking = () => {
                                     </Row>
 
 
-                                    <Form.Item
-                                        name="type"
-                                        label="Loại dịch vụ"
-                                        rules={[{ required: true, message: 'Vui lòng chọn loại dịch vụ' }]}
-                                    >
+                                    <Form.Item name="type" label="Loại dịch vụ" rules={[{ required: true, message: 'Vui lòng chọn loại dịch vụ' }]}>
                                         <Select placeholder="Chọn loại dịch vụ">
-                                            <Option value="Khám">Đặt khám</Option>
-                                            <Option value="Tái khám">Tái khám</Option>
-                                            <Option value="Tư vấn">Tư vấn</Option>
+                                            <Select.Option value="APPOINTMENT">{typeMapping.APPOINTMENT}</Select.Option>
+                                            <Select.Option value="FOLLOW_UP">{typeMapping.FOLLOW_UP}</Select.Option>
+                                            <Select.Option value="CONSULTATION">{typeMapping.CONSULTATION}</Select.Option>
                                         </Select>
                                     </Form.Item>
+
                                     <Form.Item
                                         name="doctor"
                                         label="Bác sĩ"
@@ -155,21 +244,21 @@ const Booking = () => {
                                             </Form.Item>
                                         </Col>
                                         <Col span={12}>
-                                            <Form.Item
-                                                name="time"
-                                                label="Giờ khám"
-                                                rules={[{ required: true, message: 'Vui lòng chọn giờ khám' }]}
-                                            >
-                                                <Select placeholder="Chọn giờ khám">
-                                                    {availableTimes.map((time) => (
-                                                        <Option key={time.format('HH:mm')} value={time.format('HH:mm')}>
-                                                            {time.format('HH:mm')}
-                                                        </Option>
+                                            <Form.Item name="slot" label="Khung giờ" rules={[{ required: true }]}>
+                                                <Select placeholder="Chọn khung giờ" disabled={!availableSchedules.length}>
+                                                    {availableSchedules.map(schedule => (
+                                                        <Select.Option key={schedule.id} value={schedule.slot}>{schedule.slot}</Select.Option>
                                                     ))}
                                                 </Select>
                                             </Form.Item>
                                         </Col>
                                     </Row>
+                                    {selectedSchedule && (
+                                        <Descriptions bordered>
+                                            <Descriptions.Item label="Loại lịch hẹn">{typeMapping[type]}</Descriptions.Item>
+                                            <Descriptions.Item label="Giá tiền">{selectedAmount ? selectedAmount.toLocaleString('vi-VN') : '0'} VND</Descriptions.Item>
+                                        </Descriptions>
+                                    )}
                                     <Form.Item style={{ display: 'flex', justifyContent: 'flex-end' }}>
                                         <Button type="primary" htmlType="submit">
                                             Xác nhận đặt lịch

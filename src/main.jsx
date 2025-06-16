@@ -26,6 +26,7 @@ import App from './pages/client/App';
 import PrivateRoute from './pages/private-route';
 import Resources from './pages/client/resources';
 import Doctors from './pages/client/doctors';
+import PaymentCallback from './pages/client/payment-callback';
 
 
 
@@ -45,6 +46,15 @@ const router = createBrowserRouter([
         element: (
           <PrivateRoute>
             <BookingCheckupForm />
+          </PrivateRoute>
+        ),
+        errorElement: <Errors />,
+      },
+      {
+        path: '/payment/callback',
+        element: (
+          <PrivateRoute>
+            <PaymentCallback />
           </PrivateRoute>
         ),
         errorElement: <Errors />,
