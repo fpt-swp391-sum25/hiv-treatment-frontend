@@ -1,0 +1,154 @@
+.calendar {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.calendar-nav {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.calendar-nav button {
+  background: transparent;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.calendar-nav button:hover {
+  background: #f8f9fa;
+}
+
+.calendar-nav h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.today-button {
+  padding: 6px 12px;
+  background: #e9ecef;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.today-button:hover {
+  background: #dee2e6;
+}
+
+.calendar-grid {
+  padding: 15px;
+}
+
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.weekday {
+  padding: 10px;
+  text-align: center;
+  font-weight: 600;
+  color: #6c757d;
+}
+
+.calendar-days {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.calendar-week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+}
+
+.calendar-cell {
+  min-height: 120px;
+  padding: 8px;
+  border: 1px solid #dee2e6;
+  background: white;
+}
+
+.calendar-cell.other-month {
+  background: #f8f9fa;
+  color: #adb5bd;
+}
+
+.calendar-cell.today {
+  background: #e8f4ff;
+}
+
+.day-number {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.day-schedules {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.schedule-item {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.schedule-item:hover {
+  filter: brightness(0.95);
+}
+
+.status-pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-confirmed {
+  background: #d1e7dd;
+  color: #0f5132;
+}
+
+.status-cancelled {
+  background: #f8d7da;
+  color: #842029;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .calendar-cell {
+    min-height: 100px;
+  }
+
+  .day-number {
+    font-size: 0.9rem;
+  }
+
+  .schedule-item {
+    font-size: 0.8rem;
+  }
+}

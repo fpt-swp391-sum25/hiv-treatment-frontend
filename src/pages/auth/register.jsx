@@ -14,7 +14,6 @@ const Register = () => {
     const navigate = useNavigate();
     const onFinish = async (values) => {
         const response = await registerAPI(values)
-        setError('Success');
         if (response.data) {
             notification.success({
                 message: 'Đăng kí thành công'
