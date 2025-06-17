@@ -1,115 +1,131 @@
 import React, { useState, useEffect } from 'react';
+import FullCalendar from '@fullcalendar/react';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import interactionPlugin from '@fullcalendar/interaction';
+import bootstrap5Plugin from '@fullcalendar/bootstrap5';
+import viLocale from '@fullcalendar/core/locales/vi';
 import moment from 'moment';
-import 'moment/locale/vi'; // Import locale tiếng Việt
 import './Calendar.css';
+import { ScheduleStatus } from '../../../types/schedule.types';
 
-const Calendar = ({ viewMode, selectedDoctor, selectedStatus, onScheduleClick }) => {
-  const [currentDate, setCurrentDate] = useState(moment());
-  const [schedules, setSchedules] = useState([]);
+const Calendar = ({ events, onDateSelect, onEventSelect }) => {
+    const [view, setView] = useState('dayGridMonth');
+    
+    const handleDateSelect = (selectInfo) => {
+        // Kiểm tra ngày quá khứ
+        const selectedDate = moment(selectInfo.start);
+        const today = moment().startOf('day');
+        
+        // Vẫn cho phép chọn ngày quá khứ, nhưng component cha sẽ xử lý logic cảnh báo
+        onDateSelect(selectInfo.start);
+    };
 
-  // Thiết lập locale tiếng Việt cho moment
-  moment.locale('vi');
+    const handleEventClick = (clickInfo) => {
+        // Khi click vào sự kiện, truyền thông tin sự kiện lên component cha
+        onEventSelect(clickInfo.event.extendedProps);
+    };
 
-  useEffect(() => {
-    // TODO: Fetch schedules based on viewMode, selectedDoctor, selectedStatus
-    // fetchSchedules();
-  }, [viewMode, selectedDoctor, selectedStatus, currentDate]);
+    const getStatusColor = (status) => {
+        switch (status) {
+            case 'available':
+                return '#28a745'; // success
+            case 'on_leave':
+                return '#ffc107'; // warning
+            case 'in_meeting':
+                return '#007bff'; // primary
+            default:
+                return '#6c757d'; // secondary
+        }
+    };
 
-  const renderHeader = () => {
-    return (
-      <div className="calendar-header">
-        <div className="calendar-nav">
-          <button onClick={() => setCurrentDate(moment(currentDate).subtract(1, viewMode))}>
-            <i className="fas fa-chevron-left"></i>
-          </button>
-          <h2>{currentDate.format('MMMM YYYY')}</h2>
-          <button onClick={() => setCurrentDate(moment(currentDate).add(1, viewMode))}>
-            <i className="fas fa-chevron-right"></i>
-          </button>
-        </div>
-        <button className="today-button" onClick={() => setCurrentDate(moment())}>
-          Hôm nay
-        </button>
-      </div>
-    );
-  };
+    // Chuẩn bị sự kiện cho Full Calendar
+    const calendarEvents = events.map(event => {
+        return {
+            id: event.id,
+            title: event.title,
+            start: event.date,
+            color: getStatusColor(event.status),
+            extendedProps: event, // Lưu toàn bộ thông tin sự kiện
+            allDay: true
+        };
+    });
 
-  const renderMonthView = () => {
-    const startDay = moment(currentDate).startOf('month').startOf('week');
-    const endDay = moment(currentDate).endOf('month').endOf('week');
-    const weeks = [];
-    let days = [];
-    let day = startDay;
+    // Render content cho ngày quá khứ
+    const dayCellDidMount = (info) => {
+        const date = info.date;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        if (date < today) {
+            // Thêm class cho ngày đã qua
+            info.el.classList.add('fc-day-past');
+        }
+    };
 
-    // Render weekday headers - sử dụng tên ngày tiếng Việt
-    const weekDays = moment.weekdaysShort().map(day => (
-      <div key={day} className="calendar-cell weekday">{day}</div>
-    ));
-
-    // Render calendar days
-    while (day <= endDay) {
-      for (let i = 0; i < 7; i++) {
-        const cloneDay = moment(day);
-        days.push(
-          <div
-            key={day.format('YYYY-MM-DD')}
-            className={`calendar-cell ${
-              day.month() !== currentDate.month() ? 'other-month' : ''
-            } ${day.isSame(moment(), 'day') ? 'today' : ''}`}
-          >
-            <div className="day-number">{day.format('D')}</div>
-            <div className="day-schedules">
-              {/* Render schedules for this day */}
-              {schedules
-                .filter(schedule => moment(schedule.date).isSame(day, 'day'))
-                .map(schedule => (
-                  <div
-                    key={schedule.id}
-                    className={`schedule-item status-${schedule.status}`}
-                    onClick={() => onScheduleClick(schedule)}
-                  >
-                    {schedule.title}
-                  </div>
-                ))}
+    // Tùy chỉnh hiển thị nội dung của sự kiện
+    const eventContent = (eventInfo) => {
+        const eventData = eventInfo.event.extendedProps;
+        const statusClass = `status-${eventData.status}`;
+        
+        return (
+            <div className={`custom-event-content ${statusClass}`}>
+                <div className="event-title">{eventData.doctorName}</div>
+                <div className="event-status">
+                    {eventData.status === 'available' 
+                        ? `Làm việc: ${eventData.morning && eventData.afternoon 
+                            ? 'Cả ngày' 
+                            : eventData.morning 
+                                ? 'Buổi sáng' 
+                                : 'Buổi chiều'}`
+                        : eventData.status === 'on_leave'
+                            ? 'Nghỉ phép'
+                            : 'Họp'
+                    }
+                </div>
             </div>
-          </div>
         );
-        day = moment(day).add(1, 'day');
-      }
-      weeks.push(
-        <div key={`week-${weeks.length}`} className="calendar-week">
-          {days}
-        </div>
-      );
-      days = [];
-    }
+    };
+
+    const renderToolbar = () => {
+        return {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        };
+    };
+    
+    const handleViewChange = (viewInfo) => {
+        setView(viewInfo.view.type);
+    };
 
     return (
-      <div className="calendar-grid month-view">
-        <div className="calendar-weekdays">{weekDays}</div>
-        <div className="calendar-days">{weeks}</div>
-      </div>
+        <div className="calendar-wrapper">
+            <FullCalendar
+                plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, bootstrap5Plugin]}
+                initialView="dayGridMonth"
+                headerToolbar={renderToolbar()}
+                selectable={true}
+                selectMirror={true}
+                dayMaxEvents={true}
+                weekends={true}
+                events={calendarEvents}
+                select={handleDateSelect}
+                eventClick={handleEventClick}
+                eventContent={eventContent}
+                height="auto"
+                locale={viLocale}
+                themeSystem="bootstrap5"
+                dayCellDidMount={dayCellDidMount}
+                viewDidMount={handleViewChange}
+                businessHours={{
+                    daysOfWeek: [1, 2, 3, 4, 5, 6], // Thứ 2 đến thứ 7
+                    startTime: '08:00',
+                    endTime: '17:00',
+                }}
+            />
+        </div>
     );
-  };
-
-  const renderWeekView = () => {
-    // TODO: Implement week view
-    return <div className="calendar-grid week-view">Chế độ xem theo tuần sẽ sớm ra mắt...</div>;
-  };
-
-  const renderDayView = () => {
-    // TODO: Implement day view
-    return <div className="calendar-grid day-view">Chế độ xem theo ngày sẽ sớm ra mắt...</div>;
-  };
-
-  return (
-    <div className="calendar">
-      {renderHeader()}
-      {viewMode === 'month' && renderMonthView()}
-      {viewMode === 'week' && renderWeekView()}
-      {viewMode === 'day' && renderDayView()}
-    </div>
-  );
 };
 
 export default Calendar;
