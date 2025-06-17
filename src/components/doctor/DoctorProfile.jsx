@@ -1,4 +1,4 @@
-import React, { useState, useEffect, lazy, Suspense } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { Card, Row, Col, Nav } from 'react-bootstrap';
 import '../../styles/doctor/DoctorProfile.css';
 
@@ -35,9 +35,9 @@ const mockDoctorData = {
 };
 
 const DoctorProfile = () => {
-  const [doctorData, setDoctorData] = useState(mockDoctorData);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [doctorData] = useState(mockDoctorData);
+  const [loading] = useState(false);
+  const [error] = useState(null);
   const [activeTab, setActiveTab] = useState('personal-info');
 
   const handleTabChange = (tabKey) => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -13,10 +13,6 @@ const Calendar = ({ events, onDateSelect, onEventSelect }) => {
     const [view, setView] = useState('dayGridMonth');
     
     const handleDateSelect = (selectInfo) => {
-        // Kiểm tra ngày quá khứ
-        const selectedDate = moment(selectInfo.start);
-        const today = moment().startOf('day');
-        
         // Vẫn cho phép chọn ngày quá khứ, nhưng component cha sẽ xử lý logic cảnh báo
         onDateSelect(selectInfo.start);
     };
@@ -94,10 +90,6 @@ const Calendar = ({ events, onDateSelect, onEventSelect }) => {
             right: 'dayGridMonth,timeGridWeek,timeGridDay'
         };
     };
-    
-    const handleViewChange = (viewInfo) => {
-        setView(viewInfo.view.type);
-    };
 
     return (
         <div className="calendar-wrapper">
@@ -117,7 +109,7 @@ const Calendar = ({ events, onDateSelect, onEventSelect }) => {
                 locale={viLocale}
                 themeSystem="bootstrap5"
                 dayCellDidMount={dayCellDidMount}
-                viewDidMount={handleViewChange}
+                viewDidMount={setView}
                 businessHours={{
                     daysOfWeek: [1, 2, 3, 4, 5, 6], // Thứ 2 đến thứ 7
                     startTime: '08:00',
