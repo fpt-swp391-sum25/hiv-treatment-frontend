@@ -2,43 +2,63 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { message } from 'antd';
 import './doctors-search-page.css';
-import { fetchAllDoctorsAPI } from '../../services/api.service';
+import { fetchAccountByRoleAPI, fetchDoctorProfileAPI } from '../../services/api.service';
 
 // Dùng ảnh từ thư mục public
 import defaultDoctorImage from '../../assets/doctor.png';
 
-function DoctorsSearchPage() {
-  const [doctors, setDoctors] = useState([]);
+const DoctorsSearchPage =  () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [doctorAccounts, setDoctorAccounts] = useState([]);
+  const [doctorProfiles, setDoctorProfiles] = useState([]);
+  const [mergedDoctors, setMergedDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+
   useEffect(() => {
-    const fetchDoctors = async () => {
+      loadDoctorData();
+  }, []);
+
+  const loadDoctorData = async () => {
       try {
-        setLoading(true);
-        const response = await fetchAllDoctorsAPI();
-        if (response && response.data) {
-          setDoctors(response.data);
-        }
+          setLoading(true);
+          const [accountRes, profileRes] = await Promise.all([
+              fetchAccountByRoleAPI("doctor"),
+              fetchDoctorProfileAPI()
+          ]);
+
+          const doctors = accountRes?.data || [];
+          const profiles = profileRes?.data || [];
+
+          setDoctorAccounts(doctors);
+          setDoctorProfiles(profiles);
+
+          console.log(doctors)
+          console.log(profiles)
+
+          const merged = doctors.map(account => {
+              const profile = profiles.find(p => p.user.id === account.id);
+              return {
+                  ...account,
+                  licenseNumber: profile?.licenseNumber || '',
+                  startYear: profile?.startYear || '',
+                  qualifications: profile?.qualifications || '',
+                  biography: profile?.biography || '',
+                  background: profile?.background || ''
+              };
+          });
+
+          setMergedDoctors(merged);
       } catch (error) {
-        console.error('Lỗi khi tải danh sách bác sĩ:', error);
-        message.error('Không thể tải danh sách bác sĩ. Vui lòng thử lại sau.');
-        // Fallback to local data if API fails
-        fetch('/api/doctors.json')
-          .then((res) => res.json())
-          .then((data) => setDoctors(data))
-          .catch((err) => console.error('Lỗi khi tải dữ liệu local:', err));
+        console.error("Lỗi khi tải thông tin bác sĩ:", error);
       } finally {
         setLoading(false);
       }
     };
-
-    fetchDoctors();
-  }, []);
+  
 
   // Filter doctors based on search term
-  const filteredDoctors = doctors.filter((doctor) =>
-    doctor.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredDoctors = mergedDoctors.filter((doctors) =>
+    doctors.fullName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   useEffect(() => {
@@ -62,19 +82,19 @@ function DoctorsSearchPage() {
         {loading ? (
           <div className="loading-message">Đang tải danh sách bác sĩ...</div>
         ) : filteredDoctors.length > 0 ? (
-          filteredDoctors.map((doctor) => (
-            <div className="doctor-card" key={doctor.id}>
+          filteredDoctors.map((mergedDoctors) => (
+            <div className="doctor-card" key={mergedDoctors.id}>
               <img
-                src={doctor.image || defaultDoctorImage}
-                alt={`Ảnh bác sĩ ${doctor.name}`}
+                src={mergedDoctors.avatar || defaultDoctorImage}
+                alt={`Ảnh bác sĩ ${mergedDoctors.fullName}`}
                 className="doctor-avatar"
                 onError={(e) => (e.target.src = defaultDoctorImage)}
               />
               <div className="doctor-info">
-                <h3>{doctor.name}</h3>
-                <p>🕒 {doctor.experience} năm kinh nghiệm</p>
-                <p>{doctor.qualifications}</p>
-                <Link to={`/booking?doctorId=${doctor.id}`} className="btn-primary">
+                <h3>{mergedDoctors.fullName}</h3>
+                <p>🕒 {mergedDoctors.startYear} năm kinh nghiệm</p>
+                <p>{mergedDoctors.qualifications}</p>
+                <Link to={`/booking?doctorId=${mergedDoctors.id}`} className="btn-primary">
                   Đặt lịch
                 </Link>
               </div>
@@ -86,6 +106,6 @@ function DoctorsSearchPage() {
       </div>      
     </section>
   );
-}
+};
 
 export default DoctorsSearchPage;
