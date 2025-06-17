@@ -101,7 +101,6 @@ const Staff = () => {
 
     return (
         <Layout>
-<<<<<<< HEAD
             <AdminHeader />
             <Content>
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '15px' }}>
@@ -109,17 +108,6 @@ const Staff = () => {
                 </div>
                 <Table columns={columns} dataSource={data} rowKey={(record) => record.id} />
             </Content>
-=======
-           {/* <StaffHeader/> */}
-           <Layout>
-                <Content>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '15px' }}>
-                        <h2>Danh sách bệnh nhân</h2>
-                    </div>
-                    <Table columns={columns} dataSource={data} rowKey={(record) => record.id} />
-                </Content>
-           </Layout>
->>>>>>> 01a32a036ebce419dcf4e532761457025799d41a
         </Layout>
     )
 }
