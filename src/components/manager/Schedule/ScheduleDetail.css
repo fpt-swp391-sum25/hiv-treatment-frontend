@@ -1,0 +1,39 @@
+.schedule-detail-modal .modal-content {
+    border-radius: 8px;
+}
+
+.schedule-detail-modal .modal-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.schedule-detail-modal .modal-title {
+    color: #2c3e50;
+    font-weight: 500;
+}
+
+.schedule-detail-modal .form-label {
+    color: #495057;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.schedule-detail-modal .form-control,
+.schedule-detail-modal .form-select {
+    border-color: #dee2e6;
+}
+
+.schedule-detail-modal .form-control:disabled,
+.schedule-detail-modal .form-select:disabled {
+    background-color: #f8f9fa;
+    cursor: not-allowed;
+}
+
+.schedule-detail-modal .btn-group {
+    gap: 0.5rem;
+}
+
+.schedule-detail-modal .modal-footer {
+    border-top: 1px solid #dee2e6;
+    padding: 1rem;
+}

@@ -1,0 +1,17 @@
+.doctor-filter {
+    margin-bottom: 1rem;
+}
+
+.doctor-select {
+    max-width: 300px;
+}
+
+.doctor-filter .input-group-text {
+    background-color: #fff;
+    color: #0d6efd;
+}
+
+.doctor-filter .form-select:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}

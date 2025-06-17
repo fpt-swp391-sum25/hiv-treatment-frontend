@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Card, Button, Form, Toast } from 'react-bootstrap';
-import { FaEdit, FaSave, FaTimes } from 'react-icons/fa';
+import { Card, Button, Form, Toast, ToastContainer } from 'react-bootstrap';
+import { FaEdit, FaSave, FaTimes, FaCheckCircle } from 'react-icons/fa';
 import '../../styles/doctor/PersonalInfo.css';
 
 const PersonalInfo = ({ doctorData }) => {
@@ -24,7 +24,7 @@ const PersonalInfo = ({ doctorData }) => {
     // TODO: Implement API call here
     setIsEditing(false);
     setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000); // Hide toast after 3 seconds
+    setTimeout(() => setShowToast(false), 3000);
   };
 
   const handleChange = (field, value) => {
@@ -34,117 +34,129 @@ const PersonalInfo = ({ doctorData }) => {
     }));
   };
 
-  return (    <div className="personal-info-container">
-      {/* Success Toast */}      <Toast 
-        show={showToast} 
-        onClose={() => setShowToast(false)}
-        style={{ 
-          position: 'fixed', 
-          top: 20, 
-          right: 20, 
-          zIndex: 1000,
-          background: '#D4EDDA',
-          color: '#155724',
-          borderColor: '#C3E6CB',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-          minWidth: '300px'
-        }}
+  return (
+    <div className="personal-info-container">
+      {/* Toast Notification */}
+      <ToastContainer 
+        position="top-end" 
+        className="p-3" 
+        style={{ zIndex: 1000 }}
       >
-        <Toast.Header closeButton={false}>
-          <strong className="me-auto">Thông báo</strong>
-        </Toast.Header>
-        <Toast.Body>Cập nhật thông tin thành công!</Toast.Body>
-      </Toast>
+        <Toast 
+          show={showToast} 
+          onClose={() => setShowToast(false)}
+          bg="success"
+          delay={3000}
+          autohide
+        >
+          <Toast.Header closeButton={true}>
+            <FaCheckCircle className="me-2 text-success" />
+            <strong className="me-auto">Thành công</strong>
+          </Toast.Header>
+          <Toast.Body className="text-white">
+            Cập nhật thông tin bác sĩ thành công!
+          </Toast.Body>
+        </Toast>
+      </ToastContainer>
 
-      {/* Qualifications Card */}
-      <Card className="info-card">
-        <Card.Body>
-          <div className="d-flex justify-content-between align-items-center mb-3">
-            <h3 className="card-title mb-0">Trình độ chuyên môn</h3>
-            {!isEditing ? (
+      {/* Trình độ chuyên môn */}
+      <div className="qualification-card">
+        <div className="card-header">
+          <h3 className="card-title">Trình độ chuyên môn</h3>
+          {!isEditing ? (
+            <Button 
+              variant="outline-primary" 
+              onClick={handleEdit}
+              className="edit-button"
+              size="sm"
+            >
+              <FaEdit /> Sửa
+            </Button>
+          ) : (
+            <div className="edit-actions">
               <Button 
-                variant="outline-primary" 
-                onClick={handleEdit}
-                className="edit-button"
+                variant="success" 
+                onClick={handleUpdate} 
+                className="me-2"
+                size="sm"
               >
-                <FaEdit /> Sửa
+                <FaSave /> Cập nhật
               </Button>
+              <Button 
+                variant="outline-secondary" 
+                onClick={handleCancel}
+                size="sm"
+              >
+                <FaTimes /> Hủy
+              </Button>
+            </div>
+          )}
+        </div>
+        <div className="card-content">
+          <div className="info-row">
+            <div className="info-label">Bằng cấp:</div>
+            {isEditing ? (
+              <Form.Control
+                type="text"
+                value={editedData.degree}
+                onChange={(e) => handleChange('degree', e.target.value)}
+                className="edit-input"
+              />
             ) : (
-              <div>
-                <Button 
-                  variant="success" 
-                  onClick={handleUpdate} 
-                  className="me-2"
-                >
-                  <FaSave /> Cập nhật
-                </Button>
-                <Button 
-                  variant="outline-secondary" 
-                  onClick={handleCancel}
-                >
-                  <FaTimes /> Hủy
-                </Button>
-              </div>
+              <div className="info-value">• {doctorData.degree}</div>
             )}
           </div>
-          <div className="qualification-details">
-            <div className="info-item">
-              <span className="info-label">Bằng cấp:</span>
+          
+          <div className="info-row">
+            <div className="info-label">Kinh nghiệm:</div>
+            {isEditing ? (
+              <Form.Control
+                type="number"
+                value={editedData.experience}
+                onChange={(e) => handleChange('experience', e.target.value)}
+                className="edit-input"
+                style={{ width: '100px' }}
+              />
+            ) : (
+              <div className="info-value">• {doctorData.experience} năm</div>
+            )}
+          </div>
+          
+          <div className="info-row">
+            <div className="info-label">Chứng chỉ:</div>
+            <div className="certificates-container">
               {isEditing ? (
-                <Form.Control
-                  type="text"
-                  value={editedData.degree}
-                  onChange={(e) => handleChange('degree', e.target.value)}
-                  className="edit-input"
-                />
+                editedData.certificates.map((cert, index) => (
+                  <Form.Control
+                    key={index}
+                    type="text"
+                    value={cert}
+                    onChange={(e) => {
+                      const newCerts = [...editedData.certificates];
+                      newCerts[index] = e.target.value;
+                      handleChange('certificates', newCerts);
+                    }}
+                    className="edit-input mb-2"
+                  />
+                ))
               ) : (
-                <span className="info-value">• {doctorData.degree}</span>
+                <div className="info-value">
+                  {doctorData.certificates.map((cert, index) => (
+                    <div key={index} className="certificate-item">{cert}</div>
+                  ))}
+                </div>
               )}
-            </div>
-            <div className="info-item">
-              <span className="info-label">Kinh nghiệm:</span>
-              {isEditing ? (
-                <Form.Control
-                  type="number"
-                  value={editedData.experience}
-                  onChange={(e) => handleChange('experience', e.target.value)}
-                  className="edit-input"
-                  style={{ width: '100px' }}
-                />
-              ) : (
-                <span className="info-value">• {doctorData.experience} năm</span>
-              )}
-            </div>
-            <div className="info-item">
-              <span className="info-label">Chứng chỉ:</span>
-              <div className="info-value certificates-list">
-                {isEditing ? (
-                  editedData.certificates.map((cert, index) => (
-                    <Form.Control
-                      key={index}
-                      type="text"
-                      value={cert}
-                      onChange={(e) => {
-                        const newCerts = [...editedData.certificates];
-                        newCerts[index] = e.target.value;
-                        handleChange('certificates', newCerts);
-                      }}
-                      className="edit-input mb-2"
-                    />
-                  ))
-                ) : (
-                  doctorData.certificates.map((cert, index) => (
-                    <div key={index} className="certificate-item"> {cert}</div>
-                  ))
-                )}
-              </div>
             </div>
           </div>
-        </Card.Body>
-      </Card>      {/* Introduction Card */}
-      <Card className="info-card">
-        <Card.Body>
+        </div>
+      </div>
+      
+      {/* Giới thiệu */}
+      <div className="bio-card">
+        <div className="card-header">
           <h3 className="card-title">Giới thiệu</h3>
+        </div>
+        <div className="card-content">
           {isEditing ? (
             <Form.Control
               as="textarea"
@@ -154,10 +166,10 @@ const PersonalInfo = ({ doctorData }) => {
               className="edit-input"
             />
           ) : (
-            <p className="introduction-text">{doctorData.bio}</p>
+            <p className="bio-text">{doctorData.bio}</p>
           )}
-        </Card.Body>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 };
