@@ -90,7 +90,8 @@ const DoctorProfile = () => {
         </div>
       </div>
 
-      <div className="custom-tabs-container">
+     <div className="custom-tabs-container">
+        <div className="custom-tabs">
         <div className="custom-tabs">
           <div 
             className={`custom-tab ${activeTab === 'personal-info' ? 'active' : ''}`}
