@@ -1,7 +1,8 @@
-import { Layout, Table, Button } from "antd";
+import { Layout, Button, Table } from "antd";
 import { useState, useEffect } from "react";
 import { fetchUsersAPI, fetchScheduleAPI } from "../../services/api.service";
 import { useNavigate } from "react-router-dom";
+import AdminHeader from '../../components/layouts/admin/admin-header';
 
 const { Content } = Layout;
 
@@ -9,7 +10,6 @@ const Staff = () => {
     const [data, setData] = useState([])
     const [schedule, setSchedule] = useState([])
     const [patient, setPatient] = useState([])
-    
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -90,15 +90,13 @@ const Staff = () => {
 
     return (
         <Layout>
-           {/* <StaffHeader/> */}
-           <Layout>
-                <Content>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '15px' }}>
-                        <h2>Danh sách bệnh nhân</h2>
-                    </div>
-                    <Table columns={columns} dataSource={data} rowKey={(record) => record.id} />
-                </Content>
-           </Layout>
+            <AdminHeader />
+            <Content>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '15px' }}>
+                    <h2>Danh sách bệnh nhân</h2>
+                </div>
+                <Table columns={columns} dataSource={data} rowKey={(record) => record.id} />
+            </Content>
         </Layout>
     )
 }

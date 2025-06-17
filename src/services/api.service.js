@@ -113,10 +113,32 @@ const fetchTestResultByHealthRecordIdAPI = (healthRecordId) => {
     return axios.get(URL_BACKEND)
 }
 
-const updateHealthRecordAPI = (healthRecord) => {
+const updateHealthRecordAPI = (healthRecordId, healthRecordData) => {
     const URL_BACKEND = `/api/health-record/${healthRecordId}`
+    return axios.put(URL_BACKEND, healthRecordData)
+}
+
+const deleteTestResultAPI = (testResultId) => {
+    const URL_BACKEND = `/api/test-result/${testResultId}`
+    return axios.delete(URL_BACKEND)
+}
+
+const createTestResultAPI = (type, note, expectedResultTime, healthRecordId) => {
+    const testResultData = {
+        type,
+        note,
+        expectedResultTime,
+        healthRecordId,
+    }
+    const URL_BACKEND = 'api/test-result'
+    return axios.post(URL_BACKEND, testResultData)
+}
+
+const updateTestResultAPI = (testResultId) => {
+    const URL_BACKEND = `api/test-result/${testResultId}`
     return axios.put(URL_BACKEND)
 }
+
 
 export {
     loginAPI,
@@ -135,5 +157,8 @@ export {
     fetchUsersAPI,
     fetchHealthRecordByScheduleIdAPI,
     fetchTestResultByHealthRecordIdAPI,
-    updateHealthRecordAPI
+    updateHealthRecordAPI,
+    deleteTestResultAPI,
+    createTestResultAPI,
+    updateTestResultAPI
 }
