@@ -1,15 +1,8 @@
-<<<<<<< HEAD
 import { Layout, Button, Table } from "antd";
 import { useState, useEffect } from "react";
 import { fetchUsersAPI, fetchScheduleAPI } from "../../services/api.service";
 import { useNavigate } from "react-router-dom";
 import AdminHeader from '../../components/layouts/admin/admin-header';
-=======
-import { Layout, Table, Button } from "antd";
-import { useState, useEffect } from "react";
-import { fetchUsersAPI, fetchScheduleAPI } from "../../services/api.service";
-import { useNavigate } from "react-router-dom";
->>>>>>> 01a32a036ebce419dcf4e532761457025799d41a
 
 const { Content } = Layout;
 
@@ -17,10 +10,7 @@ const Staff = () => {
     const [data, setData] = useState([])
     const [schedule, setSchedule] = useState([])
     const [patient, setPatient] = useState([])
-<<<<<<< HEAD
-=======
     
->>>>>>> 01a32a036ebce419dcf4e532761457025799d41a
     const navigate = useNavigate();
 
     useEffect(() => {
