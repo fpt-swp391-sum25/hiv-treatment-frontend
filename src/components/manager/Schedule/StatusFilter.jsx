@@ -15,6 +15,7 @@ const StatusFilter = ({ selectedStatus, onStatusSelect }) => {
             <Form.Select
                 value={selectedStatus || ''}
                 onChange={handleStatusChange}
+                className="custom-select"
             >
                 <option value="">Tất cả trạng thái</option>
                 <option value={ScheduleStatus.AVAILABLE}>Làm việc</option>

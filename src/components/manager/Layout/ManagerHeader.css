@@ -15,8 +15,8 @@
 }
 
 .logo-container {
-  width: 180px;
-  height: 60px;
+  width: 240px;
+  height: 80px;
   display: flex;
   align-items: center;
 }
@@ -24,9 +24,9 @@
 .app-logo {
   width: 100%;
   height: auto;
-  max-height: 50px;
+  max-height: 70px;
   object-fit: contain;
-  border-radius: 30px / 15px; /* Tạo hình ellipse */
+  border-radius: 35px / 20px; /* Tạo hình ellipse */
 }
 
 .header-center {
@@ -75,8 +75,12 @@
   }
 
   .logo-container {
-    width: 120px;
-    height: 40px;
+    width: 180px;
+    height: 60px;
+  }
+
+  .app-logo {
+    max-height: 50px;
   }
 
   .user-avatar-container {
