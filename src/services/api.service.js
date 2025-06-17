@@ -200,14 +200,8 @@ export {
     fetchUsersAPI,
     fetchHealthRecordByScheduleIdAPI,
     fetchTestResultByHealthRecordIdAPI,
-<<<<<<< HEAD
     updateHealthRecordAPI,
     deleteTestResultAPI,
     createTestResultAPI,
     updateTestResultAPI
-=======
-    updateHealthRecordAPI
-
-
->>>>>>> 01a32a036ebce419dcf4e532761457025799d41a
 }
