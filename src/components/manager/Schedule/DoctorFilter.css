@@ -1,47 +1,47 @@
 .doctor-filter {
-    margin-bottom: 1rem;
+  margin-bottom: 1rem;
 }
 
 .doctor-select {
-    max-width: 300px;
+  max-width: 300px;
 }
 
 .doctor-filter .input-group-text {
-    background-color: #fff;
-    color: #0d6efd;
+  background-color: #fff;
+  color: #0d6efd;
 }
 
 .doctor-filter .form-select:focus {
-    border-color: #86b7fe;
-    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+  border-color: #86b7fe;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
 }
 
 /* Styling for Doctor Filter */
 .form-select {
-  border-radius: 8px;
-  border: 1px solid #e0e0e0;
-  padding: 10px 15px;
-  font-size: 14px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-  background-color: white;
-  color: #333;
-  appearance: auto;
+border-radius: 8px;
+border: 1px solid #e0e0e0;
+padding: 10px 15px;
+font-size: 14px;
+box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+transition: all 0.3s ease;
+background-color: white;
+color: #333;
+appearance: none;
 }
 
 .form-select:focus {
-  border-color: #4daddf;
-  box-shadow: 0 0 0 0.2rem rgba(77, 173, 223, 0.25);
+border-color: #4daddf;
+box-shadow: 0 0 0 0.2rem rgba(77, 173, 223, 0.25);
 }
 
 .form-label {
-  font-weight: 600;
-  font-size: 14px;
-  margin-bottom: 8px;
-  color: #333;
+font-weight: 600;
+font-size: 14px;
+margin-bottom: 8px;
+color: #333;
 }
 
 /* Gradient border on hover */
 .form-select:hover {
-  border-color: #4daddf;
+border-color: #4daddf;
 }

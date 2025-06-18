@@ -12,7 +12,7 @@
     transition: all 0.3s ease;
     background-color: white;
     color: #333;
-    appearance: auto;
+    appearance: none;
 }
 
 .status-filter .form-select:focus {

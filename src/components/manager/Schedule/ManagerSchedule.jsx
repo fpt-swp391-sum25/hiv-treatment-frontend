@@ -8,6 +8,7 @@ import { Row, Col, ToastContainer, Toast } from 'react-bootstrap';
 import { BsCalendarPlus } from 'react-icons/bs';
 import moment from 'moment';
 import './CustomButtons.css';
+import './Schedule.css';
 
 const ManagerSchedule = () => {
     const [showForm, setShowForm] = useState(false);
@@ -56,28 +57,7 @@ const ManagerSchedule = () => {
                 afternoon: false,
                 note: 'Nghỉ phép cả ngày'
             },
-            {
-                id: 4,
-                title: 'BS. Phát - Họp',
-                date: moment().add(3, 'days').format('YYYY-MM-DD'),
-                status: 'in_meeting',
-                doctorId: 1,
-                doctorName: 'BS. Phát',
-                morning: false,
-                afternoon: false,
-                note: 'Họp hội đồng'
-            },
-            {
-                id: 5,
-                title: 'BS. Sơn - Làm việc',
-                date: moment().add(4, 'days').format('YYYY-MM-DD'),
-                status: 'available',
-                doctorId: 2,
-                doctorName: 'BS. Sơn',
-                morning: true,
-                afternoon: true,
-                note: 'Làm việc cả ngày'
-            }
+
         ];
 
         setSchedules(mockSchedules);
@@ -139,7 +119,9 @@ const ManagerSchedule = () => {
 
     return (
         <div className="container-fluid py-4">
-            <h2 className="mb-4">Quản lý lịch làm việc</h2>
+            <div className="schedule-header">
+                <h1 className="schedule-title text-center">Quản lý lịch làm việc</h1>
+            </div>
 
             <ToastContainer position="top-end" className="p-3" style={{ zIndex: 1070 }}>
                 <Toast 

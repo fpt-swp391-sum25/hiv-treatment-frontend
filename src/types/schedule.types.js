@@ -17,7 +17,6 @@ export const ScheduleStatus = {
     // Trạng thái làm việc của bác sĩ
     AVAILABLE: 'available',
     ON_LEAVE: 'on_leave',
-    IN_MEETING: 'in_meeting',
     UNAVAILABLE: 'UNAVAILABLE'   // Không làm việc
 };
 

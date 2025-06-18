@@ -11,7 +11,8 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         morning: true,
         afternoon: true,
         note: '',
-        doctorId: selectedDoctor || ''
+        doctorId: selectedDoctor || '',
+        repeatSchedule: false
     });
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -37,21 +38,37 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                 morning: true,
                 afternoon: true,
                 note: '',
-                doctorId: selectedDoctor || ''
+                doctorId: selectedDoctor || '',
+                repeatSchedule: false
             });
             setError(null);
         }
     }, [show, selectedDoctor]);
 
     // Kiểm tra xem bác sĩ đã có lịch vào ngày được chọn chưa
-    const checkDoctorScheduleExists = () => {
+    const checkDoctorScheduleExists = (date) => {
         if (!formData.doctorId) return false;
         
-        const selectedDateStr = moment(selectedDate).format('YYYY-MM-DD');
+        const checkDateStr = moment(date).format('YYYY-MM-DD');
         return existingSchedules.some(schedule => 
             schedule.doctorId.toString() === formData.doctorId.toString() && 
-            schedule.date === selectedDateStr
+            schedule.date === checkDateStr
         );
+    };
+
+    // Lấy tên thứ trong tuần từ ngày
+    const getDayOfWeekName = (date) => {
+        const dayOfWeekMap = {
+            0: 'Chủ nhật',
+            1: 'Thứ hai',
+            2: 'Thứ ba',
+            3: 'Thứ tư',
+            4: 'Thứ năm',
+            5: 'Thứ sáu',
+            6: 'Thứ bảy'
+        };
+        
+        return dayOfWeekMap[moment(date).day()];
     };
 
     const handleSubmit = async (e) => {
@@ -64,7 +81,7 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         }
         
         // Kiểm tra xem bác sĩ đã có lịch vào ngày này chưa
-        if (checkDoctorScheduleExists()) {
+        if (checkDoctorScheduleExists(selectedDate)) {
             setError('Bác sĩ này đã có lịch làm việc vào ngày đã chọn. Vui lòng chỉnh sửa lịch hiện có hoặc chọn ngày khác.');
             return;
         }
@@ -77,25 +94,70 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             const selectedDoctor = doctors.find(d => d.id.toString() === formData.doctorId.toString());
             const doctorName = selectedDoctor ? selectedDoctor.name : '';
             
+            // Danh sách lịch cần tạo (bao gồm cả lịch lặp lại nếu có)
+            const schedulesToCreate = [];
+            
+            // Tạo lịch cho ngày hiện tại
             const scheduleData = {
                 ...formData,
                 date: moment(selectedDate).format('YYYY-MM-DD'),
                 title: `${doctorName} - ${getStatusLabel(formData.status)}`,
                 doctorName
             };
-
-            // Tạo một lịch làm việc mẫu để hiển thị
+            
             const mockResponse = {
                 id: Math.floor(Math.random() * 1000) + 6, // Random ID từ 6-1005
                 ...scheduleData,
             };
             
-            onScheduleCreated(mockResponse);
+            schedulesToCreate.push(mockResponse);
             
-            // Gửi thông báo thành công lên component cha để hiển thị
-            if (onShowToast) {
-                onShowToast(`Đặt lịch cho bác sĩ ${doctorName} thành công!`, 'success');
+            // Nếu lặp lại lịch, thêm lịch cho 4 tuần tiếp theo
+            if (formData.repeatSchedule) {
+                const dayOfWeek = moment(selectedDate).day(); // Lấy thứ trong tuần (0 = CN, 1 = T2,...)
+                let skippedDates = 0;
+                
+                for (let i = 1; i <= 4; i++) {
+                    const nextWeekDay = moment(selectedDate).add(i * 7, 'days');
+                    
+                    // Kiểm tra xem bác sĩ đã có lịch vào ngày này chưa
+                    if (checkDoctorScheduleExists(nextWeekDay)) {
+                        skippedDates++;
+                        continue;
+                    }
+                    
+                    const nextWeekSchedule = {
+                        ...formData,
+                        date: nextWeekDay.format('YYYY-MM-DD'),
+                        title: `${doctorName} - ${getStatusLabel(formData.status)}`,
+                        doctorName
+                    };
+                    
+                    const nextWeekMockResponse = {
+                        id: Math.floor(Math.random() * 1000) + 500 + i, // Random ID từ 506-510
+                        ...nextWeekSchedule,
+                    };
+                    
+                    schedulesToCreate.push(nextWeekMockResponse);
+                }
+                
+                // Hiển thị thông báo tương ứng
+                if (skippedDates > 0) {
+                    onShowToast(`Đã đặt lịch thành công cho ngày đầu tiên và ${4 - skippedDates} tuần tiếp theo. (Bỏ qua ${skippedDates} ngày đã có lịch)`, 'warning');
+                } else {
+                    onShowToast(`Đã đặt lịch thành công cho ngày đầu tiên và 4 tuần tiếp theo.`, 'success');
+                }
+            } else {
+                // Gửi thông báo thành công lên component cha để hiển thị
+                if (onShowToast) {
+                    onShowToast(`Đặt lịch cho bác sĩ ${doctorName} thành công!`, 'success');
+                }
             }
+            
+            // Gửi tất cả lịch đã tạo lên component cha
+            schedulesToCreate.forEach(schedule => {
+                onScheduleCreated(schedule);
+            });
             
             onHide();
         } catch (err) {
@@ -111,8 +173,6 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                 return 'Làm việc';
             case ScheduleStatus.ON_LEAVE:
                 return 'Nghỉ phép';
-            case ScheduleStatus.IN_MEETING:
-                return 'Họp';
             default:
                 return '';
         }
@@ -134,6 +194,9 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                             value={moment(selectedDate).format('DD/MM/YYYY')}
                             disabled
                         />
+                        <Form.Text className="text-muted">
+                            {getDayOfWeekName(selectedDate)}
+                        </Form.Text>
                     </Form.Group>
 
                     <Form.Group className="mb-3">
@@ -161,7 +224,6 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                         >
                             <option value={ScheduleStatus.AVAILABLE}>Làm việc</option>
                             <option value={ScheduleStatus.ON_LEAVE}>Nghỉ phép</option>
-                            <option value={ScheduleStatus.IN_MEETING}>Họp</option>
                         </Form.Select>
                     </Form.Group>
 
@@ -191,6 +253,22 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                             </Form.Group>
                         </Col>
                     </Row>
+
+                    <Form.Group className="mb-3 repeat-schedule-option">
+                        <Form.Check 
+                            type="checkbox"
+                            id="repeat-check"
+                            label="Lặp lại lịch này vào các tuần sau (4 tuần)"
+                            checked={formData.repeatSchedule}
+                            onChange={(e) => setFormData({...formData, repeatSchedule: e.target.checked})}
+                        />
+                        {formData.repeatSchedule && (
+                            <div className="repeat-info mt-2">
+                                <p className="mb-0">Lịch sẽ được tạo cho mỗi <strong>{getDayOfWeekName(selectedDate)}</strong> trong 4 tuần tới</p>
+                                <p className="text-muted small">Lưu ý: Hệ thống sẽ bỏ qua những ngày đã có lịch làm việc</p>
+                            </div>
+                        )}
+                    </Form.Group>
 
                     <Form.Group className="mb-3">
                         <Form.Label>Ghi chú</Form.Label>

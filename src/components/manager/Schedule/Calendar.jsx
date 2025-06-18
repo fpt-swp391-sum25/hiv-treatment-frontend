@@ -16,8 +16,18 @@ const Calendar = ({ events, onDateSelect, onEventSelect }) => {
     const calendarRef = React.useRef(null);
     
     const handleDateSelect = (selectInfo) => {
+        const selectedDate = selectInfo.start;
+        const dayOfWeek = moment(selectedDate).day();
+        
+        // Kiểm tra xem ngày được chọn có phải là Chủ nhật không
+        if (dayOfWeek === 0) {
+            // Nếu là Chủ nhật, hiển thị thông báo hoặc vô hiệu hóa
+            alert('Chủ nhật là ngày nghỉ. Vui lòng chọn ngày khác từ thứ Hai đến thứ Bảy.');
+            return;
+        }
+        
         // Vẫn cho phép chọn ngày quá khứ, nhưng component cha sẽ xử lý logic cảnh báo
-        onDateSelect(selectInfo.start);
+        onDateSelect(selectedDate);
     };
 
     const handleEventClick = (clickInfo) => {
@@ -50,7 +60,7 @@ const Calendar = ({ events, onDateSelect, onEventSelect }) => {
         };
     });
 
-    // Render content cho ngày quá khứ
+    // Render content cho ngày quá khứ và Chủ nhật
     const dayCellDidMount = (info) => {
         const date = info.date;
         const today = new Date();
@@ -59,6 +69,12 @@ const Calendar = ({ events, onDateSelect, onEventSelect }) => {
         if (date < today) {
             // Thêm class cho ngày đã qua
             info.el.classList.add('fc-day-past');
+        }
+        
+        // Nếu là Chủ nhật, thêm class để hiển thị khác
+        if (date.getDay() === 0) {
+            info.el.classList.add('fc-day-sunday');
+            info.el.classList.add('fc-day-disabled');
         }
     };
 
