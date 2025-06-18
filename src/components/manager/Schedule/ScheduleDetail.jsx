@@ -1,124 +1,165 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Form, Button, Row, Col } from 'react-bootstrap';
-import { ScheduleType, ScheduleStatus, SlotTimes } from '../../../types/schedule.types';
-import { scheduleService } from '../../../services/schedule.service';
+import { ScheduleStatus } from '../../../types/schedule.types';
 import './ScheduleDetail.css';
 
-const ScheduleDetail = ({ show, onHide, scheduleId, onDelete, onUpdate }) => {
-    const [schedule, setSchedule] = useState(null);
+const ScheduleDetail = ({ show, onHide, schedule, onDelete, onUpdate, onShowToast }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({
-        type: '',
         status: '',
-        slot: '',
+        morning: true,
+        afternoon: true,
         note: ''
     });
 
     useEffect(() => {
-        if (scheduleId) {
-            loadScheduleDetails();
-        }
-    }, [scheduleId]);
-
-    const loadScheduleDetails = async () => {
-        try {
-            const data = await scheduleService.getScheduleById(scheduleId);
-            setSchedule(data);
+        if (schedule) {
             setFormData({
-                type: data.type,
-                status: data.status,
-                slot: data.slot,
-                note: data.note
+                status: schedule.status,
+                morning: schedule.morning !== undefined ? schedule.morning : true,
+                afternoon: schedule.afternoon !== undefined ? schedule.afternoon : true,
+                note: schedule.note || ''
             });
-        } catch (error) {
-            console.error('Error loading schedule details:', error);
+        }
+    }, [schedule]);
+
+    const handleUpdate = () => {
+        const updatedSchedule = {
+            ...schedule,
+            ...formData,
+            title: `${schedule.doctorName} - ${getStatusLabel(formData.status)}`
+        };
+        onUpdate(updatedSchedule);
+        setIsEditing(false);
+        
+        // Gửi thông báo thành công lên component cha
+        if (onShowToast) {
+            onShowToast(`Cập nhật lịch làm việc cho bác sĩ ${schedule.doctorName} thành công!`, 'success');
         }
     };
 
-    const handleUpdate = async () => {
-        try {
-            await scheduleService.updateSchedule(scheduleId, formData);
-            onUpdate();
-            setIsEditing(false);
-        } catch (error) {
-            console.error('Error updating schedule:', error);
-        }
-    };
-
-    const handleDelete = async () => {
-        if (window.confirm('Bạn có chắc muốn xóa lịch hẹn này?')) {
-            try {
-                await scheduleService.deleteSchedule(scheduleId);
-                onDelete();
-                onHide();
-            } catch (error) {
-                console.error('Error deleting schedule:', error);
+    const handleDelete = () => {
+        if (window.confirm('Bạn có chắc muốn xóa lịch làm việc này?')) {
+            onDelete(schedule.id);
+            
+            // Gửi thông báo thành công lên component cha
+            if (onShowToast) {
+                onShowToast(`Xóa lịch làm việc cho bác sĩ ${schedule.doctorName} thành công!`, 'success');
             }
+            
+            onHide();
+        }
+    };
+
+    const getStatusLabel = (status) => {
+        switch (status) {
+            case ScheduleStatus.AVAILABLE:
+                return 'Làm việc';
+            case ScheduleStatus.ON_LEAVE:
+                return 'Nghỉ phép';
+            case ScheduleStatus.IN_MEETING:
+                return 'Họp';
+            default:
+                return status;
+        }
+    };
+
+    const getStatusClass = (status) => {
+        switch (status) {
+            case ScheduleStatus.AVAILABLE:
+                return 'text-success';
+            case ScheduleStatus.ON_LEAVE:
+                return 'text-warning';
+            case ScheduleStatus.IN_MEETING:
+                return 'text-primary';
+            default:
+                return '';
         }
     };
 
     return (
         <Modal show={show} onHide={onHide} size="lg" centered className="schedule-detail-modal">
             <Modal.Header closeButton>
-                <Modal.Title>Chi tiết lịch hẹn</Modal.Title>
+                <Modal.Title>Chi tiết lịch làm việc</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 {schedule && (
                     <Form>
-                        <Row>
+                        <Row className="mb-3">
                             <Col md={6}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Loại lịch hẹn</Form.Label>
-                                    <Form.Select
-                                        value={formData.type}
-                                        onChange={(e) => setFormData({...formData, type: e.target.value})}
-                                        disabled={!isEditing}
-                                    >
-                                        {Object.entries(ScheduleType).map(([key, value]) => (
-                                            <option key={key} value={value}>
-                                                {key === 'EXAMINATION' ? 'Khám thông thường' :
-                                                 key === 'EMERGENCY' ? 'Khám khẩn cấp' :
-                                                 key === 'FOLLOW_UP' ? 'Tái khám' : 'Tư vấn'}
-                                            </option>
-                                        ))}
-                                    </Form.Select>
+                                <Form.Group>
+                                    <Form.Label>Bác sĩ</Form.Label>
+                                    <Form.Control 
+                                        type="text" 
+                                        value={schedule.doctorName} 
+                                        disabled 
+                                    />
                                 </Form.Group>
                             </Col>
                             <Col md={6}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Trạng thái</Form.Label>
-                                    <Form.Select
-                                        value={formData.status}
-                                        onChange={(e) => setFormData({...formData, status: e.target.value})}
-                                        disabled={!isEditing}
-                                    >
-                                        {Object.entries(ScheduleStatus).map(([key, value]) => (
-                                            <option key={key} value={value}>
-                                                {key === 'PENDING' ? 'Chờ xác nhận' :
-                                                 key === 'CONFIRMED' ? 'Đã xác nhận' :
-                                                 key === 'CANCELLED' ? 'Đã hủy' :
-                                                 key === 'COMPLETED' ? 'Đã hoàn thành' : 'Không đến khám'}
-                                            </option>
-                                        ))}
-                                    </Form.Select>
-                                </Form.Group>
-                            </Col>
-                        </Row>
-
-                        <Row>
-                            <Col md={12}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Ghi chú</Form.Label>
-                                    <Form.Control
-                                        as="textarea"
-                                        rows={3}
-                                        value={formData.note}
-                                        onChange={(e) => setFormData({...formData, note: e.target.value})}
-                                        disabled={!isEditing}
+                                <Form.Group>
+                                    <Form.Label>Ngày</Form.Label>
+                                    <Form.Control 
+                                        type="text" 
+                                        value={schedule.date} 
+                                        disabled 
                                     />
                                 </Form.Group>
                             </Col>
                         </Row>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label>Trạng thái</Form.Label>
+                            <Form.Select
+                                value={formData.status}
+                                onChange={(e) => setFormData({...formData, status: e.target.value})}
+                                disabled={!isEditing}
+                                className={getStatusClass(formData.status)}
+                            >
+                                <option value={ScheduleStatus.AVAILABLE}>Làm việc</option>
+                                <option value={ScheduleStatus.ON_LEAVE}>Nghỉ phép</option>
+                                <option value={ScheduleStatus.IN_MEETING}>Họp</option>
+                            </Form.Select>
+                        </Form.Group>
+
+                        <Row>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Check 
+                                        type="checkbox"
+                                        id="morning-check-detail"
+                                        label="Buổi sáng (8:00 - 11:00)"
+                                        checked={formData.morning}
+                                        onChange={(e) => setFormData({...formData, morning: e.target.checked})}
+                                        disabled={!isEditing || formData.status !== ScheduleStatus.AVAILABLE}
+                                    />
+                                </Form.Group>
+                            </Col>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Check 
+                                        type="checkbox"
+                                        id="afternoon-check-detail"
+                                        label="Buổi chiều (13:00 - 16:00)"
+                                        checked={formData.afternoon}
+                                        onChange={(e) => setFormData({...formData, afternoon: e.target.checked})}
+                                        disabled={!isEditing || formData.status !== ScheduleStatus.AVAILABLE}
+                                    />
+                                </Form.Group>
+                            </Col>
+                        </Row>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label>Ghi chú</Form.Label>
+                            <Form.Control
+                                as="textarea"
+                                rows={3}
+                                value={formData.note}
+                                onChange={(e) => setFormData({...formData, note: e.target.value})}
+                                disabled={!isEditing}
+                                placeholder="Không có ghi chú"
+                            />
+                        </Form.Group>
                     </Form>
                 )}
             </Modal.Body>

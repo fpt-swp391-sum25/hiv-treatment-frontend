@@ -1,39 +1,28 @@
 import React from 'react';
-import { Form, Button } from 'react-bootstrap';
+import { Form } from 'react-bootstrap';
 import { ScheduleStatus } from '../../../types/schedule.types';
 import './StatusFilter.css';
 
-const StatusFilter = ({ selectedStatus, onStatusChange, onReset }) => {
-    const statusLabels = {
-        [ScheduleStatus.PENDING]: 'Chờ xác nhận',
-        [ScheduleStatus.CONFIRMED]: 'Đã xác nhận',
-        [ScheduleStatus.CANCELLED]: 'Đã hủy',
-        [ScheduleStatus.COMPLETED]: 'Đã hoàn thành',
-        [ScheduleStatus.NO_SHOW]: 'Không đến khám'
+const StatusFilter = ({ selectedStatus, onStatusSelect }) => {
+    const handleStatusChange = (e) => {
+        const value = e.target.value;
+        onStatusSelect(value ? value : null);
     };
 
     return (
-        <div className="status-filter d-flex align-items-center">
-            <Form.Select 
-                value={selectedStatus || ''} 
-                onChange={(e) => onStatusChange(e.target.value)}
-                className="status-select me-2"
+        <Form.Group className="mb-3">
+            <Form.Label>Trạng thái:</Form.Label>
+            <Form.Select
+                value={selectedStatus || ''}
+                onChange={handleStatusChange}
+                className="custom-select"
             >
                 <option value="">Tất cả trạng thái</option>
-                {Object.entries(statusLabels).map(([status, label]) => (
-                    <option key={status} value={status}>
-                        {label}
-                    </option>
-                ))}
+                <option value={ScheduleStatus.AVAILABLE}>Làm việc</option>
+                <option value={ScheduleStatus.ON_LEAVE}>Nghỉ phép</option>
+                <option value={ScheduleStatus.IN_MEETING}>Họp</option>
             </Form.Select>
-            <Button 
-                variant="outline-secondary" 
-                size="sm"
-                onClick={onReset}
-            >
-                Đặt lại
-            </Button>
-        </div>
+        </Form.Group>
     );
 };
 
