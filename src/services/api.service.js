@@ -37,6 +37,14 @@ const bookingAPI = (values) => {
     return axios.post(URL_BACKEND, data)
 }
 
+const cancelBookingAPI = (scheduleId, patientId) => {
+    const URL_BACKEND = `/api/schedule/${scheduleId}/cancel`
+
+    return axios.delete(URL_BACKEND, {
+        header: { patientId: patientId.toString() },
+    })
+}
+
 const fetchAllScheduleAPI = (doctorId, date) => {
     const URL_BACKEND = '/api/schedule'
     return axios.get(URL_BACKEND, {
@@ -154,6 +162,11 @@ const updateHealthRecordAPI = (healthRecord) => {
     return axios.put(URL_BACKEND)
 }
 
+const fetchUserInfoAPI = (id) => {
+    const URL_BACKEND = `/api/user/userId/${id}`
+    return axios.get(URL_BACKEND)
+}
+
 export {
     loginAPI,
     registerAPI,
@@ -172,7 +185,7 @@ export {
     registerScheduleAPI,
     handlePaymentCallbackAPI,
     logoutAPI,
-
+    fetchUserInfoAPI,
     fetchAllDoctorsAPI,
     fetchAllDocumentsAPI,
     fetchUsersAPI,
