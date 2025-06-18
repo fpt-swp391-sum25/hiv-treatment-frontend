@@ -1,53 +1,90 @@
 .doctor-profile-container {
-  padding: 20px;
+  padding: 30px;
   max-width: 1200px;
   margin: 0 auto;
+  background-color: #f8f9fa;
 }
 
 .profile-card {
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 15px;
+  box-shadow: 0 8px 24px rgba(149, 157, 165, 0.2);
+  background-color: white;
   overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.profile-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 30px rgba(149, 157, 165, 0.3);
 }
 
 .profile-image-section {
   text-align: center;
-  padding: 20px;
+  padding: 30px;
+  background: linear-gradient(135deg, #00b4db, #0083b0);
+  color: white;
 }
 
 .profile-image {
-  width: 150px;
-  height: 150px;
+  width: 180px;
+  height: 180px;
   object-fit: cover;
   border-radius: 50%;
-  margin-bottom: 20px;
-  border: 3px solid #f0f0f0;
+  margin-bottom: 25px;
+  border: 4px solid white;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.profile-image:hover {
+  transform: scale(1.05);
 }
 
 .doctor-name {
-  font-size: 1.5rem;
-  margin-bottom: 5px;
-  color: #333;
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .doctor-specialty {
-  color: #666;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.1rem;
   margin-bottom: 20px;
+  font-weight: 500;
 }
 
 .profile-tabs {
-  margin-top: 20px;
+  margin-top: 30px;
+  padding: 0 20px;
+}
+
+.nav-tabs {
+  border-bottom: 2px solid #e9ecef;
+  gap: 10px;
 }
 
 .nav-tabs .nav-link {
   color: #495057;
   font-weight: 500;
-  padding: 10px 20px;
+  padding: 15px 25px;
+  border: none;
+  border-radius: 8px 8px 0 0;
+  transition: all 0.3s ease;
+  margin-bottom: -2px;
+}
+
+.nav-tabs .nav-link:hover {
+  color: #0083b0;
+  background-color: rgba(0, 131, 176, 0.1);
 }
 
 .nav-tabs .nav-link.active {
-  color: #007bff;
+  color: #0083b0;
   font-weight: 600;
+  border-bottom: 2px solid #0083b0;
+  background-color: white;
 }
 
 .tab-content {
