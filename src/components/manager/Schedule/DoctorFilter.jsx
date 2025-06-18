@@ -27,6 +27,7 @@ const DoctorFilter = ({ selectedDoctor, onDoctorSelect }) => {
       <Form.Select
         value={selectedDoctor || ''}
         onChange={handleDoctorChange}
+        className="custom-select"
       >
         <option value="">Tất cả bác sĩ</option>
         {doctors.map(doctor => (

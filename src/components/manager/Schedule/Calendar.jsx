@@ -6,11 +6,14 @@ import interactionPlugin from '@fullcalendar/interaction';
 import bootstrap5Plugin from '@fullcalendar/bootstrap5';
 import viLocale from '@fullcalendar/core/locales/vi';
 import moment from 'moment';
+import { BsChevronLeft, BsChevronRight } from 'react-icons/bs';
 import './Calendar.css';
+import './CustomButtons.css';
 import { ScheduleStatus } from '../../../types/schedule.types';
 
 const Calendar = ({ events, onDateSelect, onEventSelect }) => {
     const [view, setView] = useState('dayGridMonth');
+    const calendarRef = React.useRef(null);
     
     const handleDateSelect = (selectInfo) => {
         // Vẫn cho phép chọn ngày quá khứ, nhưng component cha sẽ xử lý logic cảnh báo
@@ -83,39 +86,111 @@ const Calendar = ({ events, onDateSelect, onEventSelect }) => {
         );
     };
 
+    // Xử lý chuyển đến ngày hôm nay
+    const handleTodayClick = () => {
+        if (calendarRef.current) {
+            const calendarApi = calendarRef.current.getApi();
+            calendarApi.today();
+        }
+    };
+
+    // Xử lý chuyển tháng trước
+    const handlePrevClick = () => {
+        if (calendarRef.current) {
+            const calendarApi = calendarRef.current.getApi();
+            calendarApi.prev();
+        }
+    };
+
+    // Xử lý chuyển tháng sau
+    const handleNextClick = () => {
+        if (calendarRef.current) {
+            const calendarApi = calendarRef.current.getApi();
+            calendarApi.next();
+        }
+    };
+
+    // Xử lý thay đổi view
+    const handleViewChange = (newView) => {
+        if (calendarRef.current) {
+            const calendarApi = calendarRef.current.getApi();
+            calendarApi.changeView(newView);
+            setView(newView);
+        }
+    };
+
+    // Custom toolbar
     const renderToolbar = () => {
         return {
-            left: 'prev,next today',
+            left: '',
             center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            right: ''
         };
     };
 
     return (
-        <div className="calendar-wrapper">
-            <FullCalendar
-                plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, bootstrap5Plugin]}
-                initialView="dayGridMonth"
-                headerToolbar={renderToolbar()}
-                selectable={true}
-                selectMirror={true}
-                dayMaxEvents={true}
-                weekends={true}
-                events={calendarEvents}
-                select={handleDateSelect}
-                eventClick={handleEventClick}
-                eventContent={eventContent}
-                height="auto"
-                locale={viLocale}
-                themeSystem="bootstrap5"
-                dayCellDidMount={dayCellDidMount}
-                viewDidMount={setView}
-                businessHours={{
-                    daysOfWeek: [1, 2, 3, 4, 5, 6], // Thứ 2 đến thứ 7
-                    startTime: '08:00',
-                    endTime: '17:00',
-                }}
-            />
+        <div className="calendar-container">
+            <div className="calendar-controls mb-3 d-flex justify-content-between align-items-center">
+                <div className="d-flex align-items-center">
+                    <button className="calendar-nav-button" onClick={handlePrevClick}>
+                        <BsChevronLeft />
+                    </button>
+                    <button className="today-button" onClick={handleTodayClick}>
+                        Hôm nay
+                    </button>
+                    <button className="calendar-nav-button" onClick={handleNextClick}>
+                        <BsChevronRight />
+                    </button>
+                </div>
+                
+                <div className="view-toggle-container">
+                    <button 
+                        className={`view-toggle-button ${view === 'dayGridMonth' ? 'active' : ''}`}
+                        onClick={() => handleViewChange('dayGridMonth')}
+                    >
+                        Tháng
+                    </button>
+                    <button 
+                        className={`view-toggle-button ${view === 'timeGridWeek' ? 'active' : ''}`}
+                        onClick={() => handleViewChange('timeGridWeek')}
+                    >
+                        Tuần
+                    </button>
+                    <button 
+                        className={`view-toggle-button ${view === 'timeGridDay' ? 'active' : ''}`}
+                        onClick={() => handleViewChange('timeGridDay')}
+                    >
+                        Ngày
+                    </button>
+                </div>
+            </div>
+
+            <div className="calendar-wrapper">
+                <FullCalendar
+                    ref={calendarRef}
+                    plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, bootstrap5Plugin]}
+                    initialView="dayGridMonth"
+                    headerToolbar={renderToolbar()}
+                    selectable={true}
+                    selectMirror={true}
+                    dayMaxEvents={true}
+                    weekends={true}
+                    events={calendarEvents}
+                    select={handleDateSelect}
+                    eventClick={handleEventClick}
+                    eventContent={eventContent}
+                    height="auto"
+                    locale={viLocale}
+                    themeSystem="bootstrap5"
+                    dayCellDidMount={dayCellDidMount}
+                    viewDidMount={(info) => setView(info.view.type)}
+                    businessHours={{
+                        daysOfWeek: [1, 2, 3, 4, 5, 6], // Thứ 2 đến thứ 7
+                        startTime: '08:00',
+                        endTime: '17:00',
+                    }}
+                />
+            </div>
         </div>
     );
 };

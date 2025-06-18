@@ -4,9 +4,10 @@ import DoctorFilter from './DoctorFilter';
 import StatusFilter from './StatusFilter';
 import ScheduleForm from './ScheduleForm';
 import ScheduleDetail from './ScheduleDetail';
-import { Row, Col, Button, ToastContainer, Toast } from 'react-bootstrap';
+import { Row, Col, ToastContainer, Toast } from 'react-bootstrap';
 import { BsCalendarPlus } from 'react-icons/bs';
 import moment from 'moment';
+import './CustomButtons.css';
 
 const ManagerSchedule = () => {
     const [showForm, setShowForm] = useState(false);
@@ -171,14 +172,13 @@ const ManagerSchedule = () => {
                     />
                 </Col>
                 <Col md={4} className="text-end">
-                    <Button 
-                        variant="primary" 
+                    <button 
+                        className="add-schedule-button"
                         onClick={() => handleAddClick(new Date())}
-                        className="d-inline-flex align-items-center"
                     >
-                        <BsCalendarPlus className="me-2" />
+                        <BsCalendarPlus className="add-schedule-button-icon" />
                         Thêm lịch mới
-                    </Button>
+                    </button>
                 </Col>
             </Row>
 
