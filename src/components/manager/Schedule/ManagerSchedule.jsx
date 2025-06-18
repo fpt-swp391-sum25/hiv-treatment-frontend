@@ -8,6 +8,7 @@ import { Row, Col, ToastContainer, Toast } from 'react-bootstrap';
 import { BsCalendarPlus } from 'react-icons/bs';
 import moment from 'moment';
 import './CustomButtons.css';
+import './Schedule.css';
 
 const ManagerSchedule = () => {
     const [showForm, setShowForm] = useState(false);
@@ -90,6 +91,12 @@ const ManagerSchedule = () => {
             return;
         }
         
+        // Kiểm tra xem ngày được chọn có phải là chủ nhật không
+        if (moment(date).day() === 0) { // 0 là chủ nhật trong moment
+            showToast('Hệ thống chỉ hoạt động từ thứ 2 đến thứ 7!', 'warning');
+            return;
+        }
+        
         setSelectedDate(date);
         setShowForm(true);
     };
@@ -139,7 +146,9 @@ const ManagerSchedule = () => {
 
     return (
         <div className="container-fluid py-4">
-            <h2 className="mb-4">Quản lý lịch làm việc</h2>
+            <div className="schedule-header-container">
+                <h1 className="schedule-title text-center mb-4">Quản lý lịch làm việc</h1>
+            </div>
 
             <ToastContainer position="top-end" className="p-3" style={{ zIndex: 1070 }}>
                 <Toast 

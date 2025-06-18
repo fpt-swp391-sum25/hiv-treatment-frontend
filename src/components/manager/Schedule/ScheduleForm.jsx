@@ -4,6 +4,8 @@ import { ScheduleStatus, SlotTimes } from '../../../types/schedule.types';
 import { scheduleService } from '../../../services/schedule.service';
 import moment from 'moment';
 import './ScheduleForm.css';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCreated, existingSchedules = [], onShowToast }) => {
     const [formData, setFormData] = useState({
@@ -11,11 +13,13 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         morning: true,
         afternoon: true,
         note: '',
-        doctorId: selectedDoctor || ''
+        doctorId: selectedDoctor || '',
+        date: selectedDate || new Date()
     });
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
     const [doctors, setDoctors] = useState([]);
+    const [workingMode, setWorkingMode] = useState('bothShifts'); // fullDay, morning, afternoon
 
     // Tải danh sách bác sĩ mẫu
     useEffect(() => {
@@ -37,17 +41,19 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                 morning: true,
                 afternoon: true,
                 note: '',
-                doctorId: selectedDoctor || ''
+                doctorId: selectedDoctor || '',
+                date: selectedDate || new Date()
             });
+            setWorkingMode('bothShifts');
             setError(null);
         }
-    }, [show, selectedDoctor]);
+    }, [show, selectedDoctor, selectedDate]);
 
     // Kiểm tra xem bác sĩ đã có lịch vào ngày được chọn chưa
     const checkDoctorScheduleExists = () => {
         if (!formData.doctorId) return false;
         
-        const selectedDateStr = moment(selectedDate).format('YYYY-MM-DD');
+        const selectedDateStr = moment(formData.date).format('YYYY-MM-DD');
         return existingSchedules.some(schedule => 
             schedule.doctorId.toString() === formData.doctorId.toString() && 
             schedule.date === selectedDateStr
@@ -77,9 +83,26 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             const selectedDoctor = doctors.find(d => d.id.toString() === formData.doctorId.toString());
             const doctorName = selectedDoctor ? selectedDoctor.name : '';
             
+            // Cập nhật morning và afternoon dựa trên workingMode
+            let updatedMorning = formData.morning;
+            let updatedAfternoon = formData.afternoon;
+            
+            if (workingMode === 'bothShifts') {
+                updatedMorning = true;
+                updatedAfternoon = true;
+            } else if (workingMode === 'morningOnly') {
+                updatedMorning = true;
+                updatedAfternoon = false;
+            } else if (workingMode === 'afternoonOnly') {
+                updatedMorning = false;
+                updatedAfternoon = true;
+            }
+            
             const scheduleData = {
                 ...formData,
-                date: moment(selectedDate).format('YYYY-MM-DD'),
+                morning: updatedMorning,
+                afternoon: updatedAfternoon,
+                date: moment(formData.date).format('YYYY-MM-DD'),
                 title: `${doctorName} - ${getStatusLabel(formData.status)}`,
                 doctorName
             };
@@ -118,8 +141,21 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         }
     };
 
+    const handleWorkingModeChange = (mode) => {
+        setWorkingMode(mode);
+        
+        // Cập nhật formData theo mode đã chọn
+        if (mode === 'bothShifts') {
+            setFormData({...formData, morning: true, afternoon: true});
+        } else if (mode === 'morningOnly') {
+            setFormData({...formData, morning: true, afternoon: false});
+        } else if (mode === 'afternoonOnly') {
+            setFormData({...formData, morning: false, afternoon: true});
+        }
+    };
+
     return (
-        <Modal show={show} onHide={onHide} centered>
+        <Modal show={show} onHide={onHide} centered className="schedule-form-modal">
             <Modal.Header closeButton>
                 <Modal.Title>Đặt lịch làm việc</Modal.Title>
             </Modal.Header>
@@ -129,10 +165,12 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                 <Form onSubmit={handleSubmit}>
                     <Form.Group className="mb-3">
                         <Form.Label>Ngày</Form.Label>
-                        <Form.Control
-                            type="text"
-                            value={moment(selectedDate).format('DD/MM/YYYY')}
-                            disabled
+                        <DatePicker
+                            selected={formData.date}
+                            onChange={date => setFormData({...formData, date})}
+                            dateFormat="dd/MM/yyyy"
+                            className="form-control"
+                            wrapperClassName="w-100"
                         />
                     </Form.Group>
 
@@ -142,6 +180,7 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                             value={formData.doctorId}
                             onChange={(e) => setFormData({...formData, doctorId: e.target.value})}
                             required
+                            className="custom-select"
                         >
                             <option value="">Chọn bác sĩ</option>
                             {doctors.map(doctor => (
@@ -158,6 +197,7 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                             value={formData.status}
                             onChange={(e) => setFormData({...formData, status: e.target.value})}
                             required
+                            className="custom-select"
                         >
                             <option value={ScheduleStatus.AVAILABLE}>Làm việc</option>
                             <option value={ScheduleStatus.ON_LEAVE}>Nghỉ phép</option>
@@ -165,32 +205,39 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                         </Form.Select>
                     </Form.Group>
 
-                    <Row>
-                        <Col md={6}>
-                            <Form.Group className="mb-3">
-                                <Form.Check 
-                                    type="checkbox"
-                                    id="morning-check"
+                    {formData.status === ScheduleStatus.AVAILABLE && (
+                        <Form.Group className="mb-3">
+                            <Form.Label>Ca làm việc</Form.Label>
+                            <div className="shift-options">
+                                <Form.Check
+                                    type="radio"
+                                    id="shift-both"
+                                    name="workingMode"
+                                    label="Cả ngày (8:00 - 16:00)"
+                                    checked={workingMode === 'bothShifts'}
+                                    onChange={() => handleWorkingModeChange('bothShifts')}
+                                    className="mb-2"
+                                />
+                                <Form.Check
+                                    type="radio"
+                                    id="shift-morning"
+                                    name="workingMode"
                                     label="Buổi sáng (8:00 - 11:00)"
-                                    checked={formData.morning}
-                                    onChange={(e) => setFormData({...formData, morning: e.target.checked})}
-                                    disabled={formData.status !== ScheduleStatus.AVAILABLE}
+                                    checked={workingMode === 'morningOnly'}
+                                    onChange={() => handleWorkingModeChange('morningOnly')}
+                                    className="mb-2"
                                 />
-                            </Form.Group>
-                        </Col>
-                        <Col md={6}>
-                            <Form.Group className="mb-3">
-                                <Form.Check 
-                                    type="checkbox"
-                                    id="afternoon-check"
+                                <Form.Check
+                                    type="radio"
+                                    id="shift-afternoon"
+                                    name="workingMode"
                                     label="Buổi chiều (13:00 - 16:00)"
-                                    checked={formData.afternoon}
-                                    onChange={(e) => setFormData({...formData, afternoon: e.target.checked})}
-                                    disabled={formData.status !== ScheduleStatus.AVAILABLE}
+                                    checked={workingMode === 'afternoonOnly'}
+                                    onChange={() => handleWorkingModeChange('afternoonOnly')}
                                 />
-                            </Form.Group>
-                        </Col>
-                    </Row>
+                            </div>
+                        </Form.Group>
+                    )}
 
                     <Form.Group className="mb-3">
                         <Form.Label>Ghi chú</Form.Label>
