@@ -7,10 +7,9 @@ import '../../styles/doctor/DoctorProfile.css';
 const DoctorApp = () => {
   return (
     <div className="doctor-app">
-      <Container fluid className="py-4">
+      <Container >
         <Outlet />
       </Container>
-      <AppFooter />
     </div>
   );
 };
