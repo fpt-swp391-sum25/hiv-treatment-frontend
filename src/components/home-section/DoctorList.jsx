@@ -7,29 +7,6 @@ import './DoctorList.css';
 // Dùng ảnh từ thư mục public
 import defaultDoctorImage from '../../assets/doctor.png';
 
-// function DoctorList() {
-//   const [doctors, setDoctors] = useState([]);
-  
-//   useEffect(() => {
-//     const fetchDoctors = async () => {
-//       try {
-//         const response = await fetchAllDoctorsAPI();
-//         if (response && response.data) {
-//           setDoctors(response.data);
-//         }
-//       } catch (error) {
-//         console.error('Lỗi khi tải danh sách bác sĩ:', error);
-//         message.error('Không thể tải danh sách bác sĩ');
-//         // Fallback to local data if API fails
-//         fetch('/api/doctors.json')
-//           .then((res) => res.json())
-//           .then((data) => setDoctors(data))
-//           .catch((err) => console.error('Lỗi khi tải dữ liệu local:', err));
-//       } 
-//     };
-
-//     fetchDoctors();
-//   }, []);
 const DoctorList = () => {
   const [doctorAccounts, setDoctorAccounts] = useState([]);
   const [doctorProfiles, setDoctorProfiles] = useState([]);
