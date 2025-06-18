@@ -20,7 +20,6 @@ const StatusFilter = ({ selectedStatus, onStatusSelect }) => {
                 <option value="">Tất cả trạng thái</option>
                 <option value={ScheduleStatus.AVAILABLE}>Làm việc</option>
                 <option value={ScheduleStatus.ON_LEAVE}>Nghỉ phép</option>
-                
             </Form.Select>
         </Form.Group>
     );

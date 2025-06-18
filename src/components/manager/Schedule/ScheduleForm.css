@@ -1,42 +1,68 @@
 .schedule-form-modal .modal-content {
-    border-radius: 8px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    border: none;
 }
 
 .schedule-form-modal .modal-header {
     background-color: #f8f9fa;
-    border-bottom: 1px solid #dee2e6;
-    border-radius: 8px 8px 0 0;
+    border-bottom: 1px solid #ebedf0;
+    padding: 15px 20px;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
 }
 
 .schedule-form-modal .modal-title {
-    color: #2c3e50;
-    font-weight: 500;
+    color: #1a73e8;
+    font-weight: 600;
 }
 
-.schedule-form-modal .form-label {
-    color: #495057;
-    font-weight: 500;
+.schedule-form-modal .modal-body {
+    padding: 20px;
+}
+
+.schedule-form-modal .modal-footer {
+    border-top: 1px solid #ebedf0;
+    padding: 15px 20px;
 }
 
 .schedule-form-modal .form-control,
 .schedule-form-modal .form-select {
-    border-color: #dee2e6;
+    border-radius: 8px;
+    border: 1px solid #dfe1e5;
+    padding: 10px 15px;
+    font-size: 14px;
+    box-shadow: none;
+    transition: all 0.3s;
 }
 
 .schedule-form-modal .form-control:focus,
 .schedule-form-modal .form-select:focus {
-    border-color: #86b7fe;
-    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    border-color: #4daddf;
+    box-shadow: 0 0 0 0.2rem rgba(77, 173, 223, 0.25);
+}
+
+.schedule-form-modal .form-label {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+.schedule-form-modal .form-check-label {
+    font-weight: 500;
+    font-size: 14px;
+    color: #333;
 }
 
 .schedule-form-modal .btn-primary {
-    background-color: #0d6efd;
-    border-color: #0d6efd;
+    background-color: #1a73e8;
+    border-color: #1a73e8;
 }
 
 .schedule-form-modal .btn-primary:hover {
-    background-color: #0b5ed7;
-    border-color: #0a58ca;
+    background-color: #0d62c9;
+    border-color: #0d62c9;
 }
 
 .schedule-form-modal .btn-secondary {
@@ -55,64 +81,32 @@
     border-radius: 4px;
 }
 
-/* DatePicker styling */
-.react-datepicker-wrapper {
-    width: 100%;
-}
-
-.react-datepicker__input-container input {
-    padding: 0.375rem 0.75rem;
-    font-size: 1rem;
-    line-height: 1.5;
-    border-radius: 0.25rem;
-}
-
-/* Fix for double arrow in select dropdowns */
-.custom-select {
-    -webkit-appearance: none !important;
-    -moz-appearance: none !important;
-    appearance: none !important;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
-    background-repeat: no-repeat;
-    background-position: right 0.75rem center;
-    background-size: 16px 12px;
-    padding-right: 2rem !important;
-}
-
-/* Styling for radio buttons */
-.shift-options {
-    padding: 0.5rem 0;
-}
-
-.shift-options .form-check {
-    margin-bottom: 0.5rem;
-}
-
-.shift-options .form-check-label {
-    font-weight: normal;
-}
-
-/* Styling for repeat option */
-.repeat-option {
-    padding: 0.5rem 0;
-    border-top: 1px solid #dee2e6;
-    padding-top: 1rem;
-}
-
-.repeat-checkbox {
-    font-weight: normal;
-}
-
-.repeat-info {
-    padding: 0.5rem 0.75rem;
+/* Styles for repetitive schedule feature */
+.schedule-form-modal .repeat-schedule-option {
+    margin-top: 15px;
+    padding: 12px;
     background-color: #f8f9fa;
-    border-radius: 4px;
-    color: #495057;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
 }
 
-/* Modal width */
-@media (min-width: 576px) {
-    .schedule-form-modal .modal-dialog {
-        max-width: 500px;
-    }
+.schedule-form-modal .repeat-info {
+    padding: 10px;
+    background-color: #e8f4fd;
+    border-radius: 6px;
+    margin-left: 25px;
+    border-left: 3px solid #1a73e8;
+}
+
+.schedule-form-modal .repeat-info p {
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.schedule-form-modal .repeat-info p.small {
+    font-size: 12px;
+}
+
+.schedule-form-modal .text-muted {
+    color: #6c757d;
 }

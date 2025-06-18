@@ -57,28 +57,7 @@ const ManagerSchedule = () => {
                 afternoon: false,
                 note: 'Nghỉ phép cả ngày'
             },
-            {
-                id: 4,
-                title: 'BS. Phát - Họp',
-                date: moment().add(3, 'days').format('YYYY-MM-DD'),
-                status: 'in_meeting',
-                doctorId: 1,
-                doctorName: 'BS. Phát',
-                morning: false,
-                afternoon: false,
-                note: 'Họp hội đồng'
-            },
-            {
-                id: 5,
-                title: 'BS. Sơn - Làm việc',
-                date: moment().add(4, 'days').format('YYYY-MM-DD'),
-                status: 'available',
-                doctorId: 2,
-                doctorName: 'BS. Sơn',
-                morning: true,
-                afternoon: true,
-                note: 'Làm việc cả ngày'
-            }
+
         ];
 
         setSchedules(mockSchedules);
@@ -88,12 +67,6 @@ const ManagerSchedule = () => {
         // Kiểm tra xem ngày được chọn có phải là ngày quá khứ không
         if (moment(date).isBefore(moment(), 'day')) {
             showToast('Không thể đặt lịch cho ngày đã qua!', 'danger');
-            return;
-        }
-        
-        // Kiểm tra xem ngày được chọn có phải là chủ nhật không
-        if (moment(date).day() === 0) { // 0 là chủ nhật trong moment
-            showToast('Hệ thống chỉ hoạt động từ thứ 2 đến thứ 7!', 'warning');
             return;
         }
         
@@ -146,8 +119,8 @@ const ManagerSchedule = () => {
 
     return (
         <div className="container-fluid py-4">
-            <div className="schedule-header-container">
-                <h1 className="schedule-title text-center mb-4">Quản lý lịch làm việc</h1>
+            <div className="schedule-header">
+                <h1 className="schedule-title text-center">Quản lý lịch làm việc</h1>
             </div>
 
             <ToastContainer position="top-end" className="p-3" style={{ zIndex: 1070 }}>

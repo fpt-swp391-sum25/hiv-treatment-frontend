@@ -334,3 +334,29 @@
     font-size: 1.2rem;
   }
 }
+
+/* Style cho ngày Chủ nhật */
+.fc-day-sunday {
+    background-color: #f8f9fa !important;
+    position: relative;
+}
+
+.fc-day-sunday:after {
+   
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 14px;
+    color: #dc3545;
+    font-style: italic;
+    font-weight: 500;
+    background-color: rgba(255, 255, 255, 0.7);
+    padding: 2px 8px;
+    border-radius: 4px;
+    z-index: 1;
+}
+
+.fc .fc-day-disabled {
+    pointer-events: none;
+}

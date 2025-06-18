@@ -4,8 +4,6 @@ import { ScheduleStatus, SlotTimes } from '../../../types/schedule.types';
 import { scheduleService } from '../../../services/schedule.service';
 import moment from 'moment';
 import './ScheduleForm.css';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
 
 const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCreated, existingSchedules = [], onShowToast }) => {
     const [formData, setFormData] = useState({
@@ -14,12 +12,11 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         afternoon: true,
         note: '',
         doctorId: selectedDoctor || '',
-        date: selectedDate || new Date()
+        repeatSchedule: false
     });
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
     const [doctors, setDoctors] = useState([]);
-    const [workingMode, setWorkingMode] = useState('bothShifts'); // fullDay, morning, afternoon
 
     // Tải danh sách bác sĩ mẫu
     useEffect(() => {
@@ -42,22 +39,36 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                 afternoon: true,
                 note: '',
                 doctorId: selectedDoctor || '',
-                date: selectedDate || new Date()
+                repeatSchedule: false
             });
-            setWorkingMode('bothShifts');
             setError(null);
         }
-    }, [show, selectedDoctor, selectedDate]);
+    }, [show, selectedDoctor]);
 
     // Kiểm tra xem bác sĩ đã có lịch vào ngày được chọn chưa
-    const checkDoctorScheduleExists = () => {
+    const checkDoctorScheduleExists = (date) => {
         if (!formData.doctorId) return false;
         
-        const selectedDateStr = moment(formData.date).format('YYYY-MM-DD');
+        const checkDateStr = moment(date).format('YYYY-MM-DD');
         return existingSchedules.some(schedule => 
             schedule.doctorId.toString() === formData.doctorId.toString() && 
-            schedule.date === selectedDateStr
+            schedule.date === checkDateStr
         );
+    };
+
+    // Lấy tên thứ trong tuần từ ngày
+    const getDayOfWeekName = (date) => {
+        const dayOfWeekMap = {
+            0: 'Chủ nhật',
+            1: 'Thứ hai',
+            2: 'Thứ ba',
+            3: 'Thứ tư',
+            4: 'Thứ năm',
+            5: 'Thứ sáu',
+            6: 'Thứ bảy'
+        };
+        
+        return dayOfWeekMap[moment(date).day()];
     };
 
     const handleSubmit = async (e) => {
@@ -70,7 +81,7 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         }
         
         // Kiểm tra xem bác sĩ đã có lịch vào ngày này chưa
-        if (checkDoctorScheduleExists()) {
+        if (checkDoctorScheduleExists(selectedDate)) {
             setError('Bác sĩ này đã có lịch làm việc vào ngày đã chọn. Vui lòng chỉnh sửa lịch hiện có hoặc chọn ngày khác.');
             return;
         }
@@ -83,42 +94,70 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             const selectedDoctor = doctors.find(d => d.id.toString() === formData.doctorId.toString());
             const doctorName = selectedDoctor ? selectedDoctor.name : '';
             
-            // Cập nhật morning và afternoon dựa trên workingMode
-            let updatedMorning = formData.morning;
-            let updatedAfternoon = formData.afternoon;
+            // Danh sách lịch cần tạo (bao gồm cả lịch lặp lại nếu có)
+            const schedulesToCreate = [];
             
-            if (workingMode === 'bothShifts') {
-                updatedMorning = true;
-                updatedAfternoon = true;
-            } else if (workingMode === 'morningOnly') {
-                updatedMorning = true;
-                updatedAfternoon = false;
-            } else if (workingMode === 'afternoonOnly') {
-                updatedMorning = false;
-                updatedAfternoon = true;
-            }
-            
+            // Tạo lịch cho ngày hiện tại
             const scheduleData = {
                 ...formData,
-                morning: updatedMorning,
-                afternoon: updatedAfternoon,
-                date: moment(formData.date).format('YYYY-MM-DD'),
+                date: moment(selectedDate).format('YYYY-MM-DD'),
                 title: `${doctorName} - ${getStatusLabel(formData.status)}`,
                 doctorName
             };
-
-            // Tạo một lịch làm việc mẫu để hiển thị
+            
             const mockResponse = {
                 id: Math.floor(Math.random() * 1000) + 6, // Random ID từ 6-1005
                 ...scheduleData,
             };
             
-            onScheduleCreated(mockResponse);
+            schedulesToCreate.push(mockResponse);
             
-            // Gửi thông báo thành công lên component cha để hiển thị
-            if (onShowToast) {
-                onShowToast(`Đặt lịch cho bác sĩ ${doctorName} thành công!`, 'success');
+            // Nếu lặp lại lịch, thêm lịch cho 4 tuần tiếp theo
+            if (formData.repeatSchedule) {
+                const dayOfWeek = moment(selectedDate).day(); // Lấy thứ trong tuần (0 = CN, 1 = T2,...)
+                let skippedDates = 0;
+                
+                for (let i = 1; i <= 4; i++) {
+                    const nextWeekDay = moment(selectedDate).add(i * 7, 'days');
+                    
+                    // Kiểm tra xem bác sĩ đã có lịch vào ngày này chưa
+                    if (checkDoctorScheduleExists(nextWeekDay)) {
+                        skippedDates++;
+                        continue;
+                    }
+                    
+                    const nextWeekSchedule = {
+                        ...formData,
+                        date: nextWeekDay.format('YYYY-MM-DD'),
+                        title: `${doctorName} - ${getStatusLabel(formData.status)}`,
+                        doctorName
+                    };
+                    
+                    const nextWeekMockResponse = {
+                        id: Math.floor(Math.random() * 1000) + 500 + i, // Random ID từ 506-510
+                        ...nextWeekSchedule,
+                    };
+                    
+                    schedulesToCreate.push(nextWeekMockResponse);
+                }
+                
+                // Hiển thị thông báo tương ứng
+                if (skippedDates > 0) {
+                    onShowToast(`Đã đặt lịch thành công cho ngày đầu tiên và ${4 - skippedDates} tuần tiếp theo. (Bỏ qua ${skippedDates} ngày đã có lịch)`, 'warning');
+                } else {
+                    onShowToast(`Đã đặt lịch thành công cho ngày đầu tiên và 4 tuần tiếp theo.`, 'success');
+                }
+            } else {
+                // Gửi thông báo thành công lên component cha để hiển thị
+                if (onShowToast) {
+                    onShowToast(`Đặt lịch cho bác sĩ ${doctorName} thành công!`, 'success');
+                }
             }
+            
+            // Gửi tất cả lịch đã tạo lên component cha
+            schedulesToCreate.forEach(schedule => {
+                onScheduleCreated(schedule);
+            });
             
             onHide();
         } catch (err) {
@@ -134,28 +173,13 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                 return 'Làm việc';
             case ScheduleStatus.ON_LEAVE:
                 return 'Nghỉ phép';
-            case ScheduleStatus.IN_MEETING:
-                return 'Họp';
             default:
                 return '';
         }
     };
 
-    const handleWorkingModeChange = (mode) => {
-        setWorkingMode(mode);
-        
-        // Cập nhật formData theo mode đã chọn
-        if (mode === 'bothShifts') {
-            setFormData({...formData, morning: true, afternoon: true});
-        } else if (mode === 'morningOnly') {
-            setFormData({...formData, morning: true, afternoon: false});
-        } else if (mode === 'afternoonOnly') {
-            setFormData({...formData, morning: false, afternoon: true});
-        }
-    };
-
     return (
-        <Modal show={show} onHide={onHide} centered className="schedule-form-modal">
+        <Modal show={show} onHide={onHide} centered>
             <Modal.Header closeButton>
                 <Modal.Title>Đặt lịch làm việc</Modal.Title>
             </Modal.Header>
@@ -165,13 +189,14 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                 <Form onSubmit={handleSubmit}>
                     <Form.Group className="mb-3">
                         <Form.Label>Ngày</Form.Label>
-                        <DatePicker
-                            selected={formData.date}
-                            onChange={date => setFormData({...formData, date})}
-                            dateFormat="dd/MM/yyyy"
-                            className="form-control"
-                            wrapperClassName="w-100"
+                        <Form.Control
+                            type="text"
+                            value={moment(selectedDate).format('DD/MM/YYYY')}
+                            disabled
                         />
+                        <Form.Text className="text-muted">
+                            {getDayOfWeekName(selectedDate)}
+                        </Form.Text>
                     </Form.Group>
 
                     <Form.Group className="mb-3">
@@ -180,7 +205,6 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                             value={formData.doctorId}
                             onChange={(e) => setFormData({...formData, doctorId: e.target.value})}
                             required
-                            className="custom-select"
                         >
                             <option value="">Chọn bác sĩ</option>
                             {doctors.map(doctor => (
@@ -197,47 +221,54 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                             value={formData.status}
                             onChange={(e) => setFormData({...formData, status: e.target.value})}
                             required
-                            className="custom-select"
                         >
                             <option value={ScheduleStatus.AVAILABLE}>Làm việc</option>
                             <option value={ScheduleStatus.ON_LEAVE}>Nghỉ phép</option>
-                            <option value={ScheduleStatus.IN_MEETING}>Họp</option>
                         </Form.Select>
                     </Form.Group>
 
-                    {formData.status === ScheduleStatus.AVAILABLE && (
-                        <Form.Group className="mb-3">
-                            <Form.Label>Ca làm việc</Form.Label>
-                            <div className="shift-options">
-                                <Form.Check
-                                    type="radio"
-                                    id="shift-both"
-                                    name="workingMode"
-                                    label="Cả ngày (8:00 - 16:00)"
-                                    checked={workingMode === 'bothShifts'}
-                                    onChange={() => handleWorkingModeChange('bothShifts')}
-                                    className="mb-2"
-                                />
-                                <Form.Check
-                                    type="radio"
-                                    id="shift-morning"
-                                    name="workingMode"
+                    <Row>
+                        <Col md={6}>
+                            <Form.Group className="mb-3">
+                                <Form.Check 
+                                    type="checkbox"
+                                    id="morning-check"
                                     label="Buổi sáng (8:00 - 11:00)"
-                                    checked={workingMode === 'morningOnly'}
-                                    onChange={() => handleWorkingModeChange('morningOnly')}
-                                    className="mb-2"
+                                    checked={formData.morning}
+                                    onChange={(e) => setFormData({...formData, morning: e.target.checked})}
+                                    disabled={formData.status !== ScheduleStatus.AVAILABLE}
                                 />
-                                <Form.Check
-                                    type="radio"
-                                    id="shift-afternoon"
-                                    name="workingMode"
+                            </Form.Group>
+                        </Col>
+                        <Col md={6}>
+                            <Form.Group className="mb-3">
+                                <Form.Check 
+                                    type="checkbox"
+                                    id="afternoon-check"
                                     label="Buổi chiều (13:00 - 16:00)"
-                                    checked={workingMode === 'afternoonOnly'}
-                                    onChange={() => handleWorkingModeChange('afternoonOnly')}
+                                    checked={formData.afternoon}
+                                    onChange={(e) => setFormData({...formData, afternoon: e.target.checked})}
+                                    disabled={formData.status !== ScheduleStatus.AVAILABLE}
                                 />
+                            </Form.Group>
+                        </Col>
+                    </Row>
+
+                    <Form.Group className="mb-3 repeat-schedule-option">
+                        <Form.Check 
+                            type="checkbox"
+                            id="repeat-check"
+                            label="Lặp lại lịch này vào các tuần sau (4 tuần)"
+                            checked={formData.repeatSchedule}
+                            onChange={(e) => setFormData({...formData, repeatSchedule: e.target.checked})}
+                        />
+                        {formData.repeatSchedule && (
+                            <div className="repeat-info mt-2">
+                                <p className="mb-0">Lịch sẽ được tạo cho mỗi <strong>{getDayOfWeekName(selectedDate)}</strong> trong 4 tuần tới</p>
+                                <p className="text-muted small">Lưu ý: Hệ thống sẽ bỏ qua những ngày đã có lịch làm việc</p>
                             </div>
-                        </Form.Group>
-                    )}
+                        )}
+                    </Form.Group>
 
                     <Form.Group className="mb-3">
                         <Form.Label>Ghi chú</Form.Label>

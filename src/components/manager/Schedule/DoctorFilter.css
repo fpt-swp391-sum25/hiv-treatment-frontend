@@ -1,66 +1,47 @@
 .doctor-filter {
-    margin-bottom: 1rem;
+  margin-bottom: 1rem;
 }
 
 .doctor-select {
-    max-width: 300px;
+  max-width: 300px;
 }
 
 .doctor-filter .input-group-text {
-    background-color: #fff;
-    color: #0d6efd;
+  background-color: #fff;
+  color: #0d6efd;
 }
 
 .doctor-filter .form-select:focus {
-    border-color: #86b7fe;
-    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+  border-color: #86b7fe;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
 }
 
 /* Styling for Doctor Filter */
 .form-select {
-  border-radius: 8px;
-  border: 1px solid #e0e0e0;
-  padding: 10px 15px;
-  font-size: 14px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-  background-color: white;
-  color: #333;
-  -webkit-appearance: none !important;
-  -moz-appearance: none !important;
-  appearance: none !important;
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right 0.75rem center;
-  background-size: 16px 12px;
-  padding-right: 2rem !important;
+border-radius: 8px;
+border: 1px solid #e0e0e0;
+padding: 10px 15px;
+font-size: 14px;
+box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+transition: all 0.3s ease;
+background-color: white;
+color: #333;
+appearance: none;
 }
 
 .form-select:focus {
-  border-color: #4daddf;
-  box-shadow: 0 0 0 0.2rem rgba(77, 173, 223, 0.25);
+border-color: #4daddf;
+box-shadow: 0 0 0 0.2rem rgba(77, 173, 223, 0.25);
 }
 
 .form-label {
-  font-weight: 600;
-  font-size: 14px;
-  margin-bottom: 8px;
-  color: #333;
+font-weight: 600;
+font-size: 14px;
+margin-bottom: 8px;
+color: #333;
 }
 
 /* Gradient border on hover */
 .form-select:hover {
-  border-color: #4daddf;
-}
-
-/* Class for showing only one dropdown arrow */
-.custom-select {
-  -webkit-appearance: none !important;
-  -moz-appearance: none !important;
-  appearance: none !important;
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right 0.75rem center;
-  background-size: 16px 12px;
-  padding-right: 2rem !important;
+border-color: #4daddf;
 }
