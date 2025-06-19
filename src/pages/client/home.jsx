@@ -1,4 +1,3 @@
-
 import { Layout, theme } from 'antd';
 import CareIntroSection from '../../components/home-section/CareIntroSection';
 import ServicesSection from '../../components/home-section/ServicesSection';
