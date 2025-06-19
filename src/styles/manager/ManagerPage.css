@@ -1,0 +1,83 @@
+/* Manager Layout CSS */
+.manager-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* Chiếm toàn bộ chiều cao viewport */
+  overflow: hidden; /* Ngăn cuộn cả trang */
+}
+
+/* Header cố định ở trên cùng */
+.manager-layout-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000; /* Đảm bảo header hiển thị trên các phần tử khác */
+  width: 100%;
+  height: 104px; /* Chiều cao cố định của header */
+}
+
+/* Container chính chứa sidebar và content */
+.manager-layout-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden; /* Ngăn cuộn cả phần này */
+  height: calc(100vh - 104px); /* Chiều cao = viewport - chiều cao header */
+}
+
+/* Sidebar cố định bên trái */
+.manager-layout-sidebar {
+  width: 230px;
+  flex-shrink: 0; /* Ngăn sidebar co lại */
+  height: 100%; /* Chiều cao 100% của container cha */
+  overflow-y: auto; /* Cho phép cuộn sidebar nếu nội dung sidebar quá dài */
+  background-color: #212529; /* Màu nền giống với header */
+}
+
+/* Phần nội dung chính có thể cuộn */
+.manager-layout-content {
+  flex: 1;
+  overflow-y: auto; /* Cho phép cuộn dọc */
+  padding: 20px;
+  height: 100%; /* Chiều cao 100% của container cha */
+  background-color: #f8f9fa; /* Màu nền sáng cho phần nội dung */
+}
+
+/* Đảm bảo các phần tử con chiếm đúng không gian */
+.manager-layout-header > *,
+.manager-layout-sidebar > *,
+.manager-layout-content > * {
+  width: 100%;
+}
+
+/* Responsive điều chỉnh */
+@media (max-width: 768px) {
+  .manager-layout-header {
+    height: 84px; /* Giảm chiều cao header trên màn hình nhỏ */
+  }
+
+  .manager-layout-body {
+    height: calc(100vh - 84px);
+  }
+
+  .manager-layout-sidebar {
+    width: 200px;
+  }
+}
+
+/* Custom scrollbar cho content area */
+.manager-layout-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.manager-layout-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.manager-layout-content::-webkit-scrollbar-thumb {
+  background: #bbb;
+  border-radius: 4px;
+}
+
+.manager-layout-content::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}

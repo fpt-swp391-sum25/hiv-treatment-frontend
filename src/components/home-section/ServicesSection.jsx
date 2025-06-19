@@ -1,5 +1,5 @@
 import React from 'react';
-import './ServicesSection.css'; // Đảm bảo bạn có file CSS để tùy chỉnh kiểu dáng
+import '../../styles/home-section/ServicesSection.css'; // Đảm bảo bạn có file CSS để tùy chỉnh kiểu dáng
 
 const ServicesSection = () => {
   const services = [

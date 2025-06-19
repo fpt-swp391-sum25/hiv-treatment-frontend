@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { message, Spin } from 'antd';
 import { fetchDoctorProfileAPI, fetchAccountByRoleAPI } from '../../services/api.service';
-import './DoctorList.css';
+import '../../styles/home-section/DoctorList.css';
 
 // Dùng ảnh từ thư mục public
 import defaultDoctorImage from '../../assets/doctor.png';
@@ -93,7 +93,6 @@ const DoctorList = () => {
             ))}
           </div>
           
-          {mergedDoctors.length > 4 && (
             <div className="view-all-container">
               <Link 
                 to="/doctors" 
@@ -105,7 +104,7 @@ const DoctorList = () => {
                 Xem tất cả bác sĩ
               </Link>
             </div>
-          )}
+          
         </>
       )}
     </section>

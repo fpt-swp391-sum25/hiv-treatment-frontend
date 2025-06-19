@@ -1,10 +1,10 @@
 import { Outlet } from "react-router-dom"
-import AppFooter from "../../components/layouts/client/app-footer"
-import AppHeader from "../../components/layouts/client/app-header"
+import AppFooter from "../../components/client/AppFooter"
+import AppHeader from "../../components/client/AppHeader"
 import { fetchAccountAPI } from "../../services/api.service"
 import { useContext, useEffect } from "react"
-import { AuthContext } from "../../components/context/auth.context"
-import { Layout, Spin } from "antd"
+import { AuthContext } from "../../components/context/AuthContext"
+import { Layout, Spin, message } from "antd"
 
 const App = () => {
 
@@ -12,7 +12,7 @@ const App = () => {
 
     useEffect(() => {
         fetchUserInfo()
-    }, [])
+    })
 
     const fetchUserInfo = async () => {
         try {

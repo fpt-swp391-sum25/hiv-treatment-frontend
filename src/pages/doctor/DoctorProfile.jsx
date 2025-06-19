@@ -1,98 +1,125 @@
-import React, { useState, useEffect } from 'react';
-import { Card, Row, Col, Tabs, Tab } from 'react-bootstrap';
-import './DoctorProfile.css';
+import React, { useState, Suspense } from 'react';
+import { Card, Row, Col, Nav } from 'react-bootstrap';
+import '../../styles/doctor/DoctorProfile.css';
+import DoctorPersonalProfile from "../../components/doctor/DoctorPersonalProfile"
+import DoctorStatistic from "../../components/doctor/DoctorStatistic"
 
-// Components
-import PersonalInfo from '../../components/doctor/PersonalInfo';
-import Schedule from '../../components/doctor/Schedule';
-import Feedback from '../../components/doctor/Feedback';
-import Statistics from '../../components/doctor/Statistics';
+// Assets
+import doctorProfileImage from '../../assets/doctorProfile.png';
 
-// Data giả tạm thời
+// Loading Skeleton component
+const TabContentSkeleton = () => (
+  <div className="skeleton-container">
+    <div className="skeleton-row"></div>
+    <div className="skeleton-row"></div>
+    <div className="skeleton-row"></div>
+    <div className="skeleton-row"></div>
+    <div className="skeleton-row"></div>
+  </div>
+);
+
+// Doctor data
 const mockDoctorData = {
   id: 1,
-  name: 'Bs. Nguyễn Văn A',
+  name: 'Bs. Trần Tấn Phát',
   specialty: 'Chuyên khoa HIV/AIDS',
-  email: 'doctor@example.com',
-  phoneNumber: '0987654321',
+  email: 'doctor@fpt.edu.vn',
+  phoneNumber: '0987654323',
   degree: 'Tiến sĩ Y khoa',
   experience: 10,
   certificates: ['Chứng chỉ hành nghề bác sĩ', 'Chuyên khoa HIV/AIDS'],
-  bio: 'Là bác sĩ với hơn 10 năm kinh nghiệm trong lĩnh vực điều trị HIV/AIDS. Chuyên môn sâu về quản lý và điều trị các bệnh nhiễm trùng cơ hội liên quan đến HIV.',
-  imageUrl: 'https://via.placeholder.com/150'
+  bio: 'Là bác sĩ với hơn 10 năm kinh nghiệm trong lĩnh vực điều trị HIV/AIDS. Chuyên môn sâu về quản lý và điều trị các bệnh liên quan đến HIV.',
+  imageUrl: doctorProfileImage
 };
 
 const DoctorProfile = () => {
-  const [doctorData, setDoctorData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [doctorData] = useState(mockDoctorData);
+  const [loading] = useState(false);
+  const [error] = useState(null);
+  const [activeTab, setActiveTab] = useState('personal-info');
 
-  useEffect(() => {
-    // TODO: Fetch doctor profile data
-    const fetchDoctorProfile = async () => {
-      try {
-        // Giả lập API call
-        setTimeout(() => {
-          setDoctorData(mockDoctorData);
-          setLoading(false);
-        }, 500);
-        
-        // Khi API thực sự sẵn sàng, bỏ comment phần này
-        /*
-        const response = await fetch('/api/doctor-profile/doctor-id/1'); // Replace 1 with actual doctor ID
-        const data = await response.json();
-        setDoctorData(data);
-        setLoading(false);
-        */
-      } catch (err) {
-        setError('Failed to fetch doctor profile');
-        setLoading(false);
-      }
-    };
+  const handleTabChange = (tabKey) => {
+    setActiveTab(tabKey);
+  };
 
-    fetchDoctorProfile();
-  }, []);
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Đang tải...</span>
+        </div>
+      </div>
+    );
+  }
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>{error}</div>;
+  if (error) {
+    return (
+      <div className="error-container">
+        <div className="alert alert-danger" role="alert">
+          {error}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="doctor-profile-container">
-      <Card className="profile-card">
-        <Card.Body>
-          <Row>
-            <Col md={3}>
-              <div className="profile-image-section">
-                <img 
-                  src={doctorData?.imageUrl || '/default-doctor.png'} 
-                  alt="Doctor profile" 
-                  className="profile-image"
-                />
-                <h3 className="doctor-name">{doctorData?.name}</h3>
-                <p className="doctor-specialty">{doctorData?.specialty}</p>
-              </div>
-            </Col>
-            <Col md={9}>
-              <Tabs defaultActiveKey="personal-info" className="profile-tabs">
-                <Tab eventKey="personal-info" title="Thông tin cá nhân">
-                  <PersonalInfo doctorData={doctorData} />
-                </Tab>
-                <Tab eventKey="schedule" title="Lịch làm việc">
-                  <Schedule doctorId={doctorData?.id} />
-                </Tab>
-                <Tab eventKey="feedback" title="Đánh giá">
-                  <Feedback doctorId={doctorData?.id} />
-                </Tab>
-                <Tab eventKey="statistics" title="Thống kê">
-                  <Statistics doctorId={doctorData?.id} />
-                </Tab>
-              </Tabs>
-            </Col>
-          </Row>
-        </Card.Body>
-      </Card>
-    </div>
+      <div className="profile-header">
+        <div className="profile-image-section">
+          <img
+            src={doctorData?.imageUrl}
+            alt={doctorData?.name}
+            className="profile-image"
+          />
+        </div>
+        <div className="profile-basic-info">
+          <h1 className="doctor-name">{doctorData?.name}</h1>
+          <div className="doctor-specialty">{doctorData?.specialty}</div>
+          <div className="contact-info">
+            <div className="contact-item">
+              <i className="fas fa-envelope"></i>
+              {doctorData?.email}
+            </div>
+            <div className="contact-item">
+              <i className="fas fa-phone"></i>
+              {doctorData?.phoneNumber}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="custom-tabs-container">
+        <div className="custom-tabs">
+          <div 
+            className={`custom-tab ${activeTab === 'personal-info' ? 'active' : ''}`}
+            onClick={() => handleTabChange('personal-info')}
+          >
+            Thông tin cá nhân
+          </div>
+          <div 
+            className={`custom-tab ${activeTab === 'statistics' ? 'active' : ''}`}
+            onClick={() => handleTabChange('statistics')}
+          >
+            Thống kê
+          </div>
+        </div>
+
+        <div className="tab-content-area">
+          {activeTab === 'personal-info' && (
+            <Suspense fallback={<TabContentSkeleton />}>
+              <DoctorPersonalProfile doctorData={doctorData} />
+            </Suspense>
+          )}
+          
+          {activeTab === 'statistics' && (
+            <Suspense fallback={<TabContentSkeleton />}>
+              <DoctorStatistic />
+            </Suspense>
+          )}
+        </div>
+      </div>
+    </div> 
   );
 };
 
-export default DoctorProfile; 
+export default DoctorProfile;

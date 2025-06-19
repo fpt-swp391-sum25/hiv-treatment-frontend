@@ -1,5 +1,5 @@
 import React from 'react';
-import './FullServicesSection2.css';
+import '../../styles/home-section/FullServicesSection2.css';
 
 const FullServicesSection2 = () => {
     return (        <div className="container" id="services-section">
