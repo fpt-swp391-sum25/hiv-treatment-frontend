@@ -1,20 +1,19 @@
-
 import { Layout, theme } from 'antd';
-import CareIntroSection from '../../components/home-section/CareIntroSection';
-import ServicesSection from '../../components/home-section/ServicesSection';
-import FullServicesSection2 from '../../components/home-section/FullServicesSection2';
-import DoctorList from '../../components/home-section/DoctorList';
-import DocumentList from '../../components/home-section/DocumentList';
 import { Outlet } from 'react-router-dom';
+import AppFooter from '../../components/client/AppFooter';
+import AppHeader from '../../components/client/AppHeader';
+import DoumentBanner from '../../components/document/DoumentBanner';
+import DoumentSearchPage from '../../components/document/DoumentSearchPage';
 const { Content } = Layout;
 
-const Home = () => {
+const Resources = () => { 
     const {
         token: { colorBgContainer, borderRadiusLG },
     } = theme.useToken();
     return (
         <Layout>
-
+            <AppHeader />
+            <DoumentBanner />
             <Content style={{ padding: '15px' }}>
                 <div
                     style={{
@@ -23,17 +22,13 @@ const Home = () => {
                         padding: 24,
                         borderRadius: borderRadiusLG,
                     }}
-                >
-                    <CareIntroSection />
-                    <ServicesSection />
-                    <FullServicesSection2 />
-                    <DoctorList />
-                    <DocumentList />
+                >                    
+                    <DoumentSearchPage />
                 </div>
                 <Outlet />
             </Content>
-
+            <AppFooter />         
         </Layout>
     );
 };
-export default Home;
+export default Resources;

@@ -1,0 +1,146 @@
+/* Header tổng */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  width: 100%;
+  padding: 0 24px !important;
+  min-height: 140px;
+  height: auto;
+  background: #2056df;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Phần nội dung trong header */
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 64px;
+}
+
+/* Phần menu */
+.app-menu {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  margin-left: 80px;
+}
+
+.app-logo img {
+  width: 135px;
+  height: 50px;
+  object-fit: cover;
+  display: block;
+  margin: auto;
+  margin-top: 10px;
+  transform: scale(1.05);
+}
+
+/* Menu trên */
+.main-menu {
+  display: flex;
+  justify-content: center;
+  border-bottom: none;
+  margin: 0;
+  background: #2056df;
+  min-width: 600px;
+}
+
+/* Menu dưới — thêm nền giống main-menu */
+.sub-menu {
+  display: flex;
+  justify-content: center;
+  border-bottom: none;
+  margin: 0;
+  background: #2056df;
+  min-width: 600px;
+}
+
+/* Cài đặt item menu */
+.main-menu .ant-menu-item,
+.sub-menu .ant-menu-item {
+  padding: 0 16px;
+  margin: 0 4px !important;
+  color: #fff;
+  background: #2056df;
+}
+
+.main-menu .ant-menu-item .anticon,
+.sub-menu .ant-menu-item .anticon {
+  margin-right: 8px;
+}
+
+/* Button đăng nhập / đăng ký */
+.auth-buttons .ant-btn {
+  border-radius: 4px;
+}
+
+/* Xóa border dưới mặc định của menu ngang */
+.ant-menu-horizontal {
+  border: none !important;
+}
+
+.ant-menu-horizontal > .ant-menu-item::after,
+.ant-menu-horizontal > .ant-menu-submenu::after {
+  display: none !important;
+}
+
+/* Hover và selected */
+.main-menu .ant-menu-item-selected,
+.sub-menu .ant-menu-item-selected {
+  background-color: #1c48c8 !important;
+  color: #fff !important;
+}
+
+.main-menu .ant-menu-item:hover,
+.sub-menu .ant-menu-item:hover {
+  background-color: #1c48c8 !important;
+  color: #fff !important;
+}
+
+/* Phần đăng nhập/đăng ký */
+.auth-buttons {
+  padding: 8px 0;
+}
+
+.auth-buttons .ant-btn {
+  min-width: 100px;
+}
+
+/* Phần thông tin user đã đăng nhập */
+.user-actions {
+  padding: 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-actions .ant-avatar {
+  background-color: #fff;
+  color: #2056df;
+}
+
+.user-actions .ant-btn {
+  min-width: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+@media (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .main-menu,
+  .sub-menu {
+    width: 100%;
+    justify-content: flex-start;
+    margin: 8px 0;
+  }
+}
