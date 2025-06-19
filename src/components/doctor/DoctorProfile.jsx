@@ -1,4 +1,4 @@
-import React, { useState, useEffect, lazy, Suspense } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { Card, Row, Col, Nav } from 'react-bootstrap';
 import '../../styles/doctor/DoctorProfile.css';
 
@@ -35,9 +35,9 @@ const mockDoctorData = {
 };
 
 const DoctorProfile = () => {
-  const [doctorData, setDoctorData] = useState(mockDoctorData);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [doctorData] = useState(mockDoctorData);
+  const [loading] = useState(false);
+  const [error] = useState(null);
   const [activeTab, setActiveTab] = useState('personal-info');
 
   const handleTabChange = (tabKey) => {
@@ -90,27 +90,23 @@ const DoctorProfile = () => {
         </div>
       </div>
 
-      <div className="profile-tabs">
-        <Nav variant="tabs" className="doctor-nav-tabs">
-          <Nav.Item>
-            <Nav.Link 
-              className={activeTab === 'personal-info' ? 'active' : ''} 
-              onClick={() => handleTabChange('personal-info')}
-            >
-              Thông tin cá nhân
-            </Nav.Link>
-          </Nav.Item>
-          <Nav.Item>
-            <Nav.Link 
-              className={activeTab === 'statistics' ? 'active' : ''} 
-              onClick={() => handleTabChange('statistics')}
-            >
-              Thống kê
-            </Nav.Link>
-          </Nav.Item>
-        </Nav>
+      <div className="custom-tabs-container">
+        <div className="custom-tabs">
+          <div 
+            className={`custom-tab ${activeTab === 'personal-info' ? 'active' : ''}`}
+            onClick={() => handleTabChange('personal-info')}
+          >
+            Thông tin cá nhân
+          </div>
+          <div 
+            className={`custom-tab ${activeTab === 'statistics' ? 'active' : ''}`}
+            onClick={() => handleTabChange('statistics')}
+          >
+            Thống kê
+          </div>
+        </div>
 
-        <div className="tab-content-container">
+        <div className="tab-content-area">
           {activeTab === 'personal-info' && (
             <Suspense fallback={<TabContentSkeleton />}>
               <PersonalInfo doctorData={doctorData} />
@@ -124,7 +120,7 @@ const DoctorProfile = () => {
           )}
         </div>
       </div>
-    </div>
+    </div> 
   );
 };
 

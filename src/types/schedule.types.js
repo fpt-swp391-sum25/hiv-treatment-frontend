@@ -12,23 +12,24 @@ export const ScheduleStatus = {
     CONFIRMED: 'CONFIRMED',     // Đã xác nhận
     CANCELLED: 'CANCELLED',     // Đã hủy
     COMPLETED: 'COMPLETED',     // Đã hoàn thành
-    NO_SHOW: 'NO_SHOW'         // Không đến khám
-};
-
-// Doctor Status
-export const DoctorStatus = {
-    AVAILABLE: 'AVAILABLE',       // Đang làm việc
-    ON_LEAVE: 'ON_LEAVE',        // Nghỉ phép
-    IN_MEETING: 'IN_MEETING',    // Đang họp
+    NO_SHOW: 'NO_SHOW',         // Không đến khám
+    
+    // Trạng thái làm việc của bác sĩ
+    AVAILABLE: 'available',
+    ON_LEAVE: 'on_leave',
     UNAVAILABLE: 'UNAVAILABLE'   // Không làm việc
 };
 
-// Slot Times
+// Time slots for schedule
 export const SlotTimes = {
-    MORNING_1: 'MORNING_1',     // 8:00 - 9:00
-    MORNING_2: 'MORNING_2',     // 9:00 - 10:00
-    MORNING_3: 'MORNING_3',     // 10:00 - 11:00
-    AFTERNOON_1: 'AFTERNOON_1', // 13:00 - 14:00
-    AFTERNOON_2: 'AFTERNOON_2', // 14:00 - 15:00
-    AFTERNOON_3: 'AFTERNOON_3'  // 15:00 - 16:00
+    MORNING: {
+        label: 'Buổi sáng',
+        startTime: '08:00',
+        endTime: '11:00'
+    },
+    AFTERNOON: {
+        label: 'Buổi chiều',
+        startTime: '13:00',
+        endTime: '16:00'
+    }
 };
