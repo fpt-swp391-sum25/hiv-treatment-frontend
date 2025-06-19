@@ -14,6 +14,7 @@ import Reports from './components/manager/Reports/Reports';
 
 import DoctorApp from './components/doctor/App';
 import DoctorProfile from './components/doctor/DoctorProfile';
+import DoctorDashboard from './pages/doctor/dashboard';
 
 import BookingCheckupForm from './pages/client/booking';
 import NotFound from './pages/error/not-found';
@@ -86,12 +87,16 @@ const router = createBrowserRouter([
         path: 'profile',
         element: <DoctorProfile />,
         errorElement: <Errors />,
+      },
+      {
+        path: 'dashboard',
+        element: <DoctorDashboard />,
+        errorElement: <Errors />,
       }
     ],
     errorElement: <Errors />,
   },
   {
-
     path: '/doctors',
     element: <Doctors />,
     errorElement: <Errors />,
@@ -143,7 +148,6 @@ const router = createBrowserRouter([
     ]
   },  
   {    
-
     path: '/manager',
     element: <ManagerLayout />,
     children: [

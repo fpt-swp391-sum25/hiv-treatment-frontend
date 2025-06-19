@@ -1,5 +1,6 @@
 import React from 'react';
 import './CareIntroSection.css';
+import { Link } from 'react-router-dom';
 
 function CareIntroSection() {
   return (    <section className="care-intro-section" id="care-section">
@@ -65,7 +66,8 @@ function CareIntroSection() {
         <p>Cung cấp tài liệu, hội thảo nâng cao nhận thức về HIV và sức khỏe.</p>
       </li>
     </ul>
-    <button className="register-btn">Đăng ký tài khoản miễn phí</button>
+    <Link to="/register"><button className="register-btn">Đăng ký tài khoản miễn phí</button></Link>
+    
   </div>
 </div>
       </div>

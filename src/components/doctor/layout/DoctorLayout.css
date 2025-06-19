@@ -1,0 +1,226 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+#root {
+  margin: 0;
+  padding: 0;
+}
+
+.doctor-sidebar {
+  width: 240px;
+  background: #f4f8fc;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  box-shadow: 2px 0 8px rgba(0,0,0,0.03);
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  z-index: 100;
+  margin: 0;
+  padding-top: 0;
+}
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 24px 32px 24px;
+  border-bottom: 1px solid #e5eaf1;
+  margin-bottom: 16px;
+  margin-top: 0;
+}
+.logo-circle {
+  width: 48px;
+  height: 48px;
+  background: #e0e7ff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: #2563eb;
+}
+.logo-img {
+  width: 150px;
+  height: 80px;
+  object-fit: contain;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  margin-right: 0;
+  display: block;
+}
+.sidebar-logo img {
+  width: 150px;
+  height: 80px;
+  object-fit: contain;
+  display: block;
+}
+
+.sidebar-menu {
+  flex: 1;
+  margin-top: 24px;
+}
+.sidebar-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.sidebar-menu li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 32px;
+  font-size: 1.08rem;
+  color: #222;
+  border-left: 4px solid transparent;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.sidebar-menu li.active, .sidebar-menu li:hover {
+  background: #e0e7ff;
+  border-left: 4px solid #2563eb;
+  color: #2563eb;
+}
+.sidebar-logout {
+  margin: 0 24px;
+  background: #fff;
+  color: #ef4444;
+  border: 1px solid #ef4444;
+  border-radius: 8px;
+  padding: 10px 0;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.sidebar-logout:hover {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+.doctor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 32px;
+  background: #ffffff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  width: calc(100% - 240px);
+  box-sizing: border-box;
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 99;
+}
+
+.header-title {
+  font-size: 26px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #4285f4;
+}
+
+.header-subtitle {
+  color: #666;
+  font-size: 16px;
+  font-weight: normal;
+}
+
+.header-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e1e4e8;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.header-profile:hover {
+  background: #f0f2f5;
+}
+
+.header-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #4285f4;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.header-name {
+  font-weight: 500;
+  color: #4285f4;
+  font-size: 14px;
+}
+
+/* Để phần nội dung không bị che bởi sidebar cố định, cần thêm margin-left cho phần main */
+.doctor-layout {
+  display: flex;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+.doctor-dashboard-main {
+  flex: 1;
+  margin-left: 240px;
+  background: #f8fafb;
+  min-height: 100vh;
+  width: calc(100% - 240px);
+  box-sizing: border-box;
+  overflow-x: hidden;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  position: fixed;
+  top: 0;
+  right: 0;
+}
+
+.dashboard-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  flex: 1;
+  padding: 24px 32px;
+  overflow-y: auto;
+  background: #f8fafb;
+  margin-top: 76px; /* Chiều cao của header */
+  height: calc(100vh - 76px);
+}
+
+.dashboard-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dashboard-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.dashboard-content::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 10px;
+}
+
+.dashboard-content::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
