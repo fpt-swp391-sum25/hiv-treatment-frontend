@@ -14,7 +14,7 @@ import NotFound from './pages/error/NotFound';
 import Errors from './pages/error/DataError'
 
 // Import for client page
-import Home from './pages/client/home';
+import Home from './pages/client/Home';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import BookingCheckupForm from './pages/patient/Booking';

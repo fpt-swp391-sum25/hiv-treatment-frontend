@@ -5,7 +5,6 @@ import { useGoogleLogin } from '@react-oauth/google';
 import { GoogleOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { loginAPI } from '../../services/api.service';
-import { AuthContext } from '../../components/context/AuthContext';
 import { useForm } from 'antd/es/form/Form';
 
 const { Link, Text } = Typography;
