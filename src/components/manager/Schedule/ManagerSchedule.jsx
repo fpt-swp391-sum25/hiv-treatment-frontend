@@ -4,11 +4,12 @@ import DoctorFilter from './DoctorFilter';
 import StatusFilter from './StatusFilter';
 import ScheduleForm from './ScheduleForm';
 import ScheduleDetail from './ScheduleDetail';
-import { Row, Col, ToastContainer, Toast } from 'react-bootstrap';
+import { Row, Col, ToastContainer, Toast, Form } from 'react-bootstrap';
 import { BsCalendarPlus } from 'react-icons/bs';
 import moment from 'moment';
 import './CustomButtons.css';
 import './Schedule.css';
+import { StaffRole } from '../../../types/schedule.types';
 
 const ManagerSchedule = () => {
     const [showForm, setShowForm] = useState(false);
@@ -16,9 +17,11 @@ const ManagerSchedule = () => {
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [selectedDoctor, setSelectedDoctor] = useState(null);
     const [selectedStatus, setSelectedStatus] = useState(null);
+    const [selectedRole, setSelectedRole] = useState(null);
     const [selectedSchedule, setSelectedSchedule] = useState(null);
     const [schedules, setSchedules] = useState([]);
     const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+    const [showRoleLegend, setShowRoleLegend] = useState(true);
 
     // Mock schedules data for testing
     useEffect(() => {
@@ -33,7 +36,8 @@ const ManagerSchedule = () => {
                 doctorName: 'BS. Phát',
                 morning: true,
                 afternoon: true,
-                note: 'Lịch làm việc mẫu'
+                note: 'Lịch làm việc mẫu',
+                role: StaffRole.DOCTOR
             },
             {
                 id: 2,
@@ -44,7 +48,8 @@ const ManagerSchedule = () => {
                 doctorName: 'BS. Sơn',
                 morning: true,
                 afternoon: false,
-                note: 'Chỉ làm việc buổi sáng'
+                note: 'Chỉ làm việc buổi sáng',
+                role: StaffRole.DOCTOR
             },
             {
                 id: 3,
@@ -55,7 +60,20 @@ const ManagerSchedule = () => {
                 doctorName: 'BS. Khiết',
                 morning: false,
                 afternoon: false,
-                note: 'Nghỉ phép cả ngày'
+                note: 'Nghỉ phép cả ngày',
+                role: StaffRole.DOCTOR
+            },
+            {
+                id: 4,
+                title: 'Linh - Làm việc',
+                date: moment().format('YYYY-MM-DD'),
+                status: 'available',
+                staffId: 101,
+                staffName: 'Linh',
+                morning: true,
+                afternoon: true,
+                note: 'Y tá phụ trách ca sáng và chiều',
+                role: StaffRole.NURSE
             },
 
         ];
@@ -94,15 +112,26 @@ const ManagerSchedule = () => {
         setSchedules(schedules.filter(schedule => schedule.id !== scheduleId));
     };
 
+    // Danh sách các vai trò để lọc
+    const roleOptions = [
+        { value: null, label: 'Tất cả' },
+        { value: StaffRole.DOCTOR, label: 'Bác sĩ' },
+        { value: StaffRole.NURSE, label: 'Y tá' }
+    ];
+
     const filteredSchedules = schedules.filter(schedule => {
         let match = true;
         
         if (selectedDoctor) {
-            match = match && schedule.doctorId.toString() === selectedDoctor.toString();
+            match = match && schedule.doctorId?.toString() === selectedDoctor.toString();
         }
         
         if (selectedStatus) {
             match = match && schedule.status === selectedStatus;
+        }
+        
+        if (selectedRole) {
+            match = match && schedule.role === selectedRole;
         }
         
         return match;
@@ -115,6 +144,24 @@ const ManagerSchedule = () => {
             message,
             type
         });
+    };
+
+    // Render chú thích các vai trò
+    const renderRoleLegend = () => {
+        if (!showRoleLegend) return null;
+        
+        return (
+            <div className="role-legend">
+                <div className="role-legend-item">
+                    <div className="role-legend-color role-DOCTOR-color"></div>
+                    <span>Bác sĩ</span>
+                </div>
+                <div className="role-legend-item">
+                    <div className="role-legend-color role-NURSE-color"></div>
+                    <span>Y tá</span>
+                </div>
+            </div>
+        );
     };
 
     return (
@@ -141,19 +188,34 @@ const ManagerSchedule = () => {
             </ToastContainer>
 
             <Row className="mb-4 align-items-center">
-                <Col md={4}>
+                <Col md={3}>
+                    <Form.Group>
+                        <Form.Label>Vai trò</Form.Label>
+                        <Form.Select 
+                            value={selectedRole || ''} 
+                            onChange={(e) => setSelectedRole(e.target.value || null)}
+                        >
+                            {roleOptions.map((option, idx) => (
+                                <option key={idx} value={option.value || ''}>
+                                    {option.label}
+                                </option>
+                            ))}
+                        </Form.Select>
+                    </Form.Group>
+                </Col>
+                <Col md={3}>
                     <DoctorFilter 
                         onDoctorSelect={setSelectedDoctor} 
                         selectedDoctor={selectedDoctor} 
                     />
                 </Col>
-                <Col md={4}>
+                <Col md={3}>
                     <StatusFilter 
                         onStatusSelect={setSelectedStatus} 
                         selectedStatus={selectedStatus} 
                     />
                 </Col>
-                <Col md={4} className="text-end">
+                <Col md={3} className="text-end">
                     <button 
                         className="add-schedule-button"
                         onClick={() => handleAddClick(new Date())}
@@ -163,6 +225,17 @@ const ManagerSchedule = () => {
                     </button>
                 </Col>
             </Row>
+
+            <Form.Check 
+                type="checkbox"
+                id="show-role-legend"
+                label="Hiển thị chú thích vai trò"
+                checked={showRoleLegend}
+                onChange={(e) => setShowRoleLegend(e.target.checked)}
+                className="mb-2"
+            />
+
+            {renderRoleLegend()}
 
             <Calendar 
                 events={filteredSchedules}

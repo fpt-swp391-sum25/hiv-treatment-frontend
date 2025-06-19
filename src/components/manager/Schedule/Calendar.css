@@ -169,9 +169,8 @@
 
 /* Các màu cho trạng thái làm việc của bác sĩ */
 .status-available {
-  background-color: #d4edda;
-  color: #155724;
-  border-left: 3px solid #155724;
+  background-color: rgba(40, 167, 69, 0.1);
+  border-left: 3px solid #28a745;
 }
 
 .status-on-leave {
@@ -307,7 +306,7 @@
   text-overflow: ellipsis;
 }
 
-/* Màu sắc cho từng loại trạng thái */
+/* Màu sắc cho từng loại trạng thái và vai trò */
 .status-available {
   background-color: rgba(40, 167, 69, 0.1);
   border-left: 3px solid #28a745;
@@ -323,6 +322,47 @@
   border-left: 3px solid #007bff;
 }
 
+/* Màu sắc phân biệt cho các vai trò */
+.role-DOCTOR {
+  border-left-color: #28a745;
+}
+
+.role-NURSE {
+  border-left-color: #0dcaf0;
+}
+
+/* Chú thích vai trò */
+.role-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+}
+
+.role-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+}
+
+.role-legend-color {
+  width: 15px;
+  height: 15px;
+  border-radius: 3px;
+}
+
+.role-DOCTOR-color {
+  background-color: #28a745;
+}
+
+.role-NURSE-color {
+  background-color: #0dcaf0;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .fc .fc-toolbar {
@@ -333,6 +373,11 @@
   .fc .fc-toolbar-title {
     font-size: 1.2rem;
   }
+
+  .role-legend {
+    flex-direction: column;
+    gap: 5px;
+  }
 }
 
 /* Style cho ngày Chủ nhật */
@@ -342,7 +387,7 @@
 }
 
 .fc-day-sunday:after {
-   
+    content: "Ngày nghỉ";
     position: absolute;
     top: 50%;
     left: 50%;
