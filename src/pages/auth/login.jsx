@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import '@ant-design/v5-patch-for-react-19';
 import { Form, Input, Button, Alert, Segmented, Typography, Divider, notification } from 'antd';
 import { useGoogleLogin } from '@react-oauth/google';
@@ -31,7 +31,7 @@ const Login = () => {
                 })
             }
             // return response.data;
-        } catch (err) {
+        } catch (error) {
             setError('Thông tin đăng nhập không hợp lệ!');
         }
     };
