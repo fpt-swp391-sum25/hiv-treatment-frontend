@@ -17,108 +17,126 @@
 .dashboard-stats {
   display: flex;
   gap: 24px;
-  margin-bottom: 32px;
+  margin-bottom: 24px;
 }
 .dashboard-stat-box {
+  flex: 1;
   background: #fff;
   border-radius: 12px;
-  padding: 20px 32px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  min-width: 180px;
-  flex: 1;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  padding: 20px 28px 16px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
-.dashboard-stat-blue .stat-title { color: #2563eb; }
-.dashboard-stat-green .stat-title { color: #059669; }
-.dashboard-stat-orange .stat-title { color: #ea580c; }
-.dashboard-stat-purple .stat-title { color: #7c3aed; }
-.stat-title {
-  font-weight: 600;
-  font-size: 1.1rem;
-}
-.stat-value {
-  font-size: 2.2rem;
-  font-weight: bold;
-  margin: 8px 0 4px 0;
-}
-.stat-subtitle {
-  color: #666;
-  font-size: 1rem;
-}
-.stat-note {
-  color: #aaa;
-  font-size: 0.95rem;
-}
-.dashboard-schedule-section {
-  background: #eaf1fb;
+.dashboard-stat-blue { border-top: 4px solid #2563eb; }
+.dashboard-stat-green { border-top: 4px solid #22c55e; }
+.dashboard-stat-orange { border-top: 4px solid #f59e42; }
+.dashboard-stat-purple { border-top: 4px solid #8b5cf6; }
+.stat-title { font-size: 18px; color: #888; margin-bottom: 4px; }
+.stat-value { font-size: 32px; font-weight: bold; color: #222; }
+.stat-subtitle { font-size: 15px; color: #2563eb; margin-bottom: 2px; }
+.stat-note { font-size: 13px; color: #888; }
+
+.schedule-table-container {
+  background: #fff;
   border-radius: 12px;
-  padding: 24px;
-  margin-top: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  padding: 0 0 24px 0;
+  margin-bottom: 24px;
 }
-.dashboard-schedule-header {
+.schedule-table-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  background: #e8f0fe;
+  border-radius: 12px 12px 0 0;
+  padding: 18px 32px 12px 32px;
 }
-.dashboard-schedule-table {
+.schedule-table-header h3 {
+  margin: 0;
+  font-size: 20px;
+  color: #2563eb;
+}
+.schedule-table-desc {
+  font-size: 14px;
+  color: #666;
+}
+.schedule-table {
   width: 100%;
-  background: #fff;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+  border-collapse: collapse;
+  margin-top: 0;
 }
-.dashboard-schedule-table th, .dashboard-schedule-table td {
-  padding: 12px 16px;
+.schedule-table th, .schedule-table td {
+  padding: 12px 18px;
   text-align: left;
+  font-size: 15px;
 }
-.dashboard-schedule-table th {
-  background: #f1f5f9;
+.schedule-table th {
+  background: #f4f8fc;
+  color: #2563eb;
   font-weight: 600;
 }
+.schedule-table tr {
+  border-bottom: 1px solid #f0f0f0;
+}
+.schedule-table tr:last-child {
+  border-bottom: none;
+}
 .status-confirmed {
-  background: #d1fae5;
-  color: #059669;
+  background: #e0f7e9;
+  color: #22c55e;
   padding: 4px 12px;
   border-radius: 8px;
-  font-size: 0.98rem;
+  font-size: 14px;
+  font-weight: 500;
 }
 .status-pending {
-  background: #fef3c7;
-  color: #b45309;
+  background: #fff7e0;
+  color: #f59e42;
   padding: 4px 12px;
   border-radius: 8px;
-  font-size: 0.98rem;
-}
-.btn-view {
-  background: #e0e7ff;
-  color: #3730a3;
-  border: none;
-  border-radius: 6px;
-  padding: 6px 14px;
-  margin-right: 8px;
-  cursor: pointer;
-  font-size: 1rem;
-}
-.btn-complete {
-  background: #d1fae5;
-  color: #059669;
-  border: none;
-  border-radius: 6px;
-  padding: 6px 14px;
-  cursor: pointer;
-  font-size: 1rem;
+  font-size: 14px;
+  font-weight: 500;
 }
 .btn-add-schedule {
   background: #2563eb;
   color: #fff;
   border: none;
   border-radius: 8px;
-  padding: 10px 20px;
-  font-size: 1rem;
-  font-weight: 600;
+  padding: 10px 18px;
+  font-size: 15px;
+  font-weight: 500;
   cursor: pointer;
   transition: background 0.2s;
 }
 .btn-add-schedule:hover {
-  background: #1d4ed8;
+  background: #1749b1;
+}
+.btn-view {
+  background: #e8f0fe;
+  color: #2563eb;
+  border: none;
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-size: 14px;
+  margin-right: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-view:hover {
+  background: #c7e0ff;
+}
+.btn-complete {
+  background: #e0f7e9;
+  color: #22c55e;
+  border: none;
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-complete:hover {
+  background: #b6f2d6;
 } 

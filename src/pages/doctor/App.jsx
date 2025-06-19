@@ -4,9 +4,9 @@ import { Container } from 'react-bootstrap';
 
 const DoctorApp = () => {
   return (
-    <div className="doctor-app">
+    <div >
       {/* Header có thể thêm sau */}
-      <Container fluid className="py-4">
+      <Container >
         <Outlet />
       </Container>
       {/* Footer có thể thêm sau */}
