@@ -1,6 +1,17 @@
-.manager-sidebar {
-  border-right: 1px solid #343a40;
-  transition: all 0.3s;
+.manager-sidebar-container {
+  height: 100%;
+  background-color: #212529;
+  padding: 1rem;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.sidebar-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .sidebar-menu {
@@ -10,7 +21,7 @@
 .sidebar-link {
   border-radius: 5px;
   transition: all 0.2s;
-  padding: 10px 15px;
+  padding: 10px 15px !important;
 }
 
 .sidebar-link:hover {
@@ -24,9 +35,26 @@
 }
 
 .logout-container {
-  margin-top: 20px;
   padding-top: 15px;
-  border-top: 1px solid #4f5962;
+  margin-bottom: 10px;
+}
+
+/* Thêm scrollbar tùy chỉnh cho sidebar nếu cần */
+.manager-sidebar-container::-webkit-scrollbar {
+  width: 5px;
+}
+
+.manager-sidebar-container::-webkit-scrollbar-track {
+  background: #343a40;
+}
+
+.manager-sidebar-container::-webkit-scrollbar-thumb {
+  background: #495057;
+  border-radius: 3px;
+}
+
+.manager-sidebar-container::-webkit-scrollbar-thumb:hover {
+  background: #6c757d;
 }
 
 /* Đảm bảo nút đăng xuất luôn ở dưới cùng */

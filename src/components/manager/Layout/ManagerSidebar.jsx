@@ -21,31 +21,33 @@ const ManagerSidebar = () => {
   };
 
   return (
-    <div className="manager-sidebar bg-dark text-white p-3" style={{ height: '100%', width: '100%' }}>
-      <Nav className="flex-column h-100">
-        <div className="sidebar-menu">
-          {menuItems.map((item, index) => (
-            <Nav.Link 
-              key={index}
-              className="text-white mb-3 d-flex align-items-center sidebar-link"
-              onClick={() => navigate(item.path)}
-            >
-              <item.icon className="me-2" />
-              {item.text}
-            </Nav.Link>
-          ))}
-        </div>
-        
-        <div className="logout-container mt-auto">
-          <button 
-            className="btn btn-danger w-100 d-flex align-items-center justify-content-center"
-            onClick={handleLogout}
-          >
-            <FaSignOutAlt className="me-2" />
-            Đăng xuất
-          </button>
-        </div>
-      </Nav>
+    <div className="manager-sidebar-container">
+      <div className="sidebar-content">
+        <Nav className="flex-column">
+          <div className="sidebar-menu">
+            {menuItems.map((item, index) => (
+              <Nav.Link 
+                key={index}
+                className="text-white mb-3 d-flex align-items-center sidebar-link"
+                onClick={() => navigate(item.path)}
+              >
+                <item.icon className="me-2" />
+                {item.text}
+              </Nav.Link>
+            ))}
+          </div>
+        </Nav>
+      </div>
+      
+      <div className="logout-container">
+        <button 
+          className="btn btn-danger w-100 d-flex align-items-center justify-content-center"
+          onClick={handleLogout}
+        >
+          <FaSignOutAlt className="me-2" />
+          Đăng xuất
+        </button>
+      </div>
     </div>
   );
 };

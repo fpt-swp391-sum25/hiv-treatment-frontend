@@ -7,18 +7,24 @@
   border-bottom: 1px solid #343a40;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   color: white;
+  height: 104px; /* Cố định chiều cao header */
+  width: 100%;
+  position: relative;
+  z-index: 1000;
 }
 
 .header-left {
   display: flex;
   align-items: center;
+  padding-left: 12px; /* Thêm padding bên trái để canh với sidebar */
 }
 
 .logo-container {
-  width: 240px;
+  width: 190px; /* Giảm chiều rộng logo container để phù hợp với sidebar */
   height: 80px;
   display: flex;
   align-items: center;
+  margin-left: -12px; /* Dịch logo sang trái để canh với sidebar */
 }
 
 .app-logo {
@@ -68,6 +74,7 @@
 @media (max-width: 768px) {
   .manager-header {
     padding: 10px 16px;
+    height: 84px; /* Giảm chiều cao header cho màn hình nhỏ */
   }
 
   .header-center {
