@@ -22,12 +22,12 @@ const DoctorFilter = ({ selectedDoctor, onDoctorSelect }) => {
   };
 
   return (
-    <Form.Group className="mb-3">
+    <Form.Group className="filter-group">
       <Form.Label>Bác sĩ:</Form.Label>
       <Form.Select
         value={selectedDoctor || ''}
         onChange={handleDoctorChange}
-        className="custom-select"
+        className="filter-select"
       >
         <option value="">Tất cả bác sĩ</option>
         {doctors.map(doctor => (

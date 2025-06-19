@@ -33,3 +33,9 @@ export const SlotTimes = {
         endTime: '16:00'
     }
 };
+
+// Staff role types for scheduling
+export const StaffRole = {
+    DOCTOR: 'DOCTOR',           // Bác sĩ
+    NURSE: 'NURSE'              // Y tá
+};
