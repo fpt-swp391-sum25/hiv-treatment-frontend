@@ -387,7 +387,7 @@
 }
 
 .fc-day-sunday:after {
-    content: "Ngày nghỉ";
+
     position: absolute;
     top: 50%;
     left: 50%;

@@ -2,21 +2,22 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import ManagerSidebar from '../../components/manager/Layout/ManagerSidebar';
 import ManagerHeader from '../../components/manager/Layout/ManagerHeader';
+import './manager-layout.css'; // Tạo file CSS mới cho layout
 
 const ManagerLayout = () => {
   return (
-    <div className="d-flex flex-column vh-100">
-      <div className="header-container">
+    <div className="manager-layout">
+      <header className="manager-layout-header">
         <ManagerHeader />
-      </div>
+      </header>
       
-      <div className="d-flex flex-grow-1">
-        <div className="sidebar-container" style={{ width: '230px', flexShrink: 0 }}>
+      <div className="manager-layout-body">
+        <aside className="manager-layout-sidebar">
           <ManagerSidebar />
-        </div>
-        <div className="content-container p-3 flex-grow-1 overflow-auto">
+        </aside>
+        <main className="manager-layout-content">
           <Outlet />
-        </div>
+        </main>
       </div>
     </div>
   );

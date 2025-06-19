@@ -58,33 +58,37 @@
 
 /* Nút "Thêm lịch mới" - gradient xanh lá cây */
 .add-schedule-button {
-  background: linear-gradient(90deg, #40e495 0%, #38ccb0 100%);
-  color: white;
+  background-color: #4caf50;
   border: none;
-  border-radius: 50px;
-  padding: 10px 24px;
-  font-size: 14px;
+  border-radius: 4px;
+  color: white;
+  padding: 0 20px;
   font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  box-shadow: 0 2px 5px rgba(56, 204, 176, 0.3);
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  white-space: nowrap;
+  font-size: 0.9rem;
+  height: 38px;
 }
 
 .add-schedule-button:hover {
-  box-shadow: 0 4px 8px rgba(56, 204, 176, 0.5);
-  transform: translateY(-1px);
+  background-color: #43a047;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px);
 }
 
 .add-schedule-button:active {
-  transform: translateY(1px);
-  box-shadow: 0 1px 3px rgba(56, 204, 176, 0.3);
+  background-color: #388e3c;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transform: translateY(0);
 }
 
 .add-schedule-button-icon {
-  font-size: 18px;
+  font-size: 16px;
 }
 
 /* Custom select box styling */

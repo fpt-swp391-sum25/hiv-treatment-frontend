@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Calendar from './Calendar';
 import DoctorFilter from './DoctorFilter';
 import StatusFilter from './StatusFilter';
+import StaffFilter from './StaffFilter';
 import ScheduleForm from './ScheduleForm';
 import ScheduleDetail from './ScheduleDetail';
 import { Row, Col, ToastContainer, Toast, Form } from 'react-bootstrap';
@@ -16,12 +17,12 @@ const ManagerSchedule = () => {
     const [showDetail, setShowDetail] = useState(false);
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [selectedDoctor, setSelectedDoctor] = useState(null);
+    const [selectedStaff, setSelectedStaff] = useState(null);
     const [selectedStatus, setSelectedStatus] = useState(null);
     const [selectedRole, setSelectedRole] = useState(null);
     const [selectedSchedule, setSelectedSchedule] = useState(null);
     const [schedules, setSchedules] = useState([]);
     const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
-    const [showRoleLegend, setShowRoleLegend] = useState(true);
 
     // Mock schedules data for testing
     useEffect(() => {
@@ -75,11 +76,16 @@ const ManagerSchedule = () => {
                 note: 'Y tá phụ trách ca sáng và chiều',
                 role: StaffRole.NURSE
             },
-
         ];
 
         setSchedules(mockSchedules);
     }, []);
+
+    // Reset filters khi thay đổi vai trò
+    useEffect(() => {
+        setSelectedDoctor(null);
+        setSelectedStaff(null);
+    }, [selectedRole]);
 
     const handleAddClick = (date) => {
         // Kiểm tra xem ngày được chọn có phải là ngày quá khứ không
@@ -122,16 +128,24 @@ const ManagerSchedule = () => {
     const filteredSchedules = schedules.filter(schedule => {
         let match = true;
         
-        if (selectedDoctor) {
+        // Lọc theo vai trò
+        if (selectedRole) {
+            match = match && schedule.role === selectedRole;
+        }
+        
+        // Lọc theo bác sĩ (chỉ khi đang xem bác sĩ hoặc tất cả vai trò)
+        if (selectedDoctor && (selectedRole === StaffRole.DOCTOR || selectedRole === null)) {
             match = match && schedule.doctorId?.toString() === selectedDoctor.toString();
         }
         
-        if (selectedStatus) {
-            match = match && schedule.status === selectedStatus;
+        // Lọc theo nhân viên y tá (chỉ khi đang xem y tá hoặc tất cả vai trò)
+        if (selectedStaff && (selectedRole === StaffRole.NURSE || selectedRole === null)) {
+            match = match && schedule.staffId?.toString() === selectedStaff.toString();
         }
         
-        if (selectedRole) {
-            match = match && schedule.role === selectedRole;
+        // Lọc theo trạng thái
+        if (selectedStatus) {
+            match = match && schedule.status === selectedStatus;
         }
         
         return match;
@@ -146,22 +160,150 @@ const ManagerSchedule = () => {
         });
     };
 
-    // Render chú thích các vai trò
-    const renderRoleLegend = () => {
-        if (!showRoleLegend) return null;
-        
-        return (
-            <div className="role-legend">
-                <div className="role-legend-item">
-                    <div className="role-legend-color role-DOCTOR-color"></div>
-                    <span>Bác sĩ</span>
-                </div>
-                <div className="role-legend-item">
-                    <div className="role-legend-color role-NURSE-color"></div>
-                    <span>Y tá</span>
-                </div>
-            </div>
-        );
+    // Render filters dựa theo vai trò được chọn
+    const renderFilters = () => {
+        if (selectedRole === StaffRole.DOCTOR) {
+            // Khi chọn vai trò là bác sĩ
+            return (
+                <>
+                    <Col md={3} className="filter-col">
+                        <Form.Group className="filter-group">
+                            <Form.Label>Vai trò</Form.Label>
+                            <Form.Select 
+                                value={selectedRole || ''} 
+                                onChange={(e) => setSelectedRole(e.target.value || null)}
+                                className="filter-select"
+                            >
+                                {roleOptions.map((option, idx) => (
+                                    <option key={idx} value={option.value || ''}>
+                                        {option.label}
+                                    </option>
+                                ))}
+                            </Form.Select>
+                        </Form.Group>
+                    </Col>
+                    <Col md={3} className="filter-col">
+                        <DoctorFilter 
+                            onDoctorSelect={setSelectedDoctor} 
+                            selectedDoctor={selectedDoctor} 
+                        />
+                    </Col>
+                    <Col md={3} className="filter-col">
+                        <StatusFilter 
+                            onStatusSelect={setSelectedStatus} 
+                            selectedStatus={selectedStatus} 
+                        />
+                    </Col>
+                    <Col md={3} className="filter-col text-end">
+                        <div className="button-container">
+                            <button 
+                                className="add-schedule-button"
+                                onClick={() => handleAddClick(new Date())}
+                            >
+                                <BsCalendarPlus className="add-schedule-button-icon" />
+                                Thêm lịch mới
+                            </button>
+                        </div>
+                    </Col>
+                </>
+            );
+        } else if (selectedRole === StaffRole.NURSE) {
+            // Khi chọn vai trò là y tá
+            return (
+                <>
+                    <Col md={3} className="filter-col">
+                        <Form.Group className="filter-group">
+                            <Form.Label>Vai trò</Form.Label>
+                            <Form.Select 
+                                value={selectedRole || ''} 
+                                onChange={(e) => setSelectedRole(e.target.value || null)}
+                                className="filter-select"
+                            >
+                                {roleOptions.map((option, idx) => (
+                                    <option key={idx} value={option.value || ''}>
+                                        {option.label}
+                                    </option>
+                                ))}
+                            </Form.Select>
+                        </Form.Group>
+                    </Col>
+                    <Col md={3} className="filter-col">
+                        <StaffFilter 
+                            onStaffSelect={setSelectedStaff} 
+                            selectedStaff={selectedStaff} 
+                        />
+                    </Col>
+                    <Col md={3} className="filter-col">
+                        <StatusFilter 
+                            onStatusSelect={setSelectedStatus} 
+                            selectedStatus={selectedStatus} 
+                        />
+                    </Col>
+                    <Col md={3} className="filter-col text-end">
+                        <div className="button-container">
+                            <button 
+                                className="add-schedule-button"
+                                onClick={() => handleAddClick(new Date())}
+                            >
+                                <BsCalendarPlus className="add-schedule-button-icon" />
+                                Thêm lịch mới
+                            </button>
+                        </div>
+                    </Col>
+                </>
+            );
+        } else {
+            // Khi chọn tất cả vai trò
+            return (
+                <>
+                    <Col md={2} className="filter-col">
+                        <Form.Group className="filter-group">
+                            <Form.Label>Vai trò</Form.Label>
+                            <Form.Select 
+                                value={selectedRole || ''} 
+                                onChange={(e) => setSelectedRole(e.target.value || null)}
+                                className="filter-select"
+                            >
+                                {roleOptions.map((option, idx) => (
+                                    <option key={idx} value={option.value || ''}>
+                                        {option.label}
+                                    </option>
+                                ))}
+                            </Form.Select>
+                        </Form.Group>
+                    </Col>
+                    <Col md={2} className="filter-col">
+                        <DoctorFilter 
+                            onDoctorSelect={setSelectedDoctor} 
+                            selectedDoctor={selectedDoctor} 
+                        />
+                    </Col>
+                    <Col md={2} className="filter-col">
+                        <StaffFilter 
+                            onStaffSelect={setSelectedStaff} 
+                            selectedStaff={selectedStaff} 
+                        />
+                    </Col>
+                    <Col md={3} className="filter-col">
+                        <StatusFilter 
+                            onStatusSelect={setSelectedStatus} 
+                            selectedStatus={selectedStatus} 
+                        />
+                    </Col>
+                    <Col md={3} className="filter-col text-end">
+                        <div className="button-container">
+                            <button 
+                                className="add-schedule-button"
+                                onClick={() => handleAddClick(new Date())}
+                            >
+                                <BsCalendarPlus className="add-schedule-button-icon" />
+                                Thêm lịch mới
+                            </button>
+                        </div>
+                    </Col>
+                </>
+            );
+        }
     };
 
     return (
@@ -187,55 +329,9 @@ const ManagerSchedule = () => {
                 </Toast>
             </ToastContainer>
 
-            <Row className="mb-4 align-items-center">
-                <Col md={3}>
-                    <Form.Group>
-                        <Form.Label>Vai trò</Form.Label>
-                        <Form.Select 
-                            value={selectedRole || ''} 
-                            onChange={(e) => setSelectedRole(e.target.value || null)}
-                        >
-                            {roleOptions.map((option, idx) => (
-                                <option key={idx} value={option.value || ''}>
-                                    {option.label}
-                                </option>
-                            ))}
-                        </Form.Select>
-                    </Form.Group>
-                </Col>
-                <Col md={3}>
-                    <DoctorFilter 
-                        onDoctorSelect={setSelectedDoctor} 
-                        selectedDoctor={selectedDoctor} 
-                    />
-                </Col>
-                <Col md={3}>
-                    <StatusFilter 
-                        onStatusSelect={setSelectedStatus} 
-                        selectedStatus={selectedStatus} 
-                    />
-                </Col>
-                <Col md={3} className="text-end">
-                    <button 
-                        className="add-schedule-button"
-                        onClick={() => handleAddClick(new Date())}
-                    >
-                        <BsCalendarPlus className="add-schedule-button-icon" />
-                        Thêm lịch mới
-                    </button>
-                </Col>
+            <Row className="mb-4 filter-row">
+                {renderFilters()}
             </Row>
-
-            <Form.Check 
-                type="checkbox"
-                id="show-role-legend"
-                label="Hiển thị chú thích vai trò"
-                checked={showRoleLegend}
-                onChange={(e) => setShowRoleLegend(e.target.checked)}
-                className="mb-2"
-            />
-
-            {renderRoleLegend()}
 
             <Calendar 
                 events={filteredSchedules}

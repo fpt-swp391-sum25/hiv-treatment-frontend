@@ -10,12 +10,12 @@ const StatusFilter = ({ selectedStatus, onStatusSelect }) => {
     };
 
     return (
-        <Form.Group className="mb-3">
+        <Form.Group className="filter-group">
             <Form.Label>Trạng thái:</Form.Label>
             <Form.Select
                 value={selectedStatus || ''}
                 onChange={handleStatusChange}
-                className="custom-select"
+                className="filter-select"
             >
                 <option value="">Tất cả trạng thái</option>
                 <option value={ScheduleStatus.AVAILABLE}>Làm việc</option>
