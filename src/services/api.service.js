@@ -201,7 +201,20 @@ const updateTestResultAPI = (testResultId, type, result, unit, note, expectedRes
     return axios.put(URL_BACKEND, testResultData)
 }
 
+const fetchScheduleByDoctorIdAPI = (doctorId) => {
+    const URL_BACKEND = `/api/schedule/doctor-id/${doctorId}`
+    return axios.get(URL_BACKEND)
+}
 
+const fetchRegimensByDoctorIdAPI = (doctorId) => {
+    const URL_BACKEND = `/api/regimen/doctor-id/${doctorId}`
+    return axios.get(URL_BACKEND)
+}
+
+const fetchAllRegimensAPI = () => {
+    const URL_BACKEND = '/api/regimen'
+    return axios.get(URL_BACKEND)
+}
 export {
     loginAPI,
     registerAPI,
@@ -232,5 +245,9 @@ export {
     updateHealthRecordAPI,
     deleteTestResultAPI,
     createTestResultAPI,
-    updateTestResultAPI
+    updateTestResultAPI,
+
+    fetchScheduleByDoctorIdAPI,
+    fetchRegimensByDoctorIdAPI,
+    fetchAllRegimensAPI
 }

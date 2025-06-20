@@ -1,104 +1,29 @@
-.schedule-container {
-  padding: 3px;
+.calendar-container {
+  overflow-x: auto;
+  border: 1px solid #ddd;
 }
 
-.calendar-card {
-  margin-bottom: 20px;
-  box-shadow: 0 2px 5px rgb(252, 252, 252);
+.calendar-header,
+.calendar-row {
+  display: flex;
 }
 
-.appointment-details-card {
-  margin-bottom: 20px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  height: 100%;
+.calendar-cell {
+  flex: 1;
+  border: 1px solid #eee;
+  padding: 8px;
+  min-height: 80px;
 }
 
-.section-title {
-  font-size: 1.5rem;
-  margin-bottom: 20px;
-  color: #333;
-  border-bottom: 2px solid #f0f0f0;
-  padding-bottom: 10px;
-}
-
-.detail-item {
-  margin-bottom: 10px;
-}
-
-.detail-label {
+.day-header {
   font-weight: bold;
-  margin-right: 5px;
+  background: #f5f5f5;
+  text-align: center;
 }
 
-.detail-value {
-  color: #333;
+.time-slot {
+  font-weight: bold;
+  width: 80px;
+  background: #fafafa;
+  text-align: center;
 }
-
-.patient-info {
-  border-top: 1px solid #eee;
-  padding-top: 15px;
-}
-
-.patient-info h5 {
-  font-size: 1.1rem;
-  margin-bottom: 10px;
-}
-
-.patient-info p {
-  color: #7f8c8d;
-  margin: 0;
-}
-
-.loading-spinner {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 500px;
-}
-
-.error-message {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 500px;
-  color: #e74c3c;
-}
-
-/* Tùy chỉnh styles cho react-big-calendar */
-.rbc-event {
-  border-radius: 5px !important;
-}
-
-.rbc-today {
-  background-color: rgba(0, 120, 255, 0.05) !important;
-}
-
-.rbc-toolbar button {
-  border-radius: 4px !important;
-}
-
-.rbc-toolbar button.rbc-active {
-  background-color: #007bff !important;
-  color: white !important;
-}
-
-.rbc-header {
-  padding: 10px 3px !important;
-  font-weight: bold !important;
-}
-
-.rbc-event-content {
-  font-size: 0.9rem !important;
-}
-
-/* Responsive Adjustments */
-@media (max-width: 768px) {
-  .rbc-toolbar {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  
-  .rbc-toolbar-label {
-    margin: 10px 0;
-  }
-} 
