@@ -43,7 +43,7 @@ const LabTechnicianHomePage = () => {
     };
 
     const handleViewDetail = (record) => {
-        navigate(`/labtechnician/patient-detail/${record.id}`);
+        navigate(`/lab-technician/patient-detail/${record.id}`);
     };
 
     const columns = [
