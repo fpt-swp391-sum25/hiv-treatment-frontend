@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Form, Input, Select, Button, message } from 'antd';
-import { DoctorSpecialty, ExperienceLevel } from '../../../types/doctor.types';
+import { DoctorSpecialty } from '../../../types/doctor.types';
 
 const UpdateDoctorModal = ({ visible, doctor, onCancel, onSuccess, updateDoctorProfileAPI }) => {
     const [form] = Form.useForm();
@@ -13,7 +13,7 @@ const UpdateDoctorModal = ({ visible, doctor, onCancel, onSuccess, updateDoctorP
                 email: doctor.email,
                 phone: doctor.phone,
                 specialty: doctor.specialty,
-                experienceLevel: doctor.experienceLevel,
+                experienceYears: doctor.experienceYears,
                 description: doctor.description,
                 certificates: doctor.certificates,
                 education: doctor.education
@@ -25,14 +25,15 @@ const UpdateDoctorModal = ({ visible, doctor, onCancel, onSuccess, updateDoctorP
         try {
             const values = await form.validateFields();
             setLoading(true);
-            
             await updateDoctorProfileAPI(doctor.id, values);
-            
             onSuccess();
-            message.success('Cập nhật thông tin bác sĩ thành công');
         } catch (error) {
             console.error('Error updating doctor:', error);
-            message.error('Không thể cập nhật thông tin bác sĩ');
+            message.error({
+                content: 'Không thể cập nhật thông tin bác sĩ',
+                duration: 2,
+                style: { top: 80, right: 24, position: 'fixed' }
+            });
         } finally {
             setLoading(false);
         }
@@ -105,17 +106,11 @@ const UpdateDoctorModal = ({ visible, doctor, onCancel, onSuccess, updateDoctorP
                 </Form.Item>
 
                 <Form.Item
-                    name="experienceLevel"
-                    label="Kinh nghiệm"
-                    rules={[{ required: true, message: 'Vui lòng chọn mức kinh nghiệm' }]}
+                    name="experienceYears"
+                    label="Số năm kinh nghiệm"
+                    rules={[{ required: true, message: 'Vui lòng nhập số năm kinh nghiệm' }, { type: 'number', min: 0, max: 60, message: 'Số năm hợp lệ là 0-60' }]}
                 >
-                    <Select>
-                        {Object.entries(ExperienceLevel).map(([key, value]) => (
-                            <Select.Option key={key} value={value}>
-                                {value}
-                            </Select.Option>
-                        ))}
-                    </Select>
+                    <Input type="number" min={0} max={60} placeholder="Nhập số năm kinh nghiệm" />
                 </Form.Item>
 
                 <Form.Item

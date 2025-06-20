@@ -193,6 +193,11 @@ const updateTestResultAPI = (testResultId) => {
     return axios.put(URL_BACKEND)
 }
 
+const deleteDoctorAPI = (doctorId) => {
+    const URL_BACKEND = `/api/doctor/${doctorId}`
+    return axios.delete(URL_BACKEND)
+}
+
 
 export {
     loginAPI,
@@ -224,5 +229,6 @@ export {
     updateHealthRecordAPI,
     deleteTestResultAPI,
     createTestResultAPI,
-    updateTestResultAPI
+    updateTestResultAPI,
+    deleteDoctorAPI
 }

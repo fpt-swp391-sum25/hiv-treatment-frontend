@@ -5,7 +5,13 @@ import './DoctorProfileDetail.css';
 
 const DoctorProfileDetail = ({ visible, doctor, statistics, loading, onClose }) => {
     if (!doctor) return null;
-
+    // Xác định màu trạng thái
+    let statusColor = 'green', statusText = 'Đang hoạt động';
+    if (doctor.status === 'INACTIVE') {
+        statusColor = 'red'; statusText = 'Tạm nghỉ';
+    } else if (doctor.status === 'ON_LEAVE') {
+        statusColor = 'orange'; statusText = 'Nghỉ phép';
+    }
     return (
         <Modal
             title="Thông tin chi tiết bác sĩ"
@@ -34,7 +40,7 @@ const DoctorProfileDetail = ({ visible, doctor, statistics, loading, onClose }) 
                         <div className="basic-info">
                             <h2>{doctor.fullName}</h2>
                             <p>{doctor.specialty}</p>
-                            <Tag color="blue">{doctor.experienceLevel}</Tag>
+                            <Tag color={statusColor}>{statusText}</Tag>
                         </div>
                     </div>
 
@@ -77,6 +83,9 @@ const DoctorProfileDetail = ({ visible, doctor, statistics, loading, onClose }) 
                         column={1}
                         className="doctor-details"
                     >
+                        <Descriptions.Item label="Họ và tên">
+                            {doctor.fullName}
+                        </Descriptions.Item>
                         <Descriptions.Item label="Email">
                             {doctor.email}
                         </Descriptions.Item>
@@ -86,8 +95,8 @@ const DoctorProfileDetail = ({ visible, doctor, statistics, loading, onClose }) 
                         <Descriptions.Item label="Chuyên khoa">
                             {doctor.specialty}
                         </Descriptions.Item>
-                        <Descriptions.Item label="Kinh nghiệm">
-                            {doctor.experienceLevel}
+                        <Descriptions.Item label="Số năm kinh nghiệm">
+                            {doctor.experienceYears || 'Chưa cập nhật'}
                         </Descriptions.Item>
                         <Descriptions.Item label="Mô tả">
                             {doctor.description}
@@ -97,6 +106,9 @@ const DoctorProfileDetail = ({ visible, doctor, statistics, loading, onClose }) 
                         </Descriptions.Item>
                         <Descriptions.Item label="Chứng chỉ">
                             {doctor.certificates}
+                        </Descriptions.Item>
+                        <Descriptions.Item label="Trạng thái">
+                            <Tag color={statusColor}>{statusText}</Tag>
                         </Descriptions.Item>
                     </Descriptions>
                 </>

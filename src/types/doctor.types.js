@@ -12,9 +12,18 @@ export const DoctorStatus = {
     ON_LEAVE: 'ON_LEAVE'       // Nghỉ phép
 };
 
-// Doctor Experience Level
-export const ExperienceLevel = {
-    JUNIOR: 'JUNIOR',          // 1-3 năm
-    SENIOR: 'SENIOR',          // 3-5 năm
-    EXPERT: 'EXPERT'           // Trên 5 năm
-};
+// Doctor type (JS Doc style for JS file)
+/**
+ * @typedef {Object} Doctor
+ * @property {number} id
+ * @property {string} fullName
+ * @property {string} specialty
+ * @property {string} email
+ * @property {string} phone
+ * @property {string} status
+ * @property {number=} experienceYears
+ * @property {string=} description
+ * @property {string=} certificates
+ * @property {string=} education
+ * @property {string=} avatarUrl
+ */

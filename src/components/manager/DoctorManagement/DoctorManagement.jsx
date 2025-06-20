@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Space, Button, message, Tag, Row, Col, Card, Statistic, Spin, Select, Input } from 'antd';
-import { UserOutlined, CalendarOutlined, FileTextOutlined } from '@ant-design/icons';
-import { fetchAllDoctorsAPI, fetchDoctorByIdAPI, updateDoctorProfileAPI, fetchDoctorStatisticsAPI } from '../../../services/api.service';
+import { Table, Space, Button, message, Tag, Row, Col, Card, Statistic, Spin, Select, Input, Modal } from 'antd';
+import { UserOutlined, CalendarOutlined, FileTextOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import { fetchAllDoctorsAPI, fetchDoctorByIdAPI, updateDoctorProfileAPI, fetchDoctorStatisticsAPI, deleteDoctorAPI } from '../../../services/api.service';
 import UpdateDoctorModal from './UpdateDoctorModal';
 import DoctorProfileDetail from './DoctorProfileDetail';
 import { DoctorStatus } from '../../../types/doctor.types';
@@ -26,7 +26,7 @@ const DoctorManagement = () => {
             email: 'bsa@example.com',
             phone: '0901234567',
             status: 'ACTIVE',
-            experienceLevel: 'SENIOR',
+            experienceYears: 12,
             description: 'Chuyên gia điều trị HIV/AIDS',
             certificates: 'Chứng chỉ A, B',
             education: 'Đại học Y Hà Nội',
@@ -39,7 +39,7 @@ const DoctorManagement = () => {
             email: 'bsb@example.com',
             phone: '0912345678',
             status: 'ON_LEAVE',
-            experienceLevel: 'EXPERT',
+            experienceYears: 20,
             description: 'Bác sĩ nội tổng quát nhiều năm kinh nghiệm',
             certificates: 'Chứng chỉ C',
             education: 'Đại học Y Dược TP.HCM',
@@ -52,7 +52,7 @@ const DoctorManagement = () => {
             email: 'bsc@example.com',
             phone: '0987654321',
             status: 'INACTIVE',
-            experienceLevel: 'JUNIOR',
+            experienceYears: 3,
             description: 'Bác sĩ trẻ, nhiệt huyết',
             certificates: '',
             education: 'Đại học Y Huế',
@@ -82,17 +82,26 @@ const DoctorManagement = () => {
     };
 
     const handleViewProfile = async (doctor) => {
-        setSelectedDoctor(null);
+        setSelectedDoctor(doctor); // Sửa: luôn set doctor để truyền sang modal
         setStatisticsLoading(true);
         try {
-            // Lấy chi tiết bác sĩ
-            const detailRes = await fetchDoctorByIdAPI(doctor.id);
-            setSelectedDoctor(detailRes.data);
+            // Lấy chi tiết bác sĩ (nếu có API thật)
+            let detail = doctor;
+            if (doctor.id ) {
+                const detailRes = await fetchDoctorByIdAPI(doctor.id);
+                if (detailRes && detailRes.data) detail = detailRes.data;
+            }
+            setSelectedDoctor(detail);
             // Lấy thống kê
-            const statsRes = await fetchDoctorStatisticsAPI(doctor.id);
-            setDoctorStatistics(statsRes.data);
+            let stats = null;
+            if (doctor.id && fetchDoctorStatisticsAPI) {
+                const statsRes = await fetchDoctorStatisticsAPI(doctor.id);
+                if (statsRes && statsRes.data) stats = statsRes.data;
+            }
+            setDoctorStatistics(stats);
             setIsProfileDetailVisible(true);
         } catch (error) {
+            setIsProfileDetailVisible(true); // Vẫn mở modal với dữ liệu hiện có
             message.error('Không thể tải thông tin chi tiết bác sĩ');
         } finally {
             setStatisticsLoading(false);
@@ -105,9 +114,41 @@ const DoctorManagement = () => {
     };
 
     const handleUpdateSuccess = () => {
-        message.success('Cập nhật thông tin thành công');
+        message.success({
+            content: 'Cập nhật thông tin thành công',
+            duration: 2,
+            style: { top: 80, right: 24, position: 'fixed' }
+        });
         loadDoctors();
         setIsUpdateModalVisible(false);
+    };
+
+    const handleDelete = (doctor) => {
+        Modal.confirm({
+            title: 'Xác nhận xóa',
+            icon: <ExclamationCircleOutlined />,
+            content: `Bạn có chắc chắn muốn xóa bác sĩ ${doctor.fullName}?`,
+            okText: 'Xóa',
+            okType: 'danger',
+            cancelText: 'Hủy',
+            async onOk() {
+                try {
+                    setLoading(true);
+                    await deleteDoctorAPI(doctor.id);
+                    message.success('Xóa bác sĩ thành công');
+                    // Cập nhật lại danh sách
+                    await loadDoctors();
+                } catch (error) {
+                    console.error('Error deleting doctor:', error);
+                    // Nếu dùng mock data, xóa trực tiếp
+                    const newDoctors = doctors.filter(d => d.id !== doctor.id);
+                    setDoctors(newDoctors);
+                    message.success('Xóa bác sĩ thành công (dữ liệu mẫu)');
+                } finally {
+                    setLoading(false);
+                }
+            },
+        });
     };
 
     // Lọc danh sách bác sĩ theo dropdown và search
@@ -138,33 +179,36 @@ const DoctorManagement = () => {
             dataIndex: 'phone',
             key: 'phone',
         },
-        {
-            title: 'Trạng thái',
-            dataIndex: 'status',
-            key: 'status',
-            render: (status) => {
-                let color = 'green';
-                let text = 'Đang hoạt động';
-                if (status === DoctorStatus.INACTIVE) {
-                    color = 'red';
-                    text = 'Tạm nghỉ';
-                } else if (status === DoctorStatus.ON_LEAVE) {
-                    color = 'orange';
-                    text = 'Nghỉ phép';
-                }
-                return <Tag color={color}>{text}</Tag>;
-            }
-        },
+        // {
+        //     title: 'Trạng thái',
+        //     dataIndex: 'status',
+        //     key: 'status',
+        //     render: (status) => {
+        //         let color = 'green';
+        //         let text = 'Đang hoạt động';
+        //         if (status === DoctorStatus.INACTIVE) {
+        //             color = 'red';
+        //             text = 'Tạm nghỉ';
+        //         } else if (status === DoctorStatus.ON_LEAVE) {
+        //             color = 'orange';
+        //             text = 'Nghỉ phép';
+        //         }
+        //         return <Tag color={color}>{text}</Tag>;
+        //     }
+        // },
         {
             title: 'Thao tác',
             key: 'action',
             render: (_, record) => (
                 <Space size="middle">
                     <Button type="primary" onClick={() => handleViewProfile(record)}>
-                        Xem chi tiết
+                        Xem thông tin
                     </Button>
                     <Button onClick={() => handleUpdateDoctor(record)}>
                         Cập nhật
+                    </Button>
+                    <Button onClick={() => handleDelete(record)}>
+                        Xóa
                     </Button>
                 </Space>
             ),
@@ -173,31 +217,67 @@ const DoctorManagement = () => {
 
     return (
         <div className="doctor-management">
-            <Row gutter={[16, 16]} className="dashboard-stats">
+            <Row gutter={[24, 24]} className="dashboard-stats" style={{ marginBottom: 32 }}>
                 <Col xs={24} sm={12} lg={8}>
-                    <Card>
+                    <Card
+                        style={{
+                            borderRadius: 16,
+                            boxShadow: '0 4px 24px 0 rgba(0,0,0,0.07)',
+                            background: 'linear-gradient(135deg, #f8fafc 60%, #e0e7ff 100%)',
+                            minHeight: 120,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}
+                        bodyStyle={{ padding: 24, textAlign: 'center' }}
+                    >
                         <Statistic
-                            title="Tổng số bác sĩ"
+                            title={<span style={{ color: '#64748b', fontWeight: 600, fontSize: 16 }}>Tổng số bác sĩ</span>}
                             value={doctors.length}
-                            prefix={<UserOutlined />}
+                            prefix={<UserOutlined style={{ fontSize: 32, color: '#2563eb', marginRight: 8 }} />}
+                            valueStyle={{ fontSize: 32, fontWeight: 700, color: '#22223b' }}
                         />
                     </Card>
                 </Col>
                 <Col xs={24} sm={12} lg={8}>
-                    <Card>
+                    <Card
+                        style={{
+                            borderRadius: 16,
+                            boxShadow: '0 4px 24px 0 rgba(0,0,0,0.07)',
+                            background: 'linear-gradient(135deg, #f8fafc 60%, #d1fae5 100%)',
+                            minHeight: 120,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}
+                        bodyStyle={{ padding: 24, textAlign: 'center' }}
+                    >
                         <Statistic
-                            title="Đang làm việc"
+                            title={<span style={{ color: '#64748b', fontWeight: 600, fontSize: 16 }}>Đang làm việc</span>}
                             value={doctors.filter(d => d.status === DoctorStatus.ACTIVE).length}
-                            prefix={<CalendarOutlined />}
+                            prefix={<CalendarOutlined style={{ fontSize: 32, color: '#059669', marginRight: 8 }} />}
+                            valueStyle={{ fontSize: 32, fontWeight: 700, color: '#22223b' }}
                         />
                     </Card>
                 </Col>
                 <Col xs={24} sm={12} lg={8}>
-                    <Card>
+                    <Card
+                        style={{
+                            borderRadius: 16,
+                            boxShadow: '0 4px 24px 0 rgba(0,0,0,0.07)',
+                            background: 'linear-gradient(135deg, #f8fafc 60%, #fef9c3 100%)',
+                            minHeight: 120,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}
+                        bodyStyle={{ padding: 24, textAlign: 'center' }}
+                    >
                         <Statistic
-                            title="Nghỉ phép"
+                            title={<span style={{ color: '#64748b', fontWeight: 600, fontSize: 16 }}>Nghỉ phép</span>}
                             value={doctors.filter(d => d.status === DoctorStatus.ON_LEAVE).length}
-                            prefix={<FileTextOutlined />}
+                            prefix={<FileTextOutlined style={{ fontSize: 32, color: '#eab308', marginRight: 8 }} />}
+                            valueStyle={{ fontSize: 32, fontWeight: 700, color: '#22223b' }}
                         />
                     </Card>
                 </Col>
