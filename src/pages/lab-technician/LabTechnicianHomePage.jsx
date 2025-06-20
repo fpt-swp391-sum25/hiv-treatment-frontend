@@ -6,7 +6,7 @@ import PageHeader from '../../components/client/PageHeader';
 
 const { Content } = Layout;
 const { Title } = Typography;
-const StaffHomePage = () => {
+const LabTechnicianHomePage = () => {
     const [data, setData] = useState([])
     
     const navigate = useNavigate();
@@ -43,7 +43,7 @@ const StaffHomePage = () => {
     };
 
     const handleViewDetail = (record) => {
-        navigate(`/staff/patient-detail/${record.id}`);
+        navigate(`/labtechnician/patient-detail/${record.id}`);
     };
 
     const columns = [
@@ -95,4 +95,4 @@ const StaffHomePage = () => {
         </Layout>
     )
 }
-export default StaffHomePage;
+export default LabTechnicianHomePage;

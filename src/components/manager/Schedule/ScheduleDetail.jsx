@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Form, Button, Row, Col } from 'react-bootstrap';
-import { ScheduleStatus, StaffRole } from '../../../types/schedule.types';
+import { ScheduleStatus, LabTechnicianRole } from '../../../types/schedule.types';
 import './ScheduleDetail.css';
 
 const ScheduleDetail = ({ show, onHide, schedule, onDelete, onUpdate, onShowToast }) => {
@@ -25,7 +25,7 @@ const ScheduleDetail = ({ show, onHide, schedule, onDelete, onUpdate, onShowToas
 
     // Xác định loại người được lên lịch (bác sĩ hoặc y tá)
     const isDoctor = schedule?.doctorId != null;
-    const personName = isDoctor ? schedule?.doctorName : schedule?.staffName;
+    const personName = isDoctor ? schedule?.doctorName : schedule?.labTechnicianName;
     const roleText = isDoctor ? 'bác sĩ' : 'y tá';
 
     const handleUpdate = () => {

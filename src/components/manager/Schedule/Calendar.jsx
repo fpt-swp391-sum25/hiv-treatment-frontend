@@ -9,7 +9,7 @@ import moment from 'moment';
 import { BsChevronLeft, BsChevronRight } from 'react-icons/bs';
 import './Calendar.css';
 import './CustomButtons.css';
-import { ScheduleStatus, StaffRole } from '../../../types/schedule.types';
+import { ScheduleStatus, LabTechnicianRole } from '../../../types/schedule.types';
 
 const Calendar = ({ events, onDateSelect, onEventSelect }) => {
     const [view, setView] = useState('dayGridMonth');
@@ -57,9 +57,9 @@ const Calendar = ({ events, onDateSelect, onEventSelect }) => {
         
         // Nếu đang làm việc, phân biệt màu theo vai trò
         switch (role) {
-            case StaffRole.DOCTOR:
+            case LabTechnicianRole.DOCTOR:
                 return '#28a745'; // Bác sĩ - màu xanh lá
-            case StaffRole.NURSE:
+            case LabTechnicianRole.NURSE:
                 return '#0dcaf0'; // Y tá - màu xanh dương nhạt
             default:
                 return '#28a745'; // Mặc định - màu xanh lá
@@ -69,7 +69,7 @@ const Calendar = ({ events, onDateSelect, onEventSelect }) => {
     // Chuẩn bị sự kiện cho Full Calendar
     const calendarEvents = events.map(event => {
         // Xác định vai trò từ event
-        const role = event.staffId ? (event.role || StaffRole.NURSE) : StaffRole.DOCTOR;
+        const role = event.labTechnicianId ? (event.role || LabTechnicianRole.NURSE) : LabTechnicianRole.DOCTOR;
         
         return {
             id: event.id,
@@ -108,8 +108,8 @@ const Calendar = ({ events, onDateSelect, onEventSelect }) => {
         const statusClass = `status-${eventData.status}`;
         
         // Xác định người được lên lịch (bác sĩ hoặc y tá)
-        const personName = eventData.doctorName || eventData.staffName || '';
-        const isNurse = eventData.staffId != null;
+        const personName = eventData.doctorName || eventData.labTechnicianName || '';
+        const isNurse = eventData.labTechnicianId != null;
         
         // Thêm tiền tố "Y tá" nếu là nhân viên y tá
         const displayName = isNurse ? `Y tá ${personName}` : personName;

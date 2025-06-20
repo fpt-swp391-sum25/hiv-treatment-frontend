@@ -34,8 +34,8 @@ export const SlotTimes = {
     }
 };
 
-// Staff role types for scheduling
-export const StaffRole = {
+// LabTechnician role types for scheduling
+export const LabTechnicianRole = {
     DOCTOR: 'DOCTOR',           // Bác sĩ
     NURSE: 'NURSE'              // Y tá
 };

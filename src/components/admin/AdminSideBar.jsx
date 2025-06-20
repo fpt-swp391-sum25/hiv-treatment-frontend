@@ -36,8 +36,8 @@ const AdminSidebar = () => {
       </Link>
 
       <Link 
-        to="/manager/staff" 
-        className={`sidebar-item ${isActive('/manager/staff') ? 'active' : ''}`}
+        to="/manager/lab-technician" 
+        className={`sidebar-item ${isActive('/manager/lab-technician') ? 'active' : ''}`}
       >
         <i className="fas fa-users"></i>
         Quản lý nhân viên
