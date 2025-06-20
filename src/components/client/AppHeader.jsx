@@ -81,7 +81,7 @@ const AppHeader = () => {
     {
       key: 'history',
       label: 'Lịch sử khám',
-      path: '/history',
+      path: '/appointment-history',
       icon: <HistoryOutlined />,
     },
   ]; const navigate = useNavigate();

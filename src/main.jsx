@@ -51,6 +51,7 @@ import PatientDetail from './pages/lab-technician/PatientDetailPage'
 // Import for patient pages
 import ProfileDetail from './pages/patient/ProfileDetail';
 import PaymentCallback from './pages/patient/PaymentCallback';
+import PatientAppointmentHistory from './pages/patient/PatientAppointmentHistory';
 
 const router = createBrowserRouter([
   {
@@ -86,6 +87,15 @@ const router = createBrowserRouter([
         element: (
           <PrivateRoute>
             <ProfileDetail />
+          </PrivateRoute>
+        ),
+        errorElement: <Errors />,
+      },
+      {
+        path: '/appointment-history',
+        element: (
+          <PrivateRoute>
+            <PatientAppointmentHistory />
           </PrivateRoute>
         ),
         errorElement: <Errors />,

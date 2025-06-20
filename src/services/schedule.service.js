@@ -62,13 +62,23 @@ export const scheduleService = {
             return [];
         }
     },
-
+    
     getSchedulesByStatus: async (status) => {
         try {
             const response = await axios.get(`/api/schedule/status/${status}`);
             return response.data;
         } catch (error) {
             console.error('Error getting schedules by status:', error);
+            return [];
+        }
+    },
+
+    getSchedulesByPatient: async (patientId) => {
+        try {
+            const response = await axios.get(`/api/schedule/patient-id/${patientId}`);
+            return response.data;
+        } catch (error) {
+            console.error('Error getting schedules by patient:', error);
             return [];
         }
     }
