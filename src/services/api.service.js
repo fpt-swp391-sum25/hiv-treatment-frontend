@@ -41,7 +41,7 @@ const cancelBookingAPI = (scheduleId, patientId) => {
     const URL_BACKEND = `/api/schedule/${scheduleId}/cancel`
 
     return axios.delete(URL_BACKEND, {
-        header: { patientId: patientId.toString() },
+        params: { patientId: patientId.toString() },
     })
 }
 
@@ -197,6 +197,7 @@ export {
     loginAPI,
     registerAPI,
     bookingAPI,
+    cancelBookingAPI,
     createAccountAPI,
     fetchAccountByRoleAPI,
     deleteAccountAPI,

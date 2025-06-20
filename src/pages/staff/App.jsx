@@ -1,6 +1,6 @@
 import { Routes, Route } from "react-router-dom";
-import Staff from "./pages/Staff";
-import PatientDetail from "./pages/PatientDetail";
+import Staff from "./staff-page";
+import PatientDetail from "./patient-detail";
 
 function App() {
     return (

@@ -1,16 +1,13 @@
 import { useContext, useEffect, useState } from "react"
 import { AuthContext } from "../../components/context/auth.context"
-import { fetchAllPatientScheduleAPI, fetchUserInfoAPI, updateProfileAPI } from "../../services/api.service"
-import { Layout, message, Spin, Table, Button, Popconfirm, Segmented, Card, Descriptions, Form, Input, Row, Col, Select, DatePicker, notification } from "antd"
-import dayGridPlugin from '@fullcalendar/daygrid';
-import timeGridPlugin from '@fullcalendar/timegrid';
-import interactionPlugin from '@fullcalendar/interaction';
-import listPlugin from '@fullcalendar/list';
+import { cancelBookingAPI, fetchAllPatientScheduleAPI, fetchHealthRecordByScheduleIdAPI, fetchUserInfoAPI, updateProfileAPI } from "../../services/api.service"
+import { Layout, message, Spin, Table, Button, Popconfirm, Segmented, Card, Descriptions, Form, Input, Row, Col, Select, DatePicker, notification, Typography, Modal } from "antd"
 import dayjs from "dayjs";
-import FullCalendar from "@fullcalendar/react";
+
 
 
 const { Content } = Layout;
+const { Text } = Typography
 
 const ProfileDetail = () => {
 
@@ -19,7 +16,8 @@ const ProfileDetail = () => {
     const [loading, setLoading] = useState(false);
     const [activeSegment, setActiveSegment] = useState('Thông tin cá nhân');
     const [userInfo, setUserInfo] = useState({})
-
+    const [monthFilter, setMonthFilter] = useState(null);
+    const [healthRecordData, setHealthRecordData] = useState()
 
 
     const typeMapping = {
@@ -57,12 +55,19 @@ const ProfileDetail = () => {
                 throw new Error('Không tìm thấy thông tin bệnh nhân');
             }
             const response = await fetchAllPatientScheduleAPI(user.id);
-            setSchedule(response.data.map(item => ({
-                ...item,
-                doctorName: item.doctor?.fullName || 'Không xác định',
-                type: item.type || null,
-                status: item.status || null,
-            })));
+            const sortedSchedules = response.data
+                .map(item => ({
+                    ...item,
+                    doctorName: item.doctor?.fullName || 'Không xác định',
+                    type: item.type || null,
+                    status: item.status || null,
+                }))
+                .sort((a, b) => {
+                    const dateA = dayjs(`${a.date} ${a.slot}`, 'YYYY-MM-DD HH:mm');
+                    const dateB = dayjs(`${b.date} ${b.slot}`, 'YYYY-MM-DD HH:mm');
+                    return dateB - dateA; // Mới nhất lên trên
+                });
+            setSchedule(sortedSchedules);
         } catch (error) {
             message.error(error.message || 'Lỗi khi tải lịch hẹn');
         } finally {
@@ -70,17 +75,14 @@ const ProfileDetail = () => {
         }
     }
 
+    const loadHealthRecord = async () => {
+        const response = await fet
+    }
+
     const handlePatientInputChange = async (field, value) => {
         try {
             setLoading(true);
             const updatedPatientInfo = { ...userInfo, [field]: value };
-
-            // const formattedData = {
-            //     ...updatedPatientInfo,
-            //     dateOfBirth: updatedPatientInfo.dateOfBirth
-            //         ? moment.isMoment(value) ? value.format('YYYY-MM-DD') : updatedPatientInfo.dateOfBirth
-            //         : null,
-            // };
             setUserInfo(updatedPatientInfo);
         } catch (error) {
             console.error('Update patient error:', error.response || error);
@@ -102,64 +104,37 @@ const ProfileDetail = () => {
         }
     }
 
-    const EventContent = (arg) => {
-        const { event, view } = arg;
-        const { extendedProps } = event;
-        const isWeekOrDayView = view.type === 'timeGridWeek' || view.type === 'timeGridDay';
 
-        if (isWeekOrDayView) {
-            return (
-                <div style={{ padding: '5px', fontSize: '12px' }}>
-                    <Text strong>{event.title}</Text>
-                    <div>
-                        <Text type="secondary">Giờ: {moment(event.start).format('HH:mm')} - {moment(event.end).format('HH:mm')}</Text>
-                    </div>
-                    <div>
-                        <Text type="secondary">Bác sĩ: {extendedProps.doctorName}</Text>
-                    </div>
-                    <div>
-                        <Text type="secondary">Loại: {typeMapping[extendedProps.type]}</Text>
-                    </div>
-                    <div>
-                        <Text type="secondary">Trạng thái: </Text>
-                        <Tag
-                            color={
-                                extendedProps.status === 'CONFIRMED' ? 'green' :
-                                    extendedProps.status === 'PENDING' ? 'orange' :
-                                        extendedProps.status === 'AVAILABLE' ? 'red' : 'default'
-                            }
-                        >
-                            {statusMapping[extendedProps.status]}
-                        </Tag>
-                    </div>
-                    <div>
-                        <Text type="secondary">Giá: {extendedProps.amount ? `${extendedProps.amount.toLocaleString('vi-VN')} VND` : 'N/A'}</Text>
-                    </div>
-                </div>
-            );
-        }
-
-        return <div>{event.title}</div>;
+    const handleMonthFilterChange = (date) => {
+        setMonthFilter(date ? date.format('YYYY-MM') : null);
     };
 
-    const events = schedule.map(s => ({
-        id: s.id,
-        title: `${s.doctorName} - ${typeMapping[s.type]}`,
-        start: `${s.date}T${s.slot}:00`,
-        end: `${s.date}T${s.slot}:30`,
-        extendedProps: {
-            status: s.status,
-            amount: s.amount,
-            doctorName: s.doctorName,
-            type: s.type,
-        },
-        backgroundColor: s.status === 'CONFIRMED' ? '#52c41a' : s.status === 'PENDING' ? '#faad14' : '#f5222d',
-        borderColor: s.status === 'CONFIRMED' ? '#52c41a' : s.status === 'PENDING' ? '#faad14' : '#f5222d',
-    }));
+    const filteredSchedules = monthFilter
+        ? schedule.filter(s => dayjs(s.date).format('YYYY-MM') === monthFilter)
+        : schedule;
 
 
-    const handleCancelSchedule = (scheduleId) => {
 
+
+    const handleCancelSchedule = async (scheduleId) => {
+        setLoading(true)
+        try {
+            const response = await cancelBookingAPI(scheduleId, user.id)
+            if (response.data) {
+                notification.success({
+                    message: 'Hệ thống',
+                    description: 'Hủy lịch hẹn thành công'
+                })
+            }
+        } catch (error) {
+            if (error.response?.status !== 401) {
+                notification.error({
+                    message: 'Hệ thống',
+                    description: error.message
+                })
+            }
+        }
+        setLoading(false)
     };
 
     const columns = [
@@ -195,25 +170,73 @@ const ProfileDetail = () => {
             title: 'Hành động',
             key: 'action',
             render: (_, record) => (
-                ['PENDING', 'PENDING_PAYMENT_CONFIRMED', 'Đang hoạt động'].includes(record.status) ? (
-                    <Popconfirm
-                        title="Hủy lịch hẹn"
-                        description="Bạn có chắc muốn hủy lịch hẹn này?"
-                        onConfirm={() => { }}
-                        okText="Có"
-                        cancelText="Không"
-                        placement="left"
+                <>
+                    <Button
+                        type="link"
+                        onClick={async () => {
+                            setLoading(true);
+                            let result = null;
+                            try {
+                                const response = await fetchHealthRecordByScheduleIdAPI(record.id);
+                                if (response.data) {
+                                    result = response.data
+                                }
+                                console.log("check result", result)
+                            } catch (error) {
+                                console.error('Error fetching appointment result:', error);
+                                message.error('Lỗi khi tải kết quả lịch hẹn');
+                            } finally {
+                                setLoading(false);
+                            }
+                            Modal.info({
+                                title: 'Chi tiết lịch hẹn',
+                                width: 800,
+                                content: (
+                                    <Descriptions column={1}>
+                                        <Descriptions.Item label="Bác sĩ">{result?.schedule?.doctor?.fullName || 'Chưa có'}</Descriptions.Item>
+                                        <Descriptions.Item label="Loại">{typeMapping[result?.schedule?.type] || 'Chưa có'}</Descriptions.Item>
+                                        <Descriptions.Item label="Ngày">{result?.schedule?.date ? dayjs(result.schedule.date).format('DD/MM/YYYY') : 'Chưa có'}</Descriptions.Item>
+                                        <Descriptions.Item label="Giờ">
+                                            {result?.schedule?.slot ?
+                                                `${dayjs(result.schedule.slot, 'HH:mm:ss').format('HH:mm')} - ${dayjs(result.schedule.slot, 'HH:mm:ss').add(30, 'minutes').format('HH:mm')}`
+                                                : 'Chưa có'}
+                                        </Descriptions.Item>
+
+                                        <Descriptions.Item label="Mã phòng khám">{result?.roomCode || 'Chưa có'}</Descriptions.Item>
+                                        <Descriptions.Item label="Số bảo hiểm y tế">{result?.insuranceNumber || 'Chưa có'}</Descriptions.Item>
+                                        <Descriptions.Item label="Chiều cao">{result?.height ? `${result.height} cm` : 'Chưa có'}</Descriptions.Item>
+                                        <Descriptions.Item label="Cân nặng">{result?.weight ? `${result.weight} kg` : 'Chưa có'}</Descriptions.Item>
+                                        <Descriptions.Item label="Nhóm máu">{result?.bloodType || 'Chưa có'}</Descriptions.Item>
+                                        <Descriptions.Item label="Trạng thái HIV">{result?.hivStatus || 'Chưa có'}</Descriptions.Item>
+                                        <Descriptions.Item label="Trạng thái điều trị">{result?.treatmentStatus || 'Chưa có'}</Descriptions.Item>
+                                        <Descriptions.Item label="Ghi chú">{result?.note || 'Chưa có'}</Descriptions.Item>
+                                    </Descriptions>
+                                ),
+                                onOk() { },
+                            });
+                        }}
                     >
-                        <Button
-                            type="primary"
-                            onClick={() => handleCancelSchedule(record.id)}
-                            disabled={loading}
-                            danger
+                        Chi tiết
+                    </Button>
+                    {['PENDING', 'PENDING_PAYMENT_CONFIRMED', 'Đang hoạt động'].includes(record.status) ? (
+                        <Popconfirm
+                            title="Hủy lịch hẹn"
+                            description="Bạn có chắc muốn hủy lịch hẹn này?"
+                            onConfirm={() => { handleCancelSchedule(record.id) }}
+                            okText="Có"
+                            cancelText="Không"
+                            placement="left"
                         >
-                            Hủy
-                        </Button>
-                    </Popconfirm>
-                ) : null
+                            <Button
+                                type="primary"
+                                disabled={loading}
+                                danger
+                            >
+                                Hủy
+                            </Button>
+                        </Popconfirm>
+                    ) : null}
+                </>
             ),
         },
 
@@ -235,7 +258,7 @@ const ProfileDetail = () => {
                     <Spin tip="Đang tải..." />
                 ) : (
                     <Card>
-                        {activeSegment === 'Thông tin cá nhân' ? (
+                        {activeSegment === 'Thông tin cá nhân' && (
                             <Card
                                 title="Thông tin cá nhân"
                                 style={{ marginTop: '5vh', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
@@ -337,14 +360,14 @@ const ProfileDetail = () => {
                                             <Col span={12}>
                                                 <div>
                                                     <Popconfirm
-                                                        title="Cap nhat"
-                                                        description="Bạn có chắc muốn cap nhat thong tin?"
+                                                        title="Cập nhật"
+                                                        description="Bạn có chắc muốn cập nhật thông tin?"
                                                         onConfirm={() => { handleUpdateProfile() }}
                                                         okText="Có"
                                                         cancelText="Không"
                                                         placement="left"
                                                     >
-                                                        <Button type="primary" >Luu</Button>
+                                                        <Button type="primary" >Lưu</Button>
                                                     </Popconfirm>
                                                 </div>
                                             </Col>
@@ -356,33 +379,28 @@ const ProfileDetail = () => {
                             </Card>
 
 
-                        ) : (
-                            <Card style={{ borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-                                <div className="calendar-container">
-                                    <FullCalendar
-                                        plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
-                                        initialView="dayGridMonth"
-                                        headerToolbar={{
-                                            left: 'prev,next today',
-                                            center: 'title',
-                                            right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek',
-                                        }}
-                                        events={events}
-                                        eventContent={EventContent}
-                                        // eventClick={handleEventClick}
-                                        locale="vi"
-                                        height="600px"
-                                        eventTimeFormat={{
-                                            hour: '2-digit',
-                                            minute: '2-digit',
-                                            hour12: false,
-                                        }}
-                                        slotLabelFormat={{
-                                            hour: '2-digit',
-                                            minute: '2-digit',
-                                            hour12: false,
-                                        }}
-                                        noEventsContent="Chưa có lịch hẹn nào"
+                        )}
+
+                        {activeSegment === 'Lịch hẹn' && (
+                            <Card title="Lịch hẹn"
+                                style={{ marginTop: '5vh', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+                                <div style={{ padding: '20px' }}>
+                                    <div style={{ marginBottom: '16px' }}>
+                                        <Text style={{ marginRight: '8px' }}>Lọc theo tháng:</Text>
+                                        <DatePicker.MonthPicker
+                                            format="MM/YYYY"
+                                            onChange={handleMonthFilterChange}
+                                            style={{ width: '150px' }}
+                                            allowClear
+                                            placeholder="Chọn tháng"
+                                        />
+                                    </div>
+                                    <Table
+                                        columns={columns}
+                                        dataSource={filteredSchedules}
+                                        rowKey="id"
+                                        locale={{ emptyText: 'Chưa có lịch hẹn nào' }}
+                                        pagination={{ pageSize: 10 }}
                                     />
                                 </div>
                             </Card>

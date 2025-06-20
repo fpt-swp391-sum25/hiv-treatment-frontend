@@ -84,15 +84,15 @@ const router = createBrowserRouter([
     element: <DoctorApp />,
     children: [
       {
-        path: 'profile',
-        element: <DoctorProfile />,
+        index: true,
+        element: <DoctorDashboard />,
         errorElement: <Errors />,
       },
       {
-        path: 'dashboard',
-        element: <DoctorDashboard />,
+        path: '/doctor/profile',
+        element: <DoctorProfile />,
         errorElement: <Errors />,
-      }
+      },
     ],
     errorElement: <Errors />,
   },
@@ -146,8 +146,8 @@ const router = createBrowserRouter([
         errorElement: <Errors />,
       }
     ]
-  },  
-  {    
+  },
+  {
     path: '/manager',
     element: <ManagerLayout />,
     children: [
