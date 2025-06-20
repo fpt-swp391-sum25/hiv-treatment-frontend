@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Calendar from './Calendar';
 import DoctorFilter from './DoctorFilter';
 import StatusFilter from './StatusFilter';
-import StaffFilter from './StaffFilter';
+import LabTechnicianFilter from './LabTechnicianFilter';
 import ScheduleForm from './ScheduleForm';
 import ScheduleDetail from './ScheduleDetail';
 import { Row, Col, ToastContainer, Toast, Form } from 'react-bootstrap';
@@ -10,14 +10,14 @@ import { BsCalendarPlus } from 'react-icons/bs';
 import moment from 'moment';
 import './CustomButtons.css';
 import './Schedule.css';
-import { StaffRole } from '../../../types/schedule.types';
+import { LabTechnicianRole } from '../../../types/schedule.types';
 
 const ManagerSchedule = () => {
     const [showForm, setShowForm] = useState(false);
     const [showDetail, setShowDetail] = useState(false);
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [selectedDoctor, setSelectedDoctor] = useState(null);
-    const [selectedStaff, setSelectedStaff] = useState(null);
+    const [selectedLabTechnician, setSelectedLabTechnician] = useState(null);
     const [selectedStatus, setSelectedStatus] = useState(null);
     const [selectedRole, setSelectedRole] = useState(null);
     const [selectedSchedule, setSelectedSchedule] = useState(null);
@@ -38,7 +38,7 @@ const ManagerSchedule = () => {
                 morning: true,
                 afternoon: true,
                 note: 'Lịch làm việc mẫu',
-                role: StaffRole.DOCTOR
+                role: LabTechnicianRole.DOCTOR
             },
             {
                 id: 2,
@@ -50,7 +50,7 @@ const ManagerSchedule = () => {
                 morning: true,
                 afternoon: false,
                 note: 'Chỉ làm việc buổi sáng',
-                role: StaffRole.DOCTOR
+                role: LabTechnicianRole.DOCTOR
             },
             {
                 id: 3,
@@ -62,19 +62,19 @@ const ManagerSchedule = () => {
                 morning: false,
                 afternoon: false,
                 note: 'Nghỉ phép cả ngày',
-                role: StaffRole.DOCTOR
+                role: LabTechnicianRole.DOCTOR
             },
             {
                 id: 4,
                 title: 'Linh - Làm việc',
                 date: moment().format('YYYY-MM-DD'),
                 status: 'available',
-                staffId: 101,
-                staffName: 'Linh',
+                labTechnicianId: 101,
+                labTechnicianName: 'Linh',
                 morning: true,
                 afternoon: true,
                 note: 'Y tá phụ trách ca sáng và chiều',
-                role: StaffRole.NURSE
+                role: LabTechnicianRole.NURSE
             },
         ];
 
@@ -84,7 +84,7 @@ const ManagerSchedule = () => {
     // Reset filters khi thay đổi vai trò
     useEffect(() => {
         setSelectedDoctor(null);
-        setSelectedStaff(null);
+        setSelectedLabTechnician(null);
     }, [selectedRole]);
 
     const handleAddClick = (date) => {
@@ -121,8 +121,8 @@ const ManagerSchedule = () => {
     // Danh sách các vai trò để lọc
     const roleOptions = [
         { value: null, label: 'Tất cả' },
-        { value: StaffRole.DOCTOR, label: 'Bác sĩ' },
-        { value: StaffRole.NURSE, label: 'Y tá' }
+        { value: LabTechnicianRole.DOCTOR, label: 'Bác sĩ' },
+        { value: LabTechnicianRole.NURSE, label: 'Y tá' }
     ];
 
     const filteredSchedules = schedules.filter(schedule => {
@@ -134,13 +134,13 @@ const ManagerSchedule = () => {
         }
         
         // Lọc theo bác sĩ (chỉ khi đang xem bác sĩ hoặc tất cả vai trò)
-        if (selectedDoctor && (selectedRole === StaffRole.DOCTOR || selectedRole === null)) {
+        if (selectedDoctor && (selectedRole === LabTechnicianRole.DOCTOR || selectedRole === null)) {
             match = match && schedule.doctorId?.toString() === selectedDoctor.toString();
         }
         
         // Lọc theo nhân viên y tá (chỉ khi đang xem y tá hoặc tất cả vai trò)
-        if (selectedStaff && (selectedRole === StaffRole.NURSE || selectedRole === null)) {
-            match = match && schedule.staffId?.toString() === selectedStaff.toString();
+        if (selectedLabTechnician && (selectedRole === LabTechnicianRole.NURSE || selectedRole === null)) {
+            match = match && schedule.labTechnicianId?.toString() === selectedLabTechnician.toString();
         }
         
         // Lọc theo trạng thái
@@ -162,7 +162,7 @@ const ManagerSchedule = () => {
 
     // Render filters dựa theo vai trò được chọn
     const renderFilters = () => {
-        if (selectedRole === StaffRole.DOCTOR) {
+        if (selectedRole === LabTechnicianRole.DOCTOR) {
             // Khi chọn vai trò là bác sĩ
             return (
                 <>
@@ -207,7 +207,7 @@ const ManagerSchedule = () => {
                     </Col>
                 </>
             );
-        } else if (selectedRole === StaffRole.NURSE) {
+        } else if (selectedRole === LabTechnicianRole.NURSE) {
             // Khi chọn vai trò là y tá
             return (
                 <>
@@ -228,9 +228,9 @@ const ManagerSchedule = () => {
                         </Form.Group>
                     </Col>
                     <Col md={3} className="filter-col">
-                        <StaffFilter 
-                            onStaffSelect={setSelectedStaff} 
-                            selectedStaff={selectedStaff} 
+                        <LabTechnicianFilter 
+                            onLabTechnicianSelect={setSelectedLabTechnician} 
+                            selectedLabTechnician={selectedLabTechnician} 
                         />
                     </Col>
                     <Col md={3} className="filter-col">
@@ -279,9 +279,9 @@ const ManagerSchedule = () => {
                         />
                     </Col>
                     <Col md={2} className="filter-col">
-                        <StaffFilter 
-                            onStaffSelect={setSelectedStaff} 
-                            selectedStaff={selectedStaff} 
+                        <LabTechnicianFilter 
+                            onLabTechnicianSelect={setSelectedLabTechnician} 
+                            selectedLabTechnician={selectedLabTechnician} 
                         />
                     </Col>
                     <Col md={3} className="filter-col">

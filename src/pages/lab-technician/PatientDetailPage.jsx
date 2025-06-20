@@ -10,7 +10,7 @@ import {
 import { Typography, Space, notification, Popconfirm, 
         Button, Input, Modal, DatePicker, Card, Form, Row, Col, Divider } from 'antd';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
-import UpdateTestResultModal from '../../components/staff/UpdateTestResultModal.jsx';
+import UpdateTestResultModal from '../../components/lab-technician/UpdateTestResultModal.jsx';
 
 const PatientDetail = () => {
   const [type, setType] = useState("");

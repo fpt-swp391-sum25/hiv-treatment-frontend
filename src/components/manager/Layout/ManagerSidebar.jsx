@@ -10,7 +10,7 @@ const ManagerSidebar = () => {
   const menuItems = [
     { icon: FaChartBar, text: 'Thống kê', path: '/manager/dashboard' },
     { icon: FaUserMd, text: 'Bác sĩ', path: '/manager/doctors' },
-    { icon: FaUsers, text: 'Nhân viên', path: '/manager/staff' },
+    { icon: FaUsers, text: 'Nhân viên', path: '/manager/lab-technician' },
     { icon: FaCalendarAlt, text: 'Quản lí lịch', path: '/manager/schedule' },
     { icon: FaFileAlt, text: 'Báo cáo', path: '/manager/reports' },
   ];

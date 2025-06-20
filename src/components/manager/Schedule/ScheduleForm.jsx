@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Form, Button, Alert, Row, Col } from 'react-bootstrap';
-import { ScheduleStatus, SlotTimes, StaffRole } from '../../../types/schedule.types';
+import { ScheduleStatus, SlotTimes, LabTechnicianRole } from '../../../types/schedule.types';
 import { scheduleService } from '../../../services/schedule.service';
 import moment from 'moment';
 import './ScheduleForm.css';
@@ -12,15 +12,15 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         afternoon: true,
         note: '',
         doctorId: selectedDoctor || '',
-        staffId: '',
+        labTechnicianId: '',
         repeatSchedule: false,
         repeatCount: 4,
-        role: StaffRole.DOCTOR
+        role: LabTechnicianRole.DOCTOR
     });
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
     const [doctors, setDoctors] = useState([]);
-    const [staffMembers, setStaffMembers] = useState([]);
+    const [labTechnicianMembers, setLabTechnicianMembers] = useState([]);
 
     // Tải danh sách bác sĩ và nhân viên mẫu
     useEffect(() => {
@@ -32,13 +32,13 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         ];
         
         // Mock data cho danh sách y tá
-        const mockStaff = [
-            { id: 101, name: "Linh", role: StaffRole.NURSE },
-            { id: 102, name: "Hà", role: StaffRole.NURSE }
+        const mockLabTechnician = [
+            { id: 101, name: "Linh", role: LabTechnicianRole.NURSE },
+            { id: 102, name: "Hà", role: LabTechnicianRole.NURSE }
         ];
         
         setDoctors(mockDoctors);
-        setStaffMembers(mockStaff);
+        setLabTechnicianMembers(mockLabTechnician);
     }, []);
 
     // Reset form when modal opens
@@ -50,10 +50,10 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                 afternoon: true,
                 note: '',
                 doctorId: selectedDoctor || '',
-                staffId: '',
+                labTechnicianId: '',
                 repeatSchedule: false,
                 repeatCount: 4,
-                role: StaffRole.DOCTOR
+                role: LabTechnicianRole.DOCTOR
             });
             setError(null);
         }
@@ -61,21 +61,21 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
 
     // Kiểm tra xem đã tồn tại lịch cho người được chọn vào ngày chỉ định chưa
     const checkScheduleExists = (date) => {
-        if (formData.role === StaffRole.DOCTOR && !formData.doctorId) return false;
-        if (formData.role !== StaffRole.DOCTOR && !formData.staffId) return false;
+        if (formData.role === LabTechnicianRole.DOCTOR && !formData.doctorId) return false;
+        if (formData.role !== LabTechnicianRole.DOCTOR && !formData.labTechnicianId) return false;
         
         const checkDateStr = moment(date).format('YYYY-MM-DD');
         
         // Kiểm tra dựa vào role (bác sĩ hoặc y tá)
-        if (formData.role === StaffRole.DOCTOR) {
+        if (formData.role === LabTechnicianRole.DOCTOR) {
             return existingSchedules.some(schedule => 
                 schedule.doctorId?.toString() === formData.doctorId.toString() && 
                 schedule.date === checkDateStr &&
-                !schedule.staffId // Đảm bảo đây là lịch của bác sĩ
+                !schedule.labTechnicianId // Đảm bảo đây là lịch của bác sĩ
             );
         } else {
             return existingSchedules.some(schedule => 
-                schedule.staffId?.toString() === formData.staffId.toString() && 
+                schedule.labTechnicianId?.toString() === formData.labTechnicianId.toString() && 
                 schedule.date === checkDateStr
             );
         }
@@ -100,19 +100,19 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         e.preventDefault();
         
         // Validate required fields
-        if (formData.role === StaffRole.DOCTOR && !formData.doctorId) {
+        if (formData.role === LabTechnicianRole.DOCTOR && !formData.doctorId) {
             setError('Vui lòng chọn bác sĩ');
             return;
         }
         
-        if (formData.role === StaffRole.NURSE && !formData.staffId) {
+        if (formData.role === LabTechnicianRole.NURSE && !formData.labTechnicianId) {
             setError('Vui lòng chọn y tá');
             return;
         }
         
         // Kiểm tra xem đã có lịch vào ngày này chưa
         if (checkScheduleExists(selectedDate)) {
-            setError(`${formData.role === StaffRole.DOCTOR ? 'Bác sĩ' : 'Y tá'} này đã có lịch làm việc vào ngày đã chọn. Vui lòng chỉnh sửa lịch hiện có hoặc chọn ngày khác.`);
+            setError(`${formData.role === LabTechnicianRole.DOCTOR ? 'Bác sĩ' : 'Y tá'} này đã có lịch làm việc vào ngày đã chọn. Vui lòng chỉnh sửa lịch hiện có hoặc chọn ngày khác.`);
             return;
         }
         
@@ -124,14 +124,14 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             let personName = '';
             let personId = '';
             
-            if (formData.role === StaffRole.DOCTOR) {
+            if (formData.role === LabTechnicianRole.DOCTOR) {
                 const selectedDoc = doctors.find(d => d.id.toString() === formData.doctorId.toString());
                 personName = selectedDoc ? selectedDoc.name : '';
                 personId = formData.doctorId;
             } else {
-                const selectedStaffMember = staffMembers.find(s => s.id.toString() === formData.staffId.toString());
-                personName = selectedStaffMember ? selectedStaffMember.name : '';
-                personId = formData.staffId;
+                const selectedLabTechnicianMember = labTechnicianMembers.find(s => s.id.toString() === formData.labTechnicianId.toString());
+                personName = selectedLabTechnicianMember ? selectedLabTechnicianMember.name : '';
+                personId = formData.labTechnicianId;
             }
             
             // Danh sách lịch cần tạo (bao gồm cả lịch lặp lại nếu có)
@@ -142,10 +142,10 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                 ...formData,
                 date: moment(selectedDate).format('YYYY-MM-DD'),
                 title: `${personName} - ${getStatusLabel(formData.status)}`,
-                doctorName: formData.role === StaffRole.DOCTOR ? personName : null,
-                staffName: formData.role !== StaffRole.DOCTOR ? personName : null,
-                doctorId: formData.role === StaffRole.DOCTOR ? personId : null,
-                staffId: formData.role !== StaffRole.DOCTOR ? personId : null
+                doctorName: formData.role === LabTechnicianRole.DOCTOR ? personName : null,
+                labTechnicianName: formData.role !== LabTechnicianRole.DOCTOR ? personName : null,
+                doctorId: formData.role === LabTechnicianRole.DOCTOR ? personId : null,
+                labTechnicianId: formData.role !== LabTechnicianRole.DOCTOR ? personId : null
             };
             
             const mockResponse = {
@@ -172,10 +172,10 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                         ...formData,
                         date: nextWeekDay.format('YYYY-MM-DD'),
                         title: `${personName} - ${getStatusLabel(formData.status)}`,
-                        doctorName: formData.role === StaffRole.DOCTOR ? personName : null,
-                        staffName: formData.role !== StaffRole.DOCTOR ? personName : null,
-                        doctorId: formData.role === StaffRole.DOCTOR ? personId : null,
-                        staffId: formData.role !== StaffRole.DOCTOR ? personId : null
+                        doctorName: formData.role === LabTechnicianRole.DOCTOR ? personName : null,
+                        labTechnicianName: formData.role !== LabTechnicianRole.DOCTOR ? personName : null,
+                        doctorId: formData.role === LabTechnicianRole.DOCTOR ? personId : null,
+                        labTechnicianId: formData.role !== LabTechnicianRole.DOCTOR ? personId : null
                     };
                     
                     const nextWeekMockResponse = {
@@ -187,7 +187,7 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                 }
                 
                 // Hiển thị thông báo tương ứng
-                const roleText = formData.role === StaffRole.DOCTOR ? 'bác sĩ' : 'y tá';
+                const roleText = formData.role === LabTechnicianRole.DOCTOR ? 'bác sĩ' : 'y tá';
                 if (skippedDates > 0) {
                     onShowToast(`Đã đặt lịch thành công cho ${roleText} ${personName} ngày đầu tiên và ${formData.repeatCount - skippedDates} tuần tiếp theo. (Bỏ qua ${skippedDates} ngày đã có lịch)`, 'warning');
                 } else {
@@ -195,7 +195,7 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                 }
             } else {
                 // Gửi thông báo thành công lên component cha để hiển thị
-                const roleText = formData.role === StaffRole.DOCTOR ? 'bác sĩ' : 'y tá';
+                const roleText = formData.role === LabTechnicianRole.DOCTOR ? 'bác sĩ' : 'y tá';
                 if (onShowToast) {
                     onShowToast(`Đặt lịch cho ${roleText} ${personName} thành công!`, 'success');
                 }
@@ -254,18 +254,18 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                                 setFormData({
                                     ...formData, 
                                     role: e.target.value,
-                                    doctorId: e.target.value === StaffRole.DOCTOR ? formData.doctorId : '',
-                                    staffId: e.target.value !== StaffRole.DOCTOR ? formData.staffId : ''
+                                    doctorId: e.target.value === LabTechnicianRole.DOCTOR ? formData.doctorId : '',
+                                    labTechnicianId: e.target.value !== LabTechnicianRole.DOCTOR ? formData.labTechnicianId : ''
                                 })
                             }}
                             required
                         >
-                            <option value={StaffRole.DOCTOR}>Bác sĩ</option>
-                            <option value={StaffRole.NURSE}>Y tá</option>
+                            <option value={LabTechnicianRole.DOCTOR}>Bác sĩ</option>
+                            <option value={LabTechnicianRole.NURSE}>Y tá</option>
                         </Form.Select>
                     </Form.Group>
 
-                    {formData.role === StaffRole.DOCTOR ? (
+                    {formData.role === LabTechnicianRole.DOCTOR ? (
                         <Form.Group className="mb-3">
                             <Form.Label>Bác sĩ <span className="text-danger">*</span></Form.Label>
                             <Form.Select
@@ -285,16 +285,16 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                         <Form.Group className="mb-3">
                             <Form.Label>Y tá <span className="text-danger">*</span></Form.Label>
                             <Form.Select
-                                value={formData.staffId}
-                                onChange={(e) => setFormData({...formData, staffId: e.target.value})}
+                                value={formData.labTechnicianId}
+                                onChange={(e) => setFormData({...formData, labTechnicianId: e.target.value})}
                                 required
                             >
                                 <option value="">Chọn y tá</option>
-                                {staffMembers
-                                    .filter(staff => staff.role === StaffRole.NURSE)
-                                    .map(staff => (
-                                        <option key={staff.id} value={staff.id}>
-                                            {staff.name}
+                                {labTechnicianMembers
+                                    .filter(labtechnician => labtechnician.role === LabTechnicianRole.NURSE)
+                                    .map(labtechnician => (
+                                        <option key={labtechnician.id} value={labtechnician.id}>
+                                            {labtechnician.name}
                                         </option>
                                     ))
                                 }
