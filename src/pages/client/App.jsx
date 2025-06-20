@@ -12,7 +12,7 @@ const App = () => {
 
     useEffect(() => {
         fetchUserInfo()
-    })
+    }, [])
 
     const fetchUserInfo = async () => {
         try {
