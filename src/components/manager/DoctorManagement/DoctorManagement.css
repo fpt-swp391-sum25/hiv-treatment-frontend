@@ -1,0 +1,41 @@
+.doctor-management {
+    padding: 24px;
+}
+
+.dashboard-stats {
+    margin-bottom: 24px;
+}
+
+.doctor-table {
+    background: white;
+    padding: 24px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Doctor Profile Modal Styles */
+.doctor-profile-modal .ant-modal-body {
+    padding: 24px;
+}
+
+.loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+}
+
+.statistics-section {
+    margin: 24px 0;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .dashboard-stats .ant-col {
+        margin-bottom: 16px;
+    }
+}
+
+.ant-table-wrapper {
+    overflow-x: auto;
+}

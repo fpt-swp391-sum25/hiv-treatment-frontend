@@ -129,6 +129,24 @@ const fetchAllDoctorsAPI = () => {
     return axios.get(URL_BACKEND)
 }
 
+// Lấy thông tin chi tiết của một bác sĩ
+const fetchDoctorByIdAPI = (doctorId) => {
+    const URL_BACKEND = `/api/doctors/${doctorId}`;
+    return axios.get(URL_BACKEND);
+}
+
+// Cập nhật thông tin bác sĩ
+const updateDoctorProfileAPI = (doctorId, profileData) => {
+    const URL_BACKEND = `/api/doctors/${doctorId}`;
+    return axios.put(URL_BACKEND, profileData);
+}
+
+// Lấy thống kê công việc của bác sĩ
+const fetchDoctorStatisticsAPI = (doctorId) => {
+    const URL_BACKEND = `/api/doctors/${doctorId}/statistics`;
+    return axios.get(URL_BACKEND);
+}
+
 const fetchAllDocumentsAPI = () => {
     const URL_BACKEND = '/api/document'
     return axios.get(URL_BACKEND)
@@ -196,6 +214,9 @@ export {
     logoutAPI,
 
     fetchAllDoctorsAPI,
+    fetchDoctorByIdAPI,
+    updateDoctorProfileAPI,
+    fetchDoctorStatisticsAPI,
     fetchAllDocumentsAPI,
     fetchUsersAPI,
     fetchHealthRecordByScheduleIdAPI,
