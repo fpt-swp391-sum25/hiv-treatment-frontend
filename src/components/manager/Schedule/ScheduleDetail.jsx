@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Form, Button, Row, Col } from 'react-bootstrap';
-import { ScheduleStatus, LabTechnicianRole } from '../../../types/schedule.types';
+import { ScheduleStatus } from '../../../types/schedule.types';
 import './ScheduleDetail.css';
 
 const ScheduleDetail = ({ show, onHide, schedule, onDelete, onUpdate, onShowToast }) => {
@@ -23,23 +23,18 @@ const ScheduleDetail = ({ show, onHide, schedule, onDelete, onUpdate, onShowToas
         }
     }, [schedule]);
 
-    // Xác định loại người được lên lịch (bác sĩ hoặc y tá)
-    const isDoctor = schedule?.doctorId != null;
-    const personName = isDoctor ? schedule?.doctorName : schedule?.labTechnicianName;
-    const roleText = isDoctor ? 'bác sĩ' : 'y tá';
-
     const handleUpdate = () => {
         const updatedSchedule = {
             ...schedule,
             ...formData,
-            title: `${personName} - ${getStatusLabel(formData.status)}`
+            title: `${schedule.doctorName} - ${getStatusLabel(formData.status)}`
         };
         onUpdate(updatedSchedule);
         setIsEditing(false);
         
         // Gửi thông báo thành công lên component cha
         if (onShowToast) {
-            onShowToast(`Cập nhật lịch làm việc cho ${roleText} ${personName} thành công!`, 'success');
+            onShowToast(`Cập nhật lịch làm việc cho bác sĩ ${schedule.doctorName} thành công!`, 'success');
         }
     };
 
@@ -49,7 +44,7 @@ const ScheduleDetail = ({ show, onHide, schedule, onDelete, onUpdate, onShowToas
             
             // Gửi thông báo thành công lên component cha
             if (onShowToast) {
-                onShowToast(`Xóa lịch làm việc cho ${roleText} ${personName} thành công!`, 'success');
+                onShowToast(`Xóa lịch làm việc cho bác sĩ ${schedule.doctorName} thành công!`, 'success');
             }
             
             onHide();
@@ -82,16 +77,10 @@ const ScheduleDetail = ({ show, onHide, schedule, onDelete, onUpdate, onShowToas
         }
     };
 
-    // Xác định nhãn hiển thị dựa trên vai trò
-    const getRoleLabel = () => {
-        if (isDoctor) return "Bác sĩ";
-        return "Y tá";
-    };
-
     return (
         <Modal show={show} onHide={onHide} size="lg" centered className="schedule-detail-modal">
             <Modal.Header closeButton>
-                <Modal.Title>Chi tiết lịch làm việc</Modal.Title>
+                <Modal.Title>Chi tiết lịch làm việc bác sĩ</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 {schedule && (
@@ -99,10 +88,10 @@ const ScheduleDetail = ({ show, onHide, schedule, onDelete, onUpdate, onShowToas
                         <Row className="mb-3">
                             <Col md={6}>
                                 <Form.Group>
-                                    <Form.Label>{getRoleLabel()}</Form.Label>
+                                    <Form.Label>Bác sĩ</Form.Label>
                                     <Form.Control 
                                         type="text" 
-                                        value={personName} 
+                                        value={schedule.doctorName} 
                                         disabled 
                                     />
                                 </Form.Group>
