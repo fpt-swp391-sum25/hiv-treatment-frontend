@@ -39,10 +39,11 @@ import Reports from './components/manager/Reports/Reports';
 
 // Import for doctor pages
 import DoctorHomePage from './pages/doctor/DoctorHomePage';
-import DoctorProfile from './pages/doctor/DoctorProfile';
-import DoctorSchedule from './pages/doctor/DoctorSchedule';
-import ViewOnlyPatientDetail from './pages/doctor/ViewOnlyPatientDetail';
-import PatientList from './pages/doctor/PatientList';
+import DoctorProfilePage from './pages/doctor/DoctorProfilePage';
+import DoctorSchedulePage from './pages/doctor/DoctorSchedulePage';
+import ViewOnlyPatientDetail from './components/doctor/ViewOnlyPatientDetail';
+import PatientListPage from './pages/doctor/PatientListPage';
+import RegimenListPage from './pages/doctor/RegimenListPage';
 
 // Import for lab technician pages
 import LabTechnicianHomePage from './pages/lab-technician/LabTechnicianHomePage'
@@ -55,6 +56,7 @@ import PatientAppointmentHistory from './pages/patient/PatientAppointmentHistory
 
 const router = createBrowserRouter([
   {
+    // Path for home pages
     path: '/',
     element: <App />,
     errorElement: <NotFound />,
@@ -102,34 +104,7 @@ const router = createBrowserRouter([
       },
     ]
   },
-  {
-    path: '/doctor',
-    element: <DoctorHomePage />,
-    errorElement: <Errors />,
-    children: [
-      {
-        path: '/doctor/profile',
-        element: <DoctorProfile />,
-        errorElement: <Errors />,
-      },
-      {
-        path: '/doctor/schedule',
-        element: <DoctorSchedule/>,
-        errorElement: <Errors />,
-      },
-      {
-        path: '/doctor/patient-list',
-        element: <PatientList />,
-        errorElement: <Errors />,
-      },
-      {
-        path: '/doctor/patient-list/:id',
-        element: <ViewOnlyPatientDetail />,
-        errorElement: <Errors />
-      }
-    ],
-  },
-  {
+{
     path: '/doctors',
     element: <DoctorProfileList />,
     errorElement: <Errors />,
@@ -149,6 +124,48 @@ const router = createBrowserRouter([
     element: <Register />,
     errorElement: <Errors />,
   },
+  
+  // Path for doctor pages
+  {
+    path: '/doctor',
+    element: <DoctorHomePage />,
+    errorElement: <Errors />,
+    children: [
+      {
+        index: true, 
+        element: <DoctorProfilePage />, 
+        errorElement: <Errors />,
+      },
+      {
+        path: 'profile',
+        element: <DoctorProfilePage />,
+        errorElement: <Errors />,
+      },
+      {
+        path: 'schedule',
+        element: <DoctorSchedulePage />,
+        errorElement: <Errors />,
+      },
+      {
+        path: 'patients',
+        element: <PatientListPage />,
+        errorElement: <Errors />,
+      },
+      {
+        path: 'regimens',
+        element: <RegimenListPage />,
+        errorElement: <Errors />,
+      },
+      {
+        path: 'patients/:id', 
+        element: <ViewOnlyPatientDetail />,
+        errorElement: <Errors />
+      }
+    ]
+  },
+
+  
+  // Path for admin pages
   {
     path: '/admin',
     element: <AdminPage />,
@@ -179,7 +196,9 @@ const router = createBrowserRouter([
         errorElement: <Errors />,
       }
     ]
-  },  
+  }, 
+
+  // Path for manager pages 
   {    
     path: '/manager',
     element: <ManagerPage />,
@@ -211,6 +230,7 @@ const router = createBrowserRouter([
     errorElement: <Errors />,
   },
 
+  // Path for lab technician pages
   {
     path: '/lab-technician',
     element: <LabTechnicianHomePage />,

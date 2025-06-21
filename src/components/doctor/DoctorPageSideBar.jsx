@@ -8,7 +8,7 @@ const { Title } = Typography;
 
 const icons = [ScheduleOutlined, UnorderedListOutlined, UnorderedListOutlined, UserOutlined];
 const labels = ['Lịch làm việc', 'Danh sách bệnh nhân', 'Danh sách phác đồ', 'Hồ sơ cá nhân']
-const paths = [ '/doctor/schedule', '/doctor/patient-list', '/doctor/profile', '/doctor/profile'];
+const paths = [ '/doctor/schedule', '/doctor/patients', '/doctor/regimens', '/doctor/profile'];
 const items = icons.map(
   (icon, index) => ({
     key: String(index + 1),
@@ -17,19 +17,16 @@ const items = icons.map(
   }),
 );
 
-const DotorPageSideBar = () => {
+const DoctorPageSideBar = () => {
   return (
-    <Layout style = {{ minHeight: '92.5vh'}}>
       <Sider
         width={15 + 'vw'}
         breakpoint="md"
         collapsedWidth="60"
       >
-        <Menu theme="dark" mode="inline" defaultSelectedKeys={['4']} items={items} />
-      </Sider>
-      
-      <Outlet/>
-    </Layout>
+        <Menu theme="dark" mode="inline" defaultSelectedKeys={['4']} items={items} 
+          selectedKeys={[location.pathname]}/>
+      </Sider>      
   );
 };
-export default DotorPageSideBar;
+export default DoctorPageSideBar;

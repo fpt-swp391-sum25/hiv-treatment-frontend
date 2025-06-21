@@ -1,7 +1,7 @@
 import { Layout, Button, Table, Typography } from "antd";
 import { useState, useEffect } from "react";
 import { fetchUsersAPI, fetchScheduleAPI } from "../../services/api.service";
-import { useNavigate } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import PageHeader from '../../components/client/PageHeader';
 
 const { Content } = Layout;
@@ -92,6 +92,7 @@ const PatientList = () => {
                 </div>
                 <Table columns={columns} dataSource={data} rowKey={(record) => record.id} />
             </Content>
+            <Outlet />
         </Layout>
     )
 }
