@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Spin, message } from 'antd';
+import { Spin, message, Modal } from 'antd';
 import { fetchAllDocumentsAPI } from '../../services/api.service';
 import '../../styles/home-section/DocumentList.css';
 
@@ -9,6 +9,8 @@ const Document = () => {
   const [showAll] = useState(false);
   const [expandedId, setExpandedId] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [selectedDoc, setSelectedDoc] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
     const fetchDocuments = async () => {
@@ -39,6 +41,15 @@ const Document = () => {
 
   const toggleExpand = (id) => {
     setExpandedId(expandedId === id ? null : id);
+  };
+
+  const showModal = (doc) => {
+    setSelectedDoc(doc);
+    setModalVisible(true);
+  };
+
+  const handleCancel = () => {
+    setModalVisible(false);
   };
 
   return (
@@ -73,17 +84,11 @@ const Document = () => {
                   📅 {new Date(doc.createdAt || doc.created_at).toLocaleDateString('vi-VN')}
                 </p>
                 <button
-                  className={`btn-read ${expandedId === doc.id ? 'expanded' : ''}`}
-                  onClick={() => toggleExpand(doc.id)}
+                  className="btn-read"
+                  onClick={() => showModal(doc)}
                 >
-                  {expandedId === doc.id ? '🔽 Thu gọn' : '📖 Đọc bài viết'}
+                  📖 Đọc bài viết
                 </button>
-                {expandedId === doc.id && (
-                  <div className="document-full-content">
-                    <hr />
-                    <p>{doc.content}</p>
-                  </div>
-                )}
               </div>
             ))}
           </div>
@@ -105,6 +110,28 @@ const Document = () => {
       ) : (
         <div className="no-results">Không có tài liệu nào.</div>
       )}
+
+      <Modal
+        title={selectedDoc?.title}
+        open={modalVisible}
+        onCancel={handleCancel}
+        footer={null}
+        width={800}
+      >
+        {selectedDoc && (
+          <div className="modal-content">
+            <p className="document-author">
+              👨‍⚕️ {selectedDoc.author || 'Chưa có tác giả'}
+            </p>
+            <p className="document-date">
+              📅 {new Date(selectedDoc.createdAt || selectedDoc.created_at).toLocaleDateString('vi-VN')}
+            </p>
+            <div className="document-content">
+              {selectedDoc.content}
+            </div>
+          </div>
+        )}
+      </Modal>
     </section>
   );
 };
