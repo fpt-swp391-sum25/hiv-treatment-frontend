@@ -215,7 +215,6 @@ const fetchAllRegimensAPI = () => {
     const URL_BACKEND = '/api/regimen'
     return axios.get(URL_BACKEND)
 }
-<<<<<<< HEAD
 
 const createRegimenAPI = (components, regimenName, 
     description, indications, contraindications) => {
@@ -247,8 +246,6 @@ const deleteRegimenAPI = (id) => {
     const URL_BACKEND = `/api/regimen/${id}`;
     return axios.delete(URL_BACKEND)
 }
-=======
->>>>>>> 34f4227fbcb87a1444233099a4f5ea888807fece
 export {
     loginAPI,
     registerAPI,
@@ -283,12 +280,8 @@ export {
 
     fetchScheduleByDoctorIdAPI,
     fetchRegimensByDoctorIdAPI,
-<<<<<<< HEAD
     fetchAllRegimensAPI,
     createRegimenAPI,
     updateRegimenAPI,
     deleteRegimenAPI
-=======
-    fetchAllRegimensAPI
->>>>>>> 34f4227fbcb87a1444233099a4f5ea888807fece
 }
