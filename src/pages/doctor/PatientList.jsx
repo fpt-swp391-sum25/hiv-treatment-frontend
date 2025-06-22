@@ -25,7 +25,6 @@ const PatientList = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        loadData()
         const filtered = data.filter(item => {
             const matchesText =
                 item.fullName.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -41,6 +40,10 @@ const PatientList = () => {
 
         setFilteredData(filtered);
     }, [searchText, selectedYear, selectedMonth, selectedDate, data]);
+
+    useEffect(() => {
+        loadData();
+    }, []); 
 
    const loadData = async () => {
         try {
