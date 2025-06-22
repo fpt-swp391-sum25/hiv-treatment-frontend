@@ -1,5 +1,6 @@
 import React from 'react';
 import '../../styles/home-section/FullServicesSection2.css';
+import { Link } from 'react-router-dom';
 
 const FullServicesSection2 = () => {
     return (        <div className="container" id="services-section">
@@ -17,7 +18,7 @@ const FullServicesSection2 = () => {
                         <li>Xác nhận tự thi</li>
                         <li>Nhắc lịch tự động</li>
                     </ul>
-                    <button className="button">Sử dụng dịch vụ &rarr;</button>
+                    <Link to="/booking"><button className="button">Sử dụng dịch vụ &rarr;</button></Link>
                     </div>
                 </div>
                 <div className="card">
@@ -29,7 +30,7 @@ const FullServicesSection2 = () => {
                         <li>Theo dõi tiến trình điều trị</li>
                         <li>Tư vấn chuyên môn định kỳ</li>
                     </ul>
-                    <button className="button">Sử dụng dịch vụ &rarr;</button>
+                    <Link to="/booking"><button className="button">Sử dụng dịch vụ &rarr;</button></Link>
                     </div>
                 </div>
                 <div className="card">
@@ -41,7 +42,7 @@ const FullServicesSection2 = () => {
                         <li>Tư vấn dinh dưỡng & tâm lý</li>
                         <li>Đồng hành lâu dài trong điều trị</li>
                     </ul>
-                    <button className="button">Sử dụng dịch vụ &rarr;</button>
+                    <Link to="/booking"><button className="button">Sử dụng dịch vụ &rarr;</button></Link>
                     </div>
                 </div>
             </div>

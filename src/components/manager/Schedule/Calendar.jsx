@@ -9,7 +9,7 @@ import moment from 'moment';
 import { BsChevronLeft, BsChevronRight } from 'react-icons/bs';
 import './Calendar.css';
 import './CustomButtons.css';
-import { ScheduleStatus, LabTechnicianRole } from '../../../types/schedule.types';
+import { ScheduleStatus } from '../../../types/schedule.types';
 
 const Calendar = ({ events, onDateSelect, onEventSelect }) => {
     const [view, setView] = useState('dayGridMonth');
@@ -48,37 +48,15 @@ const Calendar = ({ events, onDateSelect, onEventSelect }) => {
         }
     };
 
-    // Màu sắc phân biệt cho các vai trò
-    const getRoleColor = (role, status) => {
-        // Nếu nghỉ phép hoặc họp, ưu tiên màu của trạng thái
-        if (status !== 'available') {
-            return getStatusColor(status);
-        }
-        
-        // Nếu đang làm việc, phân biệt màu theo vai trò
-        switch (role) {
-            case LabTechnicianRole.DOCTOR:
-                return '#28a745'; // Bác sĩ - màu xanh lá
-            case LabTechnicianRole.NURSE:
-                return '#0dcaf0'; // Y tá - màu xanh dương nhạt
-            default:
-                return '#28a745'; // Mặc định - màu xanh lá
-        }
-    };
-
     // Chuẩn bị sự kiện cho Full Calendar
     const calendarEvents = events.map(event => {
-        // Xác định vai trò từ event
-        const role = event.labTechnicianId ? (event.role || LabTechnicianRole.NURSE) : LabTechnicianRole.DOCTOR;
-        
         return {
             id: event.id,
             title: event.title,
             start: event.date,
-            color: getRoleColor(role, event.status),
+            color: getStatusColor(event.status),
             extendedProps: {
-                ...event,
-                role // Đảm bảo role được truyền trong extendedProps
+                ...event
             },
             allDay: true
         };
@@ -107,16 +85,9 @@ const Calendar = ({ events, onDateSelect, onEventSelect }) => {
         const eventData = eventInfo.event.extendedProps;
         const statusClass = `status-${eventData.status}`;
         
-        // Xác định người được lên lịch (bác sĩ hoặc y tá)
-        const personName = eventData.doctorName || eventData.labTechnicianName || '';
-        const isNurse = eventData.labTechnicianId != null;
-        
-        // Thêm tiền tố "Y tá" nếu là nhân viên y tá
-        const displayName = isNurse ? `Y tá ${personName}` : personName;
-        
         return (
             <div className={`custom-event-content ${statusClass}`}>
-                <div className="event-title">{displayName}</div>
+                <div className="event-title">{eventData.doctorName}</div>
                 <div className="event-status">
                     {eventData.status === 'available' 
                         ? `Làm việc: ${eventData.morning && eventData.afternoon 

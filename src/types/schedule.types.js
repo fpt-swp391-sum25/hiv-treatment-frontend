@@ -17,7 +17,8 @@ export const ScheduleStatus = {
     // Trạng thái làm việc của bác sĩ
     AVAILABLE: 'available',
     ON_LEAVE: 'on_leave',
-    UNAVAILABLE: 'UNAVAILABLE'   // Không làm việc
+    UNAVAILABLE: 'UNAVAILABLE',   // Không làm việc
+    IN_MEETING: 'in_meeting'      // Đang họp
 };
 
 // Time slots for schedule
@@ -32,10 +33,4 @@ export const SlotTimes = {
         startTime: '13:00',
         endTime: '16:00'
     }
-};
-
-// LabTechnician role types for scheduling
-export const LabTechnicianRole = {
-    DOCTOR: 'DOCTOR',           // Bác sĩ
-    NURSE: 'NURSE'              // Y tá
 };

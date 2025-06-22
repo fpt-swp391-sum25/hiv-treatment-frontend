@@ -38,6 +38,7 @@ import LabTechnicianManagement from './components/manager/LabTechnicianManagemen
 import Reports from './components/manager/Reports/Reports';
 
 // Import for doctor pages
+<<<<<<< HEAD
 import DoctorHome from './pages/doctor/DoctorHome';
 import DoctorProfile from './pages/doctor/DoctorProfile';
 import DoctorSchedule from './pages/doctor/DoctorSchedule';
@@ -45,6 +46,15 @@ import ViewOnlyPatientDetail from './components/doctor/ViewOnlyPatientDetail';
 import PatientList from './pages/doctor/PatientList';
 import RegimenList from './pages/doctor/RegimenList';
 import UpdateRegimenModal from './pages/doctor/RegimenList';
+=======
+import DoctorHomePage from './pages/doctor/DoctorHomePage';
+import DoctorProfilePage from './pages/doctor/DoctorProfilePage';
+import DoctorSchedulePage from './pages/doctor/DoctorSchedulePage';
+import ViewOnlyPatientDetail from './components/doctor/ViewOnlyPatientDetail';
+import PatientListPage from './pages/doctor/PatientListPage';
+import RegimenListPage from './pages/doctor/RegimenListPage';
+
+>>>>>>> 34f4227fbcb87a1444233099a4f5ea888807fece
 // Import for lab technician pages
 import LabTechnicianHomePage from './pages/lab-technician/LabTechnicianHomePage'
 import PatientDetail from './pages/lab-technician/PatientDetailPage'
@@ -52,6 +62,7 @@ import PatientDetail from './pages/lab-technician/PatientDetailPage'
 // Import for patient pages
 import ProfileDetail from './pages/patient/ProfileDetail';
 import PaymentCallback from './pages/patient/PaymentCallback';
+import PatientAppointmentHistory from './pages/patient/PatientAppointmentHistory';
 
 const router = createBrowserRouter([
   {
@@ -88,6 +99,15 @@ const router = createBrowserRouter([
         element: (
           <PrivateRoute>
             <ProfileDetail />
+          </PrivateRoute>
+        ),
+        errorElement: <Errors />,
+      },
+      {
+        path: '/appointment-history',
+        element: (
+          <PrivateRoute>
+            <PatientAppointmentHistory />
           </PrivateRoute>
         ),
         errorElement: <Errors />,
