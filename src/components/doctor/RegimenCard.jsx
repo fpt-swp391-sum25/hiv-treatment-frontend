@@ -16,9 +16,9 @@ const RegimenCard = ({ regimen, onEdit, onDelete }) => {
   return (
     <Card
       title={
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span>{regimen?.regimenName || 'Không tên'}</span>
-          {/* {getTypeTag(regimen.user)} */}
+          {getTypeTag(regimen.doctor)}
         </div>
       }
       hoverable
@@ -58,18 +58,23 @@ const RegimenCard = ({ regimen, onEdit, onDelete }) => {
         </div>
       </div>
 
+      { /* Update and delete regimen if not default */}
       <Space style={{ marginTop: '1vh' }}>
-        <EditOutlined onClick={() => onEdit(regimen)} />
-        <Popconfirm
-          title='Xóa phác đồ'
-          description='Bạn có chắc muốn xóa phác đồ này?'
-          onConfirm={() => onDelete(regimen.id)}
-          okText='Có'
-          cancelText='Không'
-          placement='bottom'
-        >
-          <DeleteOutlined style={{ color: 'red' }} />
-        </Popconfirm>
+        {regimen.doctor && (
+          <>
+            <EditOutlined onClick={() => onEdit(regimen)} />
+            <Popconfirm
+              title='Xóa phác đồ'
+              description='Bạn có chắc muốn xóa phác đồ này?'
+              onConfirm={() => onDelete(regimen.id)}
+              okText='Có'
+              cancelText='Không'
+              placement='bottom'
+            >
+              <DeleteOutlined style={{ color: 'red' }} />
+            </Popconfirm>
+          </>
+        )}
       </Space>
     </Card>
   );
