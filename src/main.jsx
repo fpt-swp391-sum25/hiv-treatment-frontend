@@ -38,13 +38,13 @@ import LabTechnicianManagement from './components/manager/LabTechnicianManagemen
 import Reports from './components/manager/Reports/Reports';
 
 // Import for doctor pages
-import DoctorHomePage from './pages/doctor/DoctorHomePage';
-import DoctorProfilePage from './pages/doctor/DoctorProfilePage';
-import DoctorSchedulePage from './pages/doctor/DoctorSchedulePage';
+import DoctorHome from './pages/doctor/DoctorHome';
+import DoctorProfile from './pages/doctor/DoctorProfile';
+import DoctorSchedule from './pages/doctor/DoctorSchedule';
 import ViewOnlyPatientDetail from './components/doctor/ViewOnlyPatientDetail';
-import PatientListPage from './pages/doctor/PatientListPage';
-import RegimenListPage from './pages/doctor/RegimenListPage';
-
+import PatientList from './pages/doctor/PatientList';
+import RegimenList from './pages/doctor/RegimenList';
+import UpdateRegimenModal from './pages/doctor/RegimenList';
 // Import for lab technician pages
 import LabTechnicianHomePage from './pages/lab-technician/LabTechnicianHomePage'
 import PatientDetail from './pages/lab-technician/PatientDetailPage'
@@ -118,42 +118,41 @@ const router = createBrowserRouter([
   // Path for doctor pages
   {
     path: '/doctor',
-    element: <DoctorHomePage />,
+    element: <DoctorHome />,
     errorElement: <Errors />,
     children: [
       {
         index: true, 
-        element: <DoctorProfilePage />, 
+        element: <DoctorSchedule />, 
         errorElement: <Errors />,
       },
       {
         path: 'profile',
-        element: <DoctorProfilePage />,
+        element: <DoctorProfile />,
         errorElement: <Errors />,
       },
       {
         path: 'schedule',
-        element: <DoctorSchedulePage />,
+        element: <DoctorSchedule />,
         errorElement: <Errors />,
       },
       {
         path: 'patients',
-        element: <PatientListPage />,
-        errorElement: <Errors />,
-      },
-      {
-        path: 'regimens',
-        element: <RegimenListPage />,
+        element: <PatientList />,
         errorElement: <Errors />,
       },
       {
         path: 'patients/:id', 
         element: <ViewOnlyPatientDetail />,
         errorElement: <Errors />
-      }
+      },
+      {
+        path: 'regimens',
+        element: <RegimenList />,
+        errorElement: <Errors />,
+      },
     ]
   },
-
   
   // Path for admin pages
   {

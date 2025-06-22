@@ -31,7 +31,7 @@ const ScheduleCalendar = () => {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [schedule]);
 
   const loadData = async () => {
     try {
