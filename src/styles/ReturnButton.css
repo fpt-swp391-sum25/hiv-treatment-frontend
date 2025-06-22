@@ -1,0 +1,18 @@
+.custom-yellow-btn {
+  background-color: gold !important;
+  border-color: gold !important;
+  color: black !important;
+}
+
+.custom-yellow-btn:hover,
+.custom-yellow-btn:focus {
+  background-color: #e6c200 !important;
+  border-color: #e6c200 !important;
+  color: black !important;
+}
+
+.custom-yellow-btn:active {
+  background-color: #ccad00 !important;
+  border-color: #ccad00 !important;
+  color: black !important;
+}
