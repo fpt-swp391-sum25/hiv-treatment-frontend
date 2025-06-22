@@ -60,12 +60,12 @@ import '../../styles/ReturnButton.css'
       if (response.data) {
         notification.success({
           title: "Hệ thống",
-          description: "Chỉ định phác đồ thành công"
+          description: "Cập nhật phác đồ thành công"
         })
       } else {
         notification.error({
           title: "Hệ thống",
-          description: "Chỉ định phác đồ không thành công"
+          description: "Cập nhật phác đồ không thành công"
         })
       }
       await loadData();
@@ -218,13 +218,13 @@ import '../../styles/ReturnButton.css'
 
         <div style={{ textAlign: "right", marginBottom: 15 }}>
           <Button type='primary' onClick={() => setIsIndiateRegimenModalOpen(true)}>
-            {healthRecordData.regimenId ? "Thay đổi phác đồ" : "Chỉ định phác đồ"}
+            Cập nhật phác đồ
           </Button>
         </div>
 
         {/* Indicate regimen modal */}
         <Modal
-          title="Chỉ định phác đồ cho bệnh nhân"
+          title="Cập nhật phác đồ cho bệnh nhân"
           open={isIndiateRegimenModalOpen}
           onOk={handleIndicateRegimen}
           onCancel={resetAndClose}
@@ -237,7 +237,21 @@ import '../../styles/ReturnButton.css'
                 showSearch
                 placeholder="Tìm kiếm theo tên, mô tả, chỉ định, thành phần..."
                 value={selectedRegimenId}
-                onChange={(value) => setSelectedRegimenId(value)}
+                onChange={(value) => {
+                  if (value === '') {
+                    Modal.confirm({
+                      title: "Xác nhận bỏ phác đồ?",
+                      content: "Bạn có chắc chắn muốn bỏ phác đồ điều trị khỏi bệnh nhân này?",
+                      okText: "Đồng ý",
+                      cancelText: "Hủy",
+                      onOk: () => {
+                        setSelectedRegimenId(null);
+                      },
+                    });
+                  } else {
+                    setSelectedRegimenId(value);
+                  }
+                }}
                 optionFilterProp="children"
                 optionLabelProp="label"
                 filterOption={(input, option) => {
@@ -255,6 +269,9 @@ import '../../styles/ReturnButton.css'
                   return content.includes(lower);
                 }}
               >
+              <Select.Option value="" label="Không có phác đồ">
+                <strong>Không có phác đồ</strong>
+              </Select.Option>
                 {regimenOptions.map((regimen) => (
                   <Select.Option
                     key={regimen.id}
