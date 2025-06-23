@@ -125,8 +125,10 @@ const logoutAPI = () => {
 }
 
 const fetchAllDoctorsAPI = () => {
-    const URL_BACKEND = '/api/doctors'
-    return axios.get(URL_BACKEND)
+    // Truy cập trực tiếp vào bảng users với role = 3 (bác sĩ)
+    const URL_BACKEND = '/api/user/role/3';
+    console.log('Calling API to fetch doctors from:', URL_BACKEND);
+    return axios.get(URL_BACKEND);
 }
 
 // Lấy thông tin chi tiết của một bác sĩ
@@ -246,6 +248,59 @@ const deleteRegimenAPI = (id) => {
     const URL_BACKEND = `/api/regimen/${id}`;
     return axios.delete(URL_BACKEND)
 }
+
+// Thêm các API từ schedule.service.js
+const createScheduleAPI = (scheduleData) => {
+    const URL_BACKEND = '/api/schedule';
+    return axios.post(URL_BACKEND, scheduleData);
+}
+
+const getAllSchedulesAPI = () => {
+    const URL_BACKEND = '/api/schedule';
+    return axios.get(URL_BACKEND);
+}
+
+const getSchedulesByDoctorAPI = (doctorId) => {
+    const URL_BACKEND = `/api/schedule/doctor-id/${doctorId}`;
+    return axios.get(URL_BACKEND);
+}
+
+const getSchedulesByDateAPI = (date) => {
+    const URL_BACKEND = `/api/schedule/date/${date}`;
+    return axios.get(URL_BACKEND);
+}
+
+const getSchedulesByTypeAPI = (type) => {
+    const URL_BACKEND = `/api/schedule/type/${type}`;
+    return axios.get(URL_BACKEND);
+}
+
+const getSchedulesByStatusAPI = (status) => {
+    const URL_BACKEND = `/api/schedule/status/${status}`;
+    return axios.get(URL_BACKEND);
+}
+
+const updateScheduleAPI = (scheduleId, scheduleData) => {
+    const URL_BACKEND = `/api/schedule/${scheduleId}`;
+    return axios.put(URL_BACKEND, scheduleData);
+}
+
+const deleteScheduleAPI = (scheduleId) => {
+    const URL_BACKEND = `/api/schedule/${scheduleId}`;
+    return axios.delete(URL_BACKEND);
+}
+
+const getSchedulesByPatientAPI = (patientId) => {
+    const URL_BACKEND = `/api/schedule/patient/${patientId}`;
+    return axios.get(URL_BACKEND);
+}
+
+// Thêm API mới để lấy users theo role
+const fetchUsersByRoleAPI = (role) => {
+    const URL_BACKEND = `/api/user/role/${role}`
+    return axios.get(URL_BACKEND)
+}
+
 export {
     loginAPI,
     registerAPI,
@@ -283,5 +338,17 @@ export {
     fetchAllRegimensAPI,
     createRegimenAPI,
     updateRegimenAPI,
-    deleteRegimenAPI
+    deleteRegimenAPI,
+    
+    // Thêm các API mới
+    createScheduleAPI,
+    getAllSchedulesAPI,
+    getSchedulesByDoctorAPI,
+    getSchedulesByDateAPI,
+    getSchedulesByTypeAPI,
+    getSchedulesByStatusAPI,
+    updateScheduleAPI,
+    deleteScheduleAPI,
+    getSchedulesByPatientAPI,
+    fetchUsersByRoleAPI
 }
