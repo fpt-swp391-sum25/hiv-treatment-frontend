@@ -1,7 +1,7 @@
 import React from 'react';
 import { Form } from 'react-bootstrap';
-import { ScheduleStatus } from '../../../types/schedule.types';
 import './StatusFilter.css';
+import { ScheduleStatus } from '../../../types/schedule.types';
 
 const StatusFilter = ({ selectedStatus, onStatusSelect }) => {
     const handleStatusChange = (e) => {

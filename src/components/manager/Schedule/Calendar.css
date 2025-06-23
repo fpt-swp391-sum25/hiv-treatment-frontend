@@ -179,12 +179,6 @@
   border-left: 3px solid #856404;
 }
 
-.status-in-meeting {
-  background-color: #cce5ff;
-  color: #004085;
-  border-left: 3px solid #004085;
-}
-
 /* Toast notification */
 .toast-container {
   position: fixed;
@@ -306,7 +300,7 @@
   text-overflow: ellipsis;
 }
 
-/* Màu sắc cho từng loại trạng thái và vai trò */
+/* Màu sắc cho từng loại trạng thái */
 .status-available {
   background-color: rgba(40, 167, 69, 0.1);
   border-left: 3px solid #28a745;
@@ -317,50 +311,14 @@
   border-left: 3px solid #ffc107;
 }
 
-.status-in_meeting {
-  background-color: rgba(0, 123, 255, 0.1);
-  border-left: 3px solid #007bff;
+/* Style cho ngày Chủ nhật */
+.fc-day-sunday {
+  background-color: #f8f9fa !important;
+  position: relative;
 }
 
-/* Màu sắc phân biệt cho các vai trò */
-.role-DOCTOR {
-  border-left-color: #28a745;
-}
-
-.role-NURSE {
-  border-left-color: #0dcaf0;
-}
-
-/* Chú thích vai trò */
-.role-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 10px;
-  padding: 10px;
-  background-color: #f8f9fa;
-  border-radius: 4px;
-}
-
-.role-legend-item {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 12px;
-}
-
-.role-legend-color {
-  width: 15px;
-  height: 15px;
-  border-radius: 3px;
-}
-
-.role-DOCTOR-color {
-  background-color: #28a745;
-}
-
-.role-NURSE-color {
-  background-color: #0dcaf0;
+.fc .fc-day-disabled {
+  pointer-events: none;
 }
 
 /* Responsive */
@@ -373,35 +331,4 @@
   .fc .fc-toolbar-title {
     font-size: 1.2rem;
   }
-
-  .role-legend {
-    flex-direction: column;
-    gap: 5px;
-  }
-}
-
-/* Style cho ngày Chủ nhật */
-.fc-day-sunday {
-    background-color: #f8f9fa !important;
-    position: relative;
-}
-
-.fc-day-sunday:after {
-
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 14px;
-    color: #dc3545;
-    font-style: italic;
-    font-weight: 500;
-    background-color: rgba(255, 255, 255, 0.7);
-    padding: 2px 8px;
-    border-radius: 4px;
-    z-index: 1;
-}
-
-.fc .fc-day-disabled {
-    pointer-events: none;
 }
