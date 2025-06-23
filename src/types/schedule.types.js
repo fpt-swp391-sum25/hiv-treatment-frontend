@@ -15,10 +15,9 @@ export const ScheduleStatus = {
     NO_SHOW: 'NO_SHOW',         // Không đến khám
     
     // Trạng thái làm việc của bác sĩ
-    AVAILABLE: 'available',
-    ON_LEAVE: 'on_leave',
-    UNAVAILABLE: 'UNAVAILABLE',   // Không làm việc
-    IN_MEETING: 'in_meeting'      // Đang họp
+    AVAILABLE: 'available',     // Làm việc
+    ON_LEAVE: 'on_leave',       // Nghỉ phép
+    UNAVAILABLE: 'UNAVAILABLE'  // Không làm việc
 };
 
 // Time slots for schedule
