@@ -8,6 +8,9 @@ export default function PatientAppointmentHistory() {
   const [loading, setLoading] = useState(true);
   const [searchDoctor, setSearchDoctor] = useState('');
   const [selectedType, setSelectedType] = useState('all');
+  const [healthRecord, setHealthRecord] = useState(null);
+  const [loadingHealthRecord, setLoadingHealthRecord] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     const fetchAppointments = async () => {
@@ -33,6 +36,28 @@ export default function PatientAppointmentHistory() {
     };
     fetchAppointments();
   }, [user]);
+
+  // Hàm lấy health record theo schedule ID
+  const fetchHealthRecord = async (scheduleId) => {
+    setLoadingHealthRecord(true);
+    setShowModal(true);
+    try {
+      const data = await healthRecordService.getHealthRecordByScheduleId(scheduleId);
+      setHealthRecord(data);
+      console.log('Health Record:', data);
+    } catch (error) {
+      console.error('Error fetching health record:', error);
+      setHealthRecord(null);
+    } finally {
+      setLoadingHealthRecord(false);
+    }
+  };
+
+  // Hàm đóng modal
+  const closeModal = () => {
+    setShowModal(false);
+    setHealthRecord(null);
+  };
 
   if (loading) return <div>Đang tải lịch sử khám...</div>;
 
@@ -248,9 +273,154 @@ export default function PatientAppointmentHistory() {
                 <b>Trạng thái</b>
                 <div>{record.status}</div>
               </div>
+              <div style={{ flex: 1 }}>
+                <button
+                  onClick={() => fetchHealthRecord(record.id)}
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: 6,
+                    border: '1px solid #1976d2',
+                    background: '#1976d2',
+                    color: '#fff',
+                    cursor: 'pointer',
+                    fontWeight: 500
+                  }}
+                >
+                  Chi tiết
+                </button>
+              </div>
             </div>
           </div>
         ))
+      )}
+
+      {/* Modal hiển thị chi tiết hồ sơ sức khỏe */}
+      {showModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            background: '#fff',
+            borderRadius: 12,
+            padding: 24,
+            maxWidth: 600,
+            width: '90%',
+            maxHeight: '80vh',
+            overflowY: 'auto',
+            position: 'relative'
+          }}>
+            {/* Header */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: 20,
+              borderBottom: '1px solid #eee',
+              paddingBottom: 16
+            }}>
+              <h2 style={{ margin: 0, color: '#1976d2' }}>Chi tiết hồ sơ sức khỏe</h2>
+              <button
+                onClick={closeModal}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: 24,
+                  cursor: 'pointer',
+                  color: '#666'
+                }}
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Content */}
+            {loadingHealthRecord ? (
+              <div style={{ textAlign: 'center', padding: 40 }}>
+                <div>Đang tải thông tin hồ sơ sức khỏe...</div>
+              </div>
+            ) : healthRecord ? (
+              <div>
+                {/* Thông tin chung */}
+                <div style={{ marginBottom: 16 }}>
+                  <h3 style={{ color: '#333', marginBottom: 8 }}>Thông tin chung</h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                    <div><strong>ID:</strong> {healthRecord.id}</div>
+                    <div><strong>Mã phòng:</strong> {healthRecord.roomCode || 'N/A'}</div>
+                    <div><strong>Số BHYT:</strong> {healthRecord.insuranceNumber || 'N/A'}</div>
+                    <div><strong>Tình trạng HIV:</strong> {healthRecord.hivStatus || 'N/A'}</div>
+                    <div><strong>Nhóm máu:</strong> {healthRecord.bloodType || 'N/A'}</div>
+                    <div><strong>Tình trạng điều trị:</strong> {healthRecord.treatmentStatus || 'N/A'}</div>
+                  </div>
+                </div>
+
+                {/* Chỉ số sức khỏe */}
+                <div style={{ marginBottom: 16 }}>
+                  <h3 style={{ color: '#333', marginBottom: 8 }}>Chỉ số sức khỏe</h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                    <div><strong>Cân nặng:</strong> {healthRecord.weight ? `${healthRecord.weight} kg` : 'N/A'}</div>
+                    <div><strong>Chiều cao:</strong> {healthRecord.height ? `${healthRecord.height} cm` : 'N/A'}</div>
+                  </div>
+                </div>
+
+                {/* Ghi chú */}
+                <div style={{ marginBottom: 16 }}>
+                  <h3 style={{ color: '#333', marginBottom: 8 }}>Ghi chú</h3>
+                  <div style={{
+                    background: '#f5f5f5',
+                    padding: 12,
+                    borderRadius: 6,
+                    minHeight: 80
+                  }}>
+                    {healthRecord.note || 'Không có ghi chú'}
+                  </div>
+                </div>
+
+                {/* Thông tin liên quan */}
+                <div style={{ marginBottom: 16 }}>
+                  <h3 style={{ color: '#333', marginBottom: 8 }}>Thông tin liên quan</h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                    <div><strong>Lịch hẹn (ID):</strong> {healthRecord.schedule ? healthRecord.schedule.id : 'N/A'}</div>
+                    <div><strong>Phác đồ (ID):</strong> {healthRecord.regimen ? healthRecord.regimen.id : 'N/A'}</div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div style={{ textAlign: 'center', padding: 40, color: '#666' }}>
+                <div>Không tìm thấy thông tin hồ sơ sức khỏe cho lịch khám này</div>
+              </div>
+            )}
+
+            {/* Footer */}
+            <div style={{
+              marginTop: 24,
+              textAlign: 'right',
+              borderTop: '1px solid #eee',
+              paddingTop: 16
+            }}>
+              <button
+                onClick={closeModal}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: 6,
+                  border: '1px solid #ddd',
+                  background: '#f5f5f5',
+                  cursor: 'pointer'
+                }}
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
