@@ -1,5 +1,4 @@
-import React from 'react';
-import './CareIntroSection.css';
+import '../../styles/home-section/CareIntroSection.css';
 import { Link } from 'react-router-dom';
 
 function CareIntroSection() {

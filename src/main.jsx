@@ -1,43 +1,58 @@
 import ReactDOM from 'react-dom/client'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import Home from './pages/client/home';
-import Login from './pages/auth/login';
-import Register from './pages/auth/register';
-import Admin from './pages/admin/admin-page';
-import ManagerLayout from './pages/manager/manager-page';
+
+import App from './pages/client/App';
+
+// Import for all pages
+import { GoogleOAuthProvider } from '@react-oauth/google';
+import { AuthWrapper } from './components/context/AuthContext';
+import PrivateRoute from './pages/auth/PrivateRoute';
+
+// Import for error handler
+import NotFound from './pages/error/NotFound';
+import Errors from './pages/error/DataError'
+
+// Import for client page
+import Home from './pages/client/Home';
+import Login from './pages/auth/Login';
+import Register from './pages/auth/Register';
+import BookingCheckupForm from './pages/patient/Booking';
+import DocumentList from './pages/client/DocumentList';
+import DoctorProfileList from './pages/client/DoctorProfileList';
+
+// Import for admin page
+import AdminPage from './pages/admin/AdminPage';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AccountManagers from './pages/admin/AccountManagers';
+import AccountDoctors from './pages/admin/AccountDoctors';
+import AccountLabTechnicians from './pages/admin/AccountLabTechnicians';
+import AccountPatients from './pages/admin/AccountPatients';
+
+// Import for manager page
+import ManagerPage from './pages/manager/ManagerPage';
 import ManagerDashboard from './components/manager/Dashboard';
 import ManagerSchedule from './components/manager/Schedule/ManagerSchedule';
 import DoctorManagement from './components/manager/DoctorManagement/DoctorManagement';
 import StaffManagement from './components/manager/StaffManagement/StaffManagement';
 import Reports from './components/manager/Reports/Reports';
 
-import DoctorApp from './components/doctor/App';
-import DoctorProfile from './components/doctor/DoctorProfile';
-import DoctorDashboard from './pages/doctor/dashboard';
+// Import for doctor page
+import DoctorHomePage from './pages/doctor/DoctorHomePage';
+import DoctorProfile from './pages/doctor/DoctorProfile';
+import DoctorSchedule from './pages/doctor/DoctorSchedule';
+import ViewOnlyPatientDetail from './pages/doctor/ViewOnlyPatientDetail';
+import PatientList from './pages/doctor/PatientList';
 
-import BookingCheckupForm from './pages/client/booking';
-import NotFound from './pages/error/not-found';
-import Errors from './pages/error/data-error'
-import AdminDashboard from './pages/admin/dashboard';
-import AccountManagers from './pages/admin/managers';
-import AccountDoctors from './pages/admin/doctors';
-import AccountStaff from './pages/admin/staff';
-import AccountUsers from './pages/admin/users';
-
-import Staff from './pages/staff/staff-page'
-import PatientDetail from './pages/staff/patient-detail'
-
-import { GoogleOAuthProvider } from '@react-oauth/google';
-import { AuthWrapper } from './components/context/auth.context';
-import App from './pages/client/App';
-import PrivateRoute from './pages/private-route';
-import Resources from './pages/client/resources';
-import Doctors from './pages/client/doctors';
-import PaymentCallback from './pages/client/payment-callback';
-import ProfileDetail from './pages/client/profile';
+// Import for staff page
+import StaffHomePage from './pages/staff/StaffHomePage'
+import PatientDetail from './pages/staff/PatientDetailPage'
 
 
+// Import for patient page
+import ProfileDetail from './pages/patient/ProfileDetail';
+import PaymentCallback from './pages/patient/PaymentCallback';
+import AppointmentResult from './pages/patient/AppointmentResult';
 
 const router = createBrowserRouter([
   {
@@ -77,33 +92,52 @@ const router = createBrowserRouter([
         ),
         errorElement: <Errors />,
       },
+      {
+        path: '/appointment-result/:scheduleId',
+        element: (
+          <PrivateRoute>
+            <AppointmentResult />
+          </PrivateRoute>
+        ),
+        errorElement: <Errors />,
+      },
     ]
   },
   {
     path: '/doctor',
-    element: <DoctorApp />,
+    element: <DoctorHomePage />,
+    errorElement: <Errors />,
     children: [
-      {
-        index: true,
-        element: <DoctorDashboard />,
-        errorElement: <Errors />,
-      },
       {
         path: '/doctor/profile',
         element: <DoctorProfile />,
         errorElement: <Errors />,
       },
+      {
+        path: '/doctor/schedule',
+        element: <DoctorSchedule />,
+        errorElement: <Errors />,
+      },
+      {
+        path: '/doctor/patient-list',
+        element: <PatientList />,
+        errorElement: <Errors />,
+      },
+      {
+        path: '/doctor/patient-list/:id',
+        element: <ViewOnlyPatientDetail />,
+        errorElement: <Errors />
+      }
     ],
-    errorElement: <Errors />,
   },
   {
     path: '/doctors',
-    element: <Doctors />,
+    element: <DoctorProfileList />,
     errorElement: <Errors />,
   },
   {
     path: '/resources',
-    element: <Resources />,
+    element: <DocumentList />,
     errorElement: <Errors />,
   },
   {
@@ -118,7 +152,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/admin',
-    element: <Admin />,
+    element: <AdminPage />,
     children: [
       {
         index: true,
@@ -137,19 +171,19 @@ const router = createBrowserRouter([
       },
       {
         path: '/admin/staff',
-        element: <AccountStaff />,
+        element: <AccountLabTechnicians />,
         errorElement: <Errors />,
       },
       {
         path: '/admin/users',
-        element: <AccountUsers />,
+        element: <AccountPatients />,
         errorElement: <Errors />,
       }
     ]
   },
   {
     path: '/manager',
-    element: <ManagerLayout />,
+    element: <ManagerPage />,
     children: [
       {
         index: true,
@@ -177,18 +211,19 @@ const router = createBrowserRouter([
     ],
     errorElement: <Errors />,
   },
+
   {
     path: '/staff',
-    element: <Staff />,
+    element: <StaffHomePage />,
     errorElement: <Errors />,
   },
+
   {
     path: '/staff/patient-detail/:id',
     element: <PatientDetail />,
     errorElement: <Errors />,
   }
 ])
-
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <GoogleOAuthProvider clientId="115076786122-q76et2blbn1k1dmfpd6d5ss1t192ljj6.apps.googleusercontent.com">
