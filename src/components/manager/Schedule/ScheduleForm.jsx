@@ -36,8 +36,18 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             const response = await fetchAllDoctorsAPI();
             console.log('ScheduleForm: API response for doctors:', response);
             
-            // Kiểm tra cả response.data và response trực tiếp (tùy thuộc vào cấu trúc API)
-            const doctorsData = response.data || response || [];
+            // Kiểm tra cấu trúc response để xác định nơi chứa dữ liệu
+            let doctorsData = [];
+            
+            if (response && response.data) {
+                doctorsData = response.data;
+            } else if (response && Array.isArray(response)) {
+                doctorsData = response;
+            } else if (response) {
+                doctorsData = response;
+            }
+            
+            // Đảm bảo doctorsData là một mảng
             const doctorsList = Array.isArray(doctorsData) ? doctorsData : [];
             
             console.log('ScheduleForm: Doctors data after processing:', doctorsList);
@@ -48,10 +58,13 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                     // Log để kiểm tra cấu trúc dữ liệu
                     console.log('ScheduleForm: Doctor data structure:', doctor);
                     
+                    // Xử lý các trường hợp khác nhau của cấu trúc dữ liệu
+                    const id = doctor.id || doctor.userId || doctor.user_id;
+                    const name = doctor.full_name || doctor.fullName || doctor.name || doctor.username || `BS. ${id}`;
+                    
                     return {
-                        id: doctor.id,
-                        // Dựa vào hình ảnh bảng users, trường tên là full_name
-                        name: doctor.full_name || `BS. ${doctor.username || doctor.id}`
+                        id: id,
+                        name: name
                     };
                 });
                 
@@ -130,6 +143,18 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             return;
         }
 
+        // Kiểm tra ngày
+        if (!formData.date) {
+            onShowToast('Vui lòng chọn ngày', 'danger');
+            return;
+        }
+
+        // Kiểm tra ngày có phải là quá khứ không
+        if (moment(formData.date).isBefore(moment(), 'day')) {
+            onShowToast('Không thể đặt lịch cho ngày đã qua!', 'danger');
+            return;
+        }
+
         // Kiểm tra trùng lịch
         const conflictingSchedules = existingSchedules.filter(schedule => 
             schedule.date === formData.date && 
@@ -140,6 +165,8 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             onShowToast('Bác sĩ đã có lịch vào ngày này!', 'danger');
             return;
         }
+
+        console.log('Form data before submission:', formData);
 
         // Tạo lịch mới
         if (formData.repeatWeekly && formData.repeatCount > 1) {
@@ -160,8 +187,6 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                     const doctorName = selectedDoc ? selectedDoc.name : '';
                     
                     const newSchedule = {
-                        id: Date.now() + i, // Tạm thời dùng timestamp + i làm id
-                        title: `${doctorName} - ${formData.status === ScheduleStatus.AVAILABLE ? 'Làm việc' : 'Nghỉ phép'}`,
                         doctorId: formData.doctorId,
                         doctorName: doctorName,
                         date: newDate,
@@ -177,8 +202,8 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             
             // Thông báo số lịch được tạo
             if (schedules.length > 0) {
+                console.log('Creating multiple schedules:', schedules);
                 onScheduleCreated(schedules);
-                onShowToast(`Đã tạo ${schedules.length} lịch làm việc`, 'success');
             } else {
                 onShowToast('Không thể tạo lịch do trùng lặp với lịch hiện có', 'warning');
             }
@@ -188,8 +213,6 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             const doctorName = selectedDoc ? selectedDoc.name : '';
             
             const newSchedule = {
-                id: Date.now(),
-                title: `${doctorName} - ${formData.status === ScheduleStatus.AVAILABLE ? 'Làm việc' : 'Nghỉ phép'}`,
                 doctorId: formData.doctorId,
                 doctorName: doctorName,
                 date: formData.date,
@@ -199,8 +222,8 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                 note: formData.note
             };
             
+            console.log('Creating single schedule:', newSchedule);
             onScheduleCreated(newSchedule);
-            onShowToast('Đã tạo lịch làm việc mới', 'success');
         }
         
         onHide();
@@ -272,23 +295,20 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                             </Form.Group>
                         </Col>
                         <Col md={6}>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Buổi làm việc</Form.Label>
-                                <div className="d-flex">
-                                    <Form.Check 
+                            <Form.Group className="mb-3 mt-4">
+                                <div className="d-flex flex-column">
+                                    <Form.Check
                                         type="checkbox"
-                                        id="morning-checkbox"
-                                        label="Sáng"
                                         name="morning"
+                                        label="Buổi sáng (8:00 - 12:00)"
                                         checked={formData.morning}
                                         onChange={handleChange}
-                                        className="me-3"
+                                        className="mb-2"
                                     />
-                                    <Form.Check 
+                                    <Form.Check
                                         type="checkbox"
-                                        id="afternoon-checkbox"
-                                        label="Chiều"
                                         name="afternoon"
+                                        label="Buổi chiều (13:00 - 17:00)"
                                         checked={formData.afternoon}
                                         onChange={handleChange}
                                     />
@@ -304,45 +324,46 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                             name="note"
                             value={formData.note}
                             onChange={handleChange}
-                            rows={2}
+                            rows={3}
                         />
                     </Form.Group>
 
-                    <Form.Group className="mb-3">
-                        <Form.Check 
-                            type="checkbox"
-                            id="repeat-checkbox"
-                            label="Lặp lại hàng tuần"
-                            name="repeatWeekly"
-                            checked={formData.repeatWeekly}
-                            onChange={handleChange}
-                        />
-                    </Form.Group>
-
-                    {formData.repeatWeekly && (
-                        <Form.Group className="mb-3">
-                            <Form.Label>Số tuần lặp lại</Form.Label>
-                            <Form.Control
-                                type="number"
-                                name="repeatCount"
-                                value={formData.repeatCount}
-                                onChange={handleChange}
-                                min={1}
-                                max={12}
-                            />
-                            <Form.Text className="text-muted">
-                                Lịch sẽ được lặp lại trong {formData.repeatCount} tuần liên tiếp
-                            </Form.Text>
-                        </Form.Group>
-                    )}
+                    <Row>
+                        <Col md={6}>
+                            <Form.Group className="mb-3">
+                                <Form.Check
+                                    type="checkbox"
+                                    name="repeatWeekly"
+                                    label="Lặp lại hàng tuần"
+                                    checked={formData.repeatWeekly}
+                                    onChange={handleChange}
+                                />
+                            </Form.Group>
+                        </Col>
+                        <Col md={6}>
+                            {formData.repeatWeekly && (
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Số tuần lặp lại</Form.Label>
+                                    <Form.Control
+                                        type="number"
+                                        name="repeatCount"
+                                        value={formData.repeatCount}
+                                        onChange={handleChange}
+                                        min={1}
+                                        max={12}
+                                    />
+                                </Form.Group>
+                            )}
+                        </Col>
+                    </Row>
                 </Form>
             </Modal.Body>
             <Modal.Footer>
                 <Button variant="secondary" onClick={onHide}>
                     Hủy
                 </Button>
-                <Button variant="primary" onClick={handleSubmit} disabled={loading || doctors.length === 0}>
-                    {loading ? 'Đang xử lý...' : 'Tạo lịch'}
+                <Button variant="primary" onClick={handleSubmit}>
+                    Tạo lịch
                 </Button>
             </Modal.Footer>
         </Modal>
