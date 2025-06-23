@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { scheduleService } from '../../services/schedule.service';
-import { healthRecordService } from '../../services/health-record.service';
+import { getSchedulesByPatientAPI } from '../../services/api.service';
 import { AuthContext } from '../../components/context/AuthContext';
 
 export default function PatientAppointmentHistory() {
@@ -21,9 +20,19 @@ export default function PatientAppointmentHistory() {
         return;
       }
       setLoading(true);
-      const data = await scheduleService.getSchedulesByPatient(user.id);
-      setRecords(data);
-      setLoading(false);
+      try {
+        const response = await getSchedulesByPatientAPI(user.id);
+        if (response && response.data) {
+          setRecords(response.data);
+        } else {
+          setRecords([]);
+        }
+      } catch (error) {
+        console.error('Error fetching patient schedules:', error);
+        setRecords([]);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchAppointments();
   }, [user]);
