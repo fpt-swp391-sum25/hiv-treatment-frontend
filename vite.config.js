@@ -6,6 +6,13 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 3000,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        secure: false
+      }
+    }
   },
   optimizeDeps: {
     exclude: [
@@ -28,5 +35,8 @@ export default defineConfig({
         }
       }
     }
+  },
+  define: {
+    'import.meta.env.VITE_BACKEND_URL': JSON.stringify('')
   }
 })

@@ -125,8 +125,8 @@ const logoutAPI = () => {
 }
 
 const fetchAllDoctorsAPI = () => {
-    // Truy cập trực tiếp vào bảng users với role = 3 (bác sĩ)
-    const URL_BACKEND = '/api/user/role/3';
+    // Sử dụng API fetchAccountByRoleAPI có sẵn
+    const URL_BACKEND = '/api/user/doctor';
     console.log('Calling API to fetch doctors from:', URL_BACKEND);
     return axios.get(URL_BACKEND);
 }
@@ -252,7 +252,19 @@ const deleteRegimenAPI = (id) => {
 // Thêm các API từ schedule.service.js
 const createScheduleAPI = (scheduleData) => {
     const URL_BACKEND = '/api/schedule';
-    return axios.post(URL_BACKEND, scheduleData);
+    console.log('Sending schedule data to API:', scheduleData);
+    
+    // Đảm bảo scheduleData có định dạng đúng
+    const formattedData = {
+        doctor_id: scheduleData.doctor_id,
+        date: scheduleData.date,
+        status: scheduleData.status || 'available',
+        morning: scheduleData.morning !== undefined ? scheduleData.morning : true,
+        afternoon: scheduleData.afternoon !== undefined ? scheduleData.afternoon : true,
+        note: scheduleData.note || ''
+    };
+    
+    return axios.post(URL_BACKEND, formattedData);
 }
 
 const getAllSchedulesAPI = () => {
