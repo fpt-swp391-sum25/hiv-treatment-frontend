@@ -5,7 +5,7 @@ import { fetchUsersAPI,
     fetchScheduleByDoctorIdAPI,
     fetchHealthRecordByScheduleIdAPI 
  } from "../../services/api.service";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate, useOutletContext } from "react-router-dom";
 import dayjs from 'dayjs';
 import 'dayjs/locale/vi'; 
 import viVN from 'antd/es/date-picker/locale/vi_VN'; 
@@ -22,6 +22,8 @@ const PatientList = () => {
     const [selectedDate, setSelectedDate] = useState(null);
     const [filteredData, setFilteredData] = useState([]);
 
+    const { user } = useOutletContext();
+    
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -48,7 +50,7 @@ const PatientList = () => {
    const loadData = async () => {
         try {
             const [scheduleRes, patientRes] = await Promise.all([
-                fetchScheduleByDoctorIdAPI(7),
+                fetchScheduleByDoctorIdAPI(user.id),
                 fetchUsersAPI(),
             ]);
 

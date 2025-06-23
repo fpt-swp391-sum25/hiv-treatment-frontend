@@ -131,13 +131,13 @@ const fetchAllDoctorsAPI = () => {
 
 // Lấy thông tin chi tiết của một bác sĩ
 const fetchDoctorByIdAPI = (doctorId) => {
-    const URL_BACKEND = `/api/doctors/${doctorId}`;
+    const URL_BACKEND = `/api/doctor-profile/doctor-id/${doctorId}`;
     return axios.get(URL_BACKEND);
 }
 
 // Cập nhật thông tin bác sĩ
-const updateDoctorProfileAPI = (doctorId, profileData) => {
-    const URL_BACKEND = `/api/doctors/${doctorId}`;
+const updateDoctorProfileAPI = (id, profileData) => {
+    const URL_BACKEND = `/api/doctor-profile/${id}`;
     return axios.put(URL_BACKEND, profileData);
 }
 
@@ -246,6 +246,11 @@ const deleteRegimenAPI = (id) => {
     const URL_BACKEND = `/api/regimen/${id}`;
     return axios.delete(URL_BACKEND)
 }
+
+const updateUserAPI = (id, updateData) => {
+    const URL_BACKEND = `/api/user/${id}`;
+    return axios.put(URL_BACKEND, updateData)
+}
 export {
     loginAPI,
     registerAPI,
@@ -283,5 +288,6 @@ export {
     fetchAllRegimensAPI,
     createRegimenAPI,
     updateRegimenAPI,
-    deleteRegimenAPI
+    deleteRegimenAPI,
+    updateUserAPI,
 }

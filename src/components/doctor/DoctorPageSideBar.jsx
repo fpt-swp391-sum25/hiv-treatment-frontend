@@ -20,12 +20,13 @@ const items = icons.map(
 const DoctorPageSideBar = () => {
   return (
       <Sider
-        width={15 + 'vw'}
+        width={13 + 'vw'}
         breakpoint="md"
         collapsedWidth="60"
+        style={{background: "white"}}
       >
-        <Menu theme="dark" mode="inline" defaultSelectedKeys={['4']} items={items} 
-          selectedKeys={[location.pathname]}/>
+        <Menu theme="light" mode="inline" defaultSelectedKeys={['4']} items={items} 
+          selectedKeys={[location.pathname]} style={{minHeight: '100vh'}}/>
       </Sider>      
   );
 };
