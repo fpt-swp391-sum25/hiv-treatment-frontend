@@ -37,6 +37,14 @@ const bookingAPI = (values) => {
     return axios.post(URL_BACKEND, data)
 }
 
+const cancelBookingAPI = (scheduleId, patientId) => {
+    const URL_BACKEND = `/api/schedule/${scheduleId}/cancel`
+
+    return axios.delete(URL_BACKEND, {
+        params: { patientId: patientId.toString() },
+    })
+}
+
 const fetchAllScheduleAPI = (doctorId, date) => {
     const URL_BACKEND = '/api/schedule'
     return axios.get(URL_BACKEND, {
@@ -48,6 +56,11 @@ const fetchAllScheduleAPI = (doctorId, date) => {
     })
 }
 
+const fetchScheduleByDateAPI = (date) => {
+    const URL_BACKEND = `/api/schedule/available-slots/${date}`
+    return axios.get(URL_BACKEND)
+}
+
 const registerScheduleAPI = (registerData) => {
     const URL_BACKEND = `/api/schedule/register/schedule-id/${registerData.scheduleId}?patientId=${registerData.patientId}&type=${registerData.type}`
     return axios.put(URL_BACKEND)
@@ -57,6 +70,7 @@ const initiatePaymentAPI = (params) => {
     const URL_BACKEND = '/api/payment'
     return axios.post(URL_BACKEND, params)
 }
+
 
 const createAccountAPI = (username, password, email, role) => {
     const URL_BACKEND = '/api/user/create'
@@ -164,6 +178,14 @@ const fetchHealthRecordByScheduleIdAPI = (scheduleId) => {
     return axios.get(URL_BACKEND)
 }
 
+const createHealthRecordAPI = (scheduleId) => {
+    const URL_BACKEND = '/api/health-record'
+    const data = {
+        scheduleId: scheduleId
+    }
+    return axios.post(URL_BACKEND, data)
+}
+
 const fetchTestResultByHealthRecordIdAPI = (healthRecordId) => {
     const URL_BACKEND = `/api/test-result/health-record-id/${healthRecordId}`
     return axios.get(URL_BACKEND)
@@ -192,17 +214,26 @@ const createTestResultAPI = (type, note, expectedResultTime, healthRecordId) => 
 
 const updateTestResultAPI = (testResultId, type, result, unit, note, expectedResultTime, actualResultTime) => {
     const testResultData = {
-        type, 
-        result, 
-        unit, 
-        note, 
-        expectedResultTime, 
+        type,
+        result,
+        unit,
+        note,
+        expectedResultTime,
         actualResultTime
     }
     const URL_BACKEND = `api/test-result/${testResultId}`
     return axios.put(URL_BACKEND, testResultData)
 }
 
+const fetchUserInfoAPI = (id) => {
+    const URL_BACKEND = `/api/user/userId/${id}`
+    return axios.get(URL_BACKEND)
+}
+
+const updateProfileAPI = (values) => {
+    const URL_BACKEND = `/api/user/${values.id}`
+    return axios.put(URL_BACKEND, values)
+}
 const fetchScheduleByDoctorIdAPI = (doctorId) => {
     const URL_BACKEND = `/api/schedule/doctor-id/${doctorId}`
     return axios.get(URL_BACKEND)
@@ -218,26 +249,26 @@ const fetchAllRegimensAPI = () => {
     return axios.get(URL_BACKEND)
 }
 
-const createRegimenAPI = (components, regimenName, 
+const createRegimenAPI = (components, regimenName,
     description, indications, contraindications) => {
     const createData = {
-        components, 
-        regimenName, 
-        description, 
-        indications, 
+        components,
+        regimenName,
+        description,
+        indications,
         contraindications
     }
     const URL_BACKEND = '/api/regimen';
     return axios.post(URL_BACKEND, createData)
 }
 
-const updateRegimenAPI = (id, components, regimenName, 
+const updateRegimenAPI = (id, components, regimenName,
     description, indications, contraindications) => {
     const createData = {
-        components, 
-        regimenName, 
-        description, 
-        indications, 
+        components,
+        regimenName,
+        description,
+        indications,
         contraindications
     }
     const URL_BACKEND = `/api/regimen/${id}`;
@@ -307,7 +338,7 @@ const deleteScheduleAPI = (scheduleId) => {
 }
 
 const getSchedulesByPatientAPI = (patientId) => {
-    const URL_BACKEND = `/api/schedule/patient/${patientId}`;
+    const URL_BACKEND = `/api/schedule/patient-id/${patientId}`;
     return axios.get(URL_BACKEND);
 }
 
@@ -321,6 +352,7 @@ export {
     loginAPI,
     registerAPI,
     bookingAPI,
+    cancelBookingAPI,
     createAccountAPI,
     fetchAccountByRoleAPI,
     deleteAccountAPI,
@@ -331,18 +363,21 @@ export {
     fetchAllPatientScheduleAPI,
     fetchAvailableSlotAPI,
     fetchAllScheduleAPI,
+    fetchScheduleByDateAPI,
     initiatePaymentAPI,
     registerScheduleAPI,
     handlePaymentCallbackAPI,
     logoutAPI,
-
+    fetchUserInfoAPI,
     fetchAllDoctorsAPI,
     fetchDoctorByIdAPI,
     updateDoctorProfileAPI,
     fetchDoctorStatisticsAPI,
     fetchAllDocumentsAPI,
     fetchUsersAPI,
+    updateProfileAPI,
     fetchHealthRecordByScheduleIdAPI,
+    createHealthRecordAPI,
     fetchTestResultByHealthRecordIdAPI,
     updateHealthRecordAPI,
     deleteTestResultAPI,
@@ -355,8 +390,10 @@ export {
     createRegimenAPI,
     updateRegimenAPI,
     deleteRegimenAPI,
+
     updateUserAPI,
     
+
     // Thêm các API mới
     createScheduleAPI,
     getAllSchedulesAPI,
