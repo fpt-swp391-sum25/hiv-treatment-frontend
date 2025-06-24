@@ -3,7 +3,7 @@ import { Form, Input, Select, DatePicker, Button, Typography, Col, Row, Layout, 
 import { ArrowLeftOutlined, SoundTwoTone } from '@ant-design/icons';
 import moment from 'moment';
 import { useNavigate } from 'react-router-dom';
-import { bookingAPI, fetchAllScheduleAPI, fetchAvailableSlotAPI, fetchDoctorProfileAPI, initiatePaymentAPI, registerScheduleAPI } from '../../services/api.service';
+import { bookingAPI, createHealthRecordAPI, fetchAllScheduleAPI, fetchAvailableSlotAPI, fetchDoctorProfileAPI, fetchScheduleByDateAPI, initiatePaymentAPI, registerScheduleAPI } from '../../services/api.service';
 import { AuthContext } from '../../components/context/AuthContext';
 
 
@@ -18,8 +18,8 @@ const Booking = () => {
     const [availableTimes, setAvailableTimes] = useState(generateTimeSlots());
     const [doctors, setDoctors] = useState([])
     const [availableSlots, setAvailableSlots] = useState([])
+    const [scheduleId, setScheduleId] = useState()
     const [availableSchedules, setAvailableSchedules] = useState([]);
-    const [scheduleId, setScheduleId] = useState(null);
     const [selectedAmount, setSelectedAmount] = useState();
     const [selectedSchedule, setSelectedSchedule] = useState(null);
 
@@ -74,6 +74,18 @@ const Booking = () => {
         }
     }, [slot, type, availableSchedules]);
 
+    const handleDateChange = async (date) => {
+        if (!date) {
+            setAvailableSchedules([]);
+            form.setFieldsValue({ slot: undefined });
+            return;
+        }
+        const response = await fetchScheduleByDateAPI(date.format("YYYY-MM-DD"))
+        if (response.data) {
+            setAvailableSchedules(response.data)
+        }
+    }
+
     const handleSubmit = async (values) => {
         // console.log(values)
 
@@ -97,25 +109,44 @@ const Booking = () => {
 
     const onFinish = async (values) => {
         try {
-            console.log("check available schedule ", availableSchedules)
-            const schedule = availableSchedules.find(s => s.slot === values.slot);
-            console.log("check schedule", selectedAmount)
+            const selectedSchedules = availableSchedules.filter(schedule => schedule.slot === values.slot);
+            if (selectedSchedules.length === 0) {
+                throw new Error('Lịch hẹn không hợp lệ');
+            }
+
+
+            if (values.doctorId) {
+                const selectedSchedule = selectedSchedules.find(schedule => schedule.doctorId === values.doctorId);
+                console.log("check selected schedule", selectedSchedule)
+                if (!selectedSchedule) {
+                    throw new Error('Bác sĩ không có lịch hẹn cho slot này');
+                }
+                setScheduleId(selectedSchedule.id)
+            } else {
+                setScheduleId(selectedSchedules[0].id)
+            }
+
+            const schedule = selectedSchedules.find(s => s.slot === values.slot);
             if (!schedule) {
                 throw new Error('Lịch không khả dụng');
             }
 
+
             const registerResponse = await registerScheduleAPI({
-                scheduleId: schedule.id,
+                scheduleId: scheduleId,
                 patientId: user.id,
                 type: type
             });
-            setScheduleId(registerResponse.id);
+
+            const createHealthRecordResponse = await createHealthRecordAPI(scheduleId)
+
 
             const paymentResponse = await initiatePaymentAPI({
-                scheduleId: schedule.id,
+                scheduleId: scheduleId,
                 amount: selectedAmount,
             });
             window.location.href = paymentResponse.data;
+            // console.log("Check payment", paymentResponse.data)
         } catch (error) {
             message.error(error.message);
         }
@@ -219,9 +250,8 @@ const Booking = () => {
                                     <Form.Item
                                         name="doctor"
                                         label="Bác sĩ"
-                                        rules={[{ required: true, message: 'Vui lòng chọn bác sĩ' }]}
                                     >
-                                        <Select placeholder="Chọn bác sĩ" filterOption={(input, option) =>
+                                        <Select placeholder="Chọn bác sĩ" allowClear filterOption={(input, option) =>
                                             option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
                                         }>
                                             {doctors.map(doctor => (
@@ -239,9 +269,10 @@ const Booking = () => {
                                                 name="date"
                                                 label="Ngày khám"
                                                 rules={[{ required: true, message: 'Vui lòng chọn ngày khám' }]}
+
                                             >
 
-                                                <DatePicker disabledDate={disabledDate} format={dateFormat} style={{ width: '100%' }} />
+                                                <DatePicker disabledDate={disabledDate} format={dateFormat} style={{ width: '100%' }} onChange={handleDateChange} />
                                             </Form.Item>
                                         </Col>
                                         <Col span={12}>
