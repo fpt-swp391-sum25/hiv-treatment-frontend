@@ -344,8 +344,25 @@ const getSchedulesByPatientAPI = (patientId) => {
 
 // Thêm API mới để lấy users theo role
 const fetchUsersByRoleAPI = (role) => {
-    const URL_BACKEND = `/api/user/role/${role}`
-    return axios.get(URL_BACKEND)
+    // Sử dụng endpoint chính xác cho từng loại role
+    let URL_BACKEND = '';
+    
+    if (role === 2) { // Lab technician
+        // Endpoint cho lab technicians
+        URL_BACKEND = '/api/user/lab-technician';
+    } else if (role === 1) { // Doctor
+        URL_BACKEND = '/api/user/doctor';
+    } else if (role === 3) { // Manager
+        URL_BACKEND = '/api/user/manager';
+    } else if (role === 4) { // Patient
+        URL_BACKEND = '/api/user/patient';
+    } else {
+        // Fallback cho các role khác
+        URL_BACKEND = `/api/user/role/${role}`;
+    }
+    
+    console.log(`Fetching users with role ${role} from: ${URL_BACKEND}`);
+    return axios.get(URL_BACKEND);
 }
 
 export {

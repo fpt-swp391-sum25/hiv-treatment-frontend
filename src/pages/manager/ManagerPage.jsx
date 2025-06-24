@@ -1,24 +1,33 @@
 import { Outlet } from 'react-router-dom';
+import { Layout } from 'antd';
 import ManagerSidebar from '../../components/manager/Layout/ManagerSidebar';
 import ManagerHeader from '../../components/manager/Layout/ManagerHeader';
-import '../../styles/manager/ManagerPage.css'; 
+
+const { Content } = Layout;
 
 const ManagerPage = () => {
   return (
-    <div className="manager-layout">
-      <header className="manager-layout-header">
-        <ManagerHeader />
-      </header>
-      
-      <div className="manager-layout-body">
-        <aside className="manager-layout-sidebar">
-          <ManagerSidebar />
-        </aside>
-        <main className="manager-layout-content">
-          <Outlet />
-        </main>
-      </div>
-    </div>
+    <Layout style={{ minHeight: '100vh', background: '#f5f5f5' }}>
+      <ManagerHeader />
+      <Layout>
+        <ManagerSidebar />
+        <Layout style={{ marginLeft: 230, transition: 'all 0.2s' }}>
+          <Content
+            style={{
+              margin: '24px 16px',
+              padding: 24,
+              minHeight: 280,
+              background: '#fff',
+              borderRadius: 8,
+              overflow: 'auto',
+              boxShadow: '0 1px 4px rgba(0,0,0,0.05)'
+            }}
+          >
+            <Outlet />
+          </Content>
+        </Layout>
+      </Layout>
+    </Layout>
   );
 };
 

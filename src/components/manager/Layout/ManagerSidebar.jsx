@@ -1,54 +1,94 @@
 import React from 'react';
-import { Nav } from 'react-bootstrap';
-import { FaChartBar, FaUserMd, FaUsers, FaCalendarAlt, FaFileAlt, FaSignOutAlt } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
-import './ManagerSidebar.css';
+import { Layout, Menu } from 'antd';
+import { 
+  BarChartOutlined, 
+  UserOutlined, 
+  TeamOutlined, 
+  CalendarOutlined, 
+  FileOutlined
+} from '@ant-design/icons';
+import { useNavigate, useLocation } from 'react-router-dom';
+
+const { Sider } = Layout;
 
 const ManagerSidebar = () => {
   const navigate = useNavigate();
-
+  const location = useLocation();
+  
   const menuItems = [
-    { icon: FaChartBar, text: 'Thống kê', path: '/manager/dashboard' },
-    { icon: FaUserMd, text: 'Bác sĩ', path: '/manager/doctors' },
-    { icon: FaUsers, text: 'Nhân viên', path: '/manager/lab-technician' },
-    { icon: FaCalendarAlt, text: 'Quản lí lịch', path: '/manager/schedule' },
-    { icon: FaFileAlt, text: 'Báo cáo', path: '/manager/reports' },
+    {
+      key: '/manager/dashboard',
+      icon: <BarChartOutlined />,
+      label: 'Thống kê',
+    },
+    {
+      key: '/manager/doctors',
+      icon: <UserOutlined />,
+      label: 'Bác sĩ',
+    },
+    {
+      key: '/manager/lab-technician',
+      icon: <TeamOutlined />,
+      label: 'Nhân viên',
+    },
+    {
+      key: '/manager/schedule',
+      icon: <CalendarOutlined />,
+      label: 'Quản lí lịch',
+    },
+    {
+      key: '/manager/reports',
+      icon: <FileOutlined />,
+      label: 'Báo cáo',
+    },
   ];
 
-  const handleLogout = () => {
-    // TODO: Implement logout logic
-    navigate('/login');
+  // Custom styles cho menu items
+  const getMenuItemStyle = (isSelected) => {
+    return {
+      backgroundColor: isSelected ? '#f0f7ff' : 'transparent', // Màu nền nhẹ khi được chọn
+      color: isSelected ? '#2056df' : '#555', // Màu chữ xanh khi được chọn, xám khi không
+      margin: '4px 0',
+      borderRadius: '4px',
+      fontWeight: isSelected ? '500' : 'normal',
+    };
   };
 
   return (
-    <div className="manager-sidebar-container">
-      <div className="sidebar-content">
-        <Nav className="flex-column">
-          <div className="sidebar-menu">
-            {menuItems.map((item, index) => (
-              <Nav.Link 
-                key={index}
-                className="text-white mb-3 d-flex align-items-center sidebar-link"
-                onClick={() => navigate(item.path)}
-              >
-                <item.icon className="me-2" />
-                {item.text}
-              </Nav.Link>
-            ))}
-          </div>
-        </Nav>
+    <Sider
+      width={230}
+      style={{
+        background: '#ffffff', // Đổi từ xanh dương sang trắng
+        height: '100%',
+        position: 'fixed',
+        left: 0,
+        overflow: 'auto',
+        boxShadow: '2px 0 8px rgba(0,0,0,0.06)', // Shadow nhẹ hơn
+        borderRight: '1px solid #f0f0f0', // Thêm viền phải
+      }}
+    >
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '0 8px' }}>
+        <Menu
+          mode="inline"
+          selectedKeys={[location.pathname]}
+          style={{ 
+            background: '#ffffff', // Đổi từ xanh dương sang trắng
+            borderRight: 0,
+            marginTop: '20px',
+          }}
+          items={menuItems.map(item => ({
+            ...item,
+            style: getMenuItemStyle(location.pathname === item.key),
+            icon: React.cloneElement(item.icon, { 
+              style: { 
+                color: location.pathname === item.key ? '#2056df' : '#555' 
+              } 
+            }),
+          }))}
+          onClick={({ key }) => navigate(key)}
+        />
       </div>
-      
-      <div className="logout-container">
-        <button 
-          className="btn btn-danger w-100 d-flex align-items-center justify-content-center"
-          onClick={handleLogout}
-        >
-          <FaSignOutAlt className="me-2" />
-          Đăng xuất
-        </button>
-      </div>
-    </div>
+    </Sider>
   );
 };
 

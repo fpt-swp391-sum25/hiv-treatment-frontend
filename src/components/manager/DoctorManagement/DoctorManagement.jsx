@@ -251,34 +251,34 @@ const DoctorManagement = () => {
             <div className="doctor-filters">
                 <Row gutter={16} align="middle">
                     <Col xs={24} md={8}>
-                        <Select
-                            style={{ width: '100%' }}
+                    <Select
+                        style={{ width: '100%' }}
                             placeholder="Chọn bác sĩ"
                             onChange={(value) => setSelectedDoctorId(value)}
-                            value={selectedDoctorId}
-                        >
-                            <Select.Option value="all">Tất cả bác sĩ</Select.Option>
-                            {doctors.map((doctor) => (
-                                <Select.Option key={doctor.id} value={doctor.id}>
-                                    {doctor.fullName}
-                                </Select.Option>
-                            ))}
-                        </Select>
-                    </Col>
+                        value={selectedDoctorId}
+                    >
+                        <Select.Option value="all">Tất cả bác sĩ</Select.Option>
+                        {doctors.map((doctor) => (
+                            <Select.Option key={doctor.id} value={doctor.id}>
+                                {doctor.fullName}
+                            </Select.Option>
+                        ))}
+                    </Select>
+                </Col>
                     <Col xs={24} md={8}>
-                        <Input
+                    <Input
                             placeholder="Tìm kiếm theo tên"
-                            value={searchText}
+                        value={searchText}
                             onChange={(e) => setSearchText(e.target.value)}
-                            allowClear
-                        />
-                    </Col>
+                        allowClear
+                    />
+                </Col>
                     <Col xs={24} md={8}>
                         <Button type="primary" onClick={loadDoctors} loading={loading}>
                             Làm mới dữ liệu
                         </Button>
                     </Col>
-                </Row>
+            </Row>
             </div>
 
             <Table
@@ -293,20 +293,20 @@ const DoctorManagement = () => {
             />
 
             {selectedDoctor && (
-                <UpdateDoctorModal
-                    visible={isUpdateModalVisible}
-                    doctor={selectedDoctor}
-                    onCancel={() => setIsUpdateModalVisible(false)}
-                    onSuccess={handleUpdateSuccess}
-                />
+                    <UpdateDoctorModal
+                        visible={isUpdateModalVisible}
+                        doctor={selectedDoctor}
+                        onCancel={() => setIsUpdateModalVisible(false)}
+                        onSuccess={handleUpdateSuccess}
+                    />
             )}
 
             {selectedDoctor && (
-                <DoctorProfileDetail
-                    visible={isProfileDetailVisible}
-                    doctor={selectedDoctor}
-                    statistics={doctorStatistics}
-                    loading={statisticsLoading}
+                    <DoctorProfileDetail
+                        visible={isProfileDetailVisible}
+                        doctor={selectedDoctor}
+                        statistics={doctorStatistics}
+                        loading={statisticsLoading}
                     onCancel={() => setIsProfileDetailVisible(false)}
                     onUpdate={() => {
                         setIsProfileDetailVisible(false);

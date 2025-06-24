@@ -72,17 +72,17 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
             // Debug: Ghi log từng sự kiện
             console.log('Processing event:', event);
             
-            return {
-                id: event.id,
+        return {
+            id: event.id,
                 title: event.title || 'Không xác định',
-                start: event.date,
-                color: getStatusColor(event.status),
-                extendedProps: {
-                    ...event
-                },
-                allDay: true
-            };
-        });
+            start: event.date,
+            color: getStatusColor(event.status),
+            extendedProps: {
+                ...event
+            },
+            allDay: true
+        };
+    });
     }, [validEvents, hasEvents]);
 
     // Render content cho ngày quá khứ và Chủ nhật
@@ -282,23 +282,23 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
                 </div>
             </div>
 
-            <FullCalendar
+                <FullCalendar
                 key={calendarKey}
-                ref={calendarRef}
-                plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, bootstrap5Plugin]}
-                initialView="dayGridMonth"
+                    ref={calendarRef}
+                    plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, bootstrap5Plugin]}
+                    initialView="dayGridMonth"
                 headerToolbar={false}
                 locale={viLocale}
-                selectable={true}
-                selectMirror={true}
-                dayMaxEvents={true}
-                weekends={true}
-                select={handleDateSelect}
-                eventClick={handleEventClick}
-                eventContent={eventContent}
+                    selectable={true}
+                    selectMirror={true}
+                    dayMaxEvents={true}
+                    weekends={true}
+                    select={handleDateSelect}
+                    eventClick={handleEventClick}
+                    eventContent={eventContent}
                 dayCellDidMount={dayCellDidMount}
-                height="auto"
-                themeSystem="bootstrap5"
+                    height="auto"
+                    themeSystem="bootstrap5"
                 firstDay={1}
                 allDaySlot={false}
                 slotMinTime="08:00:00"
@@ -313,16 +313,14 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
                     hour12: false
                 }}
                 dayHeaderFormat={{
-                    weekday: 'long',
-                    day: 'numeric',
-                    month: 'numeric'
+                    weekday: 'long'
                 }}
                 eventDisplay="block"
                 fixedWeekCount={false}
                 showNonCurrentDates={true}
                 handleWindowResize={true}
                 forceEventDuration={true}
-            />
+                />
         </div>
     );
 };
