@@ -52,6 +52,7 @@ import PatientDetail from './pages/lab-technician/PatientDetailPage'
 // Import for patient pages
 import ProfileDetail from './pages/patient/ProfileDetail';
 import PaymentCallback from './pages/patient/PaymentCallback';
+import AppointmentResult from './pages/patient/AppointmentResult';
 import PatientAppointmentHistory from './pages/patient/PatientAppointmentHistory';
 
 const router = createBrowserRouter([
@@ -94,6 +95,15 @@ const router = createBrowserRouter([
         errorElement: <Errors />,
       },
       {
+        path: '/appointment-result/:scheduleId',
+        element: (
+          <PrivateRoute>
+            <AppointmentResult />
+          </PrivateRoute>
+        ),
+        errorElement: <Errors />,
+      },
+      {
         path: '/appointment-history',
         element: (
           <PrivateRoute>
@@ -104,7 +114,34 @@ const router = createBrowserRouter([
       },
     ]
   },
-{
+  {
+    path: '/doctor',
+    element: <DoctorHome />,
+    errorElement: <Errors />,
+    children: [
+      {
+        path: '/doctor/profile',
+        element: <DoctorProfile />,
+        errorElement: <Errors />,
+      },
+      {
+        path: '/doctor/schedule',
+        element: <DoctorSchedule />,
+        errorElement: <Errors />,
+      },
+      {
+        path: '/doctor/patient-list',
+        element: <PatientList />,
+        errorElement: <Errors />,
+      },
+      {
+        path: '/doctor/patient-list/:id',
+        element: <ViewOnlyPatientDetail />,
+        errorElement: <Errors />
+      }
+    ],
+  },
+  {
     path: '/doctors',
     element: <DoctorProfileList />,
     errorElement: <Errors />,
@@ -124,7 +161,7 @@ const router = createBrowserRouter([
     element: <Register />,
     errorElement: <Errors />,
   },
-  
+
   // Path for doctor pages
   {
     path: '/doctor',
@@ -132,8 +169,8 @@ const router = createBrowserRouter([
     errorElement: <Errors />,
     children: [
       {
-        index: true, 
-        element: <DoctorSchedule />, 
+        index: true,
+        element: <DoctorSchedule />,
         errorElement: <Errors />,
       },
       {
@@ -152,7 +189,7 @@ const router = createBrowserRouter([
         errorElement: <Errors />,
       },
       {
-        path: 'patients/:id', 
+        path: 'patients/:id',
         element: <ViewOnlyPatientDetail />,
         errorElement: <Errors />
       },
@@ -163,7 +200,7 @@ const router = createBrowserRouter([
       },
     ]
   },
-  
+
   // Path for admin pages
   {
     path: '/admin',
@@ -195,10 +232,8 @@ const router = createBrowserRouter([
         errorElement: <Errors />,
       }
     ]
-  }, 
-
-  // Path for manager pages 
-  {    
+  },
+  {
     path: '/manager',
     element: <ManagerPage />,
     children: [
@@ -235,7 +270,7 @@ const router = createBrowserRouter([
     element: <LabTechnicianHomePage />,
     errorElement: <Errors />,
   },
-  
+
   {
     path: '/lab-technician/patient-detail/:id',
     element: <PatientDetail />,
