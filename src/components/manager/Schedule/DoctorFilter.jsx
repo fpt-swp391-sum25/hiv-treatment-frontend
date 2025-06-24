@@ -16,39 +16,52 @@ const DoctorFilter = ({ selectedDoctor, onDoctorSelect }) => {
     setLoading(true);
     setError(null);
     try {
-      console.log('Fetching doctors from API...');
+      console.log('DoctorFilter: Fetching doctors from API...');
       const response = await fetchAllDoctorsAPI();
       
-      console.log('API response for doctors:', response);
+      console.log('DoctorFilter: API response for doctors:', response);
       
-      // Kiểm tra cả response.data và response trực tiếp (tùy thuộc vào cấu trúc API)
-      const doctorsData = response.data || response || [];
+      // Kiểm tra cấu trúc response để xác định nơi chứa dữ liệu
+      let doctorsData = [];
+      
+      if (response && response.data) {
+        doctorsData = response.data;
+      } else if (response && Array.isArray(response)) {
+        doctorsData = response;
+      } else if (response) {
+        doctorsData = response;
+      }
+      
+      // Đảm bảo doctorsData là một mảng
       const doctorsList = Array.isArray(doctorsData) ? doctorsData : [];
       
-      console.log('Doctors data after processing:', doctorsList);
+      console.log('DoctorFilter: Doctors data after processing:', doctorsList);
       
       if (doctorsList.length > 0) {
         // Chuyển đổi dữ liệu từ API để phù hợp với cấu trúc component
         const formattedDoctors = doctorsList.map(doctor => {
           // Log để kiểm tra cấu trúc dữ liệu
-          console.log('Doctor data structure:', doctor);
+          console.log('DoctorFilter: Doctor data structure:', doctor);
+          
+          // Xử lý các trường hợp khác nhau của cấu trúc dữ liệu
+          const id = doctor.id || doctor.userId || doctor.user_id;
+          const name = doctor.full_name || doctor.fullName || doctor.name || doctor.username || `BS. ${id}`;
           
           return {
-            id: doctor.id,
-            // Dựa vào hình ảnh bảng users, trường tên là full_name
-            name: doctor.full_name || `BS. ${doctor.username || doctor.id}`
+            id: id,
+            name: name
           };
         });
         
-        console.log('Formatted doctors:', formattedDoctors);
+        console.log('DoctorFilter: Formatted doctors:', formattedDoctors);
         setDoctors(formattedDoctors);
       } else {
-        console.log('No doctor data received');
+        console.log('DoctorFilter: No doctor data received');
         setDoctors([]);
         setError('Không có dữ liệu bác sĩ');
       }
     } catch (error) {
-      console.error('Error fetching doctors:', error);
+      console.error('DoctorFilter: Error fetching doctors:', error);
       setDoctors([]);
       setError('Không thể kết nối đến server');
     } finally {
@@ -61,9 +74,24 @@ const DoctorFilter = ({ selectedDoctor, onDoctorSelect }) => {
     onDoctorSelect(value ? value : null);
   };
 
+  const handleRefreshDoctors = () => {
+    fetchDoctors();
+  };
+
   return (
     <Form.Group className="filter-group">
-      <Form.Label>Bác sĩ:</Form.Label>
+      <Form.Label className="d-flex justify-content-between align-items-center">
+        <span>Bác sĩ:</span>
+        <button 
+          type="button" 
+          className="btn btn-sm btn-outline-secondary" 
+          onClick={handleRefreshDoctors}
+          disabled={loading}
+        >
+          Làm mới
+        </button>
+      </Form.Label>
+      
       {loading ? (
         <div className="d-flex align-items-center">
           <Spinner animation="border" size="sm" className="me-2" />

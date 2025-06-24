@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Form, Card, Row, Col, Tag, Button, Layout, notification, Modal, Input, Popconfirm, Space } from 'antd';
+import { Form, Row, Col, Tag, Button, notification, Modal, Input } from 'antd';
 import { fetchRegimensByDoctorIdAPI, createRegimenAPI, deleteRegimenAPI } from '../../services/api.service'; 
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import RegimenCard from '../../components/doctor/RegimenCard';
 import UpdateRegimenModal from '../../components/doctor/UpdateRegimenModal';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 
 const RegimenList = () => {
   const [regimens, setRegimens] = useState([]);
@@ -16,6 +16,10 @@ const RegimenList = () => {
   const [dataUpdate, setDataUpdate] = useState('')
   const [isCreateRegimenModalOpen, setIsCreateRegimenModalOpen ] = useState(false)
   const [isUpdateRegimenModalOpen, setIsUpdateRegimenModalOpen ] = useState(false)
+  const [searchText, setSearchText] = useState('');
+  const [filteredRegimens, setFilteredRegimens] = useState([]);
+
+  const { user } = useOutletContext();
 
   const navigate = useNavigate()
 
@@ -25,8 +29,9 @@ const RegimenList = () => {
 
   const loadRegimens = async () => {
     try {
-      const response = await fetchRegimensByDoctorIdAPI(7); 
+      const response = await fetchRegimensByDoctorIdAPI(user.id);
       setRegimens(response.data);
+      setFilteredRegimens(response.data); 
     } catch (error) {
       console.error('Failed to load regimens:', error);
     }
@@ -77,10 +82,23 @@ const RegimenList = () => {
     setIsCreateRegimenModalOpen(false)
   }
 
+  const handleSearch = (value) => {
+    setSearchText(value);
+    const lowerCaseValue = value.toLowerCase();
+
+    const filtered = regimens.filter((item) =>
+        item.regimenName.toLowerCase().includes(lowerCaseValue) ||
+        item.components.toLowerCase().includes(lowerCaseValue) ||
+        item.indications.toLowerCase().includes(lowerCaseValue) ||
+        item.contraindications.toLowerCase().includes(lowerCaseValue) ||
+        item.description.toLowerCase().includes(lowerCaseValue)
+      );
+
+    setFilteredRegimens(filtered);
+  };
+
   return (
     <div style={{ padding: '10px' }}>
-
-      {/* Mini header */}
       <Row justify="space-between" align="middle">
         <Col style={{margin: '0 0 0 1vw'}}>
           <h2>Danh sách phác đồ</h2>
@@ -92,9 +110,20 @@ const RegimenList = () => {
         </Col>
       </Row>
       
+      {/* Search regimen  */}
+      <Row justify="space-between" align="middle" style={{ marginBottom: 16}}>
+        <Input
+          allowClear
+          placeholder="Tìm kiếm phác đồ"
+          value={searchText}
+          onChange={(e) => handleSearch(e.target.value)}
+          style={{ width: '20vw', marginRight: '1vw' }}
+        />
+      </Row>
+
       {/* Display regimen */}
       <Row gutter={[24, 24]}>
-        {regimens.map((regimen) => (
+        {filteredRegimens.map((regimen) => (
           <Col key={regimen.id} xs={24} sm={12} md={8}>
             <RegimenCard
               regimen={regimen}
