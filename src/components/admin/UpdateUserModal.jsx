@@ -8,7 +8,8 @@ const UpdateUserModal = (props) => {
     const [email, setEmail] = useState("")
     const [role, setRole] = useState("")
 
-    const { isUpdateModalOpen, setIsUpdateModalOpen, dataUpdate, setDataUpdate, loadAccounts } = props
+    const { isUpdateModalOpen, setIsUpdateModalOpen, dataUpdate, 
+        setDataUpdate, loadAccounts } = props
 
     useEffect(() => {
         if (dataUpdate) {

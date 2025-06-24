@@ -10,7 +10,7 @@ const AccountLabTechnicians= () => {
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
     const [email, setEmail] = useState("")
-    const [role, setRole] = useState("STAFF")
+    const [role, setRole] = useState("LAB_TECHNICIAN")
     const [dataUpdate, setDataUpdate] = useState({})
 
     const [isOpenModal, setIsOpenModal] = useState(false)
@@ -64,7 +64,7 @@ const AccountLabTechnicians= () => {
         setUsername("")
         setEmail("")
         setPassword("")
-        setRole("STAFF")
+        setRole("LAB_TECHNICIAN")
     }
 
     const columns = [

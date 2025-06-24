@@ -15,9 +15,9 @@ export const ScheduleStatus = {
     NO_SHOW: 'NO_SHOW',         // Không đến khám
     
     // Trạng thái làm việc của bác sĩ
-    AVAILABLE: 'available',
-    ON_LEAVE: 'on_leave',
-    UNAVAILABLE: 'UNAVAILABLE'   // Không làm việc
+    AVAILABLE: 'available',     // Làm việc
+    ON_LEAVE: 'on_leave',       // Nghỉ phép
+    UNAVAILABLE: 'UNAVAILABLE'  // Không làm việc
 };
 
 // Time slots for schedule
@@ -32,10 +32,4 @@ export const SlotTimes = {
         startTime: '13:00',
         endTime: '16:00'
     }
-};
-
-// Staff role types for scheduling
-export const StaffRole = {
-    DOCTOR: 'DOCTOR',           // Bác sĩ
-    NURSE: 'NURSE'              // Y tá
 };

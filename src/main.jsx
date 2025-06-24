@@ -4,7 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 import App from './pages/client/App';
 
-// Import for all pages
+// Import for client pages
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AuthWrapper } from './components/context/AuthContext';
 import PrivateRoute from './pages/auth/PrivateRoute';
@@ -13,7 +13,7 @@ import PrivateRoute from './pages/auth/PrivateRoute';
 import NotFound from './pages/error/NotFound';
 import Errors from './pages/error/DataError'
 
-// Import for client page
+// Import for home pages
 import Home from './pages/client/Home';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
@@ -21,7 +21,7 @@ import BookingCheckupForm from './pages/patient/Booking';
 import DocumentList from './pages/client/DocumentList';
 import DoctorProfileList from './pages/client/DoctorProfileList';
 
-// Import for admin page
+// Import for admin pages
 import AdminPage from './pages/admin/AdminPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AccountManagers from './pages/admin/AccountManagers';
@@ -29,33 +29,35 @@ import AccountDoctors from './pages/admin/AccountDoctors';
 import AccountLabTechnicians from './pages/admin/AccountLabTechnicians';
 import AccountPatients from './pages/admin/AccountPatients';
 
-// Import for manager page
+// Import for manager pages
 import ManagerPage from './pages/manager/ManagerPage';
 import ManagerDashboard from './components/manager/Dashboard';
 import ManagerSchedule from './components/manager/Schedule/ManagerSchedule';
 import DoctorManagement from './components/manager/DoctorManagement/DoctorManagement';
-import StaffManagement from './components/manager/StaffManagement/StaffManagement';
+import LabTechnicianManagement from './components/manager/LabTechnicianManagement/LabTechnicianManagement';
 import Reports from './components/manager/Reports/Reports';
 
-// Import for doctor page
-import DoctorHomePage from './pages/doctor/DoctorHomePage';
+// Import for doctor pages
+import DoctorHome from './pages/doctor/DoctorHome';
 import DoctorProfile from './pages/doctor/DoctorProfile';
 import DoctorSchedule from './pages/doctor/DoctorSchedule';
-import ViewOnlyPatientDetail from './pages/doctor/ViewOnlyPatientDetail';
+import ViewOnlyPatientDetail from './components/doctor/ViewOnlyPatientDetail';
 import PatientList from './pages/doctor/PatientList';
+import RegimenList from './pages/doctor/RegimenList';
+import UpdateRegimenModal from './pages/doctor/RegimenList';
+// Import for lab technician pages
+import LabTechnicianHomePage from './pages/lab-technician/LabTechnicianHomePage'
+import PatientDetail from './pages/lab-technician/PatientDetailPage'
 
-// Import for staff page
-import StaffHomePage from './pages/staff/StaffHomePage'
-import PatientDetail from './pages/staff/PatientDetailPage'
-
-
-// Import for patient page
+// Import for patient pages
 import ProfileDetail from './pages/patient/ProfileDetail';
 import PaymentCallback from './pages/patient/PaymentCallback';
 import AppointmentResult from './pages/patient/AppointmentResult';
+import PatientAppointmentHistory from './pages/patient/PatientAppointmentHistory';
 
 const router = createBrowserRouter([
   {
+    // Path for home pages
     path: '/',
     element: <App />,
     errorElement: <NotFound />,
@@ -101,11 +103,20 @@ const router = createBrowserRouter([
         ),
         errorElement: <Errors />,
       },
+      {
+        path: '/appointment-history',
+        element: (
+          <PrivateRoute>
+            <PatientAppointmentHistory />
+          </PrivateRoute>
+        ),
+        errorElement: <Errors />,
+      },
     ]
   },
   {
     path: '/doctor',
-    element: <DoctorHomePage />,
+    element: <DoctorHome />,
     errorElement: <Errors />,
     children: [
       {
@@ -150,6 +161,47 @@ const router = createBrowserRouter([
     element: <Register />,
     errorElement: <Errors />,
   },
+
+  // Path for doctor pages
+  {
+    path: '/doctor',
+    element: <DoctorHome />,
+    errorElement: <Errors />,
+    children: [
+      {
+        index: true,
+        element: <DoctorSchedule />,
+        errorElement: <Errors />,
+      },
+      {
+        path: 'profile',
+        element: <DoctorProfile />,
+        errorElement: <Errors />,
+      },
+      {
+        path: 'schedule',
+        element: <DoctorSchedule />,
+        errorElement: <Errors />,
+      },
+      {
+        path: 'patients',
+        element: <PatientList />,
+        errorElement: <Errors />,
+      },
+      {
+        path: 'patients/:id',
+        element: <ViewOnlyPatientDetail />,
+        errorElement: <Errors />
+      },
+      {
+        path: 'regimens',
+        element: <RegimenList />,
+        errorElement: <Errors />,
+      },
+    ]
+  },
+
+  // Path for admin pages
   {
     path: '/admin',
     element: <AdminPage />,
@@ -170,7 +222,7 @@ const router = createBrowserRouter([
         errorElement: <Errors />,
       },
       {
-        path: '/admin/staff',
+        path: '/admin/lab-technician',
         element: <AccountLabTechnicians />,
         errorElement: <Errors />,
       },
@@ -199,8 +251,8 @@ const router = createBrowserRouter([
         errorElement: <Errors />,
       },
       {
-        path: 'staff',
-        element: <StaffManagement />,
+        path: 'lab-technician',
+        element: <LabTechnicianManagement />,
         errorElement: <Errors />,
       },
       {
@@ -212,14 +264,15 @@ const router = createBrowserRouter([
     errorElement: <Errors />,
   },
 
+  // Path for lab technician pages
   {
-    path: '/staff',
-    element: <StaffHomePage />,
+    path: '/lab-technician',
+    element: <LabTechnicianHomePage />,
     errorElement: <Errors />,
   },
 
   {
-    path: '/staff/patient-detail/:id',
+    path: '/lab-technician/patient-detail/:id',
     element: <PatientDetail />,
     errorElement: <Errors />,
   }

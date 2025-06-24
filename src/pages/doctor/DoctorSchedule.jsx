@@ -1,379 +1,154 @@
-import { useState, useEffect } from 'react';
-import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
-import format from 'date-fns/format';
-import parse from 'date-fns/parse';
-import startOfWeek from 'date-fns/startOfWeek';
-import getDay from 'date-fns/getDay';
-import vi from 'date-fns/locale/vi';
-import { Card, Row, Col, Badge, Form, InputGroup, Button } from 'react-bootstrap';
-import { motion, AnimatePresence } from 'framer-motion';
-import 'react-big-calendar/lib/css/react-big-calendar.css';
+import React, { useEffect, useState } from 'react';
+import { Select, Card } from 'antd';
+import dayjs from 'dayjs';
+import isoWeek from 'dayjs/plugin/isoWeek';
 import '../../styles/doctor/Schedule.css';
+import { fetchScheduleByDoctorIdAPI } from '../../services/api.service';
 
-const locales = {
-  'vi': vi,
-};
+dayjs.extend(isoWeek);
 
-const localizer = dateFnsLocalizer({
-  format,
-  parse,
-  startOfWeek,
-  getDay,
-  locales,
-});
+const { Option } = Select;
 
-// Dữ liệu giả cho lịch làm việc
-const mockAppointments = [
-  {
-    id: 1,
-    title: 'Nguyễn Văn X',
-    start: new Date(2023, 12, 15, 9, 0),
-    end: new Date(2023, 10, 15, 10, 0),
-    status: 'CONFIRMED',
-    patientInfo: 'Nam, 35 tuổi, Điều trị theo dõi HIV giai đoạn 2'
-  },
-  {
-    id: 2,
-    title: 'Trần Thị Y',
-    start: new Date(2023, 10, 15, 11, 0),
-    end: new Date(2023, 10, 15, 12, 0),
-    status: 'PENDING',
-    patientInfo: 'Nữ, 28 tuổi, Tư vấn điều trị dự phòng'
-  },
-  {
-    id: 3,
-    title: 'Lê Văn Z',
-    start: new Date(2023, 10, 16, 14, 0),
-    end: new Date(2023, 10, 16, 15, 0),
-    status: 'CANCELLED',
-    patientInfo: 'Nam, 42 tuổi, Khám định kỳ'
-  },
-  {
-    id: 4,
-    title: 'Phạm Thị A',
-    start: new Date(2023, 10, 17, 10, 0),
-    end: new Date(2023, 10, 17, 11, 0),
-    status: 'CONFIRMED',
-    patientInfo: 'Nữ, 32 tuổi, Tư vấn sức khỏe'
-  },
-  {
-    id: 5,
-    title: 'Hoàng Văn B',
-    start: new Date(2023, 10, 18, 9, 0),
-    end: new Date(2023, 10, 18, 10, 0),
-    status: 'CONFIRMED',
-    patientInfo: 'Nam, 45 tuổi, Điều trị theo dõi'
-  }
+const daysOfWeek = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ Nhật'];
+const timeSlots = [
+  '07:00', '08:00', '09:00', '10:00', '11:00',
+  '13:00', '14:00', '15:00', '16:00', '17:00',
 ];
 
-// Cập nhật ngày giờ của các cuộc hẹn để luôn hiển thị trong tuần hiện tại
-const updateAppointmentDates = (appointments) => {
-  const today = new Date();
-  const dayOfWeek = today.getDay(); // 0 = Chủ Nhật, 1-6 = Thứ 2 - Thứ 7
-  const mondayThisWeek = new Date(today);
-  mondayThisWeek.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
-
-  return appointments.map((apt, index) => {
-    const newStart = new Date(apt.start);
-    const newEnd = new Date(apt.end);
-
-    // Phân bố các cuộc hẹn trong tuần hiện tại
-    const daysToAdd = index % 5; // 0-4 tương ứng với Thứ 2 - Thứ 6
-
-    newStart.setFullYear(today.getFullYear());
-    newStart.setMonth(today.getMonth());
-    newStart.setDate(mondayThisWeek.getDate() + daysToAdd);
-
-    newEnd.setFullYear(today.getFullYear());
-    newEnd.setMonth(today.getMonth());
-    newEnd.setDate(mondayThisWeek.getDate() + daysToAdd);
-
-    return {
-      ...apt,
-      start: newStart,
-      end: newEnd
-    };
-  });
+const getDayIndex = (dateStr) => {
+  const date = new Date(dateStr);
+  const day = date.getDay();
+  return day === 0 ? 6 : day - 1;
 };
 
-const DoctorSchedule = ({ doctorId }) => {
-  const [appointments, setAppointments] = useState([]);
-  const [filteredAppointments, setFilteredAppointments] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [selectedAppointment, setSelectedAppointment] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('ALL');
+const ScheduleCalendar = () => {
+  const today = dayjs();
+  const [schedule, setSchedule] = useState([]);
+
+  const [selectedYear, setSelectedYear] = useState(today.year());
+  const [selectedMonth, setSelectedMonth] = useState(today.month());
+  const [selectedWeek, setSelectedWeek] = useState(today.isoWeek());
 
   useEffect(() => {
-    fetchAppointments();
-  }, [doctorId]);
+    loadData();
+  }, []);
 
-  useEffect(() => {
-    filterAppointments();
-  }, [appointments, searchTerm, statusFilter]);
-
-  const fetchAppointments = async () => {
+  const loadData = async () => {
     try {
-      setLoading(true);
-
-      // Giả lập API call với dữ liệu mẫu
-      setTimeout(() => {
-        const updatedAppointments = updateAppointmentDates(mockAppointments);
-        setAppointments(updatedAppointments);
-        setFilteredAppointments(updatedAppointments);
-        setLoading(false);
-      }, 800);
-
-      // TODO: Khi API thực sự sẵn sàng, bỏ comment phần này
-      /*
-      const response = await fetch(`/api/appointments/doctor/${doctorId}`);
-      const data = await response.json();
-      
-      const formattedAppointments = data.map(apt => ({
-        id: apt.id,
-        title: apt.patientName,
-        start: new Date(apt.startTime),
-        end: new Date(apt.endTime),
-        status: apt.status,
-        patientInfo: apt.patientInfo
-      }));
-      
-      setAppointments(formattedAppointments);
-      setFilteredAppointments(formattedAppointments);
-      */
+      const response = await fetchScheduleByDoctorIdAPI(7);
+      setSchedule(response.data);
     } catch (error) {
-      setError('Failed to fetch appointments');
-    } finally {
-      setLoading(false);
+      console.error(error);
     }
   };
 
-  const filterAppointments = () => {
-    let filtered = [...appointments];
-
-    // Apply search filter
-    if (searchTerm) {
-      filtered = filtered.filter(apt =>
-        apt.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        apt.patientInfo?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+  const getWeeksInMonth = (year, month) => {
+    const start = dayjs().year(year).month(month).startOf('month').startOf('isoWeek');
+    const end = dayjs().year(year).month(month).endOf('month').endOf('isoWeek');
+    const weeks = [];
+    let current = start;
+    while (current.isBefore(end)) {
+      weeks.push(current.isoWeek());
+      current = current.add(1, 'week');
     }
-
-    // Apply status filter
-    if (statusFilter !== 'ALL') {
-      filtered = filtered.filter(apt => apt.status === statusFilter);
-    }
-
-    setFilteredAppointments(filtered);
+    return [...new Set(weeks)];
   };
 
-  const handleSelectEvent = (event) => {
-    setSelectedAppointment(event);
-  };
+  const weekStart = dayjs().year(selectedYear).isoWeek(selectedWeek).startOf('isoWeek');
+  const weekEnd = weekStart.add(6, 'day');
 
-  const eventStyleGetter = (event) => {
-    let style = {
-      backgroundColor: '#3498db',
-      borderRadius: '5px',
-      opacity: 0.8,
-      color: 'white',
-      border: '0px',
-      display: 'block'
-    };
+  const calendar = Array(timeSlots.length).fill(null).map(() =>
+    Array(7).fill(null).map(() => [])
+  );
 
-    switch (event.status) {
-      case 'CONFIRMED':
-        style.backgroundColor = '#2ecc71';
-        break;
-      case 'PENDING':
-        style.backgroundColor = '#f1c40f';
-        break;
-      case 'CANCELLED':
-        style.backgroundColor = '#e74c3c';
-        break;
-      default:
-        break;
+  schedule.forEach((item) => {
+    const itemDate = dayjs(item.date);
+    if (itemDate.isAfter(weekStart.subtract(1, 'day')) && itemDate.isBefore(weekEnd.add(1, 'day'))) {
+      const time = item.slot.substring(0, 5);
+      const row = timeSlots.findIndex((t) => t === time);
+      const col = getDayIndex(item.date);
+      if (row !== -1 && col !== -1) {
+        calendar[row][col].push(item);
+      }
     }
-
-    return {
-      style
-    };
-  };
+  });
 
   return (
-    <div className="schedule-container">
-      <Row className="mb-3">
-        <Col md={8}>
-          <InputGroup>
-            <Form.Control
-              placeholder="Tìm kiếm theo tên bệnh nhân..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <Form.Select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-            >
-              <option value="ALL">Tất cả trạng thái</option>
-              <option value="CONFIRMED">Đã xác nhận</option>
-              <option value="PENDING">Đang chờ</option>
-              <option value="CANCELLED">Đã hủy</option>
-            </Form.Select>
-            <Button
-              variant="outline-secondary"
-              onClick={() => {
-                setSearchTerm('');
-                setStatusFilter('ALL');
-              }}
-            >
-              Đặt lại
-            </Button>
-          </InputGroup>
-        </Col>
-      </Row>
-      <Row>
-        <Col md={8}>
-          <AnimatePresence>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Card className="calendar-card">
-                <Card.Body>
-                  {loading ? (
-                    <div className="loading-spinner">
-                      <div className="spinner-border text-primary" role="status">
-                        <span className="visually-hidden">Loading...</span>
-                      </div>
-                    </div>
-                  ) : error ? (
-                    <div className="error-message">
-                      <i className="fas fa-exclamation-circle"></i>
-                      {error}
-                    </div>
-                  ) : (
-                    <Calendar
-                      localizer={localizer}
-                      events={filteredAppointments}
-                      startAccessor="start"
-                      endAccessor="end"
-                      style={{ height: 500 }}
-                      eventPropGetter={eventStyleGetter}
-                      onSelectEvent={handleSelectEvent}
-                      views={['month', 'week', 'day']}
-                      messages={{
-                        next: "Tiếp",
-                        previous: "Trước",
-                        today: "Hôm nay",
-                        month: "Tháng",
-                        week: "Tuần",
-                        day: "Ngày"
-                      }}
-                    />
-                  )}
-                </Card.Body>
-              </Card>
-            </motion.div>
-          </AnimatePresence>
-        </Col>
-        <Col md={4}>
-          <AnimatePresence>
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Card className="appointment-details-card">
-                <Card.Body>
-                  <h4 className="section-title">Chi tiết cuộc hẹn</h4>
-                  {selectedAppointment ? (
-                    <div className="appointment-details">
-                      <div className="detail-item">
-                        <span className="detail-label">Bệnh nhân:</span>
-                        <span className="detail-value">{selectedAppointment.title}</span>
-                      </div>
-                      <div className="detail-item">
-                        <span className="detail-label">Thời gian:</span>
-                        <span className="detail-value">
-                          {format(selectedAppointment.start, 'HH:mm - dd/MM/yyyy')}
-                        </span>
-                      </div>
-                      <div className="detail-item">
-                        <span className="detail-label">Trạng thái:</span>
-                        <Badge
-                          bg={
-                            selectedAppointment.status === 'CONFIRMED' ? 'success' :
-                              selectedAppointment.status === 'PENDING' ? 'warning' :
-                                'danger'
-                          }
-                        >
-                          {selectedAppointment.status}
-                        </Badge>
-                      </div>
-                      {selectedAppointment.patientInfo && (
-                        <div className="patient-info mt-3">
-                          <h5>Thông tin bệnh nhân</h5>
-                          <p>{selectedAppointment.patientInfo}</p>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <p className="text-muted">Chọn một cuộc hẹn để xem chi tiết</p>
-                  )}
-                </Card.Body>
-              </Card>
-            </motion.div>
-          </AnimatePresence>
-          <AnimatePresence>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Card className="stats-card mt-3">
-                <Card.Body>
-                  <h4 className="section-title">Thống kê hôm nay</h4>
-                  <div className="stats-grid">
-                    <div className="stat-item">
-                      <span className="stat-label">Tổng cuộc hẹn</span>
-                      <span className="stat-value">
-                        {appointments.filter(apt =>
-                          format(apt.start, 'dd/MM/yyyy') === format(new Date(), 'dd/MM/yyyy')
-                        ).length}
-                      </span>
-                    </div>
-                    <div className="stat-item">
-                      <span className="stat-label">Đã xác nhận</span>
-                      <span className="stat-value confirmed">
-                        {appointments.filter(apt =>
-                          format(apt.start, 'dd/MM/yyyy') === format(new Date(), 'dd/MM/yyyy') &&
-                          apt.status === 'CONFIRMED'
-                        ).length}
-                      </span>
-                    </div>
-                    <div className="stat-item">
-                      <span className="stat-label">Đang chờ</span>
-                      <span className="stat-value pending">
-                        {appointments.filter(apt =>
-                          format(apt.start, 'dd/MM/yyyy') === format(new Date(), 'dd/MM/yyyy') &&
-                          apt.status === 'PENDING'
-                        ).length}
-                      </span>
-                    </div>
-                  </div>
-                </Card.Body>
-              </Card>
-            </motion.div>
-          </AnimatePresence>
-        </Col>
-      </Row>
+    <div className="calendar-wrapper">
+      <div className="controls" style={{ marginBottom: 16, display: 'flex', gap: 16 }}>
+        <Select
+          value={selectedYear}
+          onChange={setSelectedYear}
+          style={{ width: 120 }}
+        >
+          {[2025, 2026, 2027, 2028, 2029, 2030].map((year) => (
+            <Option key={year} value={year}>{year}</Option>
+          ))}
+        </Select>
+
+        <Select
+          value={selectedMonth}
+          onChange={setSelectedMonth}
+          style={{ width: 120 }}
+        >
+          {Array.from({ length: 12 }, (_, i) => (
+            <Option key={i} value={i}>{`Tháng ${i + 1}`}</Option>
+          ))}
+        </Select>
+
+        <Select
+          value={selectedWeek}
+          onChange={setSelectedWeek}
+          style={{ width: 160 }}
+        >
+          {getWeeksInMonth(selectedYear, selectedMonth).map((weekNum) => {
+            const start = dayjs().year(selectedYear).isoWeek(weekNum).startOf('isoWeek');
+            const end = start.add(6, 'day');
+            return (
+              <Option key={weekNum} value={weekNum}>
+                {`${start.format('DD/MM')} - ${end.format('DD/MM')}`}
+              </Option>
+            );
+          })}
+        </Select>
+      </div>
+
+      <div className="week-range" style={{ marginBottom: 12 }}>
+        Tuần: {weekStart.format('DD/MM/YYYY')} - {weekEnd.format('DD/MM/YYYY')}
+      </div>
+
+      <div className="calendar-container">
+        <div className="calendar-header">
+          <div className="calendar-cell time-header"></div>
+          {daysOfWeek.map((day, index) => (
+            <div key={index} className="calendar-cell day-header">
+              {day} <br /> {weekStart.add(index, 'day').format('DD/MM')}
+            </div>
+          ))}
+        </div>
+
+        {timeSlots.map((time, rowIndex) => (
+          <div className="calendar-row" key={time}>
+            <div className="calendar-cell time-slot">{time}</div>
+            {calendar[rowIndex].map((cellSchedules, colIndex) => (
+              <div key={colIndex} className="calendar-cell">
+                {cellSchedules.map((s, i) => (
+                  <Card
+                    key={i}
+                    size="small"
+                    style={{ marginBottom: 4 }}
+                  >
+                    <div><b>Bệnh nhân:</b> {s.patient?.fullName}</div>
+                    <div><b>Loại:</b> {s.type}</div>
+                  </Card>
+                ))}
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
 
-export default DoctorSchedule; 
+export default ScheduleCalendar;

@@ -1,7 +1,7 @@
 import { Input, Modal, notification, DatePicker } from "antd"
 import { useEffect, useState } from "react"
 import { updateTestResultAPI } from "../../services/api.service"
-
+import dayjs from "dayjs"
 
 const UpdateTestResultModal = (props) => {
     const [id, setId] = useState("")
@@ -9,20 +9,20 @@ const UpdateTestResultModal = (props) => {
     const [result, setResult] = useState("");
     const [unit, setUnit] = useState("");
     const [note, setNote] = useState("");
-    const [expectedResultTime, setExpectedResultTime] = useState("");
-    const [actualResultTime, setActualResultTime] = useState("");
+    const [expectedResultTime, setExpectedResultTime] = useState(null);
+    const [actualResultTime, setActualResultTime] = useState(null);
 
-    const { isUpdateTestResultModalOpen, setIsUpdateTestResultModalOpen, dataUpdate, setDataUpdate, loadAccounts } = props
+    const { isUpdateTestResultModalOpen, setIsUpdateTestResultModalOpen, dataUpdate, setDataUpdate } = props
 
     useEffect(() => {
         if (dataUpdate) {
-            setId(dataUpdate.id)
-            setType(dataUpdate.type)
-            setResult(dataUpdate.result)
-            setUnit(dataUpdate.unit)
-            setNote(dataUpdate.note)
-            setExpectedResultTime(dataUpdate.expectedResultTime)
-            setActualResultTime(dataUpdate.actualResultTime)
+            setId(dataUpdate.id ?? "")
+            setType(dataUpdate.type ?? "")
+            setResult(dataUpdate.result ?? "")
+            setUnit(dataUpdate.unit ?? "")
+            setNote(dataUpdate.note ?? "")
+            setExpectedResultTime(dataUpdate.expectedResultTime ?? "")
+            setActualResultTime(dataUpdate.actualResultTime ?? "")
 
         }
     }, [dataUpdate])
@@ -36,7 +36,6 @@ const UpdateTestResultModal = (props) => {
             })
         }
         resetAndClose()
-        await loadAccounts()
     }
 
     const resetAndClose = () => {
@@ -70,19 +69,18 @@ const UpdateTestResultModal = (props) => {
                 <span>Ghi chú</span>
                 <Input value={note} onChange={(event) => { setNote(event.target.value) }} />
                 <span>Thời gian dự kiến</span>
-                <DatePicker
-                    format="DD/MM/YYYY"
-                    onChange={(value) => {
-                    setExpectedResultTime(value?.format("DD/MM/YYYY")); 
-                    }}
-                 />
+                <DatePicker 
+                    format="HH:mm DD/MM/YYYY"
+                    showTime
+                    value={expectedResultTime ? dayjs(expectedResultTime) : ''}
+                    onChange={(value) => setExpectedResultTime(dayjs(value).format("YYYY-MM-DDTHH:mm:ss"))}
+                />
                 <span>Thời gian nhận kết quả</span>
                 <DatePicker 
-                    format = "DD/MM/YYYY HH:mm"
+                    format="HH:mm DD/MM/YYYY"
                     showTime
-                    onChange={(value) => {
-                        setExpectedResultTime(value)
-                    }}
+                    value={actualResultTime ? dayjs(actualResultTime) : ''}
+                    onChange={(value) => setActualResultTime(dayjs(value).format("YYYY-MM-DDTHH:mm:ss"))}
                 />
             </div>
         </Modal>

@@ -32,12 +32,10 @@ function CareIntroSection() {
               <p>Thiết bị y tế hiện đại</p>
             </div>
           </div>
-          <button 
-  className="booking-btn"
-  onClick={() => window.location.href = '/dat-lich-kham'}
->
-  Đặt lịch khám ngay
-</button>
+          <Link to="/booking"><button className="booking-btn">
+              Đặt lịch khám ngay
+            </button>
+          </Link>
 
         </div>
 

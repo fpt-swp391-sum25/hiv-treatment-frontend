@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -9,11 +9,20 @@ import moment from 'moment';
 import { BsChevronLeft, BsChevronRight } from 'react-icons/bs';
 import './Calendar.css';
 import './CustomButtons.css';
-import { ScheduleStatus, StaffRole } from '../../../types/schedule.types';
+import { ScheduleStatus } from '../../../types/schedule.types';
 
-const Calendar = ({ events, onDateSelect, onEventSelect }) => {
+const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
     const [view, setView] = useState('dayGridMonth');
     const calendarRef = React.useRef(null);
+    
+    // Đảm bảo events là một mảng
+    const validEvents = Array.isArray(events) ? events : [];
+    
+    // Kiểm tra xem có sự kiện nào không
+    const hasEvents = validEvents.length > 0;
+    
+    // Debug: Ghi log events để kiểm tra
+    console.log('Calendar received events:', validEvents);
     
     const handleDateSelect = (selectInfo) => {
         const selectedDate = selectInfo.start;
@@ -41,48 +50,33 @@ const Calendar = ({ events, onDateSelect, onEventSelect }) => {
                 return '#28a745'; // success
             case 'on_leave':
                 return '#ffc107'; // warning
-            case 'in_meeting':
-                return '#007bff'; // primary
             default:
                 return '#6c757d'; // secondary
         }
     };
 
-    // Màu sắc phân biệt cho các vai trò
-    const getRoleColor = (role, status) => {
-        // Nếu nghỉ phép hoặc họp, ưu tiên màu của trạng thái
-        if (status !== 'available') {
-            return getStatusColor(status);
-        }
-        
-        // Nếu đang làm việc, phân biệt màu theo vai trò
-        switch (role) {
-            case StaffRole.DOCTOR:
-                return '#28a745'; // Bác sĩ - màu xanh lá
-            case StaffRole.NURSE:
-                return '#0dcaf0'; // Y tá - màu xanh dương nhạt
-            default:
-                return '#28a745'; // Mặc định - màu xanh lá
-        }
-    };
-
     // Chuẩn bị sự kiện cho Full Calendar
-    const calendarEvents = events.map(event => {
-        // Xác định vai trò từ event
-        const role = event.staffId ? (event.role || StaffRole.NURSE) : StaffRole.DOCTOR;
+    const calendarEvents = hasEvents ? validEvents.map(event => {
+        // Debug: Ghi log từng sự kiện
+        console.log('Processing event:', event);
+        
+        // Kiểm tra tính hợp lệ của sự kiện
+        if (!event || !event.id || !event.date) {
+            console.error('Invalid event data:', event);
+            return null;
+        }
         
         return {
             id: event.id,
-            title: event.title,
+            title: event.title || 'Không xác định',
             start: event.date,
-            color: getRoleColor(role, event.status),
+            color: getStatusColor(event.status),
             extendedProps: {
-                ...event,
-                role // Đảm bảo role được truyền trong extendedProps
+                ...event
             },
             allDay: true
         };
-    });
+    }).filter(Boolean) : []; // Lọc bỏ các sự kiện null
 
     // Render content cho ngày quá khứ và Chủ nhật
     const dayCellDidMount = (info) => {
@@ -105,18 +99,21 @@ const Calendar = ({ events, onDateSelect, onEventSelect }) => {
     // Tùy chỉnh hiển thị nội dung của sự kiện
     const eventContent = (eventInfo) => {
         const eventData = eventInfo.event.extendedProps;
+        
+        // Debug: Ghi log dữ liệu sự kiện
+        console.log('Rendering event content:', eventData);
+        
+        // Kiểm tra tính hợp lệ của dữ liệu sự kiện
+        if (!eventData || !eventData.status) {
+            console.error('Invalid event data in eventContent:', eventData);
+            return <div>Lỗi dữ liệu</div>;
+        }
+        
         const statusClass = `status-${eventData.status}`;
-        
-        // Xác định người được lên lịch (bác sĩ hoặc y tá)
-        const personName = eventData.doctorName || eventData.staffName || '';
-        const isNurse = eventData.staffId != null;
-        
-        // Thêm tiền tố "Y tá" nếu là nhân viên y tá
-        const displayName = isNurse ? `Y tá ${personName}` : personName;
         
         return (
             <div className={`custom-event-content ${statusClass}`}>
-                <div className="event-title">{displayName}</div>
+                <div className="event-title">{eventData.doctorName || 'Không có tên'}</div>
                 <div className="event-status">
                     {eventData.status === 'available' 
                         ? `Làm việc: ${eventData.morning && eventData.afternoon 
@@ -124,14 +121,44 @@ const Calendar = ({ events, onDateSelect, onEventSelect }) => {
                             : eventData.morning 
                                 ? 'Buổi sáng' 
                                 : 'Buổi chiều'}`
-                        : eventData.status === 'on_leave'
-                            ? 'Nghỉ phép'
-                            : 'Họp'
+                        : 'Nghỉ phép'
                     }
                 </div>
             </div>
         );
     };
+
+    // Hàm xóa tất cả sự kiện
+    const clearAllEvents = useCallback(() => {
+        if (calendarRef.current) {
+            const calendarApi = calendarRef.current.getApi();
+            calendarApi.removeAllEvents();
+            console.log('All events cleared from calendar');
+        }
+    }, []);
+
+    // Xóa tất cả dữ liệu lưu trữ của FullCalendar
+    const clearFullCalendarStorage = useCallback(() => {
+        // Xóa bất kỳ dữ liệu lịch nào có thể được lưu trong localStorage
+        const localStorageKeys = Object.keys(localStorage);
+        localStorageKeys.forEach(key => {
+            if (key.includes('fullcalendar') || key.includes('fc-') || key.includes('calendar') || 
+                key.includes('event') || key.includes('schedule')) {
+                console.log('Removing from localStorage:', key);
+                localStorage.removeItem(key);
+            }
+        });
+        
+        // Xóa bất kỳ dữ liệu nào được lưu trữ trong sessionStorage
+        const sessionStorageKeys = Object.keys(sessionStorage);
+        sessionStorageKeys.forEach(key => {
+            if (key.includes('fullcalendar') || key.includes('fc-') || key.includes('calendar') || 
+                key.includes('event') || key.includes('schedule')) {
+                console.log('Removing from sessionStorage:', key);
+                sessionStorage.removeItem(key);
+            }
+        });
+    }, []);
 
     // Xử lý chuyển đến ngày hôm nay
     const handleTodayClick = () => {
@@ -174,6 +201,39 @@ const Calendar = ({ events, onDateSelect, onEventSelect }) => {
             right: ''
         };
     };
+
+    // Xóa tất cả sự kiện khi component mount
+    useEffect(() => {
+        clearAllEvents();
+        clearFullCalendarStorage();
+        
+        // Thêm một timeout để đảm bảo FullCalendar đã được khởi tạo đầy đủ
+        const timer = setTimeout(() => {
+            clearAllEvents();
+        }, 500);
+        
+        return () => clearTimeout(timer);
+    }, [clearAllEvents, clearFullCalendarStorage]);
+
+    // Xóa và cập nhật lại sự kiện khi events thay đổi
+    useEffect(() => {
+        console.log('Events changed, updating calendar with:', validEvents.length, 'events');
+        
+        if (calendarRef.current) {
+            const calendarApi = calendarRef.current.getApi();
+            
+            // Xóa tất cả sự kiện hiện tại
+            calendarApi.removeAllEvents();
+            
+            // Chỉ thêm sự kiện mới nếu có dữ liệu hợp lệ
+            if (hasEvents) {
+                console.log('Adding events to calendar:', calendarEvents.length);
+                calendarApi.addEventSource(calendarEvents);
+            } else {
+                console.log('No events to add to calendar');
+            }
+        }
+    }, [events, hasEvents, calendarEvents]);
 
     return (
         <div className="calendar-container">
@@ -222,7 +282,7 @@ const Calendar = ({ events, onDateSelect, onEventSelect }) => {
                     selectMirror={true}
                     dayMaxEvents={true}
                     weekends={true}
-                    events={calendarEvents}
+                    events={[]} // Bắt đầu với mảng rỗng, sẽ thêm sự kiện qua API
                     select={handleDateSelect}
                     eventClick={handleEventClick}
                     eventContent={eventContent}
@@ -238,6 +298,12 @@ const Calendar = ({ events, onDateSelect, onEventSelect }) => {
                     }}
                 />
             </div>
+
+            {!hasEvents && (
+                <div className="text-center my-4 p-3 bg-light rounded">
+                    <p className="mb-0">Không có lịch làm việc nào. Hãy thêm lịch mới.</p>
+                </div>
+            )}
         </div>
     );
 };

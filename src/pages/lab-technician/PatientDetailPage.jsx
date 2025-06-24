@@ -10,7 +10,8 @@ import {
 import { Typography, Space, notification, Popconfirm, 
         Button, Input, Modal, DatePicker, Card, Form, Row, Col, Divider } from 'antd';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
-import UpdateTestResultModal from '../../components/staff/UpdateTestResultModal.jsx';
+import UpdateTestResultModal from '../../components/lab-technician/UpdateTestResultModal.jsx';
+import dayjs from 'dayjs';
 
 const PatientDetail = () => {
   const [type, setType] = useState("");
@@ -29,7 +30,7 @@ const PatientDetail = () => {
 
   useEffect(() => {
     loadData();
-  });
+  }, [dataUpdate]);
 
   const loadData = async () => {
     try {
@@ -176,10 +177,10 @@ const PatientDetail = () => {
             </Form.Item>
             <Form.Item label="Thời gian dự kiến">
               <DatePicker 
-                    format = "DD/MM/YYYY HH:mm"
+                    format = "HH:mm DD/MM/YYYY" 
                     showTime
                     onChange={(value) => {
-                        setExpectedResultTime(value)
+                        setExpectedResultTime(dayjs(value).format("YYYY-MM-DDTHH:mm:ss"))
                     }}
                 />
             </Form.Item>
@@ -199,11 +200,39 @@ const PatientDetail = () => {
             <Col span={8}>
               <p><strong>Ghi chú:</strong> {test.note}</p>
             </Col>
+            
             <Col span={8}>
-             <p><strong>Thời gian dự kiến:</strong> {new Date(test.expectedResultTime).toLocaleString('vi-VN')}</p>
+              <p>
+                <strong>Thời gian dự kiến:</strong>{" "}
+                {test.expectedResultTime && !isNaN(new Date(test.expectedResultTime)) 
+                  ? new Intl.DateTimeFormat('vi-VN', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                      hour12: false,
+                    }).format(new Date(test.expectedResultTime))
+                  : ''
+                }
+              </p>
             </Col>
+
             <Col span={8}>
-              <p><strong>Thời gian nhận kết quả:</strong> {new Date(test.actualResultTime).toLocaleString('vi-VN')}</p>
+              <p>
+                <strong>Thời gian nhận kết quả:</strong>{" "}
+                {test.actualResultTime && !isNaN(new Date(test.actualResultTime)) 
+                  ? new Intl.DateTimeFormat('vi-VN', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                      hour12: false,
+                    }).format(new Date(test.actualResultTime))
+                  : ''
+                }
+              </p>
             </Col>
 
             <Col span={8}>
