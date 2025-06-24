@@ -27,7 +27,7 @@ const ManagerSidebar = () => {
       label: 'Bác sĩ',
     },
     {
-      key: '/manager/lab-technician',
+      key: '/manager/lab-technicians',
       icon: <TeamOutlined />,
       label: 'Nhân viên',
     },
