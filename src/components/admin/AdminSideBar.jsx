@@ -30,8 +30,8 @@ const items = [
       },
       {
         key: '5',
-        label: <NavLink to='/admin/staff'>Nhân viên</NavLink>,
-        path: '/admin/staff'
+        label: <NavLink to='/admin/lab-technician'>Nhân viên</NavLink>,
+        path: '/admin/lab-technician'
       },
       {
         key: '6',

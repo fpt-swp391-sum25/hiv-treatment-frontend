@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { getSchedulesByPatientAPI } from '../../services/api.service';
 import { AuthContext } from '../../components/context/AuthContext';
+import { healthRecordService } from '../../services/health-record.service';
 
 export default function PatientAppointmentHistory() {
   const { user } = useContext(AuthContext);
@@ -67,13 +68,13 @@ export default function PatientAppointmentHistory() {
   // Lọc theo tìm kiếm bác sĩ và loại lịch
   const filteredRecords = records.filter(record => {
     // Tìm kiếm bác sĩ
-    const doctorMatch = !searchDoctor || 
-      (record.doctor && record.doctor.fullName && 
-       record.doctor.fullName.toLowerCase().includes(searchDoctor.toLowerCase()));
-    
+    const doctorMatch = !searchDoctor ||
+      (record.doctor && record.doctor.fullName &&
+        record.doctor.fullName.toLowerCase().includes(searchDoctor.toLowerCase()));
+
     // Lọc theo loại lịch
     const typeMatch = selectedType === 'all' || (record.type && record.type.trim() === selectedType);
-    
+
     return doctorMatch && typeMatch;
   });
 
@@ -92,7 +93,7 @@ export default function PatientAppointmentHistory() {
       <div style={{ textAlign: 'center', color: '#666', marginBottom: 32 }}>
         Theo dõi toàn bộ quá trình điều trị và chăm sóc
       </div>
-      
+
       <div style={{ display: 'flex', gap: 24, marginBottom: 32 }}>
         <div style={{ flex: 1, background: '#f4f8ff', borderRadius: 12, padding: 20, textAlign: 'center' }}>
           <div style={{ fontSize: 28, fontWeight: 600, color: '#2954d6' }}>{filteredTotal}</div>
@@ -134,10 +135,10 @@ export default function PatientAppointmentHistory() {
               value={searchDoctor}
               onChange={e => setSearchDoctor(e.target.value)}
               placeholder="Nhập tên bác sĩ..."
-              style={{ 
-                padding: 8, 
-                borderRadius: 6, 
-                marginLeft: 8, 
+              style={{
+                padding: 8,
+                borderRadius: 6,
+                marginLeft: 8,
                 border: '1px solid #ddd',
                 width: 250
               }}
@@ -159,7 +160,7 @@ export default function PatientAppointmentHistory() {
             )}
           </label>
         </div>
-        
+
         <div>
           <b>Lọc theo loại lịch: </b>
           <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
@@ -224,11 +225,11 @@ export default function PatientAppointmentHistory() {
       </div>
 
       {filteredRecords.length === 0 ? (
-        <div style={{ 
-          textAlign: 'center', 
-          padding: 40, 
-          background: '#fff', 
-          borderRadius: 12, 
+        <div style={{
+          textAlign: 'center',
+          padding: 40,
+          background: '#fff',
+          borderRadius: 12,
           color: '#666',
           border: '1px solid #ddd'
         }}>

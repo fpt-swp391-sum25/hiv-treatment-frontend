@@ -3,7 +3,7 @@ import { Form, Input, Select, DatePicker, Button, Typography, Col, Row, Layout, 
 import { ArrowLeftOutlined, SoundTwoTone } from '@ant-design/icons';
 import moment from 'moment';
 import { useNavigate } from 'react-router-dom';
-import { bookingAPI, createHealthRecordAPI, fetchAllScheduleAPI, fetchAvailableSlotAPI, fetchDoctorProfileAPI, fetchScheduleByDateAPI, initiatePaymentAPI, registerScheduleAPI } from '../../services/api.service';
+import { bookingAPI, createHealthRecordAPI, fetchAllDoctorsAPI, fetchAllScheduleAPI, fetchAvailableSlotAPI, fetchDoctorProfileAPI, fetchScheduleByDateAPI, initiatePaymentAPI, registerScheduleAPI } from '../../services/api.service';
 import { AuthContext } from '../../components/context/AuthContext';
 
 
@@ -153,7 +153,7 @@ const Booking = () => {
     };
 
     const loadDoctors = async () => {
-        const response = await fetchDoctorProfileAPI()
+        const response = await fetchAllDoctorsAPI()
         console.log(response.data)
         if (response.data) {
             setDoctors(response.data)

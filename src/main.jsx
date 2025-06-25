@@ -54,6 +54,7 @@ import ProfileDetail from './pages/patient/ProfileDetail';
 import PaymentCallback from './pages/patient/PaymentCallback';
 import AppointmentResult from './pages/patient/AppointmentResult';
 import PatientAppointmentHistory from './pages/patient/PatientAppointmentHistory';
+import AppointmentList from './pages/patient/AppointmentList';
 
 const router = createBrowserRouter([
   {
@@ -90,6 +91,15 @@ const router = createBrowserRouter([
         element: (
           <PrivateRoute>
             <ProfileDetail />
+          </PrivateRoute>
+        ),
+        errorElement: <Errors />,
+      },
+      {
+        path: '/appointment',
+        element: (
+          <PrivateRoute>
+            <AppointmentList />
           </PrivateRoute>
         ),
         errorElement: <Errors />,

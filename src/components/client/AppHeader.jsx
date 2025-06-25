@@ -62,29 +62,11 @@ const AppHeader = () => {
     { key: 'services', label: 'Dịch vụ', scrollTo: 'why-services-section' },
     { key: 'doctors', label: 'Bác sĩ', scrollTo: 'doctor-section' },
     { key: 'resources', label: 'Tài liệu', scrollTo: 'document-section' },
+    { key: 'booking', label: 'Đặt lịch khám', path: '/booking' },
+    { key: 'appointments', label: 'Lịch hẹn', path: '/appointment' },
   ];
 
-
-  const bottomMenuItems = [
-    {
-      key: 'booking',
-      label: 'Đặt lịch khám',
-      path: '/booking',
-      icon: <CalendarOutlined />,
-    },
-    {
-      key: 'test-results',
-      label: 'Tra cứu XN',
-      path: '/test-results',
-      icon: <FileSearchOutlined />,
-    },
-    {
-      key: 'history',
-      label: 'Lịch sử khám',
-      path: '/appointment-history',
-      icon: <HistoryOutlined />,
-    },
-  ]; const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const handleMenuClick = (scrollTo) => {
     // Nếu đang không ở trang chủ, chuyển về trang chủ trước
@@ -109,7 +91,9 @@ const AppHeader = () => {
           {item.label}
         </a>
       ) : (
-        <Link to={item.path}>{item.label}</Link>
+        <Link to={item.path} onClick={() => {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}>{item.label}</Link>
       ),
     }));
 
@@ -143,28 +127,26 @@ const AppHeader = () => {
     }
   };
 
+
+
   return (
     <Header className="app-header">
       <div className="header-content">
-        <div className="app-logo" style={{width: 10 + 'vw', 
-          borderRadius: 50 + 'px', backgroundColor: '#fff'}}>
+        <div className="app-logo" style={{
+          width: 10 + 'vw',
+          borderRadius: 50 + 'px', backgroundColor: '#fff'
+        }}>
           <Link to="/">
             <img src={appLogo} alt="logo" />
           </Link>
         </div>
 
-        <div className="app-menu">          
+        <div className="app-menu">
           <Menu
             mode="horizontal"
             selectedKeys={[getActiveMenu(topMenuItems)]}
             items={mapMenuItems(topMenuItems)}
             className="main-menu"
-        />
-          <Menu
-            mode="horizontal"
-            selectedKeys={[getActiveMenu(bottomMenuItems)]}
-            items={mapMenuItems(bottomMenuItems)}
-            className="sub-menu"
           />
         </div>
         <div className="auth-section">

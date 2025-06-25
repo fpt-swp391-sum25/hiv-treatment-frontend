@@ -5,7 +5,7 @@
   z-index: 1;
   width: 100%;
   padding: 0 24px !important;
-  min-height: 140px;
+  min-height: 50px;
   height: auto;
   background: #2056df;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -83,8 +83,8 @@
   border: none !important;
 }
 
-.ant-menu-horizontal > .ant-menu-item::after,
-.ant-menu-horizontal > .ant-menu-submenu::after {
+.ant-menu-horizontal>.ant-menu-item::after,
+.ant-menu-horizontal>.ant-menu-submenu::after {
   display: none !important;
 }
 
