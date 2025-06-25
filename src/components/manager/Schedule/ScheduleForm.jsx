@@ -97,14 +97,14 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
     };
 
     const resetForm = () => {
-        setFormData({
+            setFormData({
             doctorId: selectedDoctor || '',
             doctorName: '',
             date: moment(selectedDate).format('YYYY-MM-DD'),
-            status: ScheduleStatus.AVAILABLE,
-            morning: true,
-            afternoon: true,
-            note: '',
+                status: ScheduleStatus.AVAILABLE,
+                morning: true,
+                afternoon: true,
+                note: '',
             repeatWeekly: false,
             repeatCount: 1
         });
@@ -137,12 +137,12 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             onShowToast('Vui lòng chọn bác sĩ', 'danger');
             return;
         }
-
+        
         if (!formData.morning && !formData.afternoon) {
             onShowToast('Vui lòng chọn ít nhất một buổi làm việc', 'danger');
             return;
         }
-
+        
         // Kiểm tra ngày
         if (!formData.date) {
             onShowToast('Vui lòng chọn ngày', 'danger');
@@ -240,7 +240,7 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                 <Form onSubmit={handleSubmit}>
                     <Row>
                         <Col md={6}>
-                            <Form.Group className="mb-3">
+                    <Form.Group className="mb-3">
                                 <Form.Label>Bác sĩ</Form.Label>
                                 {loading ? (
                                     <div className="d-flex align-items-center">
@@ -248,20 +248,20 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                                         <span>Đang tải danh sách bác sĩ...</span>
                                     </div>
                                 ) : (
-                                    <Form.Select 
+                        <Form.Select
                                         name="doctorId"
-                                        value={formData.doctorId}
+                            value={formData.doctorId}
                                         onChange={handleChange}
                                         disabled={loading || doctors.length === 0}
-                                        required
-                                    >
-                                        <option value="">Chọn bác sĩ</option>
-                                        {doctors.map(doctor => (
-                                            <option key={doctor.id} value={doctor.id}>
-                                                {doctor.name}
-                                            </option>
-                                        ))}
-                                    </Form.Select>
+                            required
+                        >
+                            <option value="">Chọn bác sĩ</option>
+                            {doctors.map(doctor => (
+                                <option key={doctor.id} value={doctor.id}>
+                                    {doctor.name}
+                                </option>
+                            ))}
+                        </Form.Select>
                                 )}
                             </Form.Group>
                         </Col>
@@ -276,28 +276,28 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                                     min={moment().format('YYYY-MM-DD')}
                                     required
                                 />
-                            </Form.Group>
+                    </Form.Group>
                         </Col>
                     </Row>
 
                     <Row>
                         <Col md={6}>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Trạng thái</Form.Label>
-                                <Form.Select
+                    <Form.Group className="mb-3">
+                        <Form.Label>Trạng thái</Form.Label>
+                        <Form.Select
                                     name="status"
-                                    value={formData.status}
+                            value={formData.status}
                                     onChange={handleChange}
-                                >
-                                    <option value={ScheduleStatus.AVAILABLE}>Làm việc</option>
-                                    <option value={ScheduleStatus.ON_LEAVE}>Nghỉ phép</option>
-                                </Form.Select>
-                            </Form.Group>
+                        >
+                            <option value={ScheduleStatus.AVAILABLE}>Làm việc</option>
+                            <option value={ScheduleStatus.ON_LEAVE}>Nghỉ phép</option>
+                        </Form.Select>
+                    </Form.Group>
                         </Col>
-                        <Col md={6}>
+                            <Col md={6}>
                             <Form.Group className="mb-3 mt-4">
                                 <div className="d-flex flex-column">
-                                    <Form.Check
+                                    <Form.Check 
                                         type="checkbox"
                                         name="morning"
                                         label="Buổi sáng (8:00 - 12:00)"
@@ -305,7 +305,7 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                                         onChange={handleChange}
                                         className="mb-2"
                                     />
-                                    <Form.Check
+                                    <Form.Check 
                                         type="checkbox"
                                         name="afternoon"
                                         label="Buổi chiều (13:00 - 17:00)"
@@ -313,9 +313,9 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                                         onChange={handleChange}
                                     />
                                 </div>
-                            </Form.Group>
-                        </Col>
-                    </Row>
+                                </Form.Group>
+                            </Col>
+                        </Row>
 
                     <Form.Group className="mb-3">
                         <Form.Label>Ghi chú</Form.Label>
@@ -330,30 +330,30 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
 
                     <Row>
                         <Col md={6}>
-                            <Form.Group className="mb-3">
-                                <Form.Check
-                                    type="checkbox"
+                    <Form.Group className="mb-3">
+                        <Form.Check 
+                            type="checkbox"
                                     name="repeatWeekly"
                                     label="Lặp lại hàng tuần"
                                     checked={formData.repeatWeekly}
                                     onChange={handleChange}
-                                />
-                            </Form.Group>
+                        />
+                    </Form.Group>
                         </Col>
                         <Col md={6}>
                             {formData.repeatWeekly && (
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Số tuần lặp lại</Form.Label>
-                                    <Form.Control
-                                        type="number"
+                        <Form.Group className="mb-3">
+                            <Form.Label>Số tuần lặp lại</Form.Label>
+                            <Form.Control
+                                type="number"
                                         name="repeatCount"
-                                        value={formData.repeatCount}
+                                value={formData.repeatCount}
                                         onChange={handleChange}
                                         min={1}
                                         max={12}
-                                    />
-                                </Form.Group>
-                            )}
+                            />
+                        </Form.Group>
+                    )}
                         </Col>
                     </Row>
                 </Form>
