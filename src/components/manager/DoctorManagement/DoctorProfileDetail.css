@@ -60,6 +60,19 @@
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 0;
+    text-align: center;
+}
+
+.loading-container .ant-spin {
+    margin-bottom: 16px;
+}
+
 /* Responsive Design */
 @media (max-width: 576px) {
     .profile-header {

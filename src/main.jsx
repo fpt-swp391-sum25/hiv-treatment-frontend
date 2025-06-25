@@ -36,6 +36,7 @@ import ManagerSchedule from './components/manager/Schedule/ManagerSchedule';
 import DoctorManagement from './components/manager/DoctorManagement/DoctorManagement';
 import LabTechnicianManagement from './components/manager/LabTechnicianManagement/LabTechnicianManagement';
 import Reports from './components/manager/Reports/Reports';
+import AuthTest from './components/manager/AuthTest';
 
 // Import for doctor pages
 import DoctorHome from './pages/doctor/DoctorHome';
@@ -52,6 +53,7 @@ import PatientDetail from './pages/lab-technician/PatientDetailPage'
 // Import for patient pages
 import ProfileDetail from './pages/patient/ProfileDetail';
 import PaymentCallback from './pages/patient/PaymentCallback';
+import AppointmentResult from './pages/patient/AppointmentResult';
 import PatientAppointmentHistory from './pages/patient/PatientAppointmentHistory';
 
 const router = createBrowserRouter([
@@ -94,6 +96,15 @@ const router = createBrowserRouter([
         errorElement: <Errors />,
       },
       {
+        path: '/appointment-result/:scheduleId',
+        element: (
+          <PrivateRoute>
+            <AppointmentResult />
+          </PrivateRoute>
+        ),
+        errorElement: <Errors />,
+      },
+      {
         path: '/appointment-history',
         element: (
           <PrivateRoute>
@@ -104,7 +115,34 @@ const router = createBrowserRouter([
       },
     ]
   },
-{
+  {
+    path: '/doctor',
+    element: <DoctorHome />,
+    errorElement: <Errors />,
+    children: [
+      {
+        path: '/doctor/profile',
+        element: <DoctorProfile />,
+        errorElement: <Errors />,
+      },
+      {
+        path: '/doctor/schedule',
+        element: <DoctorSchedule />,
+        errorElement: <Errors />,
+      },
+      {
+        path: '/doctor/patient-list',
+        element: <PatientList />,
+        errorElement: <Errors />,
+      },
+      {
+        path: '/doctor/patient-list/:id',
+        element: <ViewOnlyPatientDetail />,
+        errorElement: <Errors />
+      }
+    ],
+  },
+  {
     path: '/doctors',
     element: <DoctorProfileList />,
     errorElement: <Errors />,
@@ -124,7 +162,7 @@ const router = createBrowserRouter([
     element: <Register />,
     errorElement: <Errors />,
   },
-  
+
   // Path for doctor pages
   {
     path: '/doctor',
@@ -132,8 +170,8 @@ const router = createBrowserRouter([
     errorElement: <Errors />,
     children: [
       {
-        index: true, 
-        element: <DoctorSchedule />, 
+        index: true,
+        element: <DoctorSchedule />,
         errorElement: <Errors />,
       },
       {
@@ -152,7 +190,7 @@ const router = createBrowserRouter([
         errorElement: <Errors />,
       },
       {
-        path: 'patients/:id', 
+        path: 'patients/:id',
         element: <ViewOnlyPatientDetail />,
         errorElement: <Errors />
       },
@@ -163,7 +201,7 @@ const router = createBrowserRouter([
       },
     ]
   },
-  
+
   // Path for admin pages
   {
     path: '/admin',
@@ -195,10 +233,8 @@ const router = createBrowserRouter([
         errorElement: <Errors />,
       }
     ]
-  }, 
-
-  // Path for manager pages 
-  {    
+  },
+  {
     path: '/manager',
     element: <ManagerPage />,
     children: [
@@ -214,39 +250,41 @@ const router = createBrowserRouter([
         path: 'doctors',
         element: <DoctorManagement />,
         errorElement: <Errors />,
-      },
-      {
-        path: 'lab-technician',
+      }, {
+        path: 'lab-technicians',
         element: <LabTechnicianManagement />,
         errorElement: <Errors />,
-      },
-      {
+      }, {
         path: 'reports',
         element: <Reports />,
         errorElement: <Errors />,
+      },
+      {
+        path: 'auth-test',
+        element: <AuthTest />,
+        errorElement: <Errors />,
       }
-    ],
-    errorElement: <Errors />,
+    ]
   },
-
   // Path for lab technician pages
   {
     path: '/lab-technician',
     element: <LabTechnicianHomePage />,
     errorElement: <Errors />,
-  },
-  
-  {
-    path: '/lab-technician/patient-detail/:id',
-    element: <PatientDetail />,
-    errorElement: <Errors />,
+    children: [
+      {
+        path: 'patient/:id',
+        element: <PatientDetail />,
+        errorElement: <Errors />
+      }
+    ]
   }
-])
+]);
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <GoogleOAuthProvider clientId="115076786122-q76et2blbn1k1dmfpd6d5ss1t192ljj6.apps.googleusercontent.com">
+  <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || '1001002031-7drnj2i99p8qo1fkjnkv9tmhbphcsfm7.apps.googleusercontent.com'}>
     <AuthWrapper>
       <RouterProvider router={router} />
     </AuthWrapper>
   </GoogleOAuthProvider>
-)
+);

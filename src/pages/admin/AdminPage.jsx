@@ -8,8 +8,7 @@ import { fetchAccountAPI } from '../../services/api.service';
 const { Content } = Layout;
 
 const Admin = () => {
-    const {
-        token: { colorBgContainer, borderRadiusLG },
+    const { token: { colorBgContainer, borderRadiusLG },
     } = theme.useToken();
 
     const { setUser, isAppLoading, setIsAppLoading } = useContext(AuthContext)

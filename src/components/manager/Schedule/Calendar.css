@@ -179,12 +179,6 @@
   border-left: 3px solid #856404;
 }
 
-.status-in-meeting {
-  background-color: #cce5ff;
-  color: #004085;
-  border-left: 3px solid #004085;
-}
-
 /* Toast notification */
 .toast-container {
   position: fixed;
@@ -306,7 +300,7 @@
   text-overflow: ellipsis;
 }
 
-/* Màu sắc cho từng loại trạng thái và vai trò */
+/* Màu sắc cho từng loại trạng thái */
 .status-available {
   background-color: rgba(40, 167, 69, 0.1);
   border-left: 3px solid #28a745;
@@ -317,50 +311,14 @@
   border-left: 3px solid #ffc107;
 }
 
-.status-in_meeting {
-  background-color: rgba(0, 123, 255, 0.1);
-  border-left: 3px solid #007bff;
+/* Style cho ngày Chủ nhật */
+.fc-day-sunday {
+  background-color: #f8f9fa !important;
+  position: relative;
 }
 
-/* Màu sắc phân biệt cho các vai trò */
-.role-DOCTOR {
-  border-left-color: #28a745;
-}
-
-.role-NURSE {
-  border-left-color: #0dcaf0;
-}
-
-/* Chú thích vai trò */
-.role-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 10px;
-  padding: 10px;
-  background-color: #f8f9fa;
-  border-radius: 4px;
-}
-
-.role-legend-item {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 12px;
-}
-
-.role-legend-color {
-  width: 15px;
-  height: 15px;
-  border-radius: 3px;
-}
-
-.role-DOCTOR-color {
-  background-color: #28a745;
-}
-
-.role-NURSE-color {
-  background-color: #0dcaf0;
+.fc .fc-day-disabled {
+  pointer-events: none;
 }
 
 /* Responsive */
@@ -373,35 +331,267 @@
   .fc .fc-toolbar-title {
     font-size: 1.2rem;
   }
+}
 
-  .role-legend {
+.calendar-container {
+  width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  background-color: #fff;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.calendar-controls {
+  margin-bottom: 15px;
+}
+
+.calendar-nav-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: #495057;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.calendar-nav-button:hover {
+  background-color: #e9ecef;
+}
+
+.today-button {
+  background-color: #2c7bbf;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin: 0 10px;
+}
+
+.today-button:hover {
+  background-color: #236aa8;
+}
+
+.view-buttons {
+  display: flex;
+  gap: 5px;
+}
+
+.view-button {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  color: #495057;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.view-button:hover {
+  background-color: #e9ecef;
+}
+
+.view-button.active {
+  background-color: #2c7bbf;
+  color: white;
+  border-color: #2c7bbf;
+}
+
+/* Tùy chỉnh các ngày trong lịch */
+.fc .fc-daygrid-day {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.fc .fc-daygrid-day:hover {
+  background-color: rgba(0, 123, 255, 0.05);
+}
+
+.fc .fc-daygrid-day.fc-day-today {
+  background-color: rgba(0, 123, 255, 0.1);
+}
+
+/* Tùy chỉnh header của lịch */
+.fc .fc-toolbar-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+/* Tùy chỉnh nút trong FullCalendar */
+.fc .fc-button-primary {
+  background-color: #2c7bbf;
+  border-color: #2c7bbf;
+}
+
+.fc .fc-button-primary:hover {
+  background-color: #236aa8;
+  border-color: #236aa8;
+}
+
+/* Tùy chỉnh sự kiện */
+.fc-event {
+  border: none;
+  border-radius: 4px;
+  padding: 2px;
+  cursor: pointer;
+  transition: transform 0.2s;
+  margin-bottom: 2px;
+}
+
+.fc-event:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Ngày quá khứ */
+.fc-day-past {
+  background-color: #f8f9fa;
+  opacity: 0.7;
+}
+
+/* Tùy chỉnh nội dung sự kiện */
+.custom-event-content {
+  padding: 4px 6px;
+  border-radius: 3px;
+}
+
+.custom-event-content .event-title {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 2px;
+  font-size: 0.9rem;
+}
+
+.custom-event-content .event-status {
+  font-size: 0.8rem;
+  opacity: 0.8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Các màu cho trạng thái làm việc của bác sĩ */
+.status-available {
+  background-color: rgba(40, 167, 69, 0.1);
+  border-left: 3px solid #28a745;
+}
+
+.status-on_leave {
+  background-color: rgba(255, 193, 7, 0.1);
+  border-left: 3px solid #ffc107;
+}
+
+/* Chủ nhật */
+.fc-day-sunday {
+  background-color: #f8f9fa;
+}
+
+/* Ngày bị vô hiệu hóa */
+.fc .fc-day-disabled {
+  background-color: #f8f9fa;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .fc .fc-toolbar {
     flex-direction: column;
-    gap: 5px;
+    gap: 10px;
+  }
+  
+  .fc .fc-toolbar-title {
+    font-size: 1.2rem;
   }
 }
 
-/* Style cho ngày Chủ nhật */
-.fc-day-sunday {
-    background-color: #f8f9fa !important;
-    position: relative;
+/* Nút làm mới dữ liệu */
+.refresh-button {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
 
-.fc-day-sunday:after {
-
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 14px;
-    color: #dc3545;
-    font-style: italic;
-    font-weight: 500;
-    background-color: rgba(255, 255, 255, 0.7);
-    padding: 2px 8px;
-    border-radius: 4px;
-    z-index: 1;
+.refresh-button:hover {
+  background-color: #5a6268;
 }
 
-.fc .fc-day-disabled {
-    pointer-events: none;
+/* Nút thêm lịch mới */
+.add-schedule-button {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+}
+
+.add-schedule-button:hover {
+  background-color: #218838;
+}
+
+.add-schedule-button:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+/* Hiển thị loading */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+/* Hiển thị không có dữ liệu */
+.no-data-container {
+  text-align: center;
+  padding: 30px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  margin: 20px 0;
+}
+
+.no-data-message {
+  color: #6c757d;
+  font-style: italic;
+}
+
+/* Cải thiện hiển thị trên các thiết bị nhỏ */
+@media (max-width: 576px) {
+  .calendar-controls {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .view-buttons {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .view-button {
+    flex: 1;
+    text-align: center;
+  }
 }
