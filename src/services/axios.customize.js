@@ -13,7 +13,9 @@ instance.interceptors.request.use(function (config) {
         config.headers.Authorization = 'Bearer ' + token;
         console.log('Token found, adding to request headers:', token.substring(0, 15) + '...');
     } else {
-        console.warn('No access token found in localStorage!');
+        console.log('No access token found in localStorage for this request');
+        // Không tự động chuyển hướng đến trang đăng nhập
+        // Để các trang công khai vẫn hoạt động bình thường
     }
     
     // Log the full request for debugging
@@ -61,7 +63,7 @@ instance.interceptors.response.use(function (response) {
         console.error('Error response headers:', error.response.headers);
         console.error('Error response data:', error.response.data);
         
-        // Check for specific auth errors
+        // Chỉ thông báo lỗi xác thực, không tự động chuyển hướng
         if (error.response.status === 401 || error.response.status === 403) {
             console.error('Authentication error. Token might be invalid or expired.');
         }

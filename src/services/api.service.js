@@ -94,7 +94,9 @@ const fetchAllPatientScheduleAPI = (id) => {
 }
 
 const fetchAccountByRoleAPI = (role) => {
+    // Đối với vai trò được biểu diễn bằng string, sử dụng đúng định dạng endpoint
     const URL_BACKEND = `/api/user/${role}`
+    console.log(`Fetching accounts with role ${role} from: ${URL_BACKEND}`);
     return axios.get(URL_BACKEND)
 }
 
@@ -344,24 +346,17 @@ const getSchedulesByPatientAPI = (patientId) => {
 
 // Thêm API mới để lấy users theo role
 const fetchUsersByRoleAPI = (role) => {
-    // Sử dụng endpoint chính xác cho từng loại role
-    let URL_BACKEND = '';
-    
-    if (role === 2) { // Lab technician
-        // Endpoint cho lab technicians
-        URL_BACKEND = '/api/user/lab-technician';
-    } else if (role === 1) { // Doctor
-        URL_BACKEND = '/api/user/doctor';
-    } else if (role === 3) { // Manager
-        URL_BACKEND = '/api/user/manager';
-    } else if (role === 4) { // Patient
-        URL_BACKEND = '/api/user/patient';
-    } else {
-        // Fallback cho các role khác
-        URL_BACKEND = `/api/user/role/${role}`;
-    }
+    // Endpoint sử dụng đúng với backend API
+    const URL_BACKEND = `/api/user/role/${role}`;
     
     console.log(`Fetching users with role ${role} from: ${URL_BACKEND}`);
+    return axios.get(URL_BACKEND);
+}
+
+// Thêm API mới để lấy danh sách nhân viên xét nghiệm
+const fetchAllLabTechniciansAPI = () => {
+    const URL_BACKEND = '/api/user/LAB_TECHNICIAN';
+    console.log('Calling API to fetch lab technicians from:', URL_BACKEND);
     return axios.get(URL_BACKEND);
 }
 
@@ -421,5 +416,6 @@ export {
     updateScheduleAPI,
     deleteScheduleAPI,
     getSchedulesByPatientAPI,
-    fetchUsersByRoleAPI
+    fetchUsersByRoleAPI,
+    fetchAllLabTechniciansAPI
 }

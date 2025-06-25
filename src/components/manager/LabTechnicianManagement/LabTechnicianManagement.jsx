@@ -1,96 +1,78 @@
-import React, { useState, useEffect } from 'react';
-import { Table, Space, Button, message, Tag, Row, Col, Card, Statistic, Spin, Select, Input, Alert } from 'antd';
+import React, { useState, useContext, useEffect } from 'react';
+import { Table, Space, Button, message, Tag, Row, Col, Card, Statistic, Select, Input, Alert } from 'antd';
 import { UserOutlined, CalendarOutlined, FileTextOutlined } from '@ant-design/icons';
-import { fetchUsersByRoleAPI, updateAccountAPI } from '../../../services/api.service';
+import { fetchAllLabTechniciansAPI, updateUserAPI } from '../../../services/api.service';
+import UpdateLabTechnicianModal from './UpdateLabTechnicianModal';
+import LabTechnicianDetail from './LabTechnicianDetail';
+import { AuthContext } from '../../context/AuthContext';
 import '../DoctorManagement/DoctorManagement.css';
 
 const LabTechnicianManagement = () => {
-    const [labTechnicians, setLabTechnicians] = useState([]);
-    const [loading, setLoading] = useState(false);
     const [selectedLabTechnician, setSelectedLabTechnician] = useState(null);
     const [isUpdateModalVisible, setIsUpdateModalVisible] = useState(false);
     const [isProfileDetailVisible, setIsProfileDetailVisible] = useState(false);
     const [selectedLabTechnicianId, setSelectedLabTechnicianId] = useState('all');
     const [searchText, setSearchText] = useState('');
+    const { user } = useContext(AuthContext);
+    
+    // Thay thế useApi bằng useState và useEffect
+    const [labTechnicians, setLabTechnicians] = useState([]);
+    const [loading, setLoading] = useState(false);
     const [apiError, setApiError] = useState(null);
 
-    useEffect(() => {
-        loadLabTechnicians();
-    }, []);
-
+    // Hàm load dữ liệu
     const loadLabTechnicians = async () => {
         setLoading(true);
         setApiError(null);
         try {
-            console.log('Fetching lab technicians from API...');
-            // Gọi API lấy danh sách nhân viên với role=2
-            const response = await fetchUsersByRoleAPI(2);
-            console.log('API response:', response);
+            const response = await fetchAllLabTechniciansAPI();
+            console.log('Lab technicians API response:', response);
             
-            // Kiểm tra cấu trúc response để xác định nơi chứa dữ liệu
-            let technicianData = [];
+            let processedData = [];
             
-            if (response && response.data) {
-                technicianData = response.data;
-            } else if (response && Array.isArray(response)) {
-                technicianData = response;
-            } else if (response) {
-                technicianData = response;
-            }
-            
-            // Đảm bảo technicianData là một mảng
-            const techniciansList = Array.isArray(technicianData) ? technicianData : [];
-            
-            console.log('Lab technicians data after processing:', techniciansList);
-            
-            if (techniciansList.length > 0) {
-                // Chuyển đổi dữ liệu từ API để phù hợp với cấu trúc component
-                // Dựa vào cấu trúc bảng user từ database như trong ảnh
-                const formattedTechnicians = techniciansList.map(tech => {
-                    // Log để kiểm tra cấu trúc dữ liệu
-                    console.log('Technician data structure:', tech);
-                    
-                    return {
-                        id: tech.id,
-                        fullName: tech.full_name,
-                        email: tech.email,
-                        phone: tech.phone_number,
-                        status: tech.account_status,
-                        gender: tech.gender,
-                        address: tech.address,
-                        avatarUrl: tech.avatar,
-                        dateOfBirth: tech.date_of_birth,
-                        username: tech.username
-                    };
-                });
-                
-                console.log('Formatted lab technicians:', formattedTechnicians);
-                setLabTechnicians(formattedTechnicians);
+            // Xử lý dữ liệu API trả về
+            if (Array.isArray(response)) {
+                processedData = response;
+            } else if (response && Array.isArray(response.data)) {
+                processedData = response.data;
+            } else if (response && response.data && Array.isArray(response.data.content)) {
+                processedData = response.data.content;
             } else {
-                console.log('No lab technician data received');
-                setLabTechnicians([]);
-                setApiError('Không có dữ liệu nhân viên từ server');
+                console.warn('Unexpected response format:', response);
+                processedData = [];
             }
+            
+            // Map dữ liệu theo cấu trúc chính xác từ BE
+            const mappedData = processedData.map(tech => ({
+                id: tech.id,
+                fullName: tech.fullName || '',
+                email: tech.email || '',
+                phone: tech.phoneNumber || '',
+                status: tech.accountStatus || 'ACTIVE',
+                gender: tech.gender || 'MALE',
+                address: tech.address || '',
+                avatarUrl: tech.avatar || '',
+                dateOfBirth: tech.dateOfBirth || '',
+                username: tech.username || '',
+                createdAt: tech.createdAt || '',
+                isVerified: tech.isVerified || false
+            }));
+            
+            setLabTechnicians(mappedData);
         } catch (error) {
             console.error('Error fetching lab technicians:', error);
+            setApiError('Không thể tải dữ liệu nhân viên. Vui lòng thử lại sau.');
+            // Fallback về mảng rỗng nếu có lỗi
             setLabTechnicians([]);
-            
-            // Hiển thị thông tin lỗi chi tiết hơn
-            if (error.response) {
-                console.error('Error response:', error.response);
-                setApiError(`Lỗi server: ${error.response.status} - ${error.response.statusText || 'Unknown error'}`);
-            } else if (error.request) {
-                console.error('Error request:', error.request);
-                setApiError('Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.');
-            } else {
-                setApiError(`Lỗi: ${error.message || 'Unknown error'}`);
-            }
-            
-            message.error('Không thể tải danh sách nhân viên kỹ thuật');
         } finally {
             setLoading(false);
         }
     };
+    
+    // Gọi API khi component mount
+    useEffect(() => {
+        loadLabTechnicians();
+    }, []);
 
     const handleViewProfile = (technician) => {
         setSelectedLabTechnician(technician);
@@ -109,11 +91,11 @@ const LabTechnicianManagement = () => {
     };
 
     // Lọc danh sách nhân viên theo dropdown và search
-    const filteredLabTechnicians = labTechnicians.filter((tech) => {
-        const matchTechnician = selectedLabTechnicianId === 'all' || tech.id.toString() === selectedLabTechnicianId.toString();
+    const filteredLabTechnicians = labTechnicians ? labTechnicians.filter((tech) => {
+        const matchTechnician = selectedLabTechnicianId === 'all' || (tech.id && tech.id.toString() === selectedLabTechnicianId.toString());
         const matchName = tech.fullName && tech.fullName.toLowerCase().includes(searchText.toLowerCase());
         return matchTechnician && matchName;
-    });
+    }) : [];
 
     // Định nghĩa trạng thái tài khoản
     const AccountStatus = {
@@ -127,21 +109,27 @@ const LabTechnicianManagement = () => {
             title: 'Họ và tên',
             dataIndex: 'fullName',
             key: 'fullName',
+            ellipsis: true,
+            width: '15%',
         },
         {
             title: 'Email',
             dataIndex: 'email',
             key: 'email',
+            ellipsis: true,
+            width: '20%',
         },
         {
             title: 'Số điện thoại',
             dataIndex: 'phone',
             key: 'phone',
+            width: '12%',
         },
         {
             title: 'Giới tính',
             dataIndex: 'gender',
             key: 'gender',
+            width: '8%',
             render: (gender) => {
                 return gender === 'MALE' ? 'Nam' : gender === 'FEMALE' ? 'Nữ' : 'Khác';
             }
@@ -151,11 +139,13 @@ const LabTechnicianManagement = () => {
             dataIndex: 'address',
             key: 'address',
             ellipsis: true,
+            width: '20%',
         },
         {
             title: 'Trạng thái',
             dataIndex: 'status',
             key: 'status',
+            width: '10%',
             render: (status) => {
                 let color = 'green';
                 let text = 'Đang hoạt động';
@@ -172,12 +162,14 @@ const LabTechnicianManagement = () => {
         {
             title: 'Thao tác',
             key: 'action',
+            fixed: 'right',
+            width: '15%',
             render: (_, record) => (
-                <Space size="middle">
-                    <Button type="primary" onClick={() => handleViewProfile(record)}>
+                <Space size="small">
+                    <Button type="primary" size="small" onClick={() => handleViewProfile(record)}>
                         Xem chi tiết
                     </Button>
-                    <Button onClick={() => handleUpdateLabTechnician(record)}>
+                    <Button size="small" onClick={() => handleUpdateLabTechnician(record)}>
                         Cập nhật
                     </Button>
                 </Space>
@@ -203,7 +195,7 @@ const LabTechnicianManagement = () => {
                     <Card>
                         <Statistic
                             title="Tổng số nhân viên"
-                            value={labTechnicians.length}
+                            value={filteredLabTechnicians.length}
                             prefix={<UserOutlined />}
                         />
                     </Card>
@@ -212,7 +204,7 @@ const LabTechnicianManagement = () => {
                     <Card>
                         <Statistic
                             title="Đang làm việc"
-                            value={labTechnicians.filter(t => t.status === AccountStatus.ACTIVE).length}
+                            value={filteredLabTechnicians.filter(t => t && t.status === AccountStatus.ACTIVE).length}
                             prefix={<CalendarOutlined />}
                         />
                     </Card>
@@ -221,7 +213,7 @@ const LabTechnicianManagement = () => {
                     <Card>
                         <Statistic
                             title="Không hoạt động"
-                            value={labTechnicians.filter(t => t.status !== AccountStatus.ACTIVE).length}
+                            value={filteredLabTechnicians.filter(t => t && t.status !== AccountStatus.ACTIVE).length}
                             prefix={<FileTextOutlined />}
                         />
                     </Card>
@@ -238,7 +230,7 @@ const LabTechnicianManagement = () => {
                             value={selectedLabTechnicianId}
                         >
                             <Select.Option value="all">Tất cả nhân viên</Select.Option>
-                            {labTechnicians.map((tech) => (
+                            {labTechnicians && labTechnicians.map((tech) => (
                                 <Select.Option key={tech.id} value={tech.id}>
                                     {tech.fullName}
                                 </Select.Option>
@@ -268,11 +260,28 @@ const LabTechnicianManagement = () => {
                 loading={loading}
                 pagination={{ pageSize: 10 }}
                 locale={{
-                    emptyText: apiError ? 'Lỗi tải dữ liệu' : 'Không có dữ liệu nhân viên'
+                    emptyText: loading ? 'Đang tải dữ liệu...' : 'Không có dữ liệu nhân viên'
                 }}
+                scroll={{ x: 'max-content' }}
+                size="middle"
+                bordered
+                responsive={true}
             />
 
-            {/* Phần modal cập nhật và xem chi tiết sẽ được thêm sau */}
+            {/* Modal cập nhật thông tin nhân viên */}
+            <UpdateLabTechnicianModal
+                visible={isUpdateModalVisible}
+                labTechnician={selectedLabTechnician}
+                onCancel={() => setIsUpdateModalVisible(false)}
+                onSuccess={handleUpdateSuccess}
+            />
+
+            {/* Modal xem chi tiết nhân viên */}
+            <LabTechnicianDetail
+                visible={isProfileDetailVisible}
+                labTechnician={selectedLabTechnician}
+                onCancel={() => setIsProfileDetailVisible(false)}
+            />
         </div>
     );
 };
