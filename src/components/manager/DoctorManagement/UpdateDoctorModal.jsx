@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Form, Input, Select, Button, message } from 'antd';
-import { DoctorSpecialty, ExperienceLevel } from '../../../types/doctor.types';
-import { updateDoctorProfileAPI } from '../../../services/api.service';
+import { updateUserAPI } from '../../../services/api.service';
 
 const UpdateDoctorModal = ({ visible, doctor, onCancel, onSuccess }) => {
     const [form] = Form.useForm();
@@ -12,12 +11,9 @@ const UpdateDoctorModal = ({ visible, doctor, onCancel, onSuccess }) => {
             form.setFieldsValue({
                 fullName: doctor.fullName || '',
                 email: doctor.email || '',
-                phone: doctor.phone || '',
-                specialty: doctor.specialty || DoctorSpecialty.HIV_AIDS,
-                experienceLevel: doctor.experienceLevel || ExperienceLevel.SENIOR,
-                description: doctor.description || '',
-                certificates: doctor.certificates || '',
-                education: doctor.education || ''
+                phoneNumber: doctor.phoneNumber || '',
+                gender: doctor.gender || 'MALE',
+                address: doctor.address || '',
             });
         }
     }, [visible, doctor, form]);
@@ -31,18 +27,15 @@ const UpdateDoctorModal = ({ visible, doctor, onCancel, onSuccess }) => {
             console.log('Update data:', values);
             
             // Chuyển đổi dữ liệu để phù hợp với API
-            const profileData = {
-                full_name: values.fullName,
+            const updateData = {
+                fullName: values.fullName,
                 email: values.email,
-                phone_number: values.phone,
-                specialty: values.specialty,
-                experience_level: values.experienceLevel,
-                description: values.description,
-                certificates: values.certificates,
-                education: values.education
+                phoneNumber: values.phoneNumber,
+                gender: values.gender,
+                address: values.address
             };
             
-            const response = await updateDoctorProfileAPI(doctor.id, profileData);
+            const response = await updateUserAPI(doctor.id, updateData);
             console.log('Update response:', response);
             
             if (onSuccess) {
@@ -84,10 +77,6 @@ const UpdateDoctorModal = ({ visible, doctor, onCancel, onSuccess }) => {
             <Form
                 form={form}
                 layout="vertical"
-                initialValues={{ 
-                    specialty: DoctorSpecialty.HIV_AIDS,
-                    experienceLevel: ExperienceLevel.SENIOR
-                }}
             >
                 <Form.Item
                     name="fullName"
@@ -109,7 +98,7 @@ const UpdateDoctorModal = ({ visible, doctor, onCancel, onSuccess }) => {
                 </Form.Item>
 
                 <Form.Item
-                    name="phone"
+                    name="phoneNumber"
                     label="Số điện thoại"
                     rules={[{ required: true, message: 'Vui lòng nhập số điện thoại' }]}
                 >
@@ -117,50 +106,20 @@ const UpdateDoctorModal = ({ visible, doctor, onCancel, onSuccess }) => {
                 </Form.Item>
 
                 <Form.Item
-                    name="specialty"
-                    label="Chuyên khoa"
-                    rules={[{ required: true, message: 'Vui lòng chọn chuyên khoa' }]}
+                    name="gender"
+                    label="Giới tính"
+                    rules={[{ required: true, message: 'Vui lòng chọn giới tính' }]}
                 >
                     <Select>
-                        {Object.entries(DoctorSpecialty).map(([key, value]) => (
-                            <Select.Option key={key} value={value}>
-                                {value}
-                            </Select.Option>
-                        ))}
+                        <Select.Option value="MALE">Nam</Select.Option>
+                        <Select.Option value="FEMALE">Nữ</Select.Option>
+                        <Select.Option value="OTHER">Khác</Select.Option>
                     </Select>
                 </Form.Item>
 
                 <Form.Item
-                    name="experienceLevel"
-                    label="Kinh nghiệm"
-                    rules={[{ required: true, message: 'Vui lòng chọn mức kinh nghiệm' }]}
-                >
-                    <Select>
-                        {Object.entries(ExperienceLevel).map(([key, value]) => (
-                            <Select.Option key={key} value={value}>
-                                {value}
-                            </Select.Option>
-                        ))}
-                    </Select>
-                </Form.Item>
-
-                <Form.Item
-                    name="description"
-                    label="Mô tả"
-                >
-                    <Input.TextArea rows={4} />
-                </Form.Item>
-
-                <Form.Item
-                    name="education"
-                    label="Học vấn"
-                >
-                    <Input.TextArea rows={3} />
-                </Form.Item>
-
-                <Form.Item
-                    name="certificates"
-                    label="Chứng chỉ"
+                    name="address"
+                    label="Địa chỉ"
                 >
                     <Input.TextArea rows={3} />
                 </Form.Item>

@@ -94,10 +94,11 @@ const fetchAllPatientScheduleAPI = (id) => {
 }
 
 const fetchAccountByRoleAPI = (role) => {
-    // Đối với vai trò được biểu diễn bằng string, sử dụng đúng định dạng endpoint
-    const URL_BACKEND = `/api/user/${role}`
-    console.log(`Fetching accounts with role ${role} from: ${URL_BACKEND}`);
-    return axios.get(URL_BACKEND)
+    // Đảm bảo role được viết hoa theo yêu cầu của BE
+    const uppercaseRole = role.toUpperCase();
+    const URL_BACKEND = `/api/user/${uppercaseRole}`;
+    console.log(`Fetching accounts with role ${uppercaseRole} from: ${URL_BACKEND}`);
+    return axios.get(URL_BACKEND);
 }
 
 const updateAccountAPI = (id, username, email) => {
@@ -141,8 +142,8 @@ const logoutAPI = () => {
 }
 
 const fetchAllDoctorsAPI = () => {
-    // Sử dụng API fetchAccountByRoleAPI có sẵn
-    const URL_BACKEND = '/api/user/doctor';
+    // Sử dụng đúng endpoint và format theo BE
+    const URL_BACKEND = '/api/user/DOCTOR'; // Role phải viết IN HOA: "DOCTOR"
     console.log('Calling API to fetch doctors from:', URL_BACKEND);
     return axios.get(URL_BACKEND);
 }
@@ -346,10 +347,12 @@ const getSchedulesByPatientAPI = (patientId) => {
 
 // Thêm API mới để lấy users theo role
 const fetchUsersByRoleAPI = (role) => {
+    // Đảm bảo role được viết hoa theo yêu cầu của BE
+    const uppercaseRole = role.toUpperCase();
     // Endpoint sử dụng đúng với backend API
-    const URL_BACKEND = `/api/user/role/${role}`;
+    const URL_BACKEND = `/api/user/${uppercaseRole}`;
     
-    console.log(`Fetching users with role ${role} from: ${URL_BACKEND}`);
+    console.log(`Fetching users with role ${uppercaseRole} from: ${URL_BACKEND}`);
     return axios.get(URL_BACKEND);
 }
 

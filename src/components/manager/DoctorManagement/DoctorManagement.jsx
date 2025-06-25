@@ -1,135 +1,84 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Space, Button, message, Tag, Row, Col, Card, Statistic, Spin, Select, Input, Alert } from 'antd';
+import { Table, Space, Button, message, Tag, Row, Col, Card, Statistic, Select, Input, Alert } from 'antd';
 import { UserOutlined, CalendarOutlined, FileTextOutlined } from '@ant-design/icons';
-import { fetchAllDoctorsAPI, fetchDoctorByIdAPI, updateDoctorProfileAPI, fetchDoctorStatisticsAPI } from '../../../services/api.service';
+import { fetchAllDoctorsAPI, fetchDoctorByIdAPI, updateDoctorProfileAPI } from '../../../services/api.service';
 import UpdateDoctorModal from './UpdateDoctorModal';
 import DoctorProfileDetail from './DoctorProfileDetail';
-import { DoctorStatus } from '../../../types/doctor.types';
 import './DoctorManagement.css';
 
 const DoctorManagement = () => {
     const [doctors, setDoctors] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
     const [selectedDoctor, setSelectedDoctor] = useState(null);
     const [isUpdateModalVisible, setIsUpdateModalVisible] = useState(false);
     const [isProfileDetailVisible, setIsProfileDetailVisible] = useState(false);
-    const [doctorStatistics, setDoctorStatistics] = useState(null);
-    const [statisticsLoading, setStatisticsLoading] = useState(false);
     const [selectedDoctorId, setSelectedDoctorId] = useState('all');
     const [searchText, setSearchText] = useState('');
-    const [apiError, setApiError] = useState(null);
+    const [detailLoading, setDetailLoading] = useState(false);
 
-    useEffect(() => {
-        loadDoctors();
-    }, []);
-
+    // Hàm load dữ liệu bác sĩ
     const loadDoctors = async () => {
         setLoading(true);
-        setApiError(null);
+        setError(null);
         try {
-            console.log('Fetching doctors from API...');
             const response = await fetchAllDoctorsAPI();
-            console.log('API response:', response);
+            console.log('Doctors API response:', response);
             
-            // Kiểm tra cấu trúc response để xác định nơi chứa dữ liệu
-            let doctorsData = [];
-            
-            if (response && response.data) {
-                doctorsData = response.data;
-            } else if (response && Array.isArray(response)) {
-                doctorsData = response;
-            } else if (response) {
-                doctorsData = response;
-            }
-            
-            // Đảm bảo doctorsData là một mảng
-            const doctorsList = Array.isArray(doctorsData) ? doctorsData : [];
-            
-            console.log('Doctors data after processing:', doctorsList);
-            
-            if (doctorsList.length > 0) {
-                // Chuyển đổi dữ liệu từ API để phù hợp với cấu trúc component
-                const formattedDoctors = doctorsList.map(doctor => {
-                    // Log để kiểm tra cấu trúc dữ liệu
-                    console.log('Doctor data structure:', doctor);
-                    
-                    // Xử lý các trường hợp khác nhau của cấu trúc dữ liệu
-                    const id = doctor.id || doctor.userId || doctor.user_id;
-                    const fullName = doctor.full_name || doctor.fullName || doctor.name || doctor.username || `BS. ${id}`;
-                    const email = doctor.email || '';
-                    const phone = doctor.phone_number || doctor.phoneNumber || doctor.phone || '';
-                    const status = doctor.account_status || doctor.status || doctor.accountStatus || 'ACTIVE';
-                    
-                    return {
-                        id: id,
-                        fullName: fullName,
-                        specialty: doctor.specialty || 'HIV/AIDS',
-                        email: email,
-                        phone: phone,
-                        status: status,
-                        experienceLevel: doctor.experience_level || doctor.experienceLevel || 'SENIOR',
-                        description: doctor.description || '',
-                        certificates: doctor.certificates || '',
-                        education: doctor.education || '',
-                        avatarUrl: doctor.avatar || doctor.avatarUrl || '',
-                    };
-                });
-                
-                console.log('Formatted doctors:', formattedDoctors);
-                setDoctors(formattedDoctors);
+            // Kiểm tra dữ liệu trả về
+            if (Array.isArray(response)) {
+                // Trường hợp API trả về trực tiếp mảng bác sĩ
+                setDoctors(response);
+            } else if (response && Array.isArray(response.data)) {
+                // Trường hợp API trả về object có thuộc tính data là mảng
+                setDoctors(response.data);
             } else {
-                console.log('No doctor data received');
+                console.warn('Unexpected response format:', response);
                 setDoctors([]);
-                setApiError('Không có dữ liệu bác sĩ từ server');
+                setError('Định dạng dữ liệu không đúng. Vui lòng thử lại sau.');
             }
         } catch (error) {
             console.error('Error fetching doctors:', error);
+            setError('Không thể tải dữ liệu bác sĩ. Vui lòng thử lại sau.');
             setDoctors([]);
-            
-            // Hiển thị thông tin lỗi chi tiết hơn
-            if (error.response) {
-                console.error('Error response:', error.response);
-                setApiError(`Lỗi server: ${error.response.status} - ${error.response.statusText || 'Unknown error'}`);
-            } else if (error.request) {
-                console.error('Error request:', error.request);
-                setApiError('Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.');
-            } else {
-                setApiError(`Lỗi: ${error.message || 'Unknown error'}`);
-            }
-            
-            message.error('Không thể tải danh sách bác sĩ');
         } finally {
             setLoading(false);
         }
     };
 
+    // Gọi API khi component mount
+    useEffect(() => {
+        loadDoctors();
+    }, []);
+
     const handleViewProfile = async (doctor) => {
-        setSelectedDoctor(null);
-        setStatisticsLoading(true);
         try {
-            // Lấy chi tiết bác sĩ
+            // Lấy thông tin chi tiết của bác sĩ từ bảng doctor_profile
+            console.log('Lấy thông tin chi tiết của bác sĩ có ID:', doctor.id);
+            setDetailLoading(true);
             const detailRes = await fetchDoctorByIdAPI(doctor.id);
-            setSelectedDoctor(detailRes.data || doctor);
-            // Lấy thống kê
-            const statsRes = await fetchDoctorStatisticsAPI(doctor.id);
-            setDoctorStatistics(statsRes.data || {
-                appointmentsCount: 0,
-                completedCount: 0,
-                cancelledCount: 0
-            });
-            setIsProfileDetailVisible(true);
+            console.log('Thông tin chi tiết bác sĩ:', detailRes);
+            
+            // Kết hợp thông tin từ cả hai nguồn
+            if (detailRes && detailRes.data) {
+                // Trường hợp API trả về thông tin đầy đủ
+                setSelectedDoctor({
+                    ...doctor,  // Thông tin cơ bản từ danh sách bác sĩ
+                    ...detailRes.data  // Thông tin chi tiết từ doctor_profile
+                });
+            } else {
+                // Nếu không lấy được thông tin chi tiết, sử dụng thông tin cơ bản
+                setSelectedDoctor(doctor);
+                message.warning('Không tìm thấy thông tin chi tiết của bác sĩ');
+            }
         } catch (error) {
-            console.error('Error fetching doctor details:', error);
+            console.error('Lỗi khi lấy thông tin chi tiết bác sĩ:', error);
+            message.error('Không thể tải thông tin chi tiết của bác sĩ');
+            // Sử dụng thông tin cơ bản nếu không lấy được chi tiết
             setSelectedDoctor(doctor);
-            setDoctorStatistics({
-                appointmentsCount: 0,
-                completedCount: 0,
-                cancelledCount: 0
-            });
-            setIsProfileDetailVisible(true);
-            message.warning('Không thể tải đầy đủ thông tin chi tiết bác sĩ');
         } finally {
-            setStatisticsLoading(false);
+            setDetailLoading(false);
+            setIsProfileDetailVisible(true);
         }
     };
 
@@ -146,45 +95,69 @@ const DoctorManagement = () => {
 
     // Lọc danh sách bác sĩ theo dropdown và search
     const filteredDoctors = doctors.filter((doctor) => {
-        const matchDoctor = selectedDoctorId === 'all' || doctor.id.toString() === selectedDoctorId.toString();
-        const matchName = doctor.fullName.toLowerCase().includes(searchText.toLowerCase());
+        const matchDoctor = selectedDoctorId === 'all' || (doctor.id && doctor.id.toString() === selectedDoctorId.toString());
+        const matchName = doctor.fullName && doctor.fullName.toLowerCase().includes(searchText.toLowerCase());
         return matchDoctor && matchName;
     });
+
+    // Định nghĩa trạng thái tài khoản
+    const AccountStatus = {
+        ACTIVE: 'ACTIVE',
+        INACTIVE: 'INACTIVE',
+        SUSPENDED: 'SUSPENDED'
+    };
 
     const columns = [
         {
             title: 'Họ và tên',
             dataIndex: 'fullName',
             key: 'fullName',
-        },
-        {
-            title: 'Chuyên khoa',
-            dataIndex: 'specialty',
-            key: 'specialty',
+            ellipsis: true,
+            width: '15%',
         },
         {
             title: 'Email',
             dataIndex: 'email',
             key: 'email',
+            ellipsis: true,
+            width: '20%',
         },
         {
             title: 'Số điện thoại',
-            dataIndex: 'phone',
-            key: 'phone',
+            dataIndex: 'phoneNumber', // Đúng tên trường từ BE
+            key: 'phoneNumber',
+            width: '12%',
+        },
+        {
+            title: 'Giới tính',
+            dataIndex: 'gender',
+            key: 'gender',
+            width: '8%',
+            render: (gender) => {
+                return gender === 'MALE' ? 'Nam' : gender === 'FEMALE' ? 'Nữ' : 'Khác';
+            }
+        },
+        {
+            title: 'Địa chỉ',
+            dataIndex: 'address',
+            key: 'address',
+            ellipsis: true,
+            width: '20%',
         },
         {
             title: 'Trạng thái',
-            dataIndex: 'status',
-            key: 'status',
+            dataIndex: 'accountStatus', // Đúng tên trường từ BE
+            key: 'accountStatus',
+            width: '10%',
             render: (status) => {
                 let color = 'green';
                 let text = 'Đang hoạt động';
-                if (status === DoctorStatus.INACTIVE) {
+                if (status === AccountStatus.INACTIVE) {
                     color = 'red';
-                    text = 'Tạm nghỉ';
-                } else if (status === DoctorStatus.ON_LEAVE) {
+                    text = 'Không hoạt động';
+                } else if (status === AccountStatus.SUSPENDED) {
                     color = 'orange';
-                    text = 'Nghỉ phép';
+                    text = 'Tạm khóa';
                 }
                 return <Tag color={color}>{text}</Tag>;
             }
@@ -192,12 +165,14 @@ const DoctorManagement = () => {
         {
             title: 'Thao tác',
             key: 'action',
+            fixed: 'right',
+            width: '15%',
             render: (_, record) => (
-                <Space size="middle">
-                    <Button type="primary" onClick={() => handleViewProfile(record)}>
+                <Space size="small">
+                    <Button type="primary" size="small" onClick={() => handleViewProfile(record)}>
                         Xem chi tiết
                     </Button>
-                    <Button onClick={() => handleUpdateDoctor(record)}>
+                    <Button size="small" onClick={() => handleUpdateDoctor(record)}>
                         Cập nhật
                     </Button>
                 </Space>
@@ -207,10 +182,10 @@ const DoctorManagement = () => {
 
     return (
         <div className="doctor-management">
-            {apiError && (
+            {error && (
                 <Alert
                     message="Lỗi kết nối"
-                    description={apiError}
+                    description={error}
                     type="error"
                     showIcon
                     closable
@@ -223,7 +198,7 @@ const DoctorManagement = () => {
                     <Card>
                         <Statistic
                             title="Tổng số bác sĩ"
-                            value={doctors.length}
+                            value={filteredDoctors.length}
                             prefix={<UserOutlined />}
                         />
                     </Card>
@@ -232,7 +207,7 @@ const DoctorManagement = () => {
                     <Card>
                         <Statistic
                             title="Đang làm việc"
-                            value={doctors.filter(d => d.status === DoctorStatus.ACTIVE).length}
+                            value={filteredDoctors.filter(d => d && d.accountStatus === AccountStatus.ACTIVE).length}
                             prefix={<CalendarOutlined />}
                         />
                     </Card>
@@ -240,8 +215,8 @@ const DoctorManagement = () => {
                 <Col xs={24} sm={12} lg={8}>
                     <Card>
                         <Statistic
-                            title="Nghỉ phép"
-                            value={doctors.filter(d => d.status === DoctorStatus.ON_LEAVE).length}
+                            title="Không hoạt động"
+                            value={filteredDoctors.filter(d => d && d.accountStatus !== AccountStatus.ACTIVE).length}
                             prefix={<FileTextOutlined />}
                         />
                     </Card>
@@ -251,34 +226,34 @@ const DoctorManagement = () => {
             <div className="doctor-filters">
                 <Row gutter={16} align="middle">
                     <Col xs={24} md={8}>
-                    <Select
-                        style={{ width: '100%' }}
+                        <Select
+                            style={{ width: '100%' }}
                             placeholder="Chọn bác sĩ"
                             onChange={(value) => setSelectedDoctorId(value)}
-                        value={selectedDoctorId}
-                    >
-                        <Select.Option value="all">Tất cả bác sĩ</Select.Option>
-                        {doctors.map((doctor) => (
-                            <Select.Option key={doctor.id} value={doctor.id}>
-                                {doctor.fullName}
-                            </Select.Option>
-                        ))}
-                    </Select>
-                </Col>
+                            value={selectedDoctorId}
+                        >
+                            <Select.Option value="all">Tất cả bác sĩ</Select.Option>
+                            {doctors.map((doctor) => (
+                                <Select.Option key={doctor.id} value={doctor.id}>
+                                    {doctor.fullName}
+                                </Select.Option>
+                            ))}
+                        </Select>
+                    </Col>
                     <Col xs={24} md={8}>
-                    <Input
+                        <Input
                             placeholder="Tìm kiếm theo tên"
-                        value={searchText}
+                            value={searchText}
                             onChange={(e) => setSearchText(e.target.value)}
-                        allowClear
-                    />
-                </Col>
+                            allowClear
+                        />
+                    </Col>
                     <Col xs={24} md={8}>
                         <Button type="primary" onClick={loadDoctors} loading={loading}>
                             Làm mới dữ liệu
                         </Button>
                     </Col>
-            </Row>
+                </Row>
             </div>
 
             <Table
@@ -288,30 +263,31 @@ const DoctorManagement = () => {
                 loading={loading}
                 pagination={{ pageSize: 10 }}
                 locale={{
-                    emptyText: apiError ? 'Lỗi tải dữ liệu' : 'Không có dữ liệu bác sĩ'
+                    emptyText: loading ? 'Đang tải dữ liệu...' : 'Không có dữ liệu bác sĩ'
                 }}
+                scroll={{ x: 'max-content' }}
+                size="middle"
+                bordered
+                responsive={true}
             />
 
+            {/* Modal cập nhật thông tin bác sĩ */}
             {selectedDoctor && (
-                    <UpdateDoctorModal
-                        visible={isUpdateModalVisible}
-                        doctor={selectedDoctor}
-                        onCancel={() => setIsUpdateModalVisible(false)}
-                        onSuccess={handleUpdateSuccess}
-                    />
+                <UpdateDoctorModal
+                    visible={isUpdateModalVisible}
+                    doctor={selectedDoctor}
+                    onCancel={() => setIsUpdateModalVisible(false)}
+                    onSuccess={handleUpdateSuccess}
+                />
             )}
 
+            {/* Modal xem chi tiết bác sĩ */}
             {selectedDoctor && (
-                    <DoctorProfileDetail
-                        visible={isProfileDetailVisible}
-                        doctor={selectedDoctor}
-                        statistics={doctorStatistics}
-                        loading={statisticsLoading}
-                    onCancel={() => setIsProfileDetailVisible(false)}
-                    onUpdate={() => {
-                        setIsProfileDetailVisible(false);
-                        setIsUpdateModalVisible(true);
-                    }}
+                <DoctorProfileDetail
+                    visible={isProfileDetailVisible}
+                    doctor={selectedDoctor}
+                    onClose={() => setIsProfileDetailVisible(false)}
+                    loading={detailLoading}
                 />
             )}
         </div>
