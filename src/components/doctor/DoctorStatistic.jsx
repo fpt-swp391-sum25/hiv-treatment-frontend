@@ -14,6 +14,9 @@ const Statistic = () => {
     newPatients: 12,
     consultations: 45
   });
+  
+  const { user } = useOutletContext()
+
 
   // Mock data for charts
   const getLineChartData = (filter) => {

@@ -1,30 +1,51 @@
-import React from 'react';
-import { Modal, Descriptions, Tag, Spin, Row, Col, Card, Statistic } from 'antd';
+import React, { useEffect } from 'react';
+import { Modal, Descriptions, Tag, Row, Col, Card, Statistic, Button, Spin } from 'antd';
 import { UserOutlined, ClockCircleOutlined, TeamOutlined } from '@ant-design/icons';
 import './DoctorProfileDetail.css';
 
-const DoctorProfileDetail = ({ visible, doctor, statistics, loading, onClose }) => {
+const DoctorProfileDetail = ({ visible, onClose, doctor, loading }) => {
+    // Debug log
+    useEffect(() => {
+        console.log('DoctorProfileDetail rendered:', { visible, doctor, loading });
+    }, [visible, doctor, loading]);
+
     if (!doctor) return null;
+
+    const handleClose = () => {
+        console.log('Closing doctor profile modal');
+        if (onClose) onClose();
+    };
+
+    // Kiểm tra xem có dữ liệu từ doctor_profile không
+    const hasProfileData = doctor.licenseNumber || doctor.startYear || doctor.qualifications || 
+                          doctor.biography || doctor.background;
 
     return (
         <Modal
             title="Thông tin chi tiết bác sĩ"
             open={visible}
-            onCancel={onClose}
-            footer={null}
+            onCancel={handleClose}
+            footer={[
+                <Button key="back" onClick={handleClose}>
+                    Đóng
+                </Button>
+            ]}
             width={800}
             className="doctor-profile-modal"
+            maskClosable={true}
+            destroyOnClose={true}
         >
             {loading ? (
                 <div className="loading-container">
                     <Spin size="large" />
+                    <p>Đang tải thông tin chi tiết...</p>
                 </div>
-            ) : (
+            ) : doctor ? (
                 <>
                     <div className="profile-header">
                         <div className="avatar-section">
-                            {doctor.avatarUrl ? (
-                                <img src={doctor.avatarUrl} alt="Doctor avatar" className="doctor-avatar" />
+                            {doctor.avatar ? (
+                                <img src={doctor.avatar} alt="Doctor avatar" className="doctor-avatar" />
                             ) : (
                                 <div className="avatar-placeholder">
                                     <UserOutlined />
@@ -32,74 +53,92 @@ const DoctorProfileDetail = ({ visible, doctor, statistics, loading, onClose }) 
                             )}
                         </div>
                         <div className="basic-info">
-                            <h2>{doctor.fullName}</h2>
-                            <p>{doctor.specialty}</p>
-                            <Tag color="blue">{doctor.experienceLevel}</Tag>
+                            <h2>{doctor.fullName || 'Không có tên'}</h2>
+                            <p>Bác sĩ chuyên khoa HIV/AIDS</p>
+                            <Tag color="blue">{doctor.role === 'DOCTOR' ? 'Bác sĩ' : 'Chuyên gia'}</Tag>
+                            {doctor.startYear && (
+                                <p>Kinh nghiệm từ năm {doctor.startYear}</p>
+                            )}
                         </div>
                     </div>
 
-                    {statistics && (
-                        <Row gutter={16} className="statistics-section">
-                            <Col span={8}>
-                                <Card>
-                                    <Statistic
-                                        title="Số bệnh nhân đã khám"
-                                        value={statistics.totalPatients}
-                                        prefix={<TeamOutlined />}
-                                    />
-                                </Card>
-                            </Col>
-                            <Col span={8}>
-                                <Card>
-                                    <Statistic
-                                        title="Giờ làm việc"
-                                        value={statistics.workingHours}
-                                        prefix={<ClockCircleOutlined />}
-                                        suffix="h"
-                                    />
-                                </Card>
-                            </Col>
-                            <Col span={8}>
-                                <Card>
-                                    <Statistic
-                                        title="Đánh giá trung bình"
-                                        value={statistics.averageRating}
-                                        precision={1}
-                                        suffix="/5"
-                                    />
-                                </Card>
-                            </Col>
-                        </Row>
-                    )}
+                    <Row gutter={16} className="statistics-section">
+                        <Col span={8}>
+                            <Card>
+                                <Statistic
+                                    title="Số bệnh nhân đã khám"
+                                    value={0}
+                                    prefix={<TeamOutlined />}
+                                />
+                            </Card>
+                        </Col>
+                        <Col span={8}>
+                            <Card>
+                                <Statistic
+                                    title="Lịch hoàn thành"
+                                    value={0}
+                                    prefix={<ClockCircleOutlined />}
+                                />
+                            </Card>
+                        </Col>
+                        <Col span={8}>
+                            <Card>
+                                <Statistic
+                                    title="Lịch đã hủy"
+                                    value={0}
+                                />
+                            </Card>
+                        </Col>
+                    </Row>
 
                     <Descriptions
                         bordered
                         column={1}
                         className="doctor-details"
+                        title="Thông tin cá nhân"
                     >
                         <Descriptions.Item label="Email">
-                            {doctor.email}
+                            {doctor.email || 'Chưa cập nhật'}
                         </Descriptions.Item>
                         <Descriptions.Item label="Số điện thoại">
-                            {doctor.phone}
+                            {doctor.phoneNumber || 'Chưa cập nhật'}
                         </Descriptions.Item>
-                        <Descriptions.Item label="Chuyên khoa">
-                            {doctor.specialty}
+                        <Descriptions.Item label="Giới tính">
+                            {doctor.gender === 'MALE' ? 'Nam' : doctor.gender === 'FEMALE' ? 'Nữ' : 'Khác'}
                         </Descriptions.Item>
-                        <Descriptions.Item label="Kinh nghiệm">
-                            {doctor.experienceLevel}
+                        <Descriptions.Item label="Địa chỉ">
+                            {doctor.address || 'Chưa cập nhật'}
                         </Descriptions.Item>
-                        <Descriptions.Item label="Mô tả">
-                            {doctor.description}
+                    </Descriptions>
+
+                    <Descriptions
+                        bordered
+                        column={1}
+                        className="doctor-details"
+                        title="Thông tin chuyên môn"
+                        style={{ marginTop: '20px' }}
+                    >
+                        <Descriptions.Item label="Số giấy phép hành nghề">
+                            {doctor.licenseNumber || 'Chưa cập nhật'}
                         </Descriptions.Item>
-                        <Descriptions.Item label="Học vấn">
-                            {doctor.education}
+                        <Descriptions.Item label="Năm bắt đầu hành nghề">
+                            {doctor.startYear || 'Chưa cập nhật'}
                         </Descriptions.Item>
-                        <Descriptions.Item label="Chứng chỉ">
-                            {doctor.certificates}
+                        <Descriptions.Item label="Bằng cấp/Chứng chỉ">
+                            {doctor.qualifications || 'Chưa cập nhật'}
+                        </Descriptions.Item>
+                        <Descriptions.Item label="Nền tảng chuyên môn">
+                            {doctor.background || 'Chưa cập nhật'}
+                        </Descriptions.Item>
+                        <Descriptions.Item label="Tiểu sử">
+                            {doctor.biography || 'Chưa cập nhật'}
                         </Descriptions.Item>
                     </Descriptions>
                 </>
+            ) : (
+                <div className="loading-container">
+                    <p>Không có thông tin bác sĩ</p>
+                </div>
             )}
         </Modal>
     );

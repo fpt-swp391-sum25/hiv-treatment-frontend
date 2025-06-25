@@ -1,175 +1,337 @@
-import React, { useState } from 'react';
-import { Card, Button, Form, Toast, ToastContainer } from 'react-bootstrap';
-import { FaEdit, FaSave, FaTimes, FaCheckCircle } from 'react-icons/fa';
-import '../../styles/doctor/PersonalInfo.css';
+import React, { useState, useEffect } from 'react';
+import {
+  Button,
+  Form,
+  Input,
+  Row,
+  Col,
+  notification,
+  message,
+  Typography,
+  Card,
+} from 'antd';
+import { SaveOutlined } from '@ant-design/icons';
+import { useOutletContext } from 'react-router-dom';
+import {
+  fetchAccountAPI,
+  fetchDoctorByIdAPI,
+  updateDoctorProfileAPI,
+  updateUserAPI,
+} from '../../services/api.service';
 
-const DoctorPersonalProfile = ({ doctorData }) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedData, setEditedData] = useState(doctorData);
-  const [showToast, setShowToast] = useState(false);
+const { Title } = Typography;
 
-  if (!doctorData) return null;
+const DoctorPersonalProfile = () => {
+  const { user, setUser } = useOutletContext();
 
-  const handleEdit = () => {
-    setEditedData(doctorData);
-    setIsEditing(true);
+  const [doctorProfile, setDoctorProfile] = useState({
+    id: '',
+    startYear: '',
+    background: '',
+    biography: '',
+    licenseNumber: '',
+    qualifications: '',
+    doctorId: ''
+  });
+
+  const [editableUser, setEditableUser] = useState({
+    id: '',
+    fullName: '',
+    address: '',
+    gender: '',
+    accountStatus: '',
+    phoneNumber: '',
+    email: '',
+    username: '',
+    password: '',
+    confirmPassword: '',
+    avatar: '',
+    dateOfBirth: '',
+    createdAt: '',
+    isVerified: false,
+    role: '',
+  });
+
+  useEffect(() => {
+    if (user?.id) {
+      setEditableUser({
+        id: user.id,
+        fullName: user.fullName || '',
+        address: user.address || '',
+        gender: user.gender || '',
+        accountStatus: user.accountStatus || '',
+        phoneNumber: user.phoneNumber || '',
+        email: user.email || '',
+        username: user.username || '',
+        password: '',
+        confirmPassword: '',
+        avatar: editableUser.avatar?.trim() === '' ? null : editableUser.avatar,
+        dateOfBirth: user.dateOfBirth || '',
+        createdAt: user.createdAt || '',
+        isVerified: user.isVerified || false,
+        role: user.role?.name || '', 
+      });
+      loadDoctorProfile(user.id);
+    }
+  }, [user]);
+
+  const loadDoctorProfile = async (doctorId) => {
+    try {
+      const response = await fetchDoctorByIdAPI(doctorId);
+      if (response.data) {
+        setDoctorProfile({
+          id: response.data.id,
+          startYear: response.data.startYear || '',
+          background: response.data.background || '',
+          biography: response.data.biography || '',
+          licenseNumber: response.data.licenseNumber || '',
+          qualifications: response.data.qualifications || '',
+          doctorId: doctorId || ''
+        });
+      } else {
+        notification.error({
+          message: 'Hệ thống',
+          description: 'Không thể tải thông tin bác sĩ',
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      notification.error({
+        message: 'Hệ thống',
+        description: 'Đã xảy ra lỗi khi tải thông tin',
+      });
+    }
   };
 
-  const handleCancel = () => {
-    setEditedData(doctorData);
-    setIsEditing(false);
-  };
+  const handleUpdate = async () => {
+    try {
+      const isChangingPassword = editableUser.password.trim().length > 0;
 
-  const handleUpdate = () => {
-    // TODO: Implement API call here
-    setIsEditing(false);
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000);
-  };
+      if (isChangingPassword && editableUser.password !== editableUser.confirmPassword) {
+        message.error('Mật khẩu xác nhận không khớp');
+        return;
+      }
 
-  const handleChange = (field, value) => {
-    setEditedData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+      const userToUpdate = {
+        id: editableUser.id,
+        fullName: editableUser.fullName,
+        address: editableUser.address,
+        gender: editableUser.gender,
+        accountStatus: editableUser.accountStatus,
+        phoneNumber: editableUser.phoneNumber,
+        email: editableUser.email,
+        username: editableUser.username,
+        avatar: editableUser.avatar,
+        dateOfBirth: editableUser.dateOfBirth,
+        createdAt: editableUser.createdAt,
+        isVerified: editableUser.isVerified,
+        role: { name: editableUser.role },
+      };
+
+      if (isChangingPassword) {
+        userToUpdate.password = editableUser.password;
+      }
+
+      const doctorRes = await updateDoctorProfileAPI(doctorProfile.id, doctorProfile);
+      const userRes = await updateUserAPI(editableUser.id, userToUpdate);
+
+      if (doctorRes.data && userRes.data) {
+        notification.success({
+          message: 'Hệ thống',
+          description: 'Cập nhật thông tin thành công',
+        });
+        const updatedUserRes = await fetchAccountAPI(editableUser.id);
+         if (updatedUserRes.data) {
+          setEditableUser({
+            ...editableUser,
+            ...updatedUserRes.data,
+            password: '',
+            confirmPassword: '',
+          });
+          setUser(updatedUserRes.data);
+        }
+      } else {
+        notification.error({
+          message: 'Hệ thống',
+          description: 'Cập nhật thông tin không thành công',
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      message.error('Cập nhật thất bại');
+    }
   };
 
   return (
     <div className="personal-info-container">
-      {/* Toast Notification */}
-      <ToastContainer 
-        position="top-end" 
-        className="p-3" 
-        style={{ zIndex: 1000 }}
+      <Card
+        title={<Title level={4}>Thông tin cá nhân</Title>}
+        extra={
+          <Button
+            type="primary"
+            icon={<SaveOutlined />}
+            onClick={handleUpdate}
+            disabled={
+              editableUser.password &&
+              editableUser.confirmPassword &&
+              editableUser.password !== editableUser.confirmPassword
+            }
+          >
+            Cập nhật
+          </Button>
+        }
       >
-        <Toast 
-          show={showToast} 
-          onClose={() => setShowToast(false)}
-          bg="success"
-          delay={3000}
-          autohide
-        >
-          <Toast.Header closeButton={true}>
-            <FaCheckCircle className="me-2 text-success" />
-            <strong className="me-auto">Thành công</strong>
-          </Toast.Header>
-          <Toast.Body className="text-white">
-            Cập nhật thông tin bác sĩ thành công!
-          </Toast.Body>
-        </Toast>
-      </ToastContainer>
+        <Form layout="vertical">
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item label="Email">
+                <Input
+                  value={editableUser.email}
+                  onChange={(e) =>
+                    setEditableUser((prev) => ({
+                      ...prev,
+                      email: e.target.value,
+                    }))
+                  }
+                />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item label="Số điện thoại">
+                <Input
+                  value={editableUser.phoneNumber}
+                  onChange={(e) =>
+                    setEditableUser((prev) => ({
+                      ...prev,
+                      phoneNumber: e.target.value,
+                    }))
+                  }
+                />
+              </Form.Item>
+            </Col>
+          </Row>
 
-      {/* Trình độ chuyên môn */}
-      <div className="qualification-card">
-        <div className="card-header">
-          <h3 className="card-title">Trình độ chuyên môn</h3>
-          {!isEditing ? (
-            <Button 
-              variant="outline-primary" 
-              onClick={handleEdit}
-              className="edit-button"
-              size="sm"
-            >
-              <FaEdit /> Sửa
-            </Button>
-          ) : (
-            <div className="edit-actions">
-              <Button 
-                variant="success" 
-                onClick={handleUpdate} 
-                className="me-2"
-                size="sm"
-              >
-                <FaSave /> Cập nhật
-              </Button>
-              <Button 
-                variant="outline-secondary" 
-                onClick={handleCancel}
-                size="sm"
-              >
-                <FaTimes /> Hủy
-              </Button>
-            </div>
-          )}
-        </div>
-        <div className="card-content">
-          <div className="info-row">
-            <div className="info-label">Bằng cấp:</div>
-            {isEditing ? (
-              <Form.Control
-                type="text"
-                value={editedData.degree}
-                onChange={(e) => handleChange('degree', e.target.value)}
-                className="edit-input"
-              />
-            ) : (
-              <div className="info-value">• {doctorData.degree}</div>
-            )}
-          </div>
-          
-          <div className="info-row">
-            <div className="info-label">Kinh nghiệm:</div>
-            {isEditing ? (
-              <Form.Control
-                type="number"
-                value={editedData.experience}
-                onChange={(e) => handleChange('experience', e.target.value)}
-                className="edit-input"
-                style={{ width: '100px' }}
-              />
-            ) : (
-              <div className="info-value">• {doctorData.experience} năm</div>
-            )}
-          </div>
-          
-          <div className="info-row">
-            <div className="info-label">Chứng chỉ:</div>
-            <div className="certificates-container">
-              {isEditing ? (
-                editedData.certificates.map((cert, index) => (
-                  <Form.Control
-                    key={index}
-                    type="text"
-                    value={cert}
-                    onChange={(e) => {
-                      const newCerts = [...editedData.certificates];
-                      newCerts[index] = e.target.value;
-                      handleChange('certificates', newCerts);
-                    }}
-                    className="edit-input mb-2"
-                  />
-                ))
-              ) : (
-                <div className="info-value">
-                  {doctorData.certificates.map((cert, index) => (
-                    <div key={index} className="certificate-item">{cert}</div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      {/* Giới thiệu */}
-      <div className="bio-card">
-        <div className="card-header">
-          <h3 className="card-title">Giới thiệu</h3>
-        </div>
-        <div className="card-content">
-          {isEditing ? (
-            <Form.Control
-              as="textarea"
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item label="Mật khẩu mới">
+                <Input.Password
+                  value={editableUser.password}
+                  onChange={(e) =>
+                    setEditableUser((prev) => ({
+                      ...prev,
+                      password: '',
+                      confirmPassword: '',
+                    }))
+                  }
+                  placeholder="Chỉ nhập nếu muốn thay đổi"
+                />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item label="Xác nhận mật khẩu">
+                <Input.Password
+                  value={editableUser.confirmPassword}
+                  onChange={(e) =>
+                    setEditableUser((prev) => ({
+                      ...prev,
+                      confirmPassword: e.target.value,
+                    }))
+                  }
+                  placeholder="Nhập lại mật khẩu"
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item label="Địa chỉ">
+                <Input
+                  value={editableUser.address}
+                  onChange={(e) =>
+                    setEditableUser((prev) => ({
+                      ...prev,
+                      address: e.target.value,
+                    }))
+                  }
+                />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item label="Trình độ chuyên môn">
+                <Input
+                  value={doctorProfile.background}
+                  onChange={(e) =>
+                    setDoctorProfile((prev) => ({
+                      ...prev,
+                      background: e.target.value,
+                    }))
+                  }
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item label="Số giấy phép hành nghề">
+                <Input
+                  value={doctorProfile.licenseNumber}
+                  onChange={(e) =>
+                    setDoctorProfile((prev) => ({
+                      ...prev,
+                      licenseNumber: e.target.value,
+                    }))
+                  }
+                />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item label="Bằng cấp chuyên môn">
+                <Input
+                  value={doctorProfile.qualifications}
+                  onChange={(e) =>
+                    setDoctorProfile((prev) => ({
+                      ...prev,
+                      qualifications: e.target.value,
+                    }))
+                  }
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item label="Năm bắt đầu làm việc">
+                <Input
+                  type="number"
+                  value={doctorProfile.startYear}
+                  onChange={(e) =>
+                    setDoctorProfile((prev) => ({
+                      ...prev,
+                      startYear: e.target.value,
+                    }))
+                  }
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Form.Item label="Giới thiệu">
+            <Input.TextArea
               rows={4}
-              value={editedData.bio}
-              onChange={(e) => handleChange('bio', e.target.value)}
-              className="edit-input"
+              value={doctorProfile.biography}
+              onChange={(e) =>
+                setDoctorProfile((prev) => ({
+                  ...prev,
+                  biography: e.target.value,
+                }))
+              }
             />
-          ) : (
-            <p className="bio-text">{doctorData.bio}</p>
-          )}
-        </div>
-      </div>
+          </Form.Item>
+        </Form>
+      </Card>
     </div>
   );
 };

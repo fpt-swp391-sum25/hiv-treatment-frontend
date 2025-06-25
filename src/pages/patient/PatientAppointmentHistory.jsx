@@ -25,7 +25,7 @@ import {
   MedicineBoxOutlined,
   MessageOutlined
 } from '@ant-design/icons';
-import { scheduleService } from '../../services/schedule.service';
+import { getSchedulesByPatientAPI } from '../../services/api.service';
 import { healthRecordService } from '../../services/health-record.service';
 import { AuthContext } from '../../components/context/AuthContext';
 import { fetchTestResultByHealthRecordIdAPI } from '../../services/api.service';
@@ -57,8 +57,8 @@ export default function PatientAppointmentHistory() {
       }
       try {
         setLoading(true);
-        const data = await scheduleService.getSchedulesByPatient(user.id);
-        setRecords(data);
+        const res = await getSchedulesByPatientAPI(user.id);
+        setRecords(res.data || []);
       } catch (error) {
         message.error('Lỗi khi tải lịch sử khám bệnh');
         console.error(error);
@@ -287,20 +287,23 @@ export default function PatientAppointmentHistory() {
           <div>Không tìm thấy thông tin ca khám.</div>
         ) : (
           <div>
-            <Descriptions title="Thông tin lịch khám" bordered column={2} size="small">
+            {/* Thông tin lịch khám */}
+            <Descriptions title="Thông tin lịch khám" bordered size="small" column={2}>
+              <Descriptions.Item label="Ngày">{healthRecord.schedule?.date}</Descriptions.Item>
+              <Descriptions.Item label="Khung giờ">{healthRecord.schedule?.slot}</Descriptions.Item>
               <Descriptions.Item label="Loại lịch">{healthRecord.schedule?.type}</Descriptions.Item>
               <Descriptions.Item label="Trạng thái">{healthRecord.schedule?.status}</Descriptions.Item>
-              <Descriptions.Item label="Ngày khám">{healthRecord.schedule?.date}</Descriptions.Item>
-              <Descriptions.Item label="Khung giờ">{healthRecord.schedule?.slot}</Descriptions.Item>
               <Descriptions.Item label="Bác sĩ">{healthRecord.schedule?.doctor?.fullName}</Descriptions.Item>
             </Descriptions>
             <Divider />
-            <Descriptions title="Thông tin bệnh nhân" bordered column={2} size="small">
-              <Descriptions.Item label="Mã BN">{healthRecord.schedule?.patient?.patientCode}</Descriptions.Item>
-              <Descriptions.Item label="Họ tên">{healthRecord.schedule?.patient?.fullName}</Descriptions.Item>
+            {/* Thông tin bệnh nhân */}
+            <Descriptions title="Thông tin bệnh nhân" bordered size="small" column={2}>
+              <Descriptions.Item label="Mã bệnh nhân">{healthRecord.schedule?.patient?.patientCode}</Descriptions.Item>
+              <Descriptions.Item label="Tên bệnh nhân">{healthRecord.schedule?.patient?.fullName}</Descriptions.Item>
             </Descriptions>
             <Divider />
-            <Descriptions title="Thông tin sức khỏe" bordered column={2} size="small">
+            {/* Thông tin sức khỏe */}
+            <Descriptions title="Thông tin sức khỏe" bordered size="small" column={2}>
               <Descriptions.Item label="Chiều cao">{healthRecord.height}</Descriptions.Item>
               <Descriptions.Item label="Cân nặng">{healthRecord.weight}</Descriptions.Item>
               <Descriptions.Item label="Nhóm máu">{healthRecord.bloodType}</Descriptions.Item>
@@ -311,7 +314,7 @@ export default function PatientAppointmentHistory() {
             {!healthRecord.regimen ? (
               <div>Chưa có phác đồ điều trị.</div>
             ) : (
-              <Descriptions bordered column={1} size="small">
+              <Descriptions bordered size="small" column={2}>
                 <Descriptions.Item label="Tên phác đồ">{healthRecord.regimen.regimenName}</Descriptions.Item>
                 <Descriptions.Item label="Thành phần">{healthRecord.regimen.components}</Descriptions.Item>
                 <Descriptions.Item label="Mô tả">{healthRecord.regimen.description}</Descriptions.Item>
@@ -323,19 +326,19 @@ export default function PatientAppointmentHistory() {
             {testResults.length === 0 ? (
               <div>Chưa có kết quả xét nghiệm.</div>
             ) : (
-              <Table
-                dataSource={testResults}
-                rowKey="id"
-                pagination={false}
-                size="small"
-                columns={[
-                  { title: 'Loại', dataIndex: 'type', key: 'type' },
-                  { title: 'Kết quả', dataIndex: 'result', key: 'result', render: (text, record) => `${text} ${record.unit}` },
-                  { title: 'Ghi chú', dataIndex: 'note', key: 'note' },
-                  { title: 'Thời gian dự kiến', dataIndex: 'expectedResultTime', key: 'expectedResultTime' },
-                  { title: 'Thời gian nhận kết quả', dataIndex: 'actualResultTime', key: 'actualResultTime' },
-                ]}
-              />
+              testResults.map(test => (
+                <Card key={test.id} style={{ marginBottom: 8 }}>
+                  <Row>
+                    <Col span={8}><b>Loại:</b> {test.type}</Col>
+                    <Col span={8}><b>Kết quả:</b> {test.result} {test.unit}</Col>
+                    <Col span={8}><b>Ghi chú:</b> {test.note}</Col>
+                  </Row>
+                  <Row>
+                    <Col span={12}><b>Thời gian dự kiến:</b> {test.expectedResultTime}</Col>
+                    <Col span={12}><b>Thời gian nhận kết quả:</b> {test.actualResultTime}</Col>
+                  </Row>
+                </Card>
+              ))
             )}
           </div>
         )}

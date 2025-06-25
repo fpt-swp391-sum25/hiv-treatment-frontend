@@ -8,7 +8,7 @@ const { Content } = Layout;
 const { Title } = Typography;
 const LabTechnicianHomePage = () => {
     const [data, setData] = useState([])
-    
+
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -26,11 +26,12 @@ const LabTechnicianHomePage = () => {
             const patientList = patientRes?.data || [];
 
             const mergedData = scheduleList.map((item) => {
-                const matchedPatient = patientList.find(p => p.id === item.patient.id);
+                const patientId = item.patient?.id;
+                const matchedPatient = patientList.find(p => p.id === patientId);
                 return {
                     id: item.id,
                     ...item,
-                    patientCode: matchedPatient?.patientCode || 'N/A',
+                    patientCode: matchedPatient?.displayId || 'N/A',
                     avatar: matchedPatient?.avatar || '',
                     fullName: matchedPatient?.fullName || 'Chưa rõ tên',
                 };
@@ -76,7 +77,7 @@ const LabTechnicianHomePage = () => {
             title: 'Action',
             key: 'action',
             render: (text, record) => (
-                <Button type = "link" onClick={() => handleViewDetail(record)}>
+                <Button type="link" onClick={() => handleViewDetail(record)}>
                     Chi tiết
                 </Button>
             ),
