@@ -22,7 +22,7 @@
   padding: 20px;
   max-width: 320px;
   width: 100%;
-  height: 480px; /* ✅ cố định chiều cao card */
+  height: 400px; /* ✅ cố định chiều cao card */
   display: flex;
   flex-direction: column;
   justify-content: space-between; /* ✅ đảm bảo nút luôn ở đáy */
