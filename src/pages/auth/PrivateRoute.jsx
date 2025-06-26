@@ -1,31 +1,20 @@
-import { useContext } from "react"
-import { AuthContext } from "../../components/context/AuthContext"
-import { Link } from "react-router-dom"
-import { Button, Result } from "antd"
+import { useContext, useEffect, useState } from 'react';
+import { Navigate } from 'react-router-dom';
+
+import { Button, Result, message } from 'antd';
+import { AuthContext } from '../../components/context/AuthContext';
 
 const PrivateRoute = ({ children, requiredRole }) => {
-    const { user } = useContext(AuthContext)
+    const { user, authUser } = useContext(AuthContext);
 
-    // Nếu chưa đăng nhập
-    if (!user || !user.id) {
-        return (
-            <Result
-                status="403"
-                title="Oops!"
-                subTitle="Bạn cần đăng nhập để truy cập trang này!"
-                extra={
-                    <Button type="primary">
-                        <Link to='/login'>
-                            <span>Đăng nhập</span>
-                        </Link>
-                    </Button>
-                }
-            />
-        )
+
+    if (!user.id && !localStorage.getItem('access_token')) {
+        message.error('Vui lòng đăng nhập');
+        return <Navigate to="/login" replace />;
     }
 
-    // Nếu có yêu cầu role và không đúng role
-    if (requiredRole && user.role !== requiredRole) {
+
+    if (requiredRole && !requiredRole.includes(user.role)) {
         return (
             <Result
                 status="403"
@@ -33,17 +22,14 @@ const PrivateRoute = ({ children, requiredRole }) => {
                 subTitle="Bạn không có quyền truy cập trang này!"
                 extra={
                     <Button type="primary">
-                        <Link to='/'>
-                            <span>Về trang chủ</span>
-                        </Link>
+                        <a href="/">Về trang chủ</a>
                     </Button>
                 }
             />
-        )
+        );
     }
 
-    // Nếu đã đăng nhập và có đủ quyền
-    return children
-}
+    return children;
+};
 
-export default PrivateRoute
+export default PrivateRoute;

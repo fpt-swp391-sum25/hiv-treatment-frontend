@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Button, Form, Alert, Row, Col } from 'react-bootstrap';
+import { Modal, Button, Form, Alert, Row, Col, Spinner } from 'react-bootstrap';
 import { ScheduleStatus } from '../../../types/schedule.types';
 import moment from 'moment';
 import './ScheduleDetail.css';
-import { updateScheduleAPI, deleteScheduleAPI } from '../../../services/api.service';
 
 const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToast }) => {
     const [formData, setFormData] = useState({
@@ -18,9 +17,11 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
     });
     const [loading, setLoading] = useState(false);
     const [confirmDelete, setConfirmDelete] = useState(false);
+    const [deleting, setDeleting] = useState(false);
 
     useEffect(() => {
         if (schedule) {
+            console.log('ScheduleDetail: Received schedule data:', schedule);
             setFormData({
                 id: schedule.id,
                 doctorId: schedule.doctorId,
@@ -32,7 +33,10 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                 note: schedule.note || ''
             });
         }
-    }, [schedule]);
+        
+        // Reset confirmDelete state when modal is shown
+        setConfirmDelete(false);
+    }, [schedule, show]);
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -58,12 +62,12 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                 title: `${formData.doctorName} - ${formData.status === ScheduleStatus.AVAILABLE ? 'Làm việc' : 'Nghỉ phép'}`
             };
             
-            // Gọi API cập nhật lịch
-            await updateScheduleAPI(formData.id, updatedSchedule);
+            console.log('ScheduleDetail: Updating schedule:', updatedSchedule);
             
-            // Thông báo thành công và cập nhật UI
+            // Gọi hàm cập nhật từ component cha
             onUpdate(updatedSchedule);
-            onHide();
+            handleClose();
+            onShowToast('Cập nhật lịch thành công', 'success');
         } catch (error) {
             console.error('Error updating schedule:', error);
             onShowToast('Có lỗi xảy ra khi cập nhật lịch', 'danger');
@@ -73,112 +77,148 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
     };
 
     const handleDelete = async () => {
-        if (!confirmDelete) {
-            setConfirmDelete(true);
-            return;
-        }
-
-        setLoading(true);
         try {
-            // Gọi API xóa lịch
-            await deleteScheduleAPI(formData.id);
+            setDeleting(true);
             
-            // Thông báo thành công và cập nhật UI
-            onDelete(formData.id);
+            // Gọi API để xóa lịch
+            console.log('Deleting schedule:', schedule.id);
+            const response = await deleteScheduleAPI(schedule.id);
+            console.log('Delete response:', response);
+            
+            // Xóa dữ liệu lịch trong localStorage và sessionStorage
+            try {
+                const localStorageKeys = Object.keys(localStorage);
+                localStorageKeys.forEach(key => {
+                    if (key.includes('fullcalendar') || key.includes('fc-') || 
+                        key.includes('calendar') || key.includes('event') || 
+                        key.includes('schedule')) {
+                        console.log('Removing from localStorage in handleDelete:', key);
+                        localStorage.removeItem(key);
+                    }
+                });
+                
+                const sessionStorageKeys = Object.keys(sessionStorage);
+                sessionStorageKeys.forEach(key => {
+                    if (key.includes('fullcalendar') || key.includes('fc-') || 
+                        key.includes('calendar') || key.includes('event') || 
+                        key.includes('schedule')) {
+                        console.log('Removing from sessionStorage in handleDelete:', key);
+                        sessionStorage.removeItem(key);
+                    }
+                });
+                
+                // Xóa tất cả dữ liệu trong localStorage và sessionStorage
+                localStorage.removeItem('fc-event-sources');
+                localStorage.removeItem('fc-view-state');
+                sessionStorage.removeItem('fc-event-sources');
+                sessionStorage.removeItem('fc-view-state');
+            } catch (error) {
+                console.error('Error clearing storage:', error);
+            }
+            
+            // Thông báo thành công và đóng modal
+            onShowToast('Đã xóa lịch thành công', 'success');
+            onDelete(schedule.id);
             onHide();
-            setConfirmDelete(false);
         } catch (error) {
             console.error('Error deleting schedule:', error);
-            onShowToast('Có lỗi xảy ra khi xóa lịch', 'danger');
+            onShowToast('Không thể xóa lịch, vui lòng thử lại sau', 'danger');
         } finally {
-            setLoading(false);
+            setDeleting(false);
         }
+    };
+
+    const handleClose = () => {
+        onHide();
+        setConfirmDelete(false);
     };
 
     const formatDate = (dateString) => {
         return moment(dateString).format('DD/MM/YYYY');
     };
 
+    if (!schedule) {
+        return null;
+    }
+
     return (
-        <Modal show={show} onHide={onHide} centered>
+        <Modal show={show} onHide={handleClose} centered>
             <Modal.Header closeButton>
                 <Modal.Title>Chi tiết lịch làm việc</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                {schedule && (
-                    <Form onSubmit={handleSubmit}>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Bác sĩ</Form.Label>
-                            <Form.Control
-                                type="text"
-                                value={formData.doctorName}
-                                disabled
-                            />
-                        </Form.Group>
+                <Form onSubmit={handleSubmit}>
+                    <Form.Group className="mb-3">
+                        <Form.Label>Bác sĩ</Form.Label>
+                        <Form.Control
+                            type="text"
+                            value={formData.doctorName}
+                            disabled
+                        />
+                    </Form.Group>
 
-                        <Form.Group className="mb-3">
-                            <Form.Label>Ngày</Form.Label>
-                            <Form.Control
-                                type="text"
-                                value={formatDate(formData.date)}
-                                disabled
-                            />
-                        </Form.Group>
+                    <Form.Group className="mb-3">
+                        <Form.Label>Ngày</Form.Label>
+                        <Form.Control
+                            type="text"
+                            value={formatDate(formData.date)}
+                            disabled
+                        />
+                    </Form.Group>
 
-                        <Form.Group className="mb-3">
-                            <Form.Label>Trạng thái</Form.Label>
-                            <Form.Select
-                                name="status"
-                                value={formData.status}
-                                onChange={handleChange}
-                            >
-                                <option value={ScheduleStatus.AVAILABLE}>Làm việc</option>
-                                <option value={ScheduleStatus.ON_LEAVE}>Nghỉ phép</option>
-                            </Form.Select>
-                        </Form.Group>
+                    <Form.Group className="mb-3">
+                        <Form.Label>Trạng thái</Form.Label>
+                        <Form.Select
+                            name="status"
+                            value={formData.status}
+                            onChange={handleChange}
+                        >
+                            <option value={ScheduleStatus.AVAILABLE}>Làm việc</option>
+                            <option value={ScheduleStatus.ON_LEAVE}>Nghỉ phép</option>
+                        </Form.Select>
+                    </Form.Group>
 
-                        {formData.status === ScheduleStatus.AVAILABLE && (
-                            <Row>
-                                <Col md={6}>
-                                    <Form.Group className="mb-3">
-                                        <Form.Check 
-                                            type="checkbox"
-                                            id="detail-morning-check"
-                                            label="Buổi sáng"
-                                            name="morning"
-                                            checked={formData.morning}
-                                            onChange={handleChange}
-                                        />
-                                    </Form.Group>
-                                </Col>
-                                <Col md={6}>
-                                    <Form.Group className="mb-3">
-                                        <Form.Check 
-                                            type="checkbox"
-                                            id="detail-afternoon-check"
-                                            label="Buổi chiều"
-                                            name="afternoon"
-                                            checked={formData.afternoon}
-                                            onChange={handleChange}
-                                        />
-                                    </Form.Group>
-                                </Col>
-                            </Row>
-                        )}
+                    {formData.status === ScheduleStatus.AVAILABLE && (
+                        <Row>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Check 
+                                        type="checkbox"
+                                        id="detail-morning-check"
+                                        label="Buổi sáng (8:00 - 12:00)"
+                                        name="morning"
+                                        checked={formData.morning}
+                                        onChange={handleChange}
+                                    />
+                                </Form.Group>
+                            </Col>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Check 
+                                        type="checkbox"
+                                        id="detail-afternoon-check"
+                                        label="Buổi chiều (13:00 - 17:00)"
+                                        name="afternoon"
+                                        checked={formData.afternoon}
+                                        onChange={handleChange}
+                                    />
+                                </Form.Group>
+                            </Col>
+                        </Row>
+                    )}
 
-                        <Form.Group className="mb-3">
-                            <Form.Label>Ghi chú</Form.Label>
-                            <Form.Control
-                                as="textarea"
-                                rows={3}
-                                name="note"
-                                value={formData.note}
-                                onChange={handleChange}
-                                placeholder="Nhập ghi chú (nếu có)"
-                            />
-                        </Form.Group>
-                    </Form>
-                )}
+                    <Form.Group className="mb-3">
+                        <Form.Label>Ghi chú</Form.Label>
+                        <Form.Control
+                            as="textarea"
+                            rows={3}
+                            name="note"
+                            value={formData.note}
+                            onChange={handleChange}
+                            placeholder="Nhập ghi chú (nếu có)"
+                        />
+                    </Form.Group>
+                </Form>
 
                 {confirmDelete && (
                     <Alert variant="danger">
@@ -192,12 +232,23 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                     <Button 
                         variant="danger" 
                         onClick={handleDelete} 
-                        disabled={loading}
+                        disabled={deleting}
                     >
-                        {confirmDelete ? 'Xác nhận xóa' : 'Xóa lịch'}
+                        {deleting ? (
+                            <>
+                                <Spinner animation="border" size="sm" className="me-1" />
+                                Đang xử lý...
+                            </>
+                        ) : (
+                            'Xóa lịch'
+                        )}
                     </Button>
                     <div>
-                        <Button variant="secondary" onClick={onHide} className="me-2">
+                        <Button 
+                            variant="secondary" 
+                            onClick={handleClose} 
+                            className="me-2"
+                        >
                             Hủy
                         </Button>
                         <Button 
@@ -205,7 +256,14 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                             onClick={handleSubmit} 
                             disabled={loading || confirmDelete}
                         >
-                            {loading ? 'Đang xử lý...' : 'Cập nhật'}
+                            {loading && !confirmDelete ? (
+                                <>
+                                    <Spinner animation="border" size="sm" className="me-1" />
+                                    Đang xử lý...
+                                </>
+                            ) : (
+                                'Cập nhật'
+                            )}
                         </Button>
                     </div>
                 </div>

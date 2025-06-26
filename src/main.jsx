@@ -71,9 +71,7 @@ const router = createBrowserRouter([
       {
         path: '/booking',
         element: (
-          <PrivateRoute>
-            <BookingCheckupForm />
-          </PrivateRoute>
+          <PrivateRoute children={<BookingCheckupForm />} />
         ),
         errorElement: <Errors />,
       },
@@ -89,36 +87,40 @@ const router = createBrowserRouter([
       {
         path: '/profile',
         element: (
-          <PrivateRoute>
-            <ProfileDetail />
-          </PrivateRoute>
+          // <PrivateRoute>
+          //   <ProfileDetail />
+          // </PrivateRoute>
+          <PrivateRoute children={<ProfileDetail />} />
         ),
         errorElement: <Errors />,
       },
       {
         path: '/appointment',
         element: (
-          <PrivateRoute>
-            <AppointmentList />
-          </PrivateRoute>
+          // <PrivateRoute>
+          //   <AppointmentList />
+          // </PrivateRoute>
+          <PrivateRoute children={<AppointmentList />} />
         ),
         errorElement: <Errors />,
       },
       {
         path: '/appointment-result/:scheduleId',
         element: (
-          <PrivateRoute>
-            <AppointmentResult />
-          </PrivateRoute>
+          // <PrivateRoute>
+          //   <AppointmentResult />
+          // </PrivateRoute>
+          <PrivateRoute children={<AppointmentResult />} />
         ),
         errorElement: <Errors />,
       },
       {
         path: '/appointment-history',
         element: (
-          <PrivateRoute>
-            <PatientAppointmentHistory />
-          </PrivateRoute>
+          // <PrivateRoute>
+          //   <PatientAppointmentHistory />
+          // </PrivateRoute>
+          <PrivateRoute children={<PatientAppointmentHistory />} />
         ),
         errorElement: <Errors />,
       },
@@ -214,31 +216,31 @@ const router = createBrowserRouter([
   // Path for admin pages
   {
     path: '/admin',
-    element: <AdminPage />,
+    element: (<PrivateRoute children={<AdminPage />} requiredRole={['ADMIN']} />),
     children: [
       {
         index: true,
-        element: <AdminDashboard />,
+        element: (<PrivateRoute children={<AdminDashboard />} requiredRole={['ADMIN']} />),
         errorElement: <Errors />,
       },
       {
         path: '/admin/managers',
-        element: <AccountManagers />,
+        element: (<PrivateRoute children={<AccountManagers />} requiredRole={['ADMIN']} />),
         errorElement: <Errors />,
       },
       {
         path: '/admin/doctors',
-        element: <AccountDoctors />,
+        element: (<PrivateRoute children={<AccountDoctors />} requiredRole={['ADMIN']} />),
         errorElement: <Errors />,
       },
       {
         path: '/admin/lab-technician',
-        element: <AccountLabTechnicians />,
+        element: (<PrivateRoute children={<AccountLabTechnicians />} requiredRole={['ADMIN']} />),
         errorElement: <Errors />,
       },
       {
         path: '/admin/users',
-        element: <AccountPatients />,
+        element: (<PrivateRoute children={<AccountPatients />} requiredRole={['ADMIN']} />),
         errorElement: <Errors />,
       }
     ]

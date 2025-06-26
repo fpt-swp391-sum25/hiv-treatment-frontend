@@ -8,7 +8,7 @@ const UpdateUserModal = (props) => {
     const [email, setEmail] = useState("")
     const [role, setRole] = useState("")
 
-    const { isUpdateModalOpen, setIsUpdateModalOpen, dataUpdate, 
+    const { isUpdateModalOpen, setIsUpdateModalOpen, dataUpdate,
         setDataUpdate, loadAccounts } = props
 
     useEffect(() => {
@@ -57,10 +57,6 @@ const UpdateUserModal = (props) => {
                 <div>
                     <span>Email</span>
                     <Input value={email} onChange={(event) => { setEmail(event.target.value) }} />
-                </div>
-                <div>
-                    <span>Vai trò</span>
-                    <Input disabled value={role} />
                 </div>
             </div>
         </Modal>

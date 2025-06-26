@@ -51,7 +51,7 @@ const fetchAllScheduleAPI = (doctorId, date) => {
         params: {
             doctorId,
             date: date.format('YYYY-MM-DD'),
-            status: 'ACTIVE',
+            status: 'Trống',
         },
     })
 }
@@ -139,21 +139,21 @@ const logoutAPI = () => {
 }
 
 const fetchAllDoctorsAPI = () => {
-    // Truy cập trực tiếp vào bảng users với role = 3 (bác sĩ)
-    const URL_BACKEND = '/api/user/role/3';
+    // Sử dụng API fetchAccountByRoleAPI có sẵn
+    const URL_BACKEND = '/api/user/doctor';
     console.log('Calling API to fetch doctors from:', URL_BACKEND);
     return axios.get(URL_BACKEND);
 }
 
 // Lấy thông tin chi tiết của một bác sĩ
 const fetchDoctorByIdAPI = (doctorId) => {
-    const URL_BACKEND = `/api/doctors/${doctorId}`;
+    const URL_BACKEND = `/api/doctor-profile/doctor-id/${doctorId}`;
     return axios.get(URL_BACKEND);
 }
 
 // Cập nhật thông tin bác sĩ
-const updateDoctorProfileAPI = (doctorId, profileData) => {
-    const URL_BACKEND = `/api/doctors/${doctorId}`;
+const updateDoctorProfileAPI = (id, profileData) => {
+    const URL_BACKEND = `/api/doctor-profile/${id}`;
     return axios.put(URL_BACKEND, profileData);
 }
 
@@ -226,7 +226,7 @@ const updateTestResultAPI = (testResultId, type, result, unit, note, expectedRes
 }
 
 const fetchUserInfoAPI = (id) => {
-    const URL_BACKEND = `/api/user/userId/${id}`
+    const URL_BACKEND = `/api/user/user-id/${id}`
     return axios.get(URL_BACKEND)
 }
 
@@ -280,10 +280,26 @@ const deleteRegimenAPI = (id) => {
     return axios.delete(URL_BACKEND)
 }
 
+const updateUserAPI = (id, updateData) => {
+    const URL_BACKEND = `/api/user/${id}`;
+    return axios.put(URL_BACKEND, updateData)
+}
 // Thêm các API từ schedule.service.js
 const createScheduleAPI = (scheduleData) => {
     const URL_BACKEND = '/api/schedule';
-    return axios.post(URL_BACKEND, scheduleData);
+    console.log('Sending schedule data to API:', scheduleData);
+
+    // Đảm bảo scheduleData có định dạng đúng
+    const formattedData = {
+        doctor_id: scheduleData.doctor_id,
+        date: scheduleData.date,
+        status: scheduleData.status || 'available',
+        morning: scheduleData.morning !== undefined ? scheduleData.morning : true,
+        afternoon: scheduleData.afternoon !== undefined ? scheduleData.afternoon : true,
+        note: scheduleData.note || ''
+    };
+
+    return axios.post(URL_BACKEND, formattedData);
 }
 
 const getAllSchedulesAPI = () => {
@@ -374,6 +390,9 @@ export {
     createRegimenAPI,
     updateRegimenAPI,
     deleteRegimenAPI,
+
+    updateUserAPI,
+
 
     // Thêm các API mới
     createScheduleAPI,

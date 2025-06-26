@@ -4,7 +4,7 @@ import { createAccountAPI, deleteAccountAPI, fetchAccountByRoleAPI } from '../..
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import UpdateUserModal from '../../components/admin/UpdateUserModal';
 
-const AccountPatients= () => {
+const AccountPatients = () => {
 
     const [data, setData] = useState([])
     const [username, setUsername] = useState("")
@@ -77,6 +77,14 @@ const AccountPatients= () => {
             title: 'Email',
             dataIndex: 'email',
             key: 'email',
+            render: (_, { email, verified }) => (
+                <Space>
+                    <span>{email}</span>
+                    <Tag color={verified ? 'green' : 'volcano'} key={verified}>
+                        {verified ? 'Đã xác minh' : 'Chưa xác minh'}
+                    </Tag>
+                </Space>
+            ),
         },
         {
             title: 'Trạng thái',

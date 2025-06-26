@@ -8,6 +8,7 @@ import '../../styles/client/AppHeader.css';
 import { useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { logoutAPI } from '../../services/api.service';
+import '../../styles/global.css'
 
 const { Header } = Layout;
 const { Text } = Typography;

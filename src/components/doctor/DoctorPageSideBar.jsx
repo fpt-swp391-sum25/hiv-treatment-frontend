@@ -25,13 +25,13 @@ const DoctorPageSideBar = () => {
   } = theme.useToken();
   return (
     <Sider
-      width={15 + 'vw'}
+      width={13 + 'vw'}
       breakpoint="md"
       collapsedWidth="60"
-      style={{ backgroundColor: colorBgContainer }}
+      style={{ background: "white" }}
     >
       <Menu theme="light" mode="inline" defaultSelectedKeys={['4']} items={items}
-        selectedKeys={[location.pathname]} />
+        selectedKeys={[location.pathname]} style={{ minHeight: '100vh' }} />
     </Sider>
   );
 };

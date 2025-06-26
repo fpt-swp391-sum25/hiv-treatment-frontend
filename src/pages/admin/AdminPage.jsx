@@ -11,7 +11,7 @@ const Admin = () => {
     const { token: { colorBgContainer, borderRadiusLG },
     } = theme.useToken();
 
-    const { setUser, isAppLoading, setIsAppLoading } = useContext(AuthContext)
+    const { setUser, setAuthUser, isAppLoading, setIsAppLoading } = useContext(AuthContext)
 
     useEffect(() => {
         fetchUserInfo()
@@ -22,6 +22,7 @@ const Admin = () => {
             const response = await fetchAccountAPI()
             if (response.data) {
                 setUser(response.data)
+                setAuthUser(response.data)
                 setIsAppLoading(false)
             }
         } catch (error) {

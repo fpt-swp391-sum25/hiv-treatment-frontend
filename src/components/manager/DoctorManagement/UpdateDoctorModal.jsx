@@ -1,22 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Form, Input, Select, Button, message } from 'antd';
 import { DoctorSpecialty, ExperienceLevel } from '../../../types/doctor.types';
+import { updateDoctorProfileAPI } from '../../../services/api.service';
 
-const UpdateDoctorModal = ({ visible, doctor, onCancel, onSuccess, updateDoctorProfileAPI }) => {
+const UpdateDoctorModal = ({ visible, doctor, onCancel, onSuccess }) => {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         if (visible && doctor) {
             form.setFieldsValue({
-                fullName: doctor.fullName,
-                email: doctor.email,
-                phone: doctor.phone,
-                specialty: doctor.specialty,
-                experienceLevel: doctor.experienceLevel,
-                description: doctor.description,
-                certificates: doctor.certificates,
-                education: doctor.education
+                fullName: doctor.fullName || '',
+                email: doctor.email || '',
+                phone: doctor.phone || '',
+                specialty: doctor.specialty || DoctorSpecialty.HIV_AIDS,
+                experienceLevel: doctor.experienceLevel || ExperienceLevel.SENIOR,
+                description: doctor.description || '',
+                certificates: doctor.certificates || '',
+                education: doctor.education || ''
             });
         }
     }, [visible, doctor, form]);
@@ -26,13 +27,35 @@ const UpdateDoctorModal = ({ visible, doctor, onCancel, onSuccess, updateDoctorP
             const values = await form.validateFields();
             setLoading(true);
             
-            await updateDoctorProfileAPI(doctor.id, values);
+            console.log('Updating doctor with ID:', doctor.id);
+            console.log('Update data:', values);
             
-            onSuccess();
+            // Chuyển đổi dữ liệu để phù hợp với API
+            const profileData = {
+                full_name: values.fullName,
+                email: values.email,
+                phone_number: values.phone,
+                specialty: values.specialty,
+                experience_level: values.experienceLevel,
+                description: values.description,
+                certificates: values.certificates,
+                education: values.education
+            };
+            
+            const response = await updateDoctorProfileAPI(doctor.id, profileData);
+            console.log('Update response:', response);
+            
+            if (onSuccess) {
+                onSuccess();
+            }
             message.success('Cập nhật thông tin bác sĩ thành công');
         } catch (error) {
             console.error('Error updating doctor:', error);
-            message.error('Không thể cập nhật thông tin bác sĩ');
+            if (error.response) {
+                message.error(`Lỗi: ${error.response.status} - ${error.response.data?.message || 'Không thể cập nhật thông tin bác sĩ'}`);
+            } else {
+                message.error('Không thể cập nhật thông tin bác sĩ');
+            }
         } finally {
             setLoading(false);
         }
@@ -61,7 +84,10 @@ const UpdateDoctorModal = ({ visible, doctor, onCancel, onSuccess, updateDoctorP
             <Form
                 form={form}
                 layout="vertical"
-                initialValues={{ specialty: DoctorSpecialty.HIV_AIDS }}
+                initialValues={{ 
+                    specialty: DoctorSpecialty.HIV_AIDS,
+                    experienceLevel: ExperienceLevel.SENIOR
+                }}
             >
                 <Form.Item
                     name="fullName"

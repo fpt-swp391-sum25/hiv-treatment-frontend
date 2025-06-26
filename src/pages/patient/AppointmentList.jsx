@@ -24,21 +24,6 @@ const AppointmentList = () => {
     const [healthRecordData, setHealthRecordData] = useState()
 
 
-    const typeMapping = {
-        APPOINTMENT: 'Đặt khám',
-        FOLLOW_UP: 'Tái khám',
-        CONSULTATION: 'Tư vấn',
-    };
-
-    const statusMapping = {
-        PENDING: 'Chờ thanh toán',
-        PENDING_PAYMENT_CONFIRMED: 'Đã thanh toán',
-        CONFIRMED: 'Đã xác nhận',
-        AVAILABLE: 'Hủy',
-        FAILED: 'Thanh toán thất bại',
-        'Đang hoạt động': 'Đã thanh toán',
-    };
-
     useEffect(() => {
         loadAllSchedule()
         loadUserInfo()
@@ -80,32 +65,6 @@ const AppointmentList = () => {
         }
     }
 
-
-
-    const handlePatientInputChange = async (field, value) => {
-        try {
-            setLoading(true);
-            const updatedPatientInfo = { ...userInfo, [field]: value };
-            setUserInfo(updatedPatientInfo);
-        } catch (error) {
-            console.error('Update patient error:', error.response || error);
-            if (error.response?.status !== 401) {
-                message.error(error.response?.data?.message || 'Lỗi khi cập nhật thông tin cá nhân');
-            }
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleUpdateProfile = async () => {
-        const response = await updateProfileAPI(userInfo)
-        if (response.data) {
-            notification.success({
-                message: 'Hệ thống',
-                description: 'Cập nhật thành công'
-            })
-        }
-    }
 
 
     const handleMonthFilterChange = (date) => {
@@ -162,26 +121,20 @@ const AppointmentList = () => {
             title: 'Loại lịch hẹn',
             dataIndex: 'type',
             key: 'type',
-            render: (type) => typeMapping[type] || type,
+
         },
         {
             title: 'Trạng thái',
             dataIndex: 'status',
             key: 'status',
-            render: (status) => statusMapping[status] || status,
+
         },
         {
             title: 'Hành động',
             key: 'action',
             render: (_, record) => (
                 <>
-                    <Button
-                        type="link"
-                        onClick={() => navigate(`/appointment-result/${record.id}`)}
-                    >
-                        Chi tiết
-                    </Button>
-                    {['PENDING', 'PENDING_PAYMENT_CONFIRMED', 'Đang hoạt động'].includes(record.status) ? (
+                    {['Đã thanh toán', 'Đang chờ thanh toán', 'Đang hoạt động'].includes(record.status) ? (
                         <Popconfirm
                             title="Hủy lịch hẹn"
                             description="Bạn có chắc muốn hủy lịch hẹn này?"

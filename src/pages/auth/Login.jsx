@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import '@ant-design/v5-patch-for-react-19';
 import { Form, Input, Button, Alert, Segmented, Typography, Divider, notification } from 'antd';
 import { useGoogleLogin } from '@react-oauth/google';
@@ -6,6 +6,7 @@ import { GoogleOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { loginAPI } from '../../services/api.service';
 import { useForm } from 'antd/es/form/Form';
+import { AuthContext } from '../../components/context/AuthContext';
 
 const { Link, Text } = Typography;
 
@@ -14,15 +15,17 @@ const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const { authUser, setAuthUser, setUser } = useContext(AuthContext)
 
     const navigate = useNavigate();
+
     const handleLogin = async () => {
         try {
             const response = await loginAPI(username, password)
             setError('Success');
             if (response.data.token) {
                 localStorage.setItem('access_token', response.data.token);
-
+                setUser(response.data)
                 navigate(response.data.role === 'ADMIN' ? '/admin' : '/');
             } else {
                 notification.error({
@@ -30,7 +33,6 @@ const Login = () => {
                     description: JSON.stringify(response.message)
                 })
             }
-            // return response.data;
         } catch (error) {
             setError('Thông tin đăng nhập không hợp lệ!');
         }

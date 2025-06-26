@@ -66,6 +66,14 @@ const AccountDoctors = () => {
             title: 'Email',
             dataIndex: 'email',
             key: 'email',
+            render: (_, { email, verified }) => (
+                <Space>
+                    <span>{email}</span>
+                    <Tag color={verified ? 'green' : 'volcano'} key={verified}>
+                        {verified ? 'Đã xác minh' : 'Chưa xác minh'}
+                    </Tag>
+                </Space>
+            ),
         },
         {
             title: 'Trạng thái',

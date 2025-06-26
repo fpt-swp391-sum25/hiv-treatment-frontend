@@ -43,7 +43,7 @@ const Booking = () => {
     useEffect(() => {
         loadAvailableSlots()
         loadSchedule()
-    }, [doctorId, date])
+    }, [doctorId])
 
     useEffect(() => {
         if (slot) {
@@ -56,13 +56,13 @@ const Booking = () => {
         if (type) {
             let amount;
             switch (type) {
-                case 'APPOINTMENT':
+                case 'Đặt khám':
                     amount = 200000;
                     break;
-                case 'FOLLOW_UP':
+                case 'Tái khám':
                     amount = 150000;
                     break;
-                case 'CONSULTATION':
+                case 'Tư vấn':
                     amount = 100000;
                     break;
                 default:
@@ -86,30 +86,11 @@ const Booking = () => {
         }
     }
 
-    const handleSubmit = async (values) => {
-        // console.log(values)
-
-        // try {
-
-        //     const response = await bookingAPI(values)
-        //     if (response.data) {
-        //         notification.success({
-        //             message: 'Đăng kí thành công'
-        //         })
-        //     }
-        //     // navigate('/booking')
-        //     form.resetFields()
-        // } catch (error) {
-        //     message.error('Có lỗi xảy ra khi đặt lịch. Vui lòng thử lại.');
-        //     console.error('Booking error:', error);
-        // }
-
-
-    };
 
     const onFinish = async (values) => {
         try {
             const selectedSchedules = availableSchedules.filter(schedule => schedule.slot === values.slot);
+            console.log("selected schedule", selectedSchedules)
             if (selectedSchedules.length === 0) {
                 throw new Error('Lịch hẹn không hợp lệ');
             }
@@ -133,20 +114,21 @@ const Booking = () => {
 
 
             const registerResponse = await registerScheduleAPI({
-                scheduleId: scheduleId,
+                scheduleId: schedule.id,
                 patientId: user.id,
                 type: type
             });
 
-            const createHealthRecordResponse = await createHealthRecordAPI(scheduleId)
+            const createHealthRecordResponse = await createHealthRecordAPI(schedule.id)
 
 
             const paymentResponse = await initiatePaymentAPI({
-                scheduleId: scheduleId,
+                scheduleId: schedule.id,
                 amount: selectedAmount,
             });
             window.location.href = paymentResponse.data;
             // console.log("Check payment", paymentResponse.data)
+            // console.log("schedule id", schedule.id)
         } catch (error) {
             message.error(error.message);
         }
@@ -217,33 +199,14 @@ const Booking = () => {
                                 <h1>Đặt lịch khám</h1>
                                 <p>Vui lòng điền thông tin dưới đây để đặt lịch khám với bác sĩ chuyên khoa HIV</p>
                                 <Form form={form} layout="vertical" onFinish={onFinish}>
-                                    <Row gutter={8}>
-                                        <Col span={12}>
-                                            <Form.Item
-                                                name="name"
-                                                label="Họ và tên"
-                                                rules={[{ required: true, message: 'Vui lòng nhập họ và tên' }]}
-                                            >
-                                                <Input placeholder="Nguyễn Văn A" />
-                                            </Form.Item>
-                                        </Col>
-                                        <Col span={12}>
-                                            <Form.Item
-                                                name="phone"
-                                                label="Số điện thoại"
-                                                rules={[{ required: true, message: 'Vui lòng nhập số điện thoại' }]}
-                                            >
-                                                <Input placeholder="0912345678" />
-                                            </Form.Item>
-                                        </Col>
-                                    </Row>
+
 
 
                                     <Form.Item name="type" label="Loại dịch vụ" rules={[{ required: true, message: 'Vui lòng chọn loại dịch vụ' }]}>
                                         <Select placeholder="Chọn loại dịch vụ">
-                                            <Select.Option value="APPOINTMENT">{typeMapping.APPOINTMENT}</Select.Option>
-                                            <Select.Option value="FOLLOW_UP">{typeMapping.FOLLOW_UP}</Select.Option>
-                                            <Select.Option value="CONSULTATION">{typeMapping.CONSULTATION}</Select.Option>
+                                            <Select.Option value="Đặt khám">Đặt khám</Select.Option>
+                                            <Select.Option value="Tái khám">Tái khám</Select.Option>
+                                            <Select.Option value="Tư vấn">Tư vấn</Select.Option>
                                         </Select>
                                     </Form.Item>
 
@@ -256,7 +219,7 @@ const Booking = () => {
                                         }>
                                             {doctors.map(doctor => (
                                                 <Option key={doctor.id} value={doctor.id}>
-                                                    {doctor.user.fullName}
+                                                    {doctor.fullName}
                                                 </Option>
                                             ))}
                                             {/* <Option value="doctor1">Bác sĩ 1</Option>
@@ -287,7 +250,7 @@ const Booking = () => {
                                     </Row>
                                     {selectedSchedule && (
                                         <Descriptions bordered>
-                                            <Descriptions.Item label="Loại lịch hẹn">{typeMapping[type]}</Descriptions.Item>
+                                            <Descriptions.Item label="Loại lịch hẹn">{type}</Descriptions.Item>
                                             <Descriptions.Item label="Giá tiền">{selectedAmount ? selectedAmount.toLocaleString('vi-VN') : '0'} VND</Descriptions.Item>
                                         </Descriptions>
                                     )}
