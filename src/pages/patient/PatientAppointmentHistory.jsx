@@ -28,14 +28,10 @@ import {
 import { getSchedulesByPatientAPI } from '../../services/api.service';
 import { healthRecordService } from '../../services/health-record.service';
 import { AuthContext } from '../../components/context/AuthContext';
-<<<<<<< HEAD
-import { healthRecordService } from '../../services/health-record.service';
-=======
 import { fetchTestResultByHealthRecordIdAPI } from '../../services/api.service';
 
 const { Search } = Input;
 const { Option } = Select;
->>>>>>> 9ae0d00c8510d977e5d7cc9cc4b1591eadf67ae1
 
 export default function PatientAppointmentHistory() {
   const { user } = useContext(AuthContext);
