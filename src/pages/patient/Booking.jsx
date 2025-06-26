@@ -256,7 +256,7 @@ const Booking = () => {
                                         }>
                                             {doctors.map(doctor => (
                                                 <Option key={doctor.id} value={doctor.id}>
-                                                    {doctor.user.fullName}
+                                                    {doctor.doctor.fullName}
                                                 </Option>
                                             ))}
                                             {/* <Option value="doctor1">Bác sĩ 1</Option>

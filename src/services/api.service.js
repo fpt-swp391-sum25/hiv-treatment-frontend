@@ -229,7 +229,7 @@ const updateTestResultAPI = (testResultId, type, result, unit, note, expectedRes
 }
 
 const fetchUserInfoAPI = (id) => {
-    const URL_BACKEND = `/api/user/userId/${id}`
+    const URL_BACKEND = `/api/user/user-id/${id}`
     return axios.get(URL_BACKEND)
 }
 

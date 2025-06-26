@@ -32,14 +32,17 @@ const ScheduleCalendar = () => {
   const { user } = useOutletContext();
 
   useEffect(() => {
-    loadData();
-  }, []);
+    if (user?.id) {
+        loadData();
+    }
+  }, [user?.id]); 
 
   const loadData = async () => {
     try {
       const response = await fetchScheduleByDoctorIdAPI(user.id);
       setSchedule(response.data);
     } catch (error) {
+      setSchedule([]); 
       console.error(error);
     }
   };
@@ -63,7 +66,7 @@ const ScheduleCalendar = () => {
     Array(7).fill(null).map(() => [])
   );
 
-  schedule.forEach((item) => {
+  (schedule || []).forEach((item) => {
     const itemDate = dayjs(item.date);
     if (itemDate.isAfter(weekStart.subtract(1, 'day')) && itemDate.isBefore(weekEnd.add(1, 'day'))) {
       const time = item.slot.substring(0, 5);
