@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { getSchedulesByPatientAPI } from '../../services/api.service';
 import { AuthContext } from '../../components/context/AuthContext';
+import { healthRecordService } from '../../services/health-record.service';
 
 export default function PatientAppointmentHistory() {
   const { user } = useContext(AuthContext);
