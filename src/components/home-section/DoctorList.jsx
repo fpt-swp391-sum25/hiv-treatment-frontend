@@ -35,7 +35,7 @@ const DoctorList = () => {
           console.log(profiles)
 
           const merged = doctors.map(account => {
-              const profile = profiles.find(p => p.user.id === account.id);
+              const profile = profiles.find(p => p.doctor.id === account.id);
               return {
                   ...account,
                   licenseNumber: profile?.licenseNumber || '',
