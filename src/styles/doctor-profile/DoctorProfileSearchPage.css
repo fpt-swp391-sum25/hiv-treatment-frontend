@@ -22,7 +22,7 @@
   padding: 20px;
   max-width: 320px;
   width: 100%;
-  height: 480px; /* ✅ cố định chiều cao card */
+  height: 400px; /* ✅ cố định chiều cao card */
   display: flex;
   flex-direction: column;
   justify-content: space-between; /* ✅ đảm bảo nút luôn ở đáy */
@@ -71,6 +71,7 @@
 
 .btn-primary {
   margin-top: 16px;
+  margin-bottom: 5px;
   padding: 8px 16px;
   border: none;
   border-radius: 6px;

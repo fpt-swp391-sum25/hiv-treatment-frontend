@@ -355,7 +355,7 @@ const ManagerSchedule = () => {
             // Nếu API gặp lỗi, vẫn cập nhật UI với dữ liệu đã nhập
             setSchedules(prevSchedules => 
                 prevSchedules.map(schedule => 
-                    schedule.id === updatedSchedule.id ? updatedSchedule : schedule
+            schedule.id === updatedSchedule.id ? updatedSchedule : schedule
                 )
             );
         }
@@ -541,11 +541,11 @@ const ManagerSchedule = () => {
                         <p className="mt-3">Đang tải dữ liệu lịch...</p>
                     </div>
                 ) : (
-                    <Calendar 
-                        events={filteredSchedules} 
-                        onDateSelect={handleAddClick}
-                        onEventSelect={handleScheduleSelect}
-                    />
+            <Calendar 
+                events={filteredSchedules}
+                onDateSelect={handleAddClick}
+                onEventSelect={handleScheduleSelect}
+            />
                 )}
             </div>
 
