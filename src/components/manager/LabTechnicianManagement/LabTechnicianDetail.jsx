@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, Descriptions, Avatar, Row, Col, Card, Tag } from 'antd';
+import { Modal, Descriptions, Avatar, Row, Col, Card } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import '../DoctorManagement/DoctorProfileDetail.css';
 
@@ -7,24 +7,6 @@ const LabTechnicianDetail = ({ visible, labTechnician, onCancel }) => {
     if (!labTechnician) {
         return null;
     }
-    
-    const getStatusColor = (status) => {
-        switch (status) {
-            case 'ACTIVE': return 'green';
-            case 'INACTIVE': return 'red';
-            case 'SUSPENDED': return 'orange';
-            default: return 'blue';
-        }
-    };
-    
-    const getStatusText = (status) => {
-        switch (status) {
-            case 'ACTIVE': return 'Đang hoạt động';
-            case 'INACTIVE': return 'Không hoạt động';
-            case 'SUSPENDED': return 'Tạm khóa';
-            default: return status;
-        }
-    };
     
     const getGenderText = (gender) => {
         switch (gender) {
@@ -52,26 +34,23 @@ const LabTechnicianDetail = ({ visible, labTechnician, onCancel }) => {
             open={visible}
             onCancel={onCancel}
             footer={null}
-            width={720}
+            width={700}
             className="doctor-profile-detail"
         >
-            <Row gutter={[16, 16]}>
-                <Col xs={24} md={8} className="profile-avatar">
+            <div style={{ display: 'flex', gap: '24px' }}>
+                <div style={{ flex: '0 0 200px', textAlign: 'center' }}>
                     <Avatar 
                         size={120} 
                         icon={<UserOutlined />}
                         src={labTechnician.avatarUrl} 
                         className="avatar"
                     />
-                    <h3 className="fullname">{labTechnician.fullName}</h3>
+                    <h3 className="fullname" style={{ marginTop: '16px' }}>{labTechnician.fullName}</h3>
                     <p className="role">Nhân viên xét nghiệm</p>
-                    <Tag color={getStatusColor(labTechnician.status)}>
-                        {getStatusText(labTechnician.status)}
-                    </Tag>
-                </Col>
+                </div>
                 
-                <Col xs={24} md={16}>
-                    <Card title="Thông tin cá nhân" className="info-card">
+                <div style={{ flex: '1 1 auto' }}>
+                    <Card title="Thông tin cá nhân" className="info-card" bodyStyle={{ padding: 0 }}>
                         <Descriptions column={1} bordered size="small">
                             <Descriptions.Item label="Họ và tên">
                                 {labTechnician.fullName || 'Chưa cập nhật'}
@@ -97,16 +76,10 @@ const LabTechnicianDetail = ({ visible, labTechnician, onCancel }) => {
                             <Descriptions.Item label="Ngày tạo">
                                 {formatDate(labTechnician.createdAt)}
                             </Descriptions.Item>
-                            <Descriptions.Item label="Trạng thái xác thực">
-                                {labTechnician.isVerified ? 
-                                    <Tag color="green">Đã xác thực</Tag> : 
-                                    <Tag color="red">Chưa xác thực</Tag>
-                                }
-                            </Descriptions.Item>
                         </Descriptions>
                     </Card>
-                </Col>
-            </Row>
+                </div>
+            </div>
         </Modal>
     );
 };

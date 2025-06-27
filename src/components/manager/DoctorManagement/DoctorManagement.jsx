@@ -113,26 +113,26 @@ const DoctorManagement = () => {
             dataIndex: 'fullName',
             key: 'fullName',
             ellipsis: true,
-            width: '15%',
+            width: '18%',
         },
         {
             title: 'Email',
             dataIndex: 'email',
             key: 'email',
             ellipsis: true,
-            width: '20%',
+            width: '22%',
         },
         {
             title: 'Số điện thoại',
             dataIndex: 'phoneNumber', // Đúng tên trường từ BE
             key: 'phoneNumber',
-            width: '12%',
+            width: '15%',
         },
         {
             title: 'Giới tính',
             dataIndex: 'gender',
             key: 'gender',
-            width: '8%',
+            width: '10%',
             render: (gender) => {
                 return gender === 'MALE' ? 'Nam' : gender === 'FEMALE' ? 'Nữ' : 'Khác';
             }
@@ -143,24 +143,6 @@ const DoctorManagement = () => {
             key: 'address',
             ellipsis: true,
             width: '20%',
-        },
-        {
-            title: 'Trạng thái',
-            dataIndex: 'accountStatus', // Đúng tên trường từ BE
-            key: 'accountStatus',
-            width: '10%',
-            render: (status) => {
-                let color = 'green';
-                let text = 'Đang hoạt động';
-                if (status === AccountStatus.INACTIVE) {
-                    color = 'red';
-                    text = 'Không hoạt động';
-                } else if (status === AccountStatus.SUSPENDED) {
-                    color = 'orange';
-                    text = 'Tạm khóa';
-                }
-                return <Tag color={color}>{text}</Tag>;
-            }
         },
         {
             title: 'Thao tác',
