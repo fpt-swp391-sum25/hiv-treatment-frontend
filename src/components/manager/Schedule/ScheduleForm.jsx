@@ -18,7 +18,9 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         afternoon: true,
         note: '',
         repeatWeekly: false,
-        repeatCount: 1
+        repeatCount: 1,
+        roomCode: '100',
+        type: 'Khám'
     });
 
     useEffect(() => {
@@ -97,16 +99,18 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
     };
 
     const resetForm = () => {
-            setFormData({
+        setFormData({
             doctorId: selectedDoctor || '',
             doctorName: '',
             date: moment(selectedDate).format('YYYY-MM-DD'),
-                status: ScheduleStatus.AVAILABLE,
-                morning: true,
-                afternoon: true,
-                note: '',
+            status: 'Đang hoạt động',
+            morning: true,
+            afternoon: true,
+            note: '',
             repeatWeekly: false,
-            repeatCount: 1
+            repeatCount: 1,
+            roomCode: '100',
+            type: 'Khám'
         });
     };
 
@@ -281,21 +285,8 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                     </Row>
 
                     <Row>
-                        <Col md={6}>
-                    <Form.Group className="mb-3">
-                        <Form.Label>Trạng thái</Form.Label>
-                        <Form.Select
-                                    name="status"
-                            value={formData.status}
-                                    onChange={handleChange}
-                        >
-                            <option value={ScheduleStatus.AVAILABLE}>Làm việc</option>
-                            <option value={ScheduleStatus.ON_LEAVE}>Nghỉ phép</option>
-                        </Form.Select>
-                    </Form.Group>
-                        </Col>
-                            <Col md={6}>
-                            <Form.Group className="mb-3 mt-4">
+                        <Col md={12}>
+                            <Form.Group className="mb-3 mt-2">
                                 <div className="d-flex flex-column">
                                     <Form.Check 
                                         type="checkbox"
@@ -313,9 +304,9 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                                         onChange={handleChange}
                                     />
                                 </div>
-                                </Form.Group>
-                            </Col>
-                        </Row>
+                            </Form.Group>
+                        </Col>
+                    </Row>
 
                     <Form.Group className="mb-3">
                         <Form.Label>Ghi chú</Form.Label>
@@ -356,6 +347,30 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                     )}
                         </Col>
                     </Row>
+
+                    <Form.Group className="mb-3">
+                        <Form.Label>Mã phòng</Form.Label>
+                        <Form.Control
+                            type="text"
+                            name="roomCode"
+                            value={formData.roomCode}
+                            onChange={handleChange}
+                            placeholder="Nhập mã phòng (vd: 100, 101, ...)"
+                        />
+                    </Form.Group>
+
+                    <Form.Group className="mb-3">
+                        <Form.Label>Loại lịch</Form.Label>
+                        <Form.Select
+                            name="type"
+                            value={formData.type}
+                            onChange={handleChange}
+                        >
+                            <option value="Khám">Khám thông thường</option>
+                            <option value="Tái khám">Tái khám</option>
+                            <option value="Tư vấn">Tư vấn</option>
+                        </Form.Select>
+                    </Form.Group>
                 </Form>
             </Modal.Body>
             <Modal.Footer>
