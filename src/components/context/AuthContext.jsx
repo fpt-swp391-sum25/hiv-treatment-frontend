@@ -1,4 +1,4 @@
-import { createContext, useState } from 'react'
+import { createContext, useState, useEffect } from 'react'
 
 export const AuthContext = createContext({
     email: '',
@@ -20,8 +20,15 @@ export const AuthWrapper = (props) => {
         phoneNumber: ''
     })
 
-
     const [isAppLoading, setIsAppLoading] = useState(false)
+
+    useEffect(() => {
+        // Lấy user từ localStorage nếu có
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            setUser(JSON.parse(storedUser));
+        }
+    }, []);
 
     return (
         <AuthContext.Provider value={{ user, setUser, isAppLoading, setIsAppLoading }} >
