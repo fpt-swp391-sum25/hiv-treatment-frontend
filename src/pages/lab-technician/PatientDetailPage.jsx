@@ -7,8 +7,10 @@ import {
   deleteTestResultAPI,
   createTestResultAPI
 } from "../../services/api.service.js";
-import { Typography, Space, notification, Popconfirm, 
-        Button, Input, Modal, DatePicker, Card, Form, Row, Col, Divider } from 'antd';
+import {
+  Typography, Space, notification, Popconfirm,
+  Button, Input, Modal, DatePicker, Card, Form, Row, Col, Divider
+} from 'antd';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import UpdateTestResultModal from '../../components/lab-technician/UpdateTestResultModal.jsx';
 import dayjs from 'dayjs';
@@ -82,24 +84,24 @@ const PatientDetail = () => {
 
   const handleDeleteTestResult = async (testResultId) => {
     const response = await deleteTestResultAPI(testResultId)
-        if (response.data) {
-            notification.success({
-                message: 'Hệ thống',
-                description: 'Xóa kết quả xét nghiệm thành công'
-            })
-            await loadData()
-        }
+    if (response.data) {
+      notification.success({
+        message: 'Hệ thống',
+        description: 'Xóa kết quả xét nghiệm thành công'
+      })
+      await loadData()
+    }
   }
 
   const resetAndClose = () => {
-        setIsCreateTestResultModalOpen(false)
-        setType('')
-        setNote('')
-        setExpectedResultTime('')
+    setIsCreateTestResultModalOpen(false)
+    setType('')
+    setNote('')
+    setExpectedResultTime('')
   }
 
   return (
-    <div style = {{marginRight: 10 + 'vw', marginLeft: 10 + 'vw'}}>
+    <div style={{ marginRight: 10 + 'vw', marginLeft: 10 + 'vw' }}>
       <Space direction="vertical" style={{ width: "100%" }}>
         <Button onClick={() => navigate(-1)}>← Quay lại</Button>
         <Title level={3} style={{ textAlign: "center", width: "100%" }}>
@@ -107,7 +109,7 @@ const PatientDetail = () => {
         </Title>
       </Space>
 
-      <Card title="Thông tin sức khỏe" style={{ marginTop: 5 + 'vh'}}>
+      <Card title="Thông tin sức khỏe" style={{ marginTop: 5 + 'vh' }}>
         <Form layout="vertical">
           <Row gutter={16}>
             <Col span={12}>
@@ -155,36 +157,36 @@ const PatientDetail = () => {
         </Form>
       </Card>
 
-      <Divider orientation="center" style = {{marginTop: 10 + 'vh'}}>Kết quả xét nghiệm</Divider>
+      <Divider orientation="center" style={{ marginTop: 10 + 'vh' }}>Kết quả xét nghiệm</Divider>
 
       <Button type="primary" onClick={() => setIsCreateTestResultModalOpen(true)}>Tạo mới</Button>
 
       <Modal
-          title="Tạo kết quả xét nghiệm"
-          closable={{ 'aria-label': 'Custom Close Button' }}
-          open={isCreateTestResultModalOpen}
-          onOk={handleCreateTestResult}
-          onCancel={resetAndClose}
-          okText={"Tạo"}
-          cancelText={"Hủy"}
+        title="Tạo kết quả xét nghiệm"
+        closable={{ 'aria-label': 'Custom Close Button' }}
+        open={isCreateTestResultModalOpen}
+        onOk={handleCreateTestResult}
+        onCancel={resetAndClose}
+        okText={"Tạo"}
+        cancelText={"Hủy"}
       >
-          <Form layout="vertical">
-            <Form.Item label="Loại xét nghiệm">
-              <Input value={type} onChange={(event) => setType(event.target.value)} />
-            </Form.Item>
-            <Form.Item label="Ghi chú">
-              <Input value={note} onChange={(event) => setNote(event.target.value)} />
-            </Form.Item>
-            <Form.Item label="Thời gian dự kiến">
-              <DatePicker 
-                    format = "HH:mm DD/MM/YYYY" 
-                    showTime
-                    onChange={(value) => {
-                        setExpectedResultTime(dayjs(value).format("YYYY-MM-DDTHH:mm:ss"))
-                    }}
-                />
-            </Form.Item>
-          </Form>
+        <Form layout="vertical">
+          <Form.Item label="Loại xét nghiệm">
+            <Input value={type} onChange={(event) => setType(event.target.value)} />
+          </Form.Item>
+          <Form.Item label="Ghi chú">
+            <Input value={note} onChange={(event) => setNote(event.target.value)} />
+          </Form.Item>
+          <Form.Item label="Thời gian dự kiến">
+            <DatePicker
+              format="HH:mm DD/MM/YYYY"
+              showTime
+              onChange={(value) => {
+                setExpectedResultTime(dayjs(value).format("YYYY-MM-DDTHH:mm:ss"))
+              }}
+            />
+          </Form.Item>
+        </Form>
       </Modal>
 
       {testResultData.map((test) => (
@@ -193,26 +195,26 @@ const PatientDetail = () => {
             <Col span={8}>
               <p><strong>Loại:</strong> {test.type}</p>
             </Col>
-            
+
             <Col span={8}>
               <p><strong>Kết quả:</strong> {test.result} {test.unit}</p>
             </Col>
             <Col span={8}>
               <p><strong>Ghi chú:</strong> {test.note}</p>
             </Col>
-            
+
             <Col span={8}>
               <p>
                 <strong>Thời gian dự kiến:</strong>{" "}
-                {test.expectedResultTime && !isNaN(new Date(test.expectedResultTime)) 
+                {test.expectedResultTime && !isNaN(new Date(test.expectedResultTime))
                   ? new Intl.DateTimeFormat('vi-VN', {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                      day: '2-digit',
-                      month: '2-digit',
-                      year: 'numeric',
-                      hour12: false,
-                    }).format(new Date(test.expectedResultTime))
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour12: false,
+                  }).format(new Date(test.expectedResultTime))
                   : ''
                 }
               </p>
@@ -221,15 +223,15 @@ const PatientDetail = () => {
             <Col span={8}>
               <p>
                 <strong>Thời gian nhận kết quả:</strong>{" "}
-                {test.actualResultTime && !isNaN(new Date(test.actualResultTime)) 
+                {test.actualResultTime && !isNaN(new Date(test.actualResultTime))
                   ? new Intl.DateTimeFormat('vi-VN', {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                      day: '2-digit',
-                      month: '2-digit',
-                      year: 'numeric',
-                      hour12: false,
-                    }).format(new Date(test.actualResultTime))
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour12: false,
+                  }).format(new Date(test.actualResultTime))
                   : ''
                 }
               </p>
@@ -264,7 +266,7 @@ const PatientDetail = () => {
         dataUpdate={dataUpdate}
         setDataUpdate={setDataUpdate}
         loadData={loadData}
-      />  
+      />
     </div>
   );
 };

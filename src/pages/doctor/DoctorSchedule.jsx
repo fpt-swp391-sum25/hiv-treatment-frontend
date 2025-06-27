@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Select, Card } from 'antd';
 import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import '../../styles/doctor/Schedule.css';
 import { fetchScheduleByDoctorIdAPI } from '../../services/api.service';
 import { useOutletContext } from "react-router-dom";
+import { AuthContext } from '../../components/context/AuthContext';
 
 dayjs.extend(isoWeek);
 
@@ -29,17 +30,20 @@ const ScheduleCalendar = () => {
   const [selectedMonth, setSelectedMonth] = useState(today.month());
   const [selectedWeek, setSelectedWeek] = useState(today.isoWeek());
 
-  const { user } = useOutletContext();
+  const { user } = useContext(AuthContext);
 
   useEffect(() => {
-    loadData();
-  }, []);
+    if (user?.id) {
+      loadData();
+    }
+  }, [user?.id]);
 
   const loadData = async () => {
     try {
       const response = await fetchScheduleByDoctorIdAPI(user.id);
       setSchedule(response.data);
     } catch (error) {
+      setSchedule([]);
       console.error(error);
     }
   };
@@ -63,7 +67,7 @@ const ScheduleCalendar = () => {
     Array(7).fill(null).map(() => [])
   );
 
-  schedule.forEach((item) => {
+  (schedule || []).forEach((item) => {
     const itemDate = dayjs(item.date);
     if (itemDate.isAfter(weekStart.subtract(1, 'day')) && itemDate.isBefore(weekEnd.add(1, 'day'))) {
       const time = item.slot.substring(0, 5);

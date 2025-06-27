@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   Button,
   Form,
@@ -18,11 +18,12 @@ import {
   updateDoctorProfileAPI,
   updateUserAPI,
 } from '../../services/api.service';
+import { AuthContext } from '../context/AuthContext';
 
 const { Title } = Typography;
 
 const DoctorPersonalProfile = () => {
-  const { user, setUser } = useOutletContext();
+  const { user, setUser } = useContext(AuthContext);
 
   const [doctorProfile, setDoctorProfile] = useState({
     id: '',
@@ -69,7 +70,7 @@ const DoctorPersonalProfile = () => {
         dateOfBirth: user.dateOfBirth || '',
         createdAt: user.createdAt || '',
         isVerified: user.isVerified || false,
-        role: user.role?.name || '', 
+        role: user.role?.name || '',
       });
       loadDoctorProfile(user.id);
     }
@@ -141,7 +142,7 @@ const DoctorPersonalProfile = () => {
           description: 'Cập nhật thông tin thành công',
         });
         const updatedUserRes = await fetchAccountAPI(editableUser.id);
-         if (updatedUserRes.data) {
+        if (updatedUserRes.data) {
           setEditableUser({
             ...editableUser,
             ...updatedUserRes.data,

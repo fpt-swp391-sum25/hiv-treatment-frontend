@@ -94,8 +94,11 @@ const fetchAllPatientScheduleAPI = (id) => {
 }
 
 const fetchAccountByRoleAPI = (role) => {
-    const URL_BACKEND = `/api/user/${role}`
-    return axios.get(URL_BACKEND)
+    // Đảm bảo role được viết hoa theo yêu cầu của BE
+    const uppercaseRole = role.toUpperCase();
+    const URL_BACKEND = `/api/user/${uppercaseRole}`;
+    console.log(`Fetching accounts with role ${uppercaseRole} from: ${URL_BACKEND}`);
+    return axios.get(URL_BACKEND);
 }
 
 const updateAccountAPI = (id, username, email) => {
@@ -139,8 +142,8 @@ const logoutAPI = () => {
 }
 
 const fetchAllDoctorsAPI = () => {
-    // Sử dụng API fetchAccountByRoleAPI có sẵn
-    const URL_BACKEND = '/api/user/doctor';
+    // Sử dụng đúng endpoint và format theo BE
+    const URL_BACKEND = '/api/user/DOCTOR'; // Role phải viết IN HOA: "DOCTOR"
     console.log('Calling API to fetch doctors from:', URL_BACKEND);
     return axios.get(URL_BACKEND);
 }
@@ -344,8 +347,20 @@ const getSchedulesByPatientAPI = (patientId) => {
 
 // Thêm API mới để lấy users theo role
 const fetchUsersByRoleAPI = (role) => {
-    const URL_BACKEND = `/api/user/role/${role}`
-    return axios.get(URL_BACKEND)
+    // Đảm bảo role được viết hoa theo yêu cầu của BE
+    const uppercaseRole = role.toUpperCase();
+    // Endpoint sử dụng đúng với backend API
+    const URL_BACKEND = `/api/user/${uppercaseRole}`;
+    
+    console.log(`Fetching users with role ${uppercaseRole} from: ${URL_BACKEND}`);
+    return axios.get(URL_BACKEND);
+}
+
+// Thêm API mới để lấy danh sách nhân viên xét nghiệm
+const fetchAllLabTechniciansAPI = () => {
+    const URL_BACKEND = '/api/user/LAB_TECHNICIAN';
+    console.log('Calling API to fetch lab technicians from:', URL_BACKEND);
+    return axios.get(URL_BACKEND);
 }
 
 export {
@@ -404,5 +419,6 @@ export {
     updateScheduleAPI,
     deleteScheduleAPI,
     getSchedulesByPatientAPI,
-    fetchUsersByRoleAPI
+    fetchUsersByRoleAPI,
+    fetchAllLabTechniciansAPI
 }

@@ -1,53 +1,59 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Form, Input, Select, Button, message } from 'antd';
+import { Modal, Form, Input, Select, Button, message, DatePicker } from 'antd';
 import { updateUserAPI } from '../../../services/api.service';
+import moment from 'moment';
 
-const UpdateDoctorModal = ({ visible, doctor, onCancel, onSuccess }) => {
+const UpdateLabTechnicianModal = ({ visible, labTechnician, onCancel, onSuccess }) => {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        if (visible && doctor) {
+        if (visible && labTechnician) {
+            // Đặt giá trị cho form từ dữ liệu nhân viên
             form.setFieldsValue({
-                fullName: doctor.fullName || '',
-                email: doctor.email || '',
-                phoneNumber: doctor.phoneNumber || '',
-                gender: doctor.gender || 'MALE',
-                address: doctor.address || '',
+                fullName: labTechnician.fullName || '',
+                email: labTechnician.email || '',
+                phone: labTechnician.phone || '',
+                gender: labTechnician.gender || 'MALE',
+                address: labTechnician.address || '',
+                status: labTechnician.status || 'ACTIVE',
+                dateOfBirth: labTechnician.dateOfBirth ? moment(labTechnician.dateOfBirth, 'YYYY-MM-DD') : null
             });
         }
-    }, [visible, doctor, form]);
+    }, [visible, labTechnician, form]);
 
     const handleSubmit = async () => {
         try {
             const values = await form.validateFields();
             setLoading(true);
             
-            console.log('Updating doctor with ID:', doctor.id);
+            console.log('Updating lab technician with ID:', labTechnician.id);
             console.log('Update data:', values);
             
             // Chuyển đổi dữ liệu để phù hợp với API
             const updateData = {
                 fullName: values.fullName,
                 email: values.email,
-                phoneNumber: values.phoneNumber,
+                phoneNumber: values.phone,
                 gender: values.gender,
-                address: values.address
+                address: values.address,
+                accountStatus: values.status,
+                dateOfBirth: values.dateOfBirth ? values.dateOfBirth.format('YYYY-MM-DD') : null
             };
             
-            const response = await updateUserAPI(doctor.id, updateData);
+            const response = await updateUserAPI(labTechnician.id, updateData);
             console.log('Update response:', response);
             
             if (onSuccess) {
                 onSuccess();
             }
-            message.success('Cập nhật thông tin bác sĩ thành công');
+            message.success('Cập nhật thông tin nhân viên thành công');
         } catch (error) {
-            console.error('Error updating doctor:', error);
+            console.error('Error updating lab technician:', error);
             if (error.response) {
-                message.error(`Lỗi: ${error.response.status} - ${error.response.data?.message || 'Không thể cập nhật thông tin bác sĩ'}`);
+                message.error(`Lỗi: ${error.response.status} - ${error.response.data?.message || 'Không thể cập nhật thông tin nhân viên'}`);
             } else {
-                message.error('Không thể cập nhật thông tin bác sĩ');
+                message.error('Không thể cập nhật thông tin nhân viên');
             }
         } finally {
             setLoading(false);
@@ -56,7 +62,7 @@ const UpdateDoctorModal = ({ visible, doctor, onCancel, onSuccess }) => {
 
     return (
         <Modal
-            title="Cập nhật thông tin bác sĩ"
+            title="Cập nhật thông tin nhân viên xét nghiệm"
             open={visible}
             onCancel={onCancel}
             footer={[
@@ -77,6 +83,10 @@ const UpdateDoctorModal = ({ visible, doctor, onCancel, onSuccess }) => {
             <Form
                 form={form}
                 layout="vertical"
+                initialValues={{ 
+                    gender: 'MALE',
+                    status: 'ACTIVE'
+                }}
             >
                 <Form.Item
                     name="fullName"
@@ -98,7 +108,7 @@ const UpdateDoctorModal = ({ visible, doctor, onCancel, onSuccess }) => {
                 </Form.Item>
 
                 <Form.Item
-                    name="phoneNumber"
+                    name="phone"
                     label="Số điện thoại"
                     rules={[{ required: true, message: 'Vui lòng nhập số điện thoại' }]}
                 >
@@ -118,14 +128,33 @@ const UpdateDoctorModal = ({ visible, doctor, onCancel, onSuccess }) => {
                 </Form.Item>
 
                 <Form.Item
+                    name="dateOfBirth"
+                    label="Ngày sinh"
+                >
+                    <DatePicker format="DD-MM-YYYY" style={{ width: '100%' }} />
+                </Form.Item>
+
+                <Form.Item
                     name="address"
                     label="Địa chỉ"
                 >
-                    <Input.TextArea rows={3} />
+                    <Input.TextArea rows={2} />
+                </Form.Item>
+
+                <Form.Item
+                    name="status"
+                    label="Trạng thái"
+                    rules={[{ required: true, message: 'Vui lòng chọn trạng thái' }]}
+                >
+                    <Select>
+                        <Select.Option value="ACTIVE">Đang hoạt động</Select.Option>
+                        <Select.Option value="INACTIVE">Không hoạt động</Select.Option>
+                        <Select.Option value="SUSPENDED">Tạm khóa</Select.Option>
+                    </Select>
                 </Form.Item>
             </Form>
         </Modal>
     );
 };
 
-export default UpdateDoctorModal;
+export default UpdateLabTechnicianModal; 

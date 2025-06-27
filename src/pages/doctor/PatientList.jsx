@@ -1,20 +1,25 @@
-import { Layout, Button, Table, Typography, Input, 
-    DatePicker, Select, Row, Col} from "antd";
-import { useState, useEffect } from "react";
-import { fetchUsersAPI, 
+import {
+    Layout, Button, Table, Typography, Input,
+    DatePicker, Select, Row, Col
+} from "antd";
+import { useState, useEffect, useContext } from "react";
+import {
+    fetchUsersAPI,
     fetchScheduleByDoctorIdAPI,
-    fetchHealthRecordByScheduleIdAPI 
- } from "../../services/api.service";
-import { Outlet, useNavigate, useOutletContext } from "react-router-dom";
+    fetchHealthRecordByScheduleIdAPI
+} from "../../services/api.service";
+import { Outlet, useNavigate } from "react-router-dom";
 import dayjs from 'dayjs';
-import 'dayjs/locale/vi'; 
-import viVN from 'antd/es/date-picker/locale/vi_VN'; 
+import 'dayjs/locale/vi';
+import viVN from 'antd/es/date-picker/locale/vi_VN';
+import { AuthContext } from "../../components/context/AuthContext";
 dayjs.locale('vi');
 
 const { Content } = Layout;
 const { Title } = Typography;
 
 const PatientList = () => {
+    const { user } = useContext(AuthContext);
     const [data, setData] = useState([])
     const [searchText, setSearchText] = useState('');
     const [selectedYear, setSelectedYear] = useState(null);
@@ -22,8 +27,8 @@ const PatientList = () => {
     const [selectedDate, setSelectedDate] = useState(null);
     const [filteredData, setFilteredData] = useState([]);
 
-    const { user } = useOutletContext();
-    
+
+
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -45,9 +50,10 @@ const PatientList = () => {
 
     useEffect(() => {
         loadData();
-    }, []); 
+    }, []);
 
-   const loadData = async () => {
+    const loadData = async () => {
+        console.log(">>>>>>>>>>check user", user)
         try {
             const [scheduleRes, patientRes] = await Promise.all([
                 fetchScheduleByDoctorIdAPI(user.id),
@@ -60,7 +66,7 @@ const PatientList = () => {
             const healthRecordPromises = scheduleList.map(item =>
                 fetchHealthRecordByScheduleIdAPI(item.id).then(
                     res => ({ scheduleId: item.id, data: res.data }),
-                    err => ({ scheduleId: item.id, data: null }) 
+                    err => ({ scheduleId: item.id, data: null })
                 )
             );
 
@@ -135,7 +141,7 @@ const PatientList = () => {
         {
             key: 'action',
             render: (text, record) => (
-                <Button type = "link" onClick={() => handleViewDetail(record)}>
+                <Button type="link" onClick={() => handleViewDetail(record)}>
                     Chi tiết
                 </Button>
             ),
@@ -145,59 +151,61 @@ const PatientList = () => {
     return (
         <Layout>
             <Row gutter={[16, 16]} style={{ margin: '3vh 1vw 0 1vw' }}>
-            <Col xs={24} md={6}>
-                <Input
-                    placeholder="Tìm theo tên hoặc mã bệnh nhân"
-                    value={searchText}
-                    onChange={e => setSearchText(e.target.value)}
-                />
-            </Col>
-            <Col xs={24} md={6}>
-                <Select
-                    placeholder="Lọc theo năm"
-                    style={{ width: '100%' }}
-                    allowClear
-                    value={selectedYear}
-                    onChange={value => setSelectedYear(value)}
-                >
-                    {Array.from({ length: 6 }, (_, i) => 2025 + i).map(year => (
-                        <Select.Option key={year} value={year}>
-                            {year}
-                        </Select.Option>
-                    ))}
-                </Select>
-            </Col>
-            <Col xs={24} md={6}>
-                <DatePicker
-                    picker="month"
-                    placeholder="Lọc theo tháng"
-                    style={{ width: '100%' }}
-                    value={selectedMonth}
-                    onChange={(date) => setSelectedMonth(date)}
-                    allowClear
-                    locale={viVN}
-                />
-            </Col>
-            <Col xs={24} md={6}>
-                <DatePicker
-                    placeholder="Lọc theo ngày"
-                    style={{ width: '100%' }}
-                    value={selectedDate}
-                    onChange={(date) => setSelectedDate(date)}
-                    allowClear
-                    locale={viVN}
-                />  
-            </Col>
-        </Row>
+                <Col xs={24} md={6}>
+                    <Input
+                        placeholder="Tìm theo tên hoặc mã bệnh nhân"
+                        value={searchText}
+                        onChange={e => setSearchText(e.target.value)}
+                    />
+                </Col>
+                <Col xs={24} md={6}>
+                    <Select
+                        placeholder="Lọc theo năm"
+                        style={{ width: '100%' }}
+                        allowClear
+                        value={selectedYear}
+                        onChange={value => setSelectedYear(value)}
+                    >
+                        {Array.from({ length: 6 }, (_, i) => 2025 + i).map(year => (
+                            <Select.Option key={year} value={year}>
+                                {year}
+                            </Select.Option>
+                        ))}
+                    </Select>
+                </Col>
+                <Col xs={24} md={6}>
+                    <DatePicker
+                        picker="month"
+                        placeholder="Lọc theo tháng"
+                        style={{ width: '100%' }}
+                        value={selectedMonth}
+                        onChange={(date) => setSelectedMonth(date)}
+                        allowClear
+                        locale={viVN}
+                    />
+                </Col>
+                <Col xs={24} md={6}>
+                    <DatePicker
+                        placeholder="Lọc theo ngày"
+                        style={{ width: '100%' }}
+                        value={selectedDate}
+                        onChange={(date) => setSelectedDate(date)}
+                        allowClear
+                        locale={viVN}
+                    />
+                </Col>
+            </Row>
 
             <Content>
-                <div style={{ display: 'flex', justifyContent: 'space-between', 
-                    padding: '15px', margin: '0 0 0 10px'}}>
+                <div style={{
+                    display: 'flex', justifyContent: 'space-between',
+                    padding: '15px', margin: '0 0 0 10px'
+                }}>
                     <Title>Danh sách bệnh nhân</Title>
                 </div>
-                <Table style = {{ margin: '0 10px 0 10px'}}
+                <Table style={{ margin: '0 10px 0 10px' }}
                     columns={columns}
-                   dataSource={[...filteredData].sort((a, b) => {
+                    dataSource={[...filteredData].sort((a, b) => {
                         if (a.treatmentStatus === 'Đang chờ khám' && b.treatmentStatus !== 'Đang chờ khám') return -1;
                         if (a.treatmentStatus !== 'Đang chờ khám' && b.treatmentStatus === 'Đang chờ khám') return 1;
                         return 0;

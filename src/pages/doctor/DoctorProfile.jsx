@@ -1,10 +1,11 @@
-import React, { useState, Suspense } from 'react';
+import React, { useState, Suspense, useContext } from 'react';
 import { Card, Row, Col, Tabs, Skeleton, Avatar, Typography } from 'antd';
 import { MailOutlined, PhoneOutlined } from '@ant-design/icons';
 import DoctorPersonalProfile from '../../components/doctor/DoctorPersonalProfile';
 import DoctorStatistic from '../../components/doctor/DoctorStatistic';
 import doctorProfileImage from '../../assets/doctorProfile.png';
 import { useOutletContext } from 'react-router-dom';
+import { AuthContext } from '../../components/context/AuthContext';
 
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
@@ -16,7 +17,7 @@ const TabContentSkeleton = () => (
 const DoctorProfile = () => {
   const [activeTab, setActiveTab] = useState('personal-info');
 
-  const { user } = useOutletContext();
+  const { user } = useContext(AuthContext);
 
   return (
     <div style={{ padding: '24px' }}>
@@ -57,7 +58,7 @@ const DoctorProfile = () => {
               label: 'Thông tin cá nhân',
               children: (
                 <Suspense fallback={<TabContentSkeleton />}>
-                  <DoctorPersonalProfile/>
+                  <DoctorPersonalProfile />
                 </Suspense>
               )
             },

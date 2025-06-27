@@ -14,7 +14,7 @@ const DoctorHome = () => {
     }, [])
 
     const { user, setUser, isAppLoading, setIsAppLoading } = useContext(AuthContext)
-    
+
     const fetchUserInfo = async () => {
         try {
             const response = await fetchAccountAPI()
@@ -39,7 +39,7 @@ const DoctorHome = () => {
                 <DoctorPageSideBar />
                 <Layout style={{ padding: "16px" }}>
                     <Content>
-                        <Outlet context={{ user, setUser}} />
+                        <Outlet />
                     </Content>
                 </Layout>
             </Layout>
