@@ -45,11 +45,15 @@ const RegimenList = () => {
     if (response.data) {
       notification.success({
         message: 'Hệ thống',
+        showProgress: true,
+        pauseOnHover: true,
         description: 'Tạo mới phác đồ thành công'
       })
     } else {
       notification.error({
         message: 'Hệ thống',
+        showProgress: true,
+        pauseOnHover: true,
         description: 'Lỗi xảy ra trong quá trình tạo phác đồ'
       })
     }
@@ -62,12 +66,16 @@ const RegimenList = () => {
     if (response.data) {
       notification.success({
         message: 'Hệ thống',
+        showProgress: true,
+        pauseOnHover: true,
         description: 'Xóa phác đồ thành công'
       })
     }
     else {
       notification.error({
         message: 'Hệ thống',
+        showProgress: true,
+        pauseOnHover: true,
         description: 'Lỗi khi xóa phác đồ'
       })
     }

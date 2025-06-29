@@ -37,6 +37,8 @@ const AccountManagers = () => {
         if (response.data) {
             notification.success({
                 message: 'Hệ thống',
+                showProgress: true,
+                pauseOnHover: true,
                 description: 'Tạo tài khoản thành công'
             })
         }
@@ -49,6 +51,8 @@ const AccountManagers = () => {
         if (response.data) {
             notification.success({
                 message: 'Hệ thống',
+                showProgress: true,
+                pauseOnHover: true,
                 description: 'Xóa tài khoản thành công'
             })
             await loadAccounts()
@@ -160,10 +164,7 @@ const AccountManagers = () => {
                         <span>Mật khẩu</span>
                         <Input.Password value={password} onChange={(event) => { setPassword(event.target.value) }} />
                     </div>
-                    <div>
-                        <span>Vai trò</span>
-                        <Input disabled value={role} />
-                    </div>
+
                 </div>
             </Modal>
 

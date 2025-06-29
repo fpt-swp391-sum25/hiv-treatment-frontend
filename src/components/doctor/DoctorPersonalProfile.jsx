@@ -92,6 +92,8 @@ const DoctorPersonalProfile = () => {
       } else {
         notification.error({
           message: 'Hệ thống',
+          showProgress: true,
+          pauseOnHover: true,
           description: 'Không thể tải thông tin bác sĩ',
         });
       }
@@ -99,6 +101,8 @@ const DoctorPersonalProfile = () => {
       console.error(error);
       notification.error({
         message: 'Hệ thống',
+        showProgress: true,
+        pauseOnHover: true,
         description: 'Đã xảy ra lỗi khi tải thông tin',
       });
     }
@@ -139,6 +143,8 @@ const DoctorPersonalProfile = () => {
       if (doctorRes.data && userRes.data) {
         notification.success({
           message: 'Hệ thống',
+          showProgress: true,
+          pauseOnHover: true,
           description: 'Cập nhật thông tin thành công',
         });
         const updatedUserRes = await fetchAccountAPI(editableUser.id);
@@ -154,6 +160,8 @@ const DoctorPersonalProfile = () => {
       } else {
         notification.error({
           message: 'Hệ thống',
+          showProgress: true,
+          pauseOnHover: true,
           description: 'Cập nhật thông tin không thành công',
         });
       }

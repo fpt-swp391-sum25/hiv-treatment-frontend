@@ -9,11 +9,12 @@ import { AuthContext } from "../../components/context/AuthContext";
 const { Header, Content } = Layout;
 
 const DoctorHome = () => {
+    const { setUser, isAppLoading, setIsAppLoading } = useContext(AuthContext)
     useEffect(() => {
         fetchUserInfo()
     }, [])
 
-    const { user, setUser, isAppLoading, setIsAppLoading } = useContext(AuthContext)
+
 
     const fetchUserInfo = async () => {
         try {

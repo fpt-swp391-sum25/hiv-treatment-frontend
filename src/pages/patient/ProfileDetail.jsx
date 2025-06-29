@@ -16,7 +16,7 @@ const ProfileDetail = () => {
     const { user, setUser } = useContext(AuthContext)
     const [loading, setLoading] = useState(false);
 
-    const handlePatientInputChange = async (field, value) => {
+    const handlePatientInputChange = (field, value) => {
         try {
             setLoading(true);
             const updatedPatientInfo = { ...user, [field]: value };
@@ -36,6 +36,8 @@ const ProfileDetail = () => {
         if (response.data) {
             notification.success({
                 message: 'Hệ thống',
+                showProgress: true,
+                pauseOnHover: true,
                 description: 'Cập nhật thành công'
             })
         }

@@ -50,6 +50,7 @@ const PatientList = () => {
 
     useEffect(() => {
         loadData();
+        console.log(">>>> check filter data", filteredData)
     }, []);
 
     const loadData = async () => {
@@ -73,13 +74,14 @@ const PatientList = () => {
             const healthRecords = await Promise.all(healthRecordPromises);
 
             const mergedData = scheduleList.map((item) => {
+                console.log("check schedule", scheduleList)
                 const matchedPatient = patientList.find(p => p.id === item.patient.id);
                 const matchedHealthRecord = healthRecords.find(hr => hr.scheduleId === item.id);
-
+                console.log(">>>>>>>>>>>> check matched patient", matchedPatient)
                 return {
                     id: item.id,
                     ...item,
-                    patientCode: matchedPatient?.patientCode || 'N/A',
+                    patientCode: matchedPatient?.displayId || 'N/A',
                     avatar: matchedPatient?.avatar || '',
                     fullName: matchedPatient?.fullName || 'Chưa rõ tên',
                     treatmentStatus: matchedHealthRecord?.data?.treatmentStatus || 'Chưa cập nhật',

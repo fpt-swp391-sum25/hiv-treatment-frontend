@@ -16,7 +16,9 @@ const Register = () => {
         const response = await registerAPI(values)
         if (response.data) {
             notification.success({
-                message: 'Đăng kí thành công'
+                message: 'Đăng kí thành công',
+                showProgress: true,
+                pauseOnHover: true,
             })
         }
         navigate('/login');

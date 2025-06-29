@@ -292,21 +292,22 @@ const createScheduleAPI = (scheduleData) => {
     const URL_BACKEND = '/api/schedule';
     console.log('Sending schedule data to API:', scheduleData);
 
-    // Đảm bảo scheduleData có định dạng đúng
+    // Đảm bảo scheduleData có định dạng đúng theo yêu cầu của BE
     const formattedData = {
-        doctor_id: scheduleData.doctor_id,
-        date: scheduleData.date,
-        status: scheduleData.status || 'available',
-        morning: scheduleData.morning !== undefined ? scheduleData.morning : true,
-        afternoon: scheduleData.afternoon !== undefined ? scheduleData.afternoon : true,
-        note: scheduleData.note || ''
+        type: scheduleData.type || 'Khám',
+        roomCode: scheduleData.roomCode || '100', // Mặc định phòng 100 nếu không có
+        date: scheduleData.date, // Giữ nguyên định dạng YYYY-MM-DD
+        slot: scheduleData.slot, // Định dạng HH:mm:ss
+        doctorId: parseInt(scheduleData.doctorId), // Đảm bảo là số
+        status: 'available' // Luôn đặt trạng thái là available (làm việc)
     };
 
+    console.log('Formatted data for API:', formattedData);
     return axios.post(URL_BACKEND, formattedData);
 }
 
 const getAllSchedulesAPI = () => {
-    const URL_BACKEND = '/api/schedule';
+    const URL_BACKEND = '/api/schedule/list';
     return axios.get(URL_BACKEND);
 }
 
@@ -351,7 +352,7 @@ const fetchUsersByRoleAPI = (role) => {
     const uppercaseRole = role.toUpperCase();
     // Endpoint sử dụng đúng với backend API
     const URL_BACKEND = `/api/user/${uppercaseRole}`;
-    
+
     console.log(`Fetching users with role ${uppercaseRole} from: ${URL_BACKEND}`);
     return axios.get(URL_BACKEND);
 }

@@ -167,16 +167,30 @@
   opacity: 0.8;
 }
 
-/* Các màu cho trạng thái làm việc của bác sĩ */
-.status-available {
-  background-color: rgba(40, 167, 69, 0.1);
-  border-left: 3px solid #28a745;
+/* Màu sắc cho từng loại trạng thái - Tăng độ tương phản */
+.status-available, .custom-event-content {
+  background-color: rgba(25, 135, 84, 0.2) !important; /* Màu xanh đậm hơn */
+  border-left: 4px solid #198754 !important; /* Viền trái đậm hơn */
+  color: #0a3622 !important; /* Màu chữ đậm hơn */
 }
 
-.status-on-leave {
-  background-color: #fff3cd;
-  color: #856404;
-  border-left: 3px solid #856404;
+/* Loại bỏ style cho on_leave hoặc đặt giống với available */
+.status-on_leave {
+  background-color: rgba(25, 135, 84, 0.2) !important;
+  border-left: 4px solid #198754 !important;
+  color: #0a3622 !important;
+}
+
+/* Đảm bảo tất cả các sự kiện đều có style giống nhau */
+.fc-event {
+  background-color: rgba(25, 135, 84, 0.2) !important;
+  border-left: 4px solid #198754 !important;
+  border-radius: 4px;
+  padding: 4px !important;
+  cursor: pointer;
+  transition: transform 0.2s;
+  margin-bottom: 2px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
 }
 
 /* Toast notification */
@@ -260,18 +274,11 @@
 }
 
 /* Tùy chỉnh sự kiện */
-.fc-event {
-  cursor: pointer;
-  border-radius: 4px;
-  border: none;
-  padding: 2px;
-  margin-bottom: 1px;
-  transition: transform 0.2s;
-}
-
 .fc-event:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
+  background-color: rgba(25, 135, 84, 0.3) !important; /* Màu nền đậm hơn khi hover */
+  transition: all 0.2s ease-in-out !important;
 }
 
 /* Tùy chỉnh ngày quá khứ */
@@ -280,35 +287,24 @@
   opacity: 0.7;
 }
 
-/* Tùy chỉnh nội dung sự kiện */
-.custom-event-content {
-  padding: 3px 5px;
-  width: 100%;
-}
-
+/* Tăng độ nổi bật cho tiêu đề và nội dung */
 .custom-event-content .event-title {
-  font-weight: 600;
+  font-weight: 700 !important; /* Đậm hơn */
+  color: #0a3622 !important; /* Màu chữ đậm */
+  font-size: 0.95rem !important;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  margin-bottom: 2px;
 }
 
 .custom-event-content .event-status {
-  font-size: 0.8rem;
+  font-weight: 500 !important;
+  color: #0a3622 !important;
+  font-size: 0.85rem !important;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-/* Màu sắc cho từng loại trạng thái */
-.status-available {
-  background-color: rgba(40, 167, 69, 0.1);
-  border-left: 3px solid #28a745;
-}
-
-.status-on_leave {
-  background-color: rgba(255, 193, 7, 0.1);
-  border-left: 3px solid #ffc107;
 }
 
 /* Style cho ngày Chủ nhật */
@@ -439,18 +435,11 @@
 }
 
 /* Tùy chỉnh sự kiện */
-.fc-event {
-  border: none;
-  border-radius: 4px;
-  padding: 2px;
-  cursor: pointer;
-  transition: transform 0.2s;
-  margin-bottom: 2px;
-}
-
 .fc-event:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
+  background-color: rgba(25, 135, 84, 0.3) !important; /* Màu nền đậm hơn khi hover */
+  transition: all 0.2s ease-in-out !important;
 }
 
 /* Ngày quá khứ */
@@ -460,11 +449,6 @@
 }
 
 /* Tùy chỉnh nội dung sự kiện */
-.custom-event-content {
-  padding: 4px 6px;
-  border-radius: 3px;
-}
-
 .custom-event-content .event-title {
   font-weight: 600;
   white-space: nowrap;
@@ -480,17 +464,6 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-/* Các màu cho trạng thái làm việc của bác sĩ */
-.status-available {
-  background-color: rgba(40, 167, 69, 0.1);
-  border-left: 3px solid #28a745;
-}
-
-.status-on_leave {
-  background-color: rgba(255, 193, 7, 0.1);
-  border-left: 3px solid #ffc107;
 }
 
 /* Chủ nhật */

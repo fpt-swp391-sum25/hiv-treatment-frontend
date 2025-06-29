@@ -54,8 +54,16 @@ const PatientDetail = () => {
 
   const handleUpdateHealthRecord = async () => {
     try {
-      await updateHealthRecordAPI(healthRecordData.id, healthRecordData);
-      alert("Cập nhật thông tin sức khỏe thành công!");
+      const response = await updateHealthRecordAPI(healthRecordData.id, healthRecordData);
+      if (response.data) {
+
+        notification.success({
+          message: 'Hệ thống',
+          showProgress: true,
+          pauseOnHover: true,
+          description: 'Cập nhật thông tin sức khỏe thành công!'
+        });
+      }
     } catch (error) {
       console.error("Lỗi khi cập nhật:", error);
       alert("Cập nhật thất bại.");
@@ -68,6 +76,8 @@ const PatientDetail = () => {
       if (response.data) {
         notification.success({
           message: 'Hệ thống',
+          showProgress: true,
+          pauseOnHover: true,
           description: 'Tạo kết quả xét nghiệm thành công'
         });
       }
@@ -77,6 +87,8 @@ const PatientDetail = () => {
       console.error("Lỗi tạo kết quả:", error.response?.data || error.message);
       notification.error({
         message: 'Lỗi',
+        showProgress: true,
+        pauseOnHover: true,
         description: 'Không thể tạo kết quả xét nghiệm'
       });
     }
@@ -87,6 +99,8 @@ const PatientDetail = () => {
     if (response.data) {
       notification.success({
         message: 'Hệ thống',
+        showProgress: true,
+        pauseOnHover: true,
         description: 'Xóa kết quả xét nghiệm thành công'
       })
       await loadData()
@@ -111,8 +125,10 @@ const PatientDetail = () => {
 
       <Card title="Thông tin sức khỏe" style={{ marginTop: 5 + 'vh' }}>
         <Form layout="vertical">
+          {/* <h2>{healthRecordData.schedule.patient.fullName}</h2> */}
           <Row gutter={16}>
-            <Col span={12}>
+
+            {/* <Col span={12}>
               <Form.Item label="Mã phòng khám">
                 <Input name="roomCode" value={healthRecordData.roomCode || ''} onChange={handleInputChange} />
               </Form.Item>
@@ -121,7 +137,7 @@ const PatientDetail = () => {
               <Form.Item label="Số bảo hiểm y tế">
                 <Input name="insuranceNumber" value={healthRecordData.insuranceNumber || ''} readOnly />
               </Form.Item>
-            </Col>
+            </Col> */}
             <Col span={12}>
               <Form.Item label="Chiều cao">
                 <Input name="height" value={healthRecordData.height || ''} onChange={handleInputChange} />

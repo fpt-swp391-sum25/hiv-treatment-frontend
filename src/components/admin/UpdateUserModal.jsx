@@ -25,6 +25,8 @@ const UpdateUserModal = (props) => {
         if (response.data) {
             notification.success({
                 message: 'Hệ thống',
+                showProgress: true,
+                pauseOnHover: true,
                 description: 'Cập nhật thành công'
             })
         }

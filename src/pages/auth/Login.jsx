@@ -19,6 +19,18 @@ const Login = () => {
     const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
+    useEffect(() => {
+        const authError = localStorage.getItem('auth_error');
+        if (authError) {
+            notification.error({
+                message: 'Hệ thống',
+                showProgress: true,
+                pauseOnHover: true,
+                description: 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.'
+            });
+            localStorage.removeItem('auth_error');
+        }
+    }, []);
 
     const handleLogin = async () => {
         setLoading(true);
@@ -45,11 +57,15 @@ const Login = () => {
 
                 notification.success({
                     message: "Đăng nhập thành công",
+                    showProgress: true,
+                    pauseOnHover: true,
                     description: `Xin chào, ${response.data.name || username}!`
                 });
             } else {
                 notification.error({
                     message: "Lỗi đăng nhập",
+                    showProgress: true,
+                    pauseOnHover: true,
                     description: response.message || "Không nhận được token từ server"
                 });
                 setError('Không nhận được token đăng nhập. Vui lòng thử lại.');
@@ -67,6 +83,8 @@ const Login = () => {
 
             notification.error({
                 message: "Lỗi đăng nhập",
+                showProgress: true,
+                pauseOnHover: true,
                 description: error.response?.data?.message || 'Thông tin đăng nhập không hợp lệ!'
             });
         } finally {

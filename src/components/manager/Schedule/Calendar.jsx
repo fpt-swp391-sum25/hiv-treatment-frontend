@@ -108,25 +108,25 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
         const eventData = eventInfo.event.extendedProps;
         
         // Kiểm tra tính hợp lệ của dữ liệu sự kiện
-        if (!eventData || !eventData.status) {
+        if (!eventData) {
             console.warn('Invalid event data:', eventData);
             return <div>Lỗi dữ liệu</div>;
         }
         
-        const statusClass = `status-${eventData.status}`;
+        // Lấy thông tin phòng nếu có
+        const roomInfo = eventData.roomCode ? `P.${eventData.roomCode}` : '';
         
+        // Luôn sử dụng class status-available cho tất cả sự kiện
         return (
-            <div className={`custom-event-content ${statusClass}`}>
+            <div className="custom-event-content status-available">
                 <div className="event-title">{eventData.doctorName || 'Không có tên'}</div>
                 <div className="event-status">
-                    {eventData.status === ScheduleStatus.AVAILABLE 
-                        ? `Làm việc: ${eventData.morning && eventData.afternoon 
-                            ? 'Cả ngày' 
-                            : eventData.morning 
-                                ? 'Buổi sáng' 
-                                : 'Buổi chiều'}`
-                        : 'Nghỉ phép'
-                    }
+                    Làm việc: {eventData.morning && eventData.afternoon 
+                        ? 'Cả ngày' 
+                        : eventData.morning 
+                            ? 'Buổi sáng' 
+                            : 'Buổi chiều'}
+                    {roomInfo && ` - ${roomInfo}`}
                 </div>
             </div>
         );

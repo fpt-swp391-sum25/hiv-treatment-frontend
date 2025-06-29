@@ -62,11 +62,15 @@ const ViewOnlyPatientDetail = () => {
     if (response.data) {
       notification.success({
         title: "Hệ thống",
+        showProgress: true,
+        pauseOnHover: true,
         description: "Cập nhật phác đồ thành công"
       })
     } else {
       notification.error({
         title: "Hệ thống",
+        showProgress: true,
+        pauseOnHover: true,
         description: "Cập nhật phác đồ không thành công"
       })
     }
@@ -93,6 +97,8 @@ const ViewOnlyPatientDetail = () => {
       if (response.data) {
         notification.success({
           message: "Hệ thống",
+          showProgress: true,
+          pauseOnHover: true,
           description: "Cập nhật trạng thái điều trị thành công"
         });
         loadData();
@@ -102,6 +108,8 @@ const ViewOnlyPatientDetail = () => {
     } catch (error) {
       notification.error({
         message: "Hệ thống",
+        showProgress: true,
+        pauseOnHover: true,
         description: "Cập nhật trạng thái điều trị thất bại"
       });
     }

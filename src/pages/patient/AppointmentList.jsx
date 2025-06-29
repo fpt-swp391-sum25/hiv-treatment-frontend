@@ -85,6 +85,8 @@ const AppointmentList = () => {
             if (response.data) {
                 notification.success({
                     message: 'Hệ thống',
+                    showProgress: true,
+                    pauseOnHover: true,
                     description: 'Hủy lịch hẹn thành công'
                 })
                 loadAllSchedule()
@@ -93,6 +95,8 @@ const AppointmentList = () => {
             if (error.response?.status !== 401) {
                 notification.error({
                     message: 'Hệ thống',
+                    showProgress: true,
+                    pauseOnHover: true,
                     description: error.message
                 })
             }
