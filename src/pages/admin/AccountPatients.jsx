@@ -4,7 +4,7 @@ import { createAccountAPI, deleteAccountAPI, fetchAccountByRoleAPI } from '../..
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import UpdateUserModal from '../../components/admin/UpdateUserModal';
 
-const AccountPatients= () => {
+const AccountPatients = () => {
 
     const [data, setData] = useState([])
     const [username, setUsername] = useState("")
@@ -30,6 +30,8 @@ const AccountPatients= () => {
             setData([]); // Fallback to empty array
             notification.error({
                 message: 'Hệ thống',
+                showProgress: true,
+                pauseOnHover: true,
                 description: { error }
             });
         }
@@ -41,6 +43,8 @@ const AccountPatients= () => {
         if (response.data) {
             notification.success({
                 message: 'Hệ thống',
+                showProgress: true,
+                pauseOnHover: true,
                 description: 'Tạo tài khoản thành công'
             })
         }
@@ -53,6 +57,8 @@ const AccountPatients= () => {
         if (response.data) {
             notification.success({
                 message: 'Hệ thống',
+                showProgress: true,
+                pauseOnHover: true,
                 description: 'Xóa tài khoản thành công'
             })
             await loadAccounts()
@@ -77,6 +83,14 @@ const AccountPatients= () => {
             title: 'Email',
             dataIndex: 'email',
             key: 'email',
+            render: (_, { email, verified }) => (
+                <Space>
+                    <span>{email}</span>
+                    <Tag color={verified ? 'green' : 'volcano'} key={verified}>
+                        {verified ? 'Đã xác minh' : 'Chưa xác minh'}
+                    </Tag>
+                </Space>
+            ),
         },
         {
             title: 'Trạng thái',
@@ -156,10 +170,7 @@ const AccountPatients= () => {
                         <span>Mật khẩu</span>
                         <Input.Password value={password} onChange={(event) => { setPassword(event.target.value) }} />
                     </div>
-                    <div>
-                        <span>Vai trò</span>
-                        <Input disabled value={role} />
-                    </div>
+
                 </div>
             </Modal>
 

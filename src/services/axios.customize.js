@@ -1,3 +1,4 @@
+import { message, notification } from "antd";
 import axios from "axios";
 
 
@@ -17,7 +18,7 @@ instance.interceptors.request.use(function (config) {
         // Không tự động chuyển hướng đến trang đăng nhập
         // Để các trang công khai vẫn hoạt động bình thường
     }
-    
+
     // Log the full request for debugging
     console.log('API Request:', {
         method: config.method?.toUpperCase(),
@@ -25,7 +26,7 @@ instance.interceptors.request.use(function (config) {
         headers: config.headers,
         data: config.data
     });
-    
+
     return config;
 }, function (error) {
     // Do something with request error
@@ -39,7 +40,7 @@ instance.interceptors.response.use(function (response) {
     // Any status code that lie within the range of 2xx cause this function to trigger
     // Do something with response data
     console.log("Response received:", response);
-    
+
     // Handle different response formats
     if (response.data) {
         if (response.data.data !== undefined) {
@@ -55,18 +56,39 @@ instance.interceptors.response.use(function (response) {
     // Any status codes that falls outside the range of 2xx cause this function to trigger
     // More detailed error logging
     console.log("API Error:", error);
-    
+
     if (error.response) {
         // The request was made and the server responded with a status code
         // that falls out of the range of 2xx
         console.error('Error response status:', error.response.status);
         console.error('Error response headers:', error.response.headers);
         console.error('Error response data:', error.response.data);
-        
+
         // Chỉ thông báo lỗi xác thực, không tự động chuyển hướng
-        if (error.response.status === 401 || error.response.status === 403) {
-            console.error('Authentication error. Token might be invalid or expired.');
+        if (error.response.status === 403) {
+            const errorMessage = error.response.data?.error || 'Access denied';
+            if (errorMessage.includes('Token expired') || errorMessage.includes('Invalid token')) {
+                // Token expired or invalid
+                localStorage.removeItem('access_token');
+
+                // message.error("Phiên đăng nhập hết hạn! Vui lòng đăng nhập lại.")
+                // notification.error({
+                //     message: 'Hệ thống',
+                //     description: 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.'
+                // });
+                localStorage.setItem('auth_error', errorMessage);
+                window.location.href = '/login';
+            } else {
+                // Role-based access denial or other 403 error
+                toast.error(errorMessage || 'Bạn không có quyền truy cập trang này.', {
+                    position: 'top-right',
+                    autoClose: 3000,
+                });
+                window.location.href = '/login';
+            }
         }
+
+        if (error.response.data) return error.response.data;
     } else if (error.request) {
         // The request was made but no response was received
         console.error('Error request:', error.request);
@@ -74,7 +96,7 @@ instance.interceptors.response.use(function (response) {
         // Something happened in setting up the request that triggered an Error
         console.error('Error message:', error.message);
     }
-    
+
     if (error.response && error.response.data) return error.response.data;
     return Promise.reject(error);
 });

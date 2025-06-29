@@ -9,12 +9,13 @@ import { AuthContext } from "../../components/context/AuthContext";
 const { Header, Content } = Layout;
 
 const DoctorHome = () => {
+    const { setUser, isAppLoading, setIsAppLoading } = useContext(AuthContext)
     useEffect(() => {
         fetchUserInfo()
     }, [])
 
-    const { user, setUser, isAppLoading, setIsAppLoading } = useContext(AuthContext)
-    
+
+
     const fetchUserInfo = async () => {
         try {
             const response = await fetchAccountAPI()
@@ -39,7 +40,7 @@ const DoctorHome = () => {
                 <DoctorPageSideBar />
                 <Layout style={{ padding: "16px" }}>
                     <Content>
-                        <Outlet context={{ user, setUser}} />
+                        <Outlet />
                     </Content>
                 </Layout>
             </Layout>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   Button,
   Form,
@@ -18,11 +18,12 @@ import {
   updateDoctorProfileAPI,
   updateUserAPI,
 } from '../../services/api.service';
+import { AuthContext } from '../context/AuthContext';
 
 const { Title } = Typography;
 
 const DoctorPersonalProfile = () => {
-  const { user, setUser } = useOutletContext();
+  const { user, setUser } = useContext(AuthContext);
 
   const [doctorProfile, setDoctorProfile] = useState({
     id: '',
@@ -69,7 +70,7 @@ const DoctorPersonalProfile = () => {
         dateOfBirth: user.dateOfBirth || '',
         createdAt: user.createdAt || '',
         isVerified: user.isVerified || false,
-        role: user.role?.name || '', 
+        role: user.role?.name || '',
       });
       loadDoctorProfile(user.id);
     }
@@ -91,6 +92,8 @@ const DoctorPersonalProfile = () => {
       } else {
         notification.error({
           message: 'Hệ thống',
+          showProgress: true,
+          pauseOnHover: true,
           description: 'Không thể tải thông tin bác sĩ',
         });
       }
@@ -98,6 +101,8 @@ const DoctorPersonalProfile = () => {
       console.error(error);
       notification.error({
         message: 'Hệ thống',
+        showProgress: true,
+        pauseOnHover: true,
         description: 'Đã xảy ra lỗi khi tải thông tin',
       });
     }
@@ -138,10 +143,12 @@ const DoctorPersonalProfile = () => {
       if (doctorRes.data && userRes.data) {
         notification.success({
           message: 'Hệ thống',
+          showProgress: true,
+          pauseOnHover: true,
           description: 'Cập nhật thông tin thành công',
         });
         const updatedUserRes = await fetchAccountAPI(editableUser.id);
-         if (updatedUserRes.data) {
+        if (updatedUserRes.data) {
           setEditableUser({
             ...editableUser,
             ...updatedUserRes.data,
@@ -153,6 +160,8 @@ const DoctorPersonalProfile = () => {
       } else {
         notification.error({
           message: 'Hệ thống',
+          showProgress: true,
+          pauseOnHover: true,
           description: 'Cập nhật thông tin không thành công',
         });
       }

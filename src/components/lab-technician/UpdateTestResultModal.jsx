@@ -32,6 +32,8 @@ const UpdateTestResultModal = (props) => {
         if (response.data) {
             notification.success({
                 message: 'Hệ thống',
+                showProgress: true,
+                pauseOnHover: true,
                 description: 'Cập nhật thành công'
             })
         }
@@ -58,7 +60,7 @@ const UpdateTestResultModal = (props) => {
             onCancel={resetAndClose}
             okText={"Cập nhật"}
             cancelText={"Hủy"}>
-            
+
             <div style={{ display: 'flex', gap: '15px', flexDirection: 'column' }}>
                 <span>Loại xét nghiệm</span>
                 <Input value={type} onChange={(event) => { setType(event.target.value) }} />
@@ -69,14 +71,14 @@ const UpdateTestResultModal = (props) => {
                 <span>Ghi chú</span>
                 <Input value={note} onChange={(event) => { setNote(event.target.value) }} />
                 <span>Thời gian dự kiến</span>
-                <DatePicker 
+                <DatePicker
                     format="HH:mm DD/MM/YYYY"
                     showTime
                     value={expectedResultTime ? dayjs(expectedResultTime) : ''}
                     onChange={(value) => setExpectedResultTime(dayjs(value).format("YYYY-MM-DDTHH:mm:ss"))}
                 />
                 <span>Thời gian nhận kết quả</span>
-                <DatePicker 
+                <DatePicker
                     format="HH:mm DD/MM/YYYY"
                     showTime
                     value={actualResultTime ? dayjs(actualResultTime) : ''}

@@ -14,49 +14,49 @@ const DoctorList = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-      loadDoctorData();
+    loadDoctorData();
   }, []);
 
   const loadDoctorData = async () => {
-      try {
-          setLoading(true);
-          const [accountRes, profileRes] = await Promise.all([
-              fetchAccountByRoleAPI("doctor"),
-              fetchDoctorProfileAPI()
-          ]);
+    try {
+      setLoading(true);
+      const [accountRes, profileRes] = await Promise.all([
+        fetchAccountByRoleAPI("doctor"),
+        fetchDoctorProfileAPI()
+      ]);
 
-          const doctors = accountRes?.data || [];
-          const profiles = profileRes?.data || [];
+      const doctors = accountRes?.data || [];
+      const profiles = profileRes?.data || [];
 
-          setDoctorAccounts(doctors);
-          setDoctorProfiles(profiles);
+      setDoctorAccounts(doctors);
+      setDoctorProfiles(profiles);
 
-          console.log(doctors)
-          console.log(profiles)
+      console.log(doctors)
+      console.log(profiles)
 
-          const merged = doctors.map(account => {
-              const profile = profiles.find(p => p.doctor.id === account.id);
-              return {
-                  ...account,
-                  licenseNumber: profile?.licenseNumber || '',
-                  startYear: profile?.startYear || '',
-                  qualifications: profile?.qualifications || '',
-                  biography: profile?.biography || '',
-                  background: profile?.background || ''
-              };
-          });
+      const merged = doctors.map(account => {
+        const profile = profiles.find(p => p.doctor.id === account.id);
+        return {
+          ...account,
+          licenseNumber: profile?.licenseNumber || '',
+          startYear: profile?.startYear || '',
+          qualifications: profile?.qualifications || '',
+          biography: profile?.biography || '',
+          background: profile?.background || ''
+        };
+      });
 
-          setMergedDoctors(merged);
-      } catch (error) {
-        console.error("Lỗi khi tải thông tin bác sĩ:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+      setMergedDoctors(merged);
+    } catch (error) {
+      console.error("Lỗi khi tải thông tin bác sĩ:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
   // Chỉ hiển thị 4 bác sĩ đầu tiên
   const visibleDoctors = mergedDoctors.slice(0, 4);
 
-  return (    
+  return (
     <section className="doctor-section" id="doctor-section">
       <h2 className="title">
         Đội ngũ <span className="highlight">bác sĩ chuyên khoa</span>
@@ -92,19 +92,19 @@ const DoctorList = () => {
               </div>
             ))}
           </div>
-          
-            <div className="view-all-container">
-              <Link 
-                to="/doctors" 
-                className="btn-outline"
-                onClick={() => {
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-              >
-                Xem tất cả bác sĩ
-              </Link>
-            </div>
-          
+
+          <div className="view-all-container">
+            <Link
+              to="/doctors"
+              className="btn-outline"
+              onClick={() => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+            >
+              Xem tất cả bác sĩ
+            </Link>
+          </div>
+
         </>
       )}
     </section>

@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { Button } from 'react-bootstrap';
 import { Line, Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Title, Tooltip, Legend } from 'chart.js';
 import '../../styles/doctor/Statistics.css';
+import { AuthContext } from '../context/AuthContext';
 
 // Register ChartJS components
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Title, Tooltip, Legend);
@@ -14,8 +15,8 @@ const Statistic = () => {
     newPatients: 12,
     consultations: 45
   });
-  
-  const { user } = useOutletContext()
+
+  const { user } = useContext(AuthContext)
 
 
   // Mock data for charts
@@ -122,7 +123,7 @@ const Statistic = () => {
 
   const handleFilterChange = (filter) => {
     setActiveFilter(filter);
-    
+
     // Update stats data based on filter
     switch (filter) {
       case 'month':
@@ -185,22 +186,22 @@ const Statistic = () => {
 
       {/* Filter Buttons */}
       <div className="filter-container">
-        <Button 
-          variant={activeFilter === 'month' ? 'primary' : 'outline-primary'} 
+        <Button
+          variant={activeFilter === 'month' ? 'primary' : 'outline-primary'}
           onClick={() => handleFilterChange('month')}
           className="filter-btn"
         >
           Tháng
         </Button>
-        <Button 
-          variant={activeFilter === 'quarter' ? 'primary' : 'outline-primary'} 
+        <Button
+          variant={activeFilter === 'quarter' ? 'primary' : 'outline-primary'}
           onClick={() => handleFilterChange('quarter')}
           className="filter-btn"
         >
           Quý
         </Button>
-        <Button 
-          variant={activeFilter === 'year' ? 'primary' : 'outline-primary'} 
+        <Button
+          variant={activeFilter === 'year' ? 'primary' : 'outline-primary'}
           onClick={() => handleFilterChange('year')}
           className="filter-btn"
         >

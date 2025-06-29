@@ -1,24 +1,24 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { 
-  Card, 
-  Statistic, 
-  Row, 
-  Col, 
-  Input, 
-  Button, 
-  Select, 
-  Table, 
-  Tag, 
-  Modal, 
-  Descriptions, 
+import {
+  Card,
+  Statistic,
+  Row,
+  Col,
+  Input,
+  Button,
+  Select,
+  Table,
+  Tag,
+  Modal,
+  Descriptions,
   Divider,
   Spin,
   message
 } from 'antd';
-import { 
-  CalendarOutlined, 
-  FileOutlined, 
-  SearchOutlined, 
+import {
+  CalendarOutlined,
+  FileOutlined,
+  SearchOutlined,
   CloseOutlined,
   UserOutlined,
   ClockCircleOutlined,
@@ -107,12 +107,12 @@ export default function PatientAppointmentHistory() {
   };
 
   const filteredRecords = records.filter(record => {
-    const doctorMatch = !searchDoctor || 
-      (record.doctor && record.doctor.fullName && 
-       record.doctor.fullName.toLowerCase().includes(searchDoctor.toLowerCase()));
-    
+    const doctorMatch = !searchDoctor ||
+      (record.doctor && record.doctor.fullName &&
+        record.doctor.fullName.toLowerCase().includes(searchDoctor.toLowerCase()));
+
     const typeMatch = selectedType === 'all' || (record.type && record.type.trim() === selectedType);
-    
+
     return doctorMatch && typeMatch;
   });
 
@@ -147,7 +147,7 @@ export default function PatientAppointmentHistory() {
       render: (slot) => (
         <div>
           <ClockCircleOutlined style={{ marginRight: 8 }} />
-          {slot ? slot.split(':').slice(0,2).join(':') : ''}
+          {slot ? slot.split(':').slice(0, 2).join(':') : ''}
         </div>
       ),
     },
@@ -172,8 +172,8 @@ export default function PatientAppointmentHistory() {
       title: '',
       key: 'action',
       render: (_, record) => (
-        <Button 
-          type="primary" 
+        <Button
+          type="primary"
           icon={<FileOutlined />}
           onClick={() => fetchHealthRecord(record.id)}
         >
@@ -185,8 +185,8 @@ export default function PatientAppointmentHistory() {
 
   return (
     <div style={{ padding: 24 }}>
-      <Card 
-        title="Lịch sử khám bệnh" 
+      <Card
+        title="Lịch sử khám bệnh"
         bordered={false}
         extra={
           <div style={{ display: 'flex', gap: 16 }}>
@@ -263,7 +263,7 @@ export default function PatientAppointmentHistory() {
           pagination={pagination}
           onChange={(pagination) => setPagination(pagination)}
           locale={{
-            emptyText: searchDoctor || selectedType !== 'all' 
+            emptyText: searchDoctor || selectedType !== 'all'
               ? `Không tìm thấy lịch khám${searchDoctor ? ` với bác sĩ "${searchDoctor}"` : ''}${selectedType !== 'all' ? ` loại "${selectedType}"` : ''}`
               : 'Chưa có lịch khám nào'
           }}

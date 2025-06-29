@@ -23,6 +23,7 @@ const App = () => {
             }
         } catch (error) {
             if (error.response?.status === 401 && error.response?.data?.message === 'JWT token has expired') {
+                setUser({})
                 localStorage.removeItem('token');
                 message.error("Phiên đăng nhập hết hạn! Vui lòng đăng nhập lại.")
             }

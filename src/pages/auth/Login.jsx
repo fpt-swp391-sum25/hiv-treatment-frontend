@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import '@ant-design/v5-patch-for-react-19';
 import { Form, Input, Button, Alert, Segmented, Typography, Divider, notification } from 'antd';
 import { useGoogleLogin } from '@react-oauth/google';
@@ -6,6 +6,7 @@ import { GoogleOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { loginAPI } from '../../services/api.service';
 import { useForm } from 'antd/es/form/Form';
+import { AuthContext } from '../../components/context/AuthContext';
 
 const { Link, Text } = Typography;
 
@@ -14,20 +15,36 @@ const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const { authUser, setAuthUser, setUser } = useContext(AuthContext)
     const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
+    useEffect(() => {
+        const authError = localStorage.getItem('auth_error');
+        if (authError) {
+            notification.error({
+                message: 'Hệ thống',
+                showProgress: true,
+                pauseOnHover: true,
+                description: 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.'
+            });
+            localStorage.removeItem('auth_error');
+        }
+    }, []);
+
     const handleLogin = async () => {
         setLoading(true);
         setError('');
         try {
             const response = await loginAPI(username, password)
             console.log('Login response:', response);
-            
+
             if (response.data && response.data.token) {
                 // Lưu token trực tiếp vào localStorage
                 localStorage.setItem('access_token', response.data.token);
-                
+                setUser(response.data)
+                navigate(response.data.role === 'ADMIN' ? '/admin' : '/');
+
                 // Kiểm tra xem có URL redirect không
                 const redirectPath = localStorage.getItem('redirect_after_login');
                 if (redirectPath) {
@@ -37,21 +54,25 @@ const Login = () => {
                     // Điều hướng theo role
                     navigate(response.data.role === 'ADMIN' ? '/admin' : '/');
                 }
-                
+
                 notification.success({
                     message: "Đăng nhập thành công",
+                    showProgress: true,
+                    pauseOnHover: true,
                     description: `Xin chào, ${response.data.name || username}!`
                 });
             } else {
                 notification.error({
                     message: "Lỗi đăng nhập",
+                    showProgress: true,
+                    pauseOnHover: true,
                     description: response.message || "Không nhận được token từ server"
                 });
                 setError('Không nhận được token đăng nhập. Vui lòng thử lại.');
             }
         } catch (error) {
             console.error('Login error:', error);
-            
+
             if (error.response) {
                 // Hiển thị thông báo lỗi cụ thể từ server
                 const errorMessage = error.response.data?.message || 'Thông tin đăng nhập không hợp lệ!';
@@ -59,9 +80,11 @@ const Login = () => {
             } else {
                 setError('Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng.');
             }
-            
+
             notification.error({
                 message: "Lỗi đăng nhập",
+                showProgress: true,
+                pauseOnHover: true,
                 description: error.response?.data?.message || 'Thông tin đăng nhập không hợp lệ!'
             });
         } finally {

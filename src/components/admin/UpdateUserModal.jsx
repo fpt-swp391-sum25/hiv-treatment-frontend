@@ -8,7 +8,7 @@ const UpdateUserModal = (props) => {
     const [email, setEmail] = useState("")
     const [role, setRole] = useState("")
 
-    const { isUpdateModalOpen, setIsUpdateModalOpen, dataUpdate, 
+    const { isUpdateModalOpen, setIsUpdateModalOpen, dataUpdate,
         setDataUpdate, loadAccounts } = props
 
     useEffect(() => {
@@ -25,6 +25,8 @@ const UpdateUserModal = (props) => {
         if (response.data) {
             notification.success({
                 message: 'Hệ thống',
+                showProgress: true,
+                pauseOnHover: true,
                 description: 'Cập nhật thành công'
             })
         }
@@ -57,10 +59,6 @@ const UpdateUserModal = (props) => {
                 <div>
                     <span>Email</span>
                     <Input value={email} onChange={(event) => { setEmail(event.target.value) }} />
-                </div>
-                <div>
-                    <span>Vai trò</span>
-                    <Input disabled value={role} />
                 </div>
             </div>
         </Modal>

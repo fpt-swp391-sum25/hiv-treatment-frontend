@@ -80,7 +80,6 @@ const AppointmentResult = () => {
                                     </Descriptions>
                                     <Descriptions title="Kết quả khám" column={{ xs: 1, sm: 2 }} bordered style={{ marginTop: '20px' }}>
                                         <Descriptions.Item label="Mã phòng khám">{result.roomCode || 'Chưa có'}</Descriptions.Item>
-                                        <Descriptions.Item label="Số bảo hiểm y tế">{result.insuranceNumber || 'Chưa có'}</Descriptions.Item>
                                         <Descriptions.Item label="Chiều cao">{result.height ? `${result.height} cm` : 'Chưa có'}</Descriptions.Item>
                                         <Descriptions.Item label="Cân nặng">{result.weight ? `${result.weight} kg` : 'Chưa có'}</Descriptions.Item>
                                         <Descriptions.Item label="Nhóm máu">{result.bloodType || 'Chưa có'}</Descriptions.Item>

@@ -51,7 +51,7 @@ const fetchAllScheduleAPI = (doctorId, date) => {
         params: {
             doctorId,
             date: date.format('YYYY-MM-DD'),
-            status: 'ACTIVE',
+            status: 'Trống',
         },
     })
 }
@@ -291,7 +291,7 @@ const updateUserAPI = (id, updateData) => {
 const createScheduleAPI = (scheduleData) => {
     const URL_BACKEND = '/api/schedule';
     console.log('Sending schedule data to API:', scheduleData);
-    
+
     // Đảm bảo scheduleData có định dạng đúng theo yêu cầu của BE
     const formattedData = {
         type: scheduleData.type || 'Khám',
@@ -301,7 +301,7 @@ const createScheduleAPI = (scheduleData) => {
         doctorId: parseInt(scheduleData.doctorId), // Đảm bảo là số
         status: 'available' // Luôn đặt trạng thái là available (làm việc)
     };
-    
+
     console.log('Formatted data for API:', formattedData);
     return axios.post(URL_BACKEND, formattedData);
 }
@@ -352,7 +352,7 @@ const fetchUsersByRoleAPI = (role) => {
     const uppercaseRole = role.toUpperCase();
     // Endpoint sử dụng đúng với backend API
     const URL_BACKEND = `/api/user/${uppercaseRole}`;
-    
+
     console.log(`Fetching users with role ${uppercaseRole} from: ${URL_BACKEND}`);
     return axios.get(URL_BACKEND);
 }
@@ -408,7 +408,7 @@ export {
     deleteRegimenAPI,
 
     updateUserAPI,
-    
+
 
     // Thêm các API mới
     createScheduleAPI,

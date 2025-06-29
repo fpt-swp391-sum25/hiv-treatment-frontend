@@ -7,11 +7,11 @@ const UpdateRegimenModal = (props) => {
     const [components, setComponents] = useState('')
     const [regimenName, setReginmenName] = useState('')
     const [description, setDescription] = useState('')
-    const [indications, setIndications]= useState('')
+    const [indications, setIndications] = useState('')
     const [contraindications, setContradications] = useState('')
 
-    const {dataUpdate, setDataUpdate, isUpdateRegimenModalOpen, 
-        setIsUpdateRegimenModalOpen, loadRegimens} = props
+    const { dataUpdate, setDataUpdate, isUpdateRegimenModalOpen,
+        setIsUpdateRegimenModalOpen, loadRegimens } = props
 
     useEffect(() => {
         if (dataUpdate) {
@@ -30,11 +30,15 @@ const UpdateRegimenModal = (props) => {
         if (response.data) {
             notification.success({
                 message: 'Hệ thống',
+                showProgress: true,
+                pauseOnHover: true,
                 description: 'Cập nhật phác đồ thành công'
             })
         } else {
             notification.error({
                 message: 'Hệ thống',
+                showProgress: true,
+                pauseOnHover: true,
                 description: 'Cập nhật phác đồ thất bại'
             })
         }
@@ -61,22 +65,22 @@ const UpdateRegimenModal = (props) => {
             onCancel={resetAndClose}
             okText={"Cập nhật"}
             cancelText={"Hủy"}
-            >
+        >
             <Form>
-                <Form.Item label = 'Tên phác đồ'>
-                    <Input value = {regimenName} onChange = {(event) => setReginmenName(event.target.value)}/>
+                <Form.Item label='Tên phác đồ'>
+                    <Input value={regimenName} onChange={(event) => setReginmenName(event.target.value)} />
                 </Form.Item>
-                <Form.Item label = 'Thành phần phác đồ'>
-                    <Input value = {components} onChange = {(event) => setComponents(event.target.value)}/>
+                <Form.Item label='Thành phần phác đồ'>
+                    <Input value={components} onChange={(event) => setComponents(event.target.value)} />
                 </Form.Item>
-                <Form.Item label = 'Mô tả'>
-                    <Input value = {description} onChange = {(event) => setDescription(event.target.value)}/>
+                <Form.Item label='Mô tả'>
+                    <Input value={description} onChange={(event) => setDescription(event.target.value)} />
                 </Form.Item>
-                <Form.Item label = 'Chỉ định'>
-                    <Input value = {indications} onChange = {(event) => setIndications(event.target.value)}/>
+                <Form.Item label='Chỉ định'>
+                    <Input value={indications} onChange={(event) => setIndications(event.target.value)} />
                 </Form.Item>
-                <Form.Item label = 'Chống chỉ định'>
-                    <Input value = {contraindications} onChange = {(event) => setContradications(event.target.value)}/>
+                <Form.Item label='Chống chỉ định'>
+                    <Input value={contraindications} onChange={(event) => setContradications(event.target.value)} />
                 </Form.Item>
             </Form>
         </Modal>

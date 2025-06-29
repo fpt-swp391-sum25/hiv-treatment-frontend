@@ -1,4 +1,4 @@
-import { Layout, Button, Avatar, Typography, message } from "antd";
+import { Layout, Button, Avatar, Typography, message, theme } from "antd";
 import { UserOutlined, LogoutOutlined } from "@ant-design/icons";
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
@@ -30,11 +30,15 @@ const PageHeader = () => {
             navigate("/login")
         }
     };
+
+    const {
+        token: { colorBgContainer, borderRadiusLG },
+    } = theme.useToken();
     return (
-        <Header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: colorBgContainer, }}>
             <div>
                 <Avatar icon={<UserOutlined />} />
-                <Text style={{ color: '#fff', marginLeft: 4, marginRight: 4}}>{user.username}</Text>
+                <Text style={{ color: 'black', marginLeft: 4, marginRight: 4 }}>{user.username}</Text>
             </div>
             <Button type="primary" icon={<LogoutOutlined />} onClick={handleLogout} danger>
                 Đăng xuất

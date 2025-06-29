@@ -7,8 +7,10 @@ import {
   deleteTestResultAPI,
   createTestResultAPI
 } from "../../services/api.service.js";
-import { Typography, Space, notification, Popconfirm, 
-        Button, Input, Modal, DatePicker, Card, Form, Row, Col, Divider } from 'antd';
+import {
+  Typography, Space, notification, Popconfirm,
+  Button, Input, Modal, DatePicker, Card, Form, Row, Col, Divider
+} from 'antd';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import UpdateTestResultModal from '../../components/lab-technician/UpdateTestResultModal.jsx';
 import dayjs from 'dayjs';
@@ -52,8 +54,16 @@ const PatientDetail = () => {
 
   const handleUpdateHealthRecord = async () => {
     try {
-      await updateHealthRecordAPI(healthRecordData.id, healthRecordData);
-      alert("Cập nhật thông tin sức khỏe thành công!");
+      const response = await updateHealthRecordAPI(healthRecordData.id, healthRecordData);
+      if (response.data) {
+
+        notification.success({
+          message: 'Hệ thống',
+          showProgress: true,
+          pauseOnHover: true,
+          description: 'Cập nhật thông tin sức khỏe thành công!'
+        });
+      }
     } catch (error) {
       console.error("Lỗi khi cập nhật:", error);
       alert("Cập nhật thất bại.");
@@ -66,6 +76,8 @@ const PatientDetail = () => {
       if (response.data) {
         notification.success({
           message: 'Hệ thống',
+          showProgress: true,
+          pauseOnHover: true,
           description: 'Tạo kết quả xét nghiệm thành công'
         });
       }
@@ -75,6 +87,8 @@ const PatientDetail = () => {
       console.error("Lỗi tạo kết quả:", error.response?.data || error.message);
       notification.error({
         message: 'Lỗi',
+        showProgress: true,
+        pauseOnHover: true,
         description: 'Không thể tạo kết quả xét nghiệm'
       });
     }
@@ -82,24 +96,26 @@ const PatientDetail = () => {
 
   const handleDeleteTestResult = async (testResultId) => {
     const response = await deleteTestResultAPI(testResultId)
-        if (response.data) {
-            notification.success({
-                message: 'Hệ thống',
-                description: 'Xóa kết quả xét nghiệm thành công'
-            })
-            await loadData()
-        }
+    if (response.data) {
+      notification.success({
+        message: 'Hệ thống',
+        showProgress: true,
+        pauseOnHover: true,
+        description: 'Xóa kết quả xét nghiệm thành công'
+      })
+      await loadData()
+    }
   }
 
   const resetAndClose = () => {
-        setIsCreateTestResultModalOpen(false)
-        setType('')
-        setNote('')
-        setExpectedResultTime('')
+    setIsCreateTestResultModalOpen(false)
+    setType('')
+    setNote('')
+    setExpectedResultTime('')
   }
 
   return (
-    <div style = {{marginRight: 10 + 'vw', marginLeft: 10 + 'vw'}}>
+    <div style={{ marginRight: 10 + 'vw', marginLeft: 10 + 'vw' }}>
       <Space direction="vertical" style={{ width: "100%" }}>
         <Button onClick={() => navigate(-1)}>← Quay lại</Button>
         <Title level={3} style={{ textAlign: "center", width: "100%" }}>
@@ -107,10 +123,12 @@ const PatientDetail = () => {
         </Title>
       </Space>
 
-      <Card title="Thông tin sức khỏe" style={{ marginTop: 5 + 'vh'}}>
+      <Card title="Thông tin sức khỏe" style={{ marginTop: 5 + 'vh' }}>
         <Form layout="vertical">
+          {/* <h2>{healthRecordData.schedule.patient.fullName}</h2> */}
           <Row gutter={16}>
-            <Col span={12}>
+
+            {/* <Col span={12}>
               <Form.Item label="Mã phòng khám">
                 <Input name="roomCode" value={healthRecordData.roomCode || ''} onChange={handleInputChange} />
               </Form.Item>
@@ -119,7 +137,7 @@ const PatientDetail = () => {
               <Form.Item label="Số bảo hiểm y tế">
                 <Input name="insuranceNumber" value={healthRecordData.insuranceNumber || ''} readOnly />
               </Form.Item>
-            </Col>
+            </Col> */}
             <Col span={12}>
               <Form.Item label="Chiều cao">
                 <Input name="height" value={healthRecordData.height || ''} onChange={handleInputChange} />
@@ -155,36 +173,36 @@ const PatientDetail = () => {
         </Form>
       </Card>
 
-      <Divider orientation="center" style = {{marginTop: 10 + 'vh'}}>Kết quả xét nghiệm</Divider>
+      <Divider orientation="center" style={{ marginTop: 10 + 'vh' }}>Kết quả xét nghiệm</Divider>
 
       <Button type="primary" onClick={() => setIsCreateTestResultModalOpen(true)}>Tạo mới</Button>
 
       <Modal
-          title="Tạo kết quả xét nghiệm"
-          closable={{ 'aria-label': 'Custom Close Button' }}
-          open={isCreateTestResultModalOpen}
-          onOk={handleCreateTestResult}
-          onCancel={resetAndClose}
-          okText={"Tạo"}
-          cancelText={"Hủy"}
+        title="Tạo kết quả xét nghiệm"
+        closable={{ 'aria-label': 'Custom Close Button' }}
+        open={isCreateTestResultModalOpen}
+        onOk={handleCreateTestResult}
+        onCancel={resetAndClose}
+        okText={"Tạo"}
+        cancelText={"Hủy"}
       >
-          <Form layout="vertical">
-            <Form.Item label="Loại xét nghiệm">
-              <Input value={type} onChange={(event) => setType(event.target.value)} />
-            </Form.Item>
-            <Form.Item label="Ghi chú">
-              <Input value={note} onChange={(event) => setNote(event.target.value)} />
-            </Form.Item>
-            <Form.Item label="Thời gian dự kiến">
-              <DatePicker 
-                    format = "HH:mm DD/MM/YYYY" 
-                    showTime
-                    onChange={(value) => {
-                        setExpectedResultTime(dayjs(value).format("YYYY-MM-DDTHH:mm:ss"))
-                    }}
-                />
-            </Form.Item>
-          </Form>
+        <Form layout="vertical">
+          <Form.Item label="Loại xét nghiệm">
+            <Input value={type} onChange={(event) => setType(event.target.value)} />
+          </Form.Item>
+          <Form.Item label="Ghi chú">
+            <Input value={note} onChange={(event) => setNote(event.target.value)} />
+          </Form.Item>
+          <Form.Item label="Thời gian dự kiến">
+            <DatePicker
+              format="HH:mm DD/MM/YYYY"
+              showTime
+              onChange={(value) => {
+                setExpectedResultTime(dayjs(value).format("YYYY-MM-DDTHH:mm:ss"))
+              }}
+            />
+          </Form.Item>
+        </Form>
       </Modal>
 
       {testResultData.map((test) => (
@@ -193,26 +211,26 @@ const PatientDetail = () => {
             <Col span={8}>
               <p><strong>Loại:</strong> {test.type}</p>
             </Col>
-            
+
             <Col span={8}>
               <p><strong>Kết quả:</strong> {test.result} {test.unit}</p>
             </Col>
             <Col span={8}>
               <p><strong>Ghi chú:</strong> {test.note}</p>
             </Col>
-            
+
             <Col span={8}>
               <p>
                 <strong>Thời gian dự kiến:</strong>{" "}
-                {test.expectedResultTime && !isNaN(new Date(test.expectedResultTime)) 
+                {test.expectedResultTime && !isNaN(new Date(test.expectedResultTime))
                   ? new Intl.DateTimeFormat('vi-VN', {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                      day: '2-digit',
-                      month: '2-digit',
-                      year: 'numeric',
-                      hour12: false,
-                    }).format(new Date(test.expectedResultTime))
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour12: false,
+                  }).format(new Date(test.expectedResultTime))
                   : ''
                 }
               </p>
@@ -221,15 +239,15 @@ const PatientDetail = () => {
             <Col span={8}>
               <p>
                 <strong>Thời gian nhận kết quả:</strong>{" "}
-                {test.actualResultTime && !isNaN(new Date(test.actualResultTime)) 
+                {test.actualResultTime && !isNaN(new Date(test.actualResultTime))
                   ? new Intl.DateTimeFormat('vi-VN', {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                      day: '2-digit',
-                      month: '2-digit',
-                      year: 'numeric',
-                      hour12: false,
-                    }).format(new Date(test.actualResultTime))
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour12: false,
+                  }).format(new Date(test.actualResultTime))
                   : ''
                 }
               </p>
@@ -264,7 +282,7 @@ const PatientDetail = () => {
         dataUpdate={dataUpdate}
         setDataUpdate={setDataUpdate}
         loadData={loadData}
-      />  
+      />
     </div>
   );
 };
