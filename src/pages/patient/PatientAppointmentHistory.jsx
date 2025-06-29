@@ -290,15 +290,14 @@ export default function PatientAppointmentHistory() {
             {/* Thông tin lịch khám */}
             <Descriptions title="Thông tin lịch khám" bordered size="small" column={2}>
               <Descriptions.Item label="Ngày">{healthRecord.schedule?.date}</Descriptions.Item>
-              <Descriptions.Item label="Khung giờ">{healthRecord.schedule?.slot}</Descriptions.Item>
+              <Descriptions.Item label="Khung giờ">{healthRecord.schedule?.slot ? healthRecord.schedule.slot.split(":").slice(0,2).join(":") : ''}</Descriptions.Item>
               <Descriptions.Item label="Loại lịch">{healthRecord.schedule?.type}</Descriptions.Item>
-              <Descriptions.Item label="Trạng thái">{healthRecord.schedule?.status}</Descriptions.Item>
               <Descriptions.Item label="Bác sĩ">{healthRecord.schedule?.doctor?.fullName}</Descriptions.Item>
             </Descriptions>
             <Divider />
             {/* Thông tin bệnh nhân */}
             <Descriptions title="Thông tin bệnh nhân" bordered size="small" column={2}>
-              <Descriptions.Item label="Mã bệnh nhân">{healthRecord.schedule?.patient?.patientCode}</Descriptions.Item>
+              <Descriptions.Item label="Mã bệnh nhân">{healthRecord.schedule?.patient?.displayId}</Descriptions.Item>
               <Descriptions.Item label="Tên bệnh nhân">{healthRecord.schedule?.patient?.fullName}</Descriptions.Item>
             </Descriptions>
             <Divider />

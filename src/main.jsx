@@ -49,6 +49,10 @@ import UpdateRegimenModal from './pages/doctor/RegimenList';
 // Import for lab technician pages
 import LabTechnicianHomePage from './pages/lab-technician/LabTechnicianHomePage'
 
+import PatientDetail from './pages/lab-technician/PatientDetailPage'
+import LabTechnicianProfile from './pages/lab-technician/Profile';
+import LabTechnicianPatientList from './pages/lab-technician/PatientList';
+
 
 // Import for patient pages
 import ProfileDetail from './pages/patient/ProfileDetail';
@@ -284,12 +288,24 @@ const router = createBrowserRouter([
     path: '/lab-technician',
     element: <LabTechnicianHomePage />,
     errorElement: <Errors />,
-  },
 
-  {
-    path: '/lab-technician/patient-detail/:id',
-    element: <PatientDetail />,
-    errorElement: <Errors />,
+    children: [
+      {
+        index: true,
+        element: <LabTechnicianPatientList />,
+        errorElement: <Errors />
+      },
+      {
+        path: 'patient-detail/:id',
+        element: <PatientDetail />,
+        errorElement: <Errors />
+      },
+      {
+        path: 'profile',
+        element: <LabTechnicianProfile />,
+        errorElement: <Errors />
+      }
+    ]
   }
 ]);
 

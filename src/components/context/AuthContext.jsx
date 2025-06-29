@@ -1,3 +1,4 @@
+
 import { createContext, useEffect, useState } from 'react'
 import { fetchAccountAPI, fetchUserInfoAPI } from '../../services/api.service'
 
@@ -12,6 +13,7 @@ export const AuthContext = createContext({
 
 export const AuthWrapper = (props) => {
     const [user, setUser] = useState({})
+
 
     const [authUser, setAuthUser] = useState({})
 
@@ -34,6 +36,15 @@ export const AuthWrapper = (props) => {
                 });
         } else {
             setIsAppLoading(false);
+        }
+    }, []);
+
+
+    useEffect(() => {
+        // Lấy user từ localStorage nếu có
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            setUser(JSON.parse(storedUser));
         }
     }, []);
 
