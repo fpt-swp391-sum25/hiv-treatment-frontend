@@ -168,14 +168,14 @@
 }
 
 /* Màu sắc cho từng loại trạng thái - Tăng độ tương phản */
-.status-available, .custom-event-content {
+.status-available, .custom-event-content, .fc-event, .fc-event-main {
   background-color: rgba(25, 135, 84, 0.2) !important; /* Màu xanh đậm hơn */
   border-left: 4px solid #198754 !important; /* Viền trái đậm hơn */
   color: #0a3622 !important; /* Màu chữ đậm hơn */
 }
 
 /* Loại bỏ style cho on_leave hoặc đặt giống với available */
-.status-on_leave {
+.status-on_leave, .status-unavailable, .status-UNAVAILABLE {
   background-color: rgba(25, 135, 84, 0.2) !important;
   border-left: 4px solid #198754 !important;
   color: #0a3622 !important;
@@ -185,12 +185,41 @@
 .fc-event {
   background-color: rgba(25, 135, 84, 0.2) !important;
   border-left: 4px solid #198754 !important;
-  border-radius: 4px;
+  border: none !important;
+  border-radius: 4px !important;
   padding: 4px !important;
-  cursor: pointer;
-  transition: transform 0.2s;
-  margin-bottom: 2px;
+  cursor: pointer !important;
+  transition: transform 0.2s !important;
+  margin-bottom: 2px !important;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+}
+
+/* Hiệu ứng hover cho sự kiện */
+.fc-event:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
+  background-color: rgba(25, 135, 84, 0.3) !important; /* Màu nền đậm hơn khi hover */
+  transition: all 0.2s ease-in-out !important;
+}
+
+/* Tăng độ nổi bật cho tiêu đề và nội dung */
+.custom-event-content .event-title {
+  font-weight: 700 !important; /* Đậm hơn */
+  color: #0a3622 !important; /* Màu chữ đậm */
+  font-size: 0.95rem !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  margin-bottom: 2px !important;
+}
+
+.custom-event-content .event-status {
+  font-weight: 500 !important;
+  color: #0a3622 !important;
+  font-size: 0.85rem !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }
 
 /* Toast notification */
@@ -273,38 +302,10 @@
   border-color: #0a58ca;
 }
 
-/* Tùy chỉnh sự kiện */
-.fc-event:hover {
-  transform: translateY(-2px) !important;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
-  background-color: rgba(25, 135, 84, 0.3) !important; /* Màu nền đậm hơn khi hover */
-  transition: all 0.2s ease-in-out !important;
-}
-
 /* Tùy chỉnh ngày quá khứ */
 .fc-day-past {
   background-color: #f8f9fa;
   opacity: 0.7;
-}
-
-/* Tăng độ nổi bật cho tiêu đề và nội dung */
-.custom-event-content .event-title {
-  font-weight: 700 !important; /* Đậm hơn */
-  color: #0a3622 !important; /* Màu chữ đậm */
-  font-size: 0.95rem !important;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-bottom: 2px;
-}
-
-.custom-event-content .event-status {
-  font-weight: 500 !important;
-  color: #0a3622 !important;
-  font-size: 0.85rem !important;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 /* Style cho ngày Chủ nhật */
@@ -434,15 +435,7 @@
   border-color: #236aa8;
 }
 
-/* Tùy chỉnh sự kiện */
-.fc-event:hover {
-  transform: translateY(-2px) !important;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
-  background-color: rgba(25, 135, 84, 0.3) !important; /* Màu nền đậm hơn khi hover */
-  transition: all 0.2s ease-in-out !important;
-}
-
-/* Ngày quá khứ */
+/* Tùy chỉnh ngày quá khứ */
 .fc-day-past {
   background-color: #f8f9fa;
   opacity: 0.7;

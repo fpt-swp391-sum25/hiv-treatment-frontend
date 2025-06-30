@@ -8,6 +8,7 @@ import {
   FileOutlined
 } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
+import './ManagerSidebar.css';
 
 const { Sider } = Layout;
 
@@ -57,25 +58,13 @@ const ManagerSidebar = () => {
   return (
     <Sider
       width={230}
-      style={{
-        background: '#ffffff', // Đổi từ xanh dương sang trắng
-        height: '100%',
-        position: 'fixed',
-        left: 0,
-        overflow: 'auto',
-        boxShadow: '2px 0 8px rgba(0,0,0,0.06)', // Shadow nhẹ hơn
-        borderRight: '1px solid #f0f0f0', // Thêm viền phải
-      }}
+      className="manager-sidebar"
     >
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '0 8px' }}>
+      <div className="sidebar-inner">
         <Menu
           mode="inline"
           selectedKeys={[location.pathname]}
-          style={{ 
-            background: '#ffffff', // Đổi từ xanh dương sang trắng
-            borderRight: 0,
-            marginTop: '20px',
-          }}
+          className="sidebar-menu"
           items={menuItems.map(item => ({
             ...item,
             style: getMenuItemStyle(location.pathname === item.key),

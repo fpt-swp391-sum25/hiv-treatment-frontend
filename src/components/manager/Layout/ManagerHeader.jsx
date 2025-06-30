@@ -3,6 +3,7 @@ import { Layout, Avatar, Typography, Space, Button } from 'antd';
 import { UserOutlined, LogoutOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import appLogo from '../../../assets/appLogo.png';
+import './ManagerHeader.css';
 
 const { Header } = Layout;
 const { Title } = Typography;
@@ -16,54 +17,30 @@ const ManagerHeader = ({ user }) => {
   };
 
   return (
-    <Header
-      style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '0 24px',
-        background: '#ffffff',
-        height: 80,
-        width: '100%',
-        position: 'sticky',
-        top: 0,
-        zIndex: 1,
-        boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-        borderBottom: '1px solid #f0f0f0',
-      }}
-    >
-      <div style={{ display: 'flex', alignItems: 'center' }}>
-        <img 
-          src={appLogo} 
-          alt="Logo" 
-          style={{ 
-            height: 55,
-            objectFit: 'contain',
-            cursor: 'pointer',
-          }} 
-          onClick={() => navigate('/manager/dashboard')}
-        />
+    <Header className="manager-header-fixed">
+      <div className="header-left">
+        <div className="logo-container">
+          <img 
+            src={appLogo} 
+            alt="Logo" 
+            className="app-logo"
+            onClick={() => navigate('/manager/dashboard')}
+          />
+        </div>
       </div>
 
       <Title 
         level={4} 
-        style={{ 
-          margin: 0, 
-          color: '#333333',
-          fontWeight: 600,
-        }}
+        className="header-title"
       >
         Chào mừng Quản lí
       </Title>
 
-      <Space>
+      <div className="header-right">
         <Avatar 
           icon={<UserOutlined />}
           size={46} 
-          style={{ 
-            background: '#2056df',
-            color: '#ffffff',
-          }}
+          className="user-avatar"
         />
         <Button
           type="primary"
@@ -73,7 +50,7 @@ const ManagerHeader = ({ user }) => {
         >
           Đăng xuất
         </Button>
-      </Space>
+      </div>
     </Header>
   );
 };

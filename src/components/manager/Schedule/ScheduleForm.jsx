@@ -16,11 +16,9 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         status: ScheduleStatus.AVAILABLE,
         morning: true,
         afternoon: true,
-        note: '',
         repeatWeekly: false,
         repeatCount: 1,
-        roomCode: '100',
-        type: 'Khám'
+        roomCode: '101'
     });
 
     useEffect(() => {
@@ -106,11 +104,9 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             status: 'Đang hoạt động',
             morning: true,
             afternoon: true,
-            note: '',
             repeatWeekly: false,
             repeatCount: 1,
-            roomCode: '100',
-            type: 'Khám'
+            roomCode: '101'
         });
     };
 
@@ -197,7 +193,8 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                         status: formData.status,
                         morning: formData.morning,
                         afternoon: formData.afternoon,
-                        note: formData.note
+                        roomCode: formData.roomCode,
+                        type: 'Khám'
                     };
                     
                     schedules.push(newSchedule);
@@ -223,7 +220,8 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                 status: formData.status,
                 morning: formData.morning,
                 afternoon: formData.afternoon,
-                note: formData.note
+                roomCode: formData.roomCode,
+                type: 'Khám'
             };
             
             console.log('Creating single schedule:', newSchedule);
@@ -234,7 +232,7 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
     };
 
     return (
-        <Modal show={show} onHide={onHide} centered size="lg">
+        <Modal show={show} onHide={onHide} centered size="lg" className="schedule-form-modal">
             <Modal.Header closeButton>
                 <Modal.Title>Tạo lịch làm việc mới</Modal.Title>
             </Modal.Header>
@@ -244,7 +242,7 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                 <Form onSubmit={handleSubmit}>
                     <Row>
                         <Col md={6}>
-                    <Form.Group className="mb-3">
+                            <Form.Group className="mb-3">
                                 <Form.Label>Bác sĩ</Form.Label>
                                 {loading ? (
                                     <div className="d-flex align-items-center">
@@ -252,20 +250,20 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                                         <span>Đang tải danh sách bác sĩ...</span>
                                     </div>
                                 ) : (
-                        <Form.Select
+                                    <Form.Select
                                         name="doctorId"
-                            value={formData.doctorId}
+                                        value={formData.doctorId}
                                         onChange={handleChange}
                                         disabled={loading || doctors.length === 0}
-                            required
-                        >
-                            <option value="">Chọn bác sĩ</option>
-                            {doctors.map(doctor => (
-                                <option key={doctor.id} value={doctor.id}>
-                                    {doctor.name}
-                                </option>
-                            ))}
-                        </Form.Select>
+                                        required
+                                    >
+                                        <option value="">Chọn bác sĩ</option>
+                                        {doctors.map(doctor => (
+                                            <option key={doctor.id} value={doctor.id}>
+                                                {doctor.name}
+                                            </option>
+                                        ))}
+                                    </Form.Select>
                                 )}
                             </Form.Group>
                         </Col>
@@ -280,13 +278,31 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                                     min={moment().format('YYYY-MM-DD')}
                                     required
                                 />
-                    </Form.Group>
+                            </Form.Group>
                         </Col>
                     </Row>
 
                     <Row>
-                        <Col md={12}>
+                        <Col md={6}>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Phòng khám</Form.Label>
+                                <Form.Select
+                                    name="roomCode"
+                                    value={formData.roomCode}
+                                    onChange={handleChange}
+                                    required
+                                >
+                                    <option value="101">Phòng 101</option>
+                                    <option value="102">Phòng 102</option>
+                                    <option value="103">Phòng 103</option>
+                                    <option value="201">Phòng 201</option>
+                                    <option value="202">Phòng 202</option>
+                                </Form.Select>
+                            </Form.Group>
+                        </Col>
+                        <Col md={6}>
                             <Form.Group className="mb-3 mt-2">
+                                <Form.Label>Buổi làm việc</Form.Label>
                                 <div className="d-flex flex-column">
                                     <Form.Check 
                                         type="checkbox"
@@ -308,78 +324,45 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                         </Col>
                     </Row>
 
-                    <Form.Group className="mb-3">
-                        <Form.Label>Ghi chú</Form.Label>
-                        <Form.Control
-                            as="textarea"
-                            name="note"
-                            value={formData.note}
-                            onChange={handleChange}
-                            rows={3}
-                        />
-                    </Form.Group>
-
-                    <Row>
+                    <Row className="mt-3">
                         <Col md={6}>
-                    <Form.Group className="mb-3">
-                        <Form.Check 
-                            type="checkbox"
+                            <Form.Group className="mb-3">
+                                <Form.Check 
+                                    type="checkbox"
                                     name="repeatWeekly"
                                     label="Lặp lại hàng tuần"
                                     checked={formData.repeatWeekly}
                                     onChange={handleChange}
-                        />
-                    </Form.Group>
+                                />
+                            </Form.Group>
                         </Col>
                         <Col md={6}>
                             {formData.repeatWeekly && (
-                        <Form.Group className="mb-3">
-                            <Form.Label>Số tuần lặp lại</Form.Label>
-                            <Form.Control
-                                type="number"
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Số tuần lặp lại</Form.Label>
+                                    <Form.Control
+                                        type="number"
                                         name="repeatCount"
-                                value={formData.repeatCount}
+                                        value={formData.repeatCount}
                                         onChange={handleChange}
                                         min={1}
                                         max={12}
-                            />
-                        </Form.Group>
-                    )}
+                                    />
+                                </Form.Group>
+                            )}
                         </Col>
                     </Row>
-
-                    <Form.Group className="mb-3">
-                        <Form.Label>Mã phòng</Form.Label>
-                        <Form.Control
-                            type="text"
-                            name="roomCode"
-                            value={formData.roomCode}
-                            onChange={handleChange}
-                            placeholder="Nhập mã phòng (vd: 100, 101, ...)"
-                        />
-                    </Form.Group>
-
-                    <Form.Group className="mb-3">
-                        <Form.Label>Loại lịch</Form.Label>
-                        <Form.Select
-                            name="type"
-                            value={formData.type}
-                            onChange={handleChange}
-                        >
-                            <option value="Khám">Khám thông thường</option>
-                            <option value="Tái khám">Tái khám</option>
-                            <option value="Tư vấn">Tư vấn</option>
-                        </Form.Select>
-                    </Form.Group>
                 </Form>
             </Modal.Body>
-            <Modal.Footer>
-                <Button variant="secondary" onClick={onHide}>
-                    Hủy
-                </Button>
-                <Button variant="primary" onClick={handleSubmit}>
-                    Tạo lịch
-                </Button>
+            <Modal.Footer className="d-flex justify-content-end">
+                <div className="d-flex gap-2">
+                    <Button variant="secondary" onClick={onHide} className="px-4">
+                        Hủy
+                    </Button>
+                    <Button variant="primary" onClick={handleSubmit} className="px-4">
+                        Tạo lịch
+                    </Button>
+                </div>
             </Modal.Footer>
         </Modal>
     );

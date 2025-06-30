@@ -64,10 +64,13 @@ const ManagerSchedule = () => {
             
             if (response && response.data) {
                 schedulesData = response.data;
+                console.log('Found data in response.data:', schedulesData);
             } else if (response && Array.isArray(response)) {
                 schedulesData = response;
+                console.log('Found array data directly in response:', schedulesData);
             } else if (response) {
                 schedulesData = response;
+                console.log('Using entire response as data:', schedulesData);
             }
             
             // Đảm bảo schedulesData là một mảng
@@ -84,10 +87,14 @@ const ManagerSchedule = () => {
                 
                 // Chuyển đổi dữ liệu từ API để phù hợp với cấu trúc component
                 const formattedSchedules = updatedSchedulesList
-                    .map(formatScheduleFromAPI)
+                    .map(schedule => {
+                        const formatted = formatScheduleFromAPI(schedule);
+                        console.log(`Formatted schedule ${schedule.id}:`, formatted);
+                        return formatted;
+                    })
                     .filter(Boolean); // Lọc bỏ các giá trị null
                 
-                console.log('Formatted schedules:', formattedSchedules);
+                console.log('Final formatted schedules:', formattedSchedules);
                 setSchedules(formattedSchedules);
                 
                 if (formattedSchedules.length === 0) {
@@ -247,25 +254,66 @@ const ManagerSchedule = () => {
 
     // Hàm định dạng dữ liệu lịch từ API để hiển thị trên UI
     const formatScheduleFromAPI = (schedule) => {
-        if (!schedule || !schedule.id) {
-            console.warn('Invalid schedule data:', schedule);
+        if (!schedule) {
+            console.warn('Invalid schedule data: null or undefined');
             return null;
         }
         
+        console.log('Formatting schedule data:', schedule);
+        
         try {
             // Lấy thông tin từ đối tượng schedule
-            const id = schedule.id;
+            const id = schedule.id || `temp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
             const date = schedule.date;
             const slot = schedule.slot;
-            const doctorId = schedule.doctorId || schedule.doctor_id || (schedule.doctor && schedule.doctor.id);
-            const doctorName = schedule.doctorName || (schedule.doctor && schedule.doctor.fullName) || 'Bác sĩ';
-            const status = 'Đang hoạt động'; // Luôn đặt trạng thái là "Đang hoạt động"
+            
+            // Xử lý nhiều cách để lấy doctorId
+            let doctorId = null;
+            if (schedule.doctorId) {
+                doctorId = schedule.doctorId;
+            } else if (schedule.doctor_id) {
+                doctorId = schedule.doctor_id;
+            } else if (schedule.doctor && schedule.doctor.id) {
+                doctorId = schedule.doctor.id;
+            } else if (schedule.doctor) {
+                doctorId = schedule.doctor;
+            }
+            
+            // Xử lý nhiều cách để lấy doctorName
+            let doctorName = 'Bác sĩ';
+            if (schedule.doctorName) {
+                doctorName = schedule.doctorName;
+            } else if (schedule.doctor && schedule.doctor.fullName) {
+                doctorName = schedule.doctor.fullName;
+            } else if (schedule.doctor && schedule.doctor.name) {
+                doctorName = schedule.doctor.name;
+            }
+            
+            // Luôn đặt trạng thái là "Đang hoạt động"
+            const status = 'available';
             const type = schedule.type || 'Khám';
             const roomCode = schedule.roomCode || schedule.room_code || '100';
             
             // Xác định buổi dựa trên slot
-            const isMorning = slot && slot.startsWith('08:');
-            const isAfternoon = slot && slot.startsWith('14:');
+            let isMorning = false;
+            let isAfternoon = false;
+            
+            if (slot) {
+                const hourStr = slot.split(':')[0];
+                const hour = parseInt(hourStr);
+                
+                if (hour >= 8 && hour < 12) {
+                    isMorning = true;
+                } else if (hour >= 13 && hour < 18) {
+                    isAfternoon = true;
+                }
+            } else {
+                // Nếu không có slot, mặc định là cả ngày
+                isMorning = true;
+                isAfternoon = true;
+            }
+            
+            console.log(`Formatted schedule ${id}: morning=${isMorning}, afternoon=${isAfternoon}`);
             
             return {
                 id: id,
@@ -334,19 +382,62 @@ const ManagerSchedule = () => {
 
     const handleScheduleDelete = async (scheduleId) => {
         try {
+            if (!scheduleId) {
+                console.error('Invalid schedule ID:', scheduleId);
+                showToast('Không thể xóa lịch: ID không hợp lệ', 'danger');
+                return;
+            }
+            
             // Gọi API để xóa lịch
             console.log('Deleting schedule with ID:', scheduleId);
-            await deleteScheduleAPI(scheduleId);
+            const response = await deleteScheduleAPI(scheduleId);
+            console.log('Delete schedule response:', response);
             
-            // Cập nhật state sau khi xóa thành công
-            setSchedules(prevSchedules => 
-                prevSchedules.filter(schedule => schedule.id !== scheduleId)
-            );
-            
-            showToast('Xóa lịch thành công!', 'success');
+            // Kiểm tra response từ API
+            if (response && (response.status === 200 || response.status === 204 || response.data?.message?.includes('success'))) {
+                // Cập nhật state sau khi xóa thành công
+                setSchedules(prevSchedules => 
+                    prevSchedules.filter(schedule => schedule.id !== scheduleId)
+                );
+                
+                // Làm mới dữ liệu từ server sau khi xóa
+                setTimeout(() => {
+                    fetchSchedules();
+                }, 500);
+                
+                showToast('Xóa lịch thành công!', 'success');
+            } else {
+                console.warn('API returned unexpected response:', response);
+                showToast('Lịch đã được xóa nhưng có thể cần làm mới trang', 'warning');
+                
+                // Vẫn cập nhật UI để người dùng không thấy lịch đã xóa
+                setSchedules(prevSchedules => 
+                    prevSchedules.filter(schedule => schedule.id !== scheduleId)
+                );
+            }
         } catch (error) {
             console.error('Error deleting schedule:', error);
-            showToast('Không thể kết nối đến server, vui lòng thử lại sau', 'danger');
+            
+            if (error.response) {
+                console.error('Error response:', error.response);
+                
+                // Xử lý các mã lỗi cụ thể
+                if (error.response.status === 404) {
+                    showToast('Không tìm thấy lịch này trên hệ thống', 'warning');
+                    
+                    // Xóa khỏi UI nếu không tìm thấy trên server
+                    setSchedules(prevSchedules => 
+                        prevSchedules.filter(schedule => schedule.id !== scheduleId)
+                    );
+                    return;
+                }
+                
+                showToast(`Lỗi server: ${error.response.status} - ${error.response.statusText || 'Unknown error'}`, 'danger');
+            } else if (error.request) {
+                showToast('Không thể kết nối đến server, vui lòng kiểm tra kết nối mạng', 'danger');
+            } else {
+                showToast(`Lỗi: ${error.message || 'Unknown error'}`, 'danger');
+            }
         }
     };
 
