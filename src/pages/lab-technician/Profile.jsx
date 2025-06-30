@@ -3,6 +3,7 @@ import { Card, Row, Col, Avatar, Typography, Form, Input, Button, message } from
 import { MailOutlined, PhoneOutlined, UserOutlined } from '@ant-design/icons';
 import { useContext } from 'react';
 import { AuthContext } from '../../components/context/AuthContext';
+import { updateUserAPI, fetchAccountAPI } from '../../services/api.service';
 
 const { Title, Text } = Typography;
 
@@ -24,16 +25,29 @@ const LabTechnicianProfile = () => {
       return;
     }
     setLoading(true);
-    // Giả lập cập nhật, thực tế nên gọi API
-    setTimeout(() => {
-      const updatedUser = { ...user, ...editableUser };
-      delete updatedUser.password;
-      delete updatedUser.confirmPassword;
-      setUser(updatedUser);
-      localStorage.setItem('user', JSON.stringify(updatedUser));
-      message.success('Cập nhật thông tin thành công!');
+    try {
+      const userToUpdate = {
+        ...user,
+        ...editableUser,
+      };
+      if (!userToUpdate.password) delete userToUpdate.password;
+      if (!userToUpdate.confirmPassword) delete userToUpdate.confirmPassword;
+      const res = await updateUserAPI(user.id, userToUpdate);
+      if (res.data) {
+        const updatedUserRes = await fetchAccountAPI();
+        if (updatedUserRes.data) {
+          setUser(updatedUserRes.data);
+          localStorage.setItem('user', JSON.stringify(updatedUserRes.data));
+        }
+        message.success('Cập nhật thông tin thành công!');
+      } else {
+        message.error('Cập nhật thông tin không thành công!');
+      }
+    } catch (error) {
+      message.error('Cập nhật thất bại!');
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   return (
