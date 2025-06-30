@@ -1,39 +1,84 @@
 .schedule-detail-modal .modal-content {
     border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    border: none;
 }
 
 .schedule-detail-modal .modal-header {
     background-color: #f8f9fa;
-    border-bottom: 1px solid #dee2e6;
+    border-bottom: 1px solid #ebedf0;
+    padding: 15px 20px;
 }
 
 .schedule-detail-modal .modal-title {
-    color: #2c3e50;
-    font-weight: 500;
+    color: #1a73e8;
+    font-weight: 600;
 }
 
-.schedule-detail-modal .form-label {
-    color: #495057;
-    font-weight: 500;
-    margin-bottom: 0.5rem;
+.schedule-detail-modal .modal-body {
+    padding: 20px;
+}
+
+.schedule-detail-modal .modal-footer {
+    border-top: 1px solid #ebedf0;
+    padding: 15px 20px;
 }
 
 .schedule-detail-modal .form-control,
 .schedule-detail-modal .form-select {
-    border-color: #dee2e6;
+    border-radius: 6px;
+    border: 1px solid #dfe1e5;
+    padding: 10px 12px;
+    font-size: 14px;
 }
 
-.schedule-detail-modal .form-control:disabled,
-.schedule-detail-modal .form-select:disabled {
-    background-color: #f8f9fa;
-    cursor: not-allowed;
+.schedule-detail-modal .form-control:focus,
+.schedule-detail-modal .form-select:focus {
+    border-color: #4daddf;
+    box-shadow: 0 0 0 0.2rem rgba(77, 173, 223, 0.25);
 }
 
-.schedule-detail-modal .btn-group {
-    gap: 0.5rem;
+.schedule-detail-modal .form-label {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 8px;
+    color: #333;
 }
 
-.schedule-detail-modal .modal-footer {
-    border-top: 1px solid #dee2e6;
-    padding: 1rem;
+.schedule-detail-modal .btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.schedule-detail-modal .btn-danger:hover:not(:disabled) {
+    background-color: #c82333;
+    border-color: #bd2130;
+}
+
+.schedule-detail-modal .btn-primary {
+    background-color: #1a73e8;
+    border-color: #1a73e8;
+}
+
+.schedule-detail-modal .btn-primary:hover:not(:disabled) {
+    background-color: #0d62c9;
+    border-color: #0d62c9;
+}
+
+.schedule-detail-modal .btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.schedule-detail-modal .btn-secondary:hover:not(:disabled) {
+    background-color: #5a6268;
+    border-color: #545b62;
+}
+
+.schedule-detail-modal .alert-danger {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+    border-radius: 6px;
+    padding: 12px 15px;
 }

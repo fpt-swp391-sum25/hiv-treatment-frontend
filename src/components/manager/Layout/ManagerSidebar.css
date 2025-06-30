@@ -1,21 +1,26 @@
-.manager-sidebar-container {
-  height: 100%;
-  background-color: #212529;
-  padding: 1rem;
-  color: white;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+.manager-sidebar {
+  background: #ffffff;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 80px; /* Đặt vị trí bắt đầu của sidebar bên dưới header */
+  overflow: auto;
+  box-shadow: 2px 0 8px rgba(0,0,0,0.06);
+  border-right: 1px solid #f0f0f0;
+  z-index: 900; /* Đảm bảo sidebar nằm dưới header nhưng trên các phần tử khác */
 }
 
-.sidebar-content {
-  flex-grow: 1;
+.sidebar-inner {
   display: flex;
   flex-direction: column;
+  height: 100%;
+  padding: 0 8px;
 }
 
 .sidebar-menu {
-  margin-bottom: 20px;
+  background: #ffffff;
+  border-right: 0;
+  margin-top: 20px;
 }
 
 .sidebar-link {
@@ -39,22 +44,29 @@
   margin-bottom: 10px;
 }
 
-/* Thêm scrollbar tùy chỉnh cho sidebar nếu cần */
-.manager-sidebar-container::-webkit-scrollbar {
+/* Thêm scrollbar tùy chỉnh cho sidebar */
+.manager-sidebar::-webkit-scrollbar {
   width: 5px;
 }
 
-.manager-sidebar-container::-webkit-scrollbar-track {
-  background: #343a40;
+.manager-sidebar::-webkit-scrollbar-track {
+  background: #f0f0f0;
 }
 
-.manager-sidebar-container::-webkit-scrollbar-thumb {
-  background: #495057;
+.manager-sidebar::-webkit-scrollbar-thumb {
+  background: #d0d0d0;
   border-radius: 3px;
 }
 
-.manager-sidebar-container::-webkit-scrollbar-thumb:hover {
-  background: #6c757d;
+.manager-sidebar::-webkit-scrollbar-thumb:hover {
+  background: #a0a0a0;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .manager-sidebar {
+    top: 70px; /* Điều chỉnh theo chiều cao của header trên màn hình nhỏ */
+  }
 }
 
 /* Đảm bảo nút đăng xuất luôn ở dưới cùng */

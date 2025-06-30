@@ -7,32 +7,51 @@
   border-bottom: 1px solid #343a40;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   color: white;
-  height: 104px; /* Cố định chiều cao header */
+  height: 80px; /* Điều chỉnh chiều cao header */
   width: 100%;
   position: relative;
   z-index: 1000;
 }
 
+/* Header cố định khi cuộn */
+.manager-header-fixed {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+  background: #ffffff;
+  height: 80px;
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  border-bottom: 1px solid #f0f0f0;
+}
+
 .header-left {
   display: flex;
   align-items: center;
-  padding-left: 12px; /* Thêm padding bên trái để canh với sidebar */
 }
 
 .logo-container {
-  width: 190px; /* Giảm chiều rộng logo container để phù hợp với sidebar */
   height: 80px;
   display: flex;
   align-items: center;
-  margin-left: -12px; /* Dịch logo sang trái để canh với sidebar */
 }
 
 .app-logo {
-  width: 100%;
-  height: auto;
-  max-height: 70px;
+  height: 55px;
   object-fit: contain;
-  border-radius: 35px / 20px; /* Tạo hình ellipse */
+  cursor: pointer;
+}
+
+.header-title {
+  margin: 0 !important;
+  color: #333333 !important;
+  font-weight: 600 !important;
 }
 
 .header-center {
@@ -45,6 +64,11 @@
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.user-avatar {
+  background: #2056df !important;
+  color: #ffffff !important;
 }
 
 .user-avatar-container {
@@ -63,35 +87,27 @@
   transform: scale(1.05);
 }
 
-.user-avatar {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 50%;
-}
-
 /* Responsive styles */
 @media (max-width: 768px) {
-  .manager-header {
-    padding: 10px 16px;
-    height: 84px; /* Giảm chiều cao header cho màn hình nhỏ */
+  .manager-header-fixed {
+    padding: 0 16px;
+    height: 70px;
   }
 
-  .header-center {
-    font-size: 1.2rem;
+  .header-title {
+    font-size: 1.2rem !important;
   }
 
   .logo-container {
-    width: 180px;
-    height: 60px;
+    height: 70px;
   }
 
   .app-logo {
-    max-height: 50px;
+    height: 45px;
   }
 
-  .user-avatar-container {
-    width: 40px;
-    height: 40px;
+  .user-avatar {
+    width: 40px !important;
+    height: 40px !important;
   }
 }

@@ -307,8 +307,18 @@ const createScheduleAPI = (scheduleData) => {
 }
 
 const getAllSchedulesAPI = () => {
+    // Try the new endpoint first, with fallback to the old one if needed
     const URL_BACKEND = '/api/schedule/list';
-    return axios.get(URL_BACKEND);
+    console.log('Fetching schedules from:', URL_BACKEND);
+    
+    return axios.get(URL_BACKEND)
+        .catch(error => {
+            console.error('Error fetching from /api/schedule/list:', error);
+            console.log('Trying fallback endpoint /api/schedule...');
+            
+            // If the first endpoint fails, try the fallback
+            return axios.get('/api/schedule');
+        });
 }
 
 const getSchedulesByDoctorAPI = (doctorId) => {

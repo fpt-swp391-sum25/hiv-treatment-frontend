@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Modal, Button, Form, Alert, Row, Col, Spinner } from 'react-bootstrap';
 import { ScheduleStatus } from '../../../types/schedule.types';
 import moment from 'moment';
+import { deleteScheduleAPI } from '../../../services/api.service';
 import './ScheduleDetail.css';
 
 const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToast }) => {
@@ -76,45 +77,30 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
         }
     };
 
+    // Hiển thị xác nhận xóa
+    const showDeleteConfirmation = () => {
+        setConfirmDelete(true);
+    };
+
+    // Hủy xác nhận xóa
+    const cancelDelete = () => {
+        setConfirmDelete(false);
+    };
+
     const handleDelete = async () => {
         try {
             setDeleting(true);
+            
+            if (!schedule || !schedule.id) {
+                console.error('Invalid schedule ID:', schedule);
+                onShowToast('Không thể xóa lịch: ID không hợp lệ', 'danger');
+                return;
+            }
             
             // Gọi API để xóa lịch
             console.log('Deleting schedule:', schedule.id);
             const response = await deleteScheduleAPI(schedule.id);
             console.log('Delete response:', response);
-            
-            // Xóa dữ liệu lịch trong localStorage và sessionStorage
-            try {
-                const localStorageKeys = Object.keys(localStorage);
-                localStorageKeys.forEach(key => {
-                    if (key.includes('fullcalendar') || key.includes('fc-') || 
-                        key.includes('calendar') || key.includes('event') || 
-                        key.includes('schedule')) {
-                        console.log('Removing from localStorage in handleDelete:', key);
-                        localStorage.removeItem(key);
-                    }
-                });
-                
-                const sessionStorageKeys = Object.keys(sessionStorage);
-                sessionStorageKeys.forEach(key => {
-                    if (key.includes('fullcalendar') || key.includes('fc-') || 
-                        key.includes('calendar') || key.includes('event') || 
-                        key.includes('schedule')) {
-                        console.log('Removing from sessionStorage in handleDelete:', key);
-                        sessionStorage.removeItem(key);
-                    }
-                });
-                
-                // Xóa tất cả dữ liệu trong localStorage và sessionStorage
-                localStorage.removeItem('fc-event-sources');
-                localStorage.removeItem('fc-view-state');
-                sessionStorage.removeItem('fc-event-sources');
-                sessionStorage.removeItem('fc-view-state');
-            } catch (error) {
-                console.error('Error clearing storage:', error);
-            }
             
             // Thông báo thành công và đóng modal
             onShowToast('Đã xóa lịch thành công', 'success');
@@ -125,6 +111,7 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
             onShowToast('Không thể xóa lịch, vui lòng thử lại sau', 'danger');
         } finally {
             setDeleting(false);
+            setConfirmDelete(false);
         }
     };
 
@@ -142,7 +129,7 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
     }
 
     return (
-        <Modal show={show} onHide={handleClose} centered>
+        <Modal show={show} onHide={handleClose} centered className="schedule-detail-modal">
             <Modal.Header closeButton>
                 <Modal.Title>Chi tiết lịch làm việc</Modal.Title>
             </Modal.Header>
@@ -222,34 +209,56 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
 
                 {confirmDelete && (
                     <Alert variant="danger">
-                        <p>Bạn có chắc chắn muốn xóa lịch làm việc này?</p>
-                        <p>Thao tác này không thể hoàn tác.</p>
+                        <p className="mb-2"><strong>Xác nhận xóa lịch làm việc</strong></p>
+                        <p className="mb-2">Bạn có chắc chắn muốn xóa lịch làm việc của bác sĩ {formData.doctorName} vào ngày {formatDate(formData.date)}?</p>
+                        <p className="mb-0">Thao tác này không thể hoàn tác và sẽ xóa dữ liệu khỏi hệ thống.</p>
                     </Alert>
                 )}
             </Modal.Body>
             <Modal.Footer>
                 <div className="d-flex justify-content-between w-100">
-                    <Button 
-                        variant="danger" 
-                        onClick={handleDelete} 
-                        disabled={deleting}
-                    >
-                        {deleting ? (
-                            <>
-                                <Spinner animation="border" size="sm" className="me-1" />
-                                Đang xử lý...
-                            </>
-                        ) : (
-                            'Xóa lịch'
-                        )}
-                    </Button>
+                    {!confirmDelete ? (
+                        <Button 
+                            variant="danger" 
+                            onClick={showDeleteConfirmation} 
+                            disabled={deleting}
+                        >
+                            Xóa lịch
+                        </Button>
+                    ) : (
+                        <div className="d-flex">
+                            <Button 
+                                variant="secondary" 
+                                onClick={cancelDelete} 
+                                className="me-2"
+                                disabled={deleting}
+                            >
+                                Hủy xóa
+                            </Button>
+                            <Button 
+                                variant="danger" 
+                                onClick={handleDelete} 
+                                disabled={deleting}
+                            >
+                                {deleting ? (
+                                    <>
+                                        <Spinner animation="border" size="sm" className="me-1" />
+                                        Đang xử lý...
+                                    </>
+                                ) : (
+                                    'Xác nhận xóa'
+                                )}
+                            </Button>
+                        </div>
+                    )}
+                    
                     <div>
                         <Button 
                             variant="secondary" 
                             onClick={handleClose} 
                             className="me-2"
                         >
-                            Hủy
+                            Đóng
                         </Button>
                         <Button 
                             variant="primary" 

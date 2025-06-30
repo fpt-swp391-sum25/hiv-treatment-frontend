@@ -58,6 +58,8 @@
 .schedule-form-modal .btn-primary {
     background-color: #1a73e8;
     border-color: #1a73e8;
+    min-width: 120px;
+    font-weight: 500;
 }
 
 .schedule-form-modal .btn-primary:hover {
@@ -68,6 +70,8 @@
 .schedule-form-modal .btn-secondary {
     background-color: #6c757d;
     border-color: #6c757d;
+    min-width: 120px;
+    font-weight: 500;
 }
 
 .schedule-form-modal .btn-secondary:hover {
@@ -109,4 +113,21 @@
 
 .schedule-form-modal .text-muted {
     color: #6c757d;
+}
+
+/* Đảm bảo nút có kích thước đồng đều */
+.schedule-form-modal .modal-footer .btn {
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+}
+
+/* Đảm bảo footer thẳng hàng */
+.schedule-form-modal .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 20px;
 }

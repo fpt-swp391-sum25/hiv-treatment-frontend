@@ -1,9 +1,12 @@
 import { message, notification } from "antd";
 import axios from "axios";
 
+// Log baseURL to help with debugging
+const baseURL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080';
+console.log('Backend URL:', baseURL);
 
 const instance = axios.create({
-    baseURL: import.meta.env.VITE_BACKEND_URL
+    baseURL: baseURL
 })
 
 // Add a request interceptor
@@ -71,19 +74,17 @@ instance.interceptors.response.use(function (response) {
                 // Token expired or invalid
                 localStorage.removeItem('access_token');
 
-                // message.error("Phiên đăng nhập hết hạn! Vui lòng đăng nhập lại.")
+                // message.error("Phiên đăng nhập hết hạn! Vui lòng đăng nhập lại.")
                 // notification.error({
-                //     message: 'Hệ thống',
+                //     message: 'Hệ thống',
                 //     description: 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.'
                 // });
                 localStorage.setItem('auth_error', errorMessage);
                 window.location.href = '/login';
             } else {
                 // Role-based access denial or other 403 error
-                toast.error(errorMessage || 'Bạn không có quyền truy cập trang này.', {
-                    position: 'top-right',
-                    autoClose: 3000,
-                });
+                console.error('Access denied:', errorMessage);
+                alert('Bạn không có quyền truy cập trang này.');
                 window.location.href = '/login';
             }
         }
