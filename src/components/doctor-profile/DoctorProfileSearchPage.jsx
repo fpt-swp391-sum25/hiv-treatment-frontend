@@ -92,7 +92,11 @@ const DoctorsSearchPage = () => {
               />
               <div className="doctor-info">
                 <h3>{mergedDoctors.fullName}</h3>
-                <p>🕒 {mergedDoctors.startYear} năm kinh nghiệm</p>
+                <p>
+                    🕒 {mergedDoctors.startYear
+                      ? `${new Date().getFullYear() - Number(mergedDoctors.startYear)} năm kinh nghiệm`
+                      : 'Chưa rõ năm kinh nghiệm'}
+                  </p>
                 <p>{mergedDoctors.qualifications}</p>
                 <Link to={`/booking?doctorId=${mergedDoctors.id}`} className="btn-primary">
                   Đặt lịch
