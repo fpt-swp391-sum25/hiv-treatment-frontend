@@ -578,20 +578,6 @@ const ManagerSchedule = () => {
                             <BsCalendarPlus className="me-2" />
                             Thêm lịch mới
                         </button>
-                        <button 
-                            className="refresh-button ms-2"
-                            onClick={handleRefreshData}
-                            disabled={loading}
-                        >
-                            {loading ? (
-                                <>
-                                    <Spinner animation="border" size="sm" className="me-1" />
-                                    Đang tải...
-                                </>
-                            ) : (
-                                'Làm mới dữ liệu'
-                            )}
-                        </button>
                     </div>
                 </Col>
             </Row>

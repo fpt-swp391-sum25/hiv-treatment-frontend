@@ -155,8 +155,14 @@ const fetchDoctorByIdAPI = (doctorId) => {
 }
 
 // Cập nhật thông tin bác sĩ
-const updateDoctorProfileAPI = (id, profileData) => {
-    const URL_BACKEND = `/api/doctor-profile/${id}`;
+const updateDoctorProfileAPI = (doctorProfileId, profileData) => {
+    // Đảm bảo startYear là chuỗi
+    if (profileData.startYear !== null && profileData.startYear !== undefined) {
+        profileData.startYear = String(profileData.startYear);
+    }
+    
+    console.log(`Updating doctor profile ID ${doctorProfileId} with data:`, profileData);
+    const URL_BACKEND = `/api/doctor-profile/${doctorProfileId}`;
     return axios.put(URL_BACKEND, profileData);
 }
 
@@ -374,6 +380,24 @@ const fetchAllLabTechniciansAPI = () => {
     return axios.get(URL_BACKEND);
 }
 
+// Lấy thông tin doctor_profile theo doctorId
+const fetchDoctorProfileByDoctorIdAPI = (doctorId) => {
+    console.log(`Fetching doctor profile for doctor ID: ${doctorId}`);
+    const URL_BACKEND = `/api/doctor-profile/doctor-id/${doctorId}`;
+    return axios.get(URL_BACKEND);
+};
+
+// Tạo mới doctor_profile
+const createDoctorProfileAPI = (profileData) => {
+    console.log(`Creating new doctor profile with data:`, profileData);
+    // Đảm bảo startYear là chuỗi
+    if (profileData.startYear !== null && profileData.startYear !== undefined) {
+        profileData.startYear = String(profileData.startYear);
+    }
+    const URL_BACKEND = `/api/doctor-profile`;
+    return axios.post(URL_BACKEND, profileData);
+};
+
 export {
     loginAPI,
     registerAPI,
@@ -431,5 +455,7 @@ export {
     deleteScheduleAPI,
     getSchedulesByPatientAPI,
     fetchUsersByRoleAPI,
-    fetchAllLabTechniciansAPI
+    fetchAllLabTechniciansAPI,
+    fetchDoctorProfileByDoctorIdAPI,
+    createDoctorProfileAPI
 }

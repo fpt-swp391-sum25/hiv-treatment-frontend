@@ -173,30 +173,12 @@ const LabTechnicianManagement = () => {
             )}
             
             <Row gutter={[16, 16]} className="dashboard-stats">
-                <Col xs={24} sm={12} lg={8}>
+                <Col xs={24}>
                     <Card>
                         <Statistic
                             title="Tổng số nhân viên"
                             value={filteredLabTechnicians.length}
                             prefix={<UserOutlined />}
-                        />
-                    </Card>
-                </Col>
-                <Col xs={24} sm={12} lg={8}>
-                    <Card>
-                        <Statistic
-                            title="Đang làm việc"
-                            value={filteredLabTechnicians.filter(t => t && t.status === AccountStatus.ACTIVE).length}
-                            prefix={<CalendarOutlined />}
-                        />
-                    </Card>
-                </Col>
-                <Col xs={24} sm={12} lg={8}>
-                    <Card>
-                        <Statistic
-                            title="Không hoạt động"
-                            value={filteredLabTechnicians.filter(t => t && t.status !== AccountStatus.ACTIVE).length}
-                            prefix={<FileTextOutlined />}
                         />
                     </Card>
                 </Col>
