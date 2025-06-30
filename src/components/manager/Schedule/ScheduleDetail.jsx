@@ -12,13 +12,32 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
         doctorName: '',
         date: '',
         status: ScheduleStatus.AVAILABLE,
-        morning: true,
-        afternoon: true,
+        slot: '',
         note: ''
     });
     const [loading, setLoading] = useState(false);
     const [confirmDelete, setConfirmDelete] = useState(false);
     const [deleting, setDeleting] = useState(false);
+
+    // Định nghĩa các khung giờ làm việc
+    const timeSlots = [
+        { value: '08:00:00', label: '08:00' },
+        { value: '08:30:00', label: '08:30' },
+        { value: '09:00:00', label: '09:00' },
+        { value: '09:30:00', label: '09:30' },
+        { value: '10:00:00', label: '10:00' },
+        { value: '10:30:00', label: '10:30' },
+        { value: '11:00:00', label: '11:00' },
+        { value: '11:30:00', label: '11:30' },
+        { value: '13:00:00', label: '13:00' },
+        { value: '13:30:00', label: '13:30' },
+        { value: '14:00:00', label: '14:00' },
+        { value: '14:30:00', label: '14:30' },
+        { value: '15:00:00', label: '15:00' },
+        { value: '15:30:00', label: '15:30' },
+        { value: '16:00:00', label: '16:00' },
+        { value: '16:30:00', label: '16:30' }
+    ];
 
     useEffect(() => {
         if (schedule) {
@@ -29,8 +48,7 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                 doctorName: schedule.doctorName,
                 date: schedule.date,
                 status: schedule.status,
-                morning: schedule.morning,
-                afternoon: schedule.afternoon,
+                slot: schedule.slot || '08:00:00',
                 note: schedule.note || ''
             });
         }
@@ -50,8 +68,8 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        if (!formData.morning && !formData.afternoon && formData.status === ScheduleStatus.AVAILABLE) {
-            onShowToast('Vui lòng chọn ít nhất một buổi làm việc', 'danger');
+        if (!formData.slot && formData.status === ScheduleStatus.AVAILABLE) {
+            onShowToast('Vui lòng chọn khung giờ làm việc', 'danger');
             return;
         }
 
@@ -124,6 +142,12 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
         return moment(dateString).format('DD/MM/YYYY');
     };
 
+    const formatTime = (timeString) => {
+        if (!timeString) return '';
+        const slot = timeSlots.find(slot => slot.value === timeString);
+        return slot ? slot.label : timeString.substring(0, 5);
+    };
+
     if (!schedule) {
         return null;
     }
@@ -166,32 +190,23 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                     </Form.Group>
 
                     {formData.status === ScheduleStatus.AVAILABLE && (
-                        <Row>
-                            <Col md={6}>
-                                <Form.Group className="mb-3">
-                                    <Form.Check 
-                                        type="checkbox"
-                                        id="detail-morning-check"
-                                        label="Buổi sáng (8:00 - 12:00)"
-                                        name="morning"
-                                        checked={formData.morning}
-                                        onChange={handleChange}
-                                    />
-                                </Form.Group>
-                            </Col>
-                            <Col md={6}>
-                                <Form.Group className="mb-3">
-                                    <Form.Check 
-                                        type="checkbox"
-                                        id="detail-afternoon-check"
-                                        label="Buổi chiều (13:00 - 17:00)"
-                                        name="afternoon"
-                                        checked={formData.afternoon}
-                                        onChange={handleChange}
-                                    />
-                                </Form.Group>
-                            </Col>
-                        </Row>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Khung giờ</Form.Label>
+                            <Form.Select
+                                name="slot"
+                                value={formData.slot}
+                                onChange={handleChange}
+                            >
+                                {timeSlots.map(slot => (
+                                    <option key={slot.value} value={slot.value}>
+                                        {slot.label}
+                                    </option>
+                                ))}
+                            </Form.Select>
+                            <Form.Text className="text-muted">
+                                Mỗi khung giờ có thể tiếp nhận tối đa 5 bệnh nhân
+                            </Form.Text>
+                        </Form.Group>
                     )}
 
                     <Form.Group className="mb-3">
@@ -210,7 +225,7 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                 {confirmDelete && (
                     <Alert variant="danger">
                         <p className="mb-2"><strong>Xác nhận xóa lịch làm việc</strong></p>
-                        <p className="mb-2">Bạn có chắc chắn muốn xóa lịch làm việc của bác sĩ {formData.doctorName} vào ngày {formatDate(formData.date)}?</p>
+                        <p className="mb-2">Bạn có chắc chắn muốn xóa lịch làm việc của bác sĩ {formData.doctorName} vào ngày {formatDate(formData.date)} lúc {formatTime(formData.slot)}?</p>
                         <p className="mb-0">Thao tác này không thể hoàn tác và sẽ xóa dữ liệu khỏi hệ thống.</p>
                     </Alert>
                 )}

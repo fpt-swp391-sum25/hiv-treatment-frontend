@@ -116,20 +116,15 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
         // Lấy thông tin phòng nếu có
         const roomInfo = eventData.roomCode ? `P.${eventData.roomCode}` : '';
         
-        // Xác định thời gian làm việc
-        let workingTime = 'Cả ngày';
-        if (eventData.morning && !eventData.afternoon) {
-            workingTime = 'Buổi sáng';
-        } else if (!eventData.morning && eventData.afternoon) {
-            workingTime = 'Buổi chiều';
-        }
+        // Lấy thông tin khung giờ
+        const slotTime = eventData.slot ? eventData.slot.substring(0, 5) : '';
         
         // Luôn sử dụng class status-available cho tất cả sự kiện
         return (
             <div className="custom-event-content status-available">
                 <div className="event-title">{eventData.doctorName || 'Không có tên'}</div>
                 <div className="event-status">
-                    Làm việc: {workingTime}
+                    {slotTime && `Giờ: ${slotTime}`}
                     {roomInfo && ` - ${roomInfo}`}
                 </div>
             </div>

@@ -226,30 +226,13 @@ const ManagerSchedule = () => {
     // Hàm chuẩn bị dữ liệu lịch để gửi đến API
     const prepareScheduleData = (schedule) => {
         // Chuyển đổi từ dữ liệu form sang định dạng API
-        // Chuyển đổi morning/afternoon thành các slot cụ thể
-        let slots = [];
-        
-        if (schedule.morning) {
-            slots.push('08:00:00'); // Slot buổi sáng
-        }
-        
-        if (schedule.afternoon) {
-            slots.push('14:00:00'); // Slot buổi chiều
-        }
-        
-        // Nếu không có slot nào được chọn, trả về null
-        if (slots.length === 0) {
-            return null;
-        }
-        
-        // Tạo một mảng các lịch với các slot khác nhau
-        return slots.map(slot => ({
+        return {
             type: 'Khám', // Mặc định là khám
-            roomCode: Math.floor(Math.random() * 5 + 1) * 100 + Math.floor(Math.random() * 10), // Tạo mã phòng ngẫu nhiên (100-599)
+            roomCode: schedule.roomCode || Math.floor(Math.random() * 5 + 1) * 100 + Math.floor(Math.random() * 10), // Sử dụng roomCode từ form hoặc tạo mã phòng ngẫu nhiên (100-599)
             date: schedule.date, // Giữ nguyên định dạng YYYY-MM-DD
-            slot: slot,
+            slot: schedule.slot, // Sử dụng slot từ form (định dạng HH:mm:ss)
             doctorId: parseInt(schedule.doctorId)
-        }));
+        };
     };
 
     // Hàm định dạng dữ liệu lịch từ API để hiển thị trên UI
@@ -265,7 +248,7 @@ const ManagerSchedule = () => {
             // Lấy thông tin từ đối tượng schedule
             const id = schedule.id || `temp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
             const date = schedule.date;
-            const slot = schedule.slot;
+            const slot = schedule.slot || '08:00:00'; // Mặc định là 8:00 nếu không có slot
             
             // Xử lý nhiều cách để lấy doctorId
             let doctorId = null;
@@ -294,39 +277,19 @@ const ManagerSchedule = () => {
             const type = schedule.type || 'Khám';
             const roomCode = schedule.roomCode || schedule.room_code || '100';
             
-            // Xác định buổi dựa trên slot
-            let isMorning = false;
-            let isAfternoon = false;
-            
-            if (slot) {
-                const hourStr = slot.split(':')[0];
-                const hour = parseInt(hourStr);
-                
-                if (hour >= 8 && hour < 12) {
-                    isMorning = true;
-                } else if (hour >= 13 && hour < 18) {
-                    isAfternoon = true;
-                }
-            } else {
-                // Nếu không có slot, mặc định là cả ngày
-                isMorning = true;
-                isAfternoon = true;
-            }
-            
-            console.log(`Formatted schedule ${id}: morning=${isMorning}, afternoon=${isAfternoon}`);
+            // Định dạng hiển thị khung giờ
+            const slotDisplay = slot ? slot.substring(0, 5) : '08:00';
             
             return {
                 id: id,
-                title: `${doctorName} - Làm việc`, // Luôn hiển thị "Làm việc"
+                title: `${doctorName} - ${slotDisplay}`, // Hiển thị tên bác sĩ và khung giờ
                 date: date,
                 doctorId: doctorId,
                 doctorName: doctorName,
                 status: status,
                 type: type,
                 roomCode: roomCode,
-                slot: slot,
-                morning: isMorning,
-                afternoon: isAfternoon
+                slot: slot
             };
         } catch (error) {
             console.error('Error formatting schedule:', error, schedule);

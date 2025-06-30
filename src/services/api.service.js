@@ -300,12 +300,12 @@ const createScheduleAPI = (scheduleData) => {
 
     // Đảm bảo scheduleData có định dạng đúng theo yêu cầu của BE
     const formattedData = {
-        type: scheduleData.type || 'Khám',
+        type: scheduleData.type || null, // Để null theo yêu cầu của BE cho Manager
         roomCode: scheduleData.roomCode || '100', // Mặc định phòng 100 nếu không có
         date: scheduleData.date, // Giữ nguyên định dạng YYYY-MM-DD
         slot: scheduleData.slot, // Định dạng HH:mm:ss
         doctorId: parseInt(scheduleData.doctorId), // Đảm bảo là số
-        status: 'available' // Luôn đặt trạng thái là available (làm việc)
+        status: 'Trống' // Đặt trạng thái là "Trống" theo yêu cầu của BE
     };
 
     console.log('Formatted data for API:', formattedData);
@@ -348,8 +348,19 @@ const getSchedulesByStatusAPI = (status) => {
 }
 
 const updateScheduleAPI = (scheduleId, scheduleData) => {
-    const URL_BACKEND = `/api/schedule/${scheduleId}`;
-    return axios.put(URL_BACKEND, scheduleData);
+    const URL_BACKEND = `/api/schedule/update/schedule-id/${scheduleId}`;
+    
+    // Đảm bảo scheduleData có định dạng đúng theo yêu cầu của BE
+    const formattedData = {
+        date: scheduleData.date,
+        slot: scheduleData.slot,
+        roomCode: scheduleData.roomCode || '100',
+        status: scheduleData.status === 'available' ? 'Trống' : 'Nghỉ',
+        doctorId: parseInt(scheduleData.doctorId)
+    };
+    
+    console.log(`Updating schedule ${scheduleId} with data:`, formattedData);
+    return axios.put(URL_BACKEND, formattedData);
 }
 
 const deleteScheduleAPI = (scheduleId) => {

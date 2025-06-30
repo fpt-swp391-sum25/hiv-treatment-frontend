@@ -14,12 +14,31 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         doctorName: '',
         date: moment(selectedDate).format('YYYY-MM-DD'),
         status: ScheduleStatus.AVAILABLE,
-        morning: true,
-        afternoon: true,
+        slot: '08:00:00',
         repeatWeekly: false,
         repeatCount: 1,
         roomCode: '101'
     });
+
+    // Định nghĩa các khung giờ làm việc
+    const timeSlots = [
+        { value: '08:00:00', label: '08:00' },
+        { value: '08:30:00', label: '08:30' },
+        { value: '09:00:00', label: '09:00' },
+        { value: '09:30:00', label: '09:30' },
+        { value: '10:00:00', label: '10:00' },
+        { value: '10:30:00', label: '10:30' },
+        { value: '11:00:00', label: '11:00' },
+        { value: '11:30:00', label: '11:30' },
+        { value: '13:00:00', label: '13:00' },
+        { value: '13:30:00', label: '13:30' },
+        { value: '14:00:00', label: '14:00' },
+        { value: '14:30:00', label: '14:30' },
+        { value: '15:00:00', label: '15:00' },
+        { value: '15:30:00', label: '15:30' },
+        { value: '16:00:00', label: '16:00' },
+        { value: '16:30:00', label: '16:30' }
+    ];
 
     useEffect(() => {
         if (show) {
@@ -102,8 +121,7 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             doctorName: '',
             date: moment(selectedDate).format('YYYY-MM-DD'),
             status: 'Đang hoạt động',
-            morning: true,
-            afternoon: true,
+            slot: '08:00:00',
             repeatWeekly: false,
             repeatCount: 1,
             roomCode: '101'
@@ -138,8 +156,8 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             return;
         }
         
-        if (!formData.morning && !formData.afternoon) {
-            onShowToast('Vui lòng chọn ít nhất một buổi làm việc', 'danger');
+        if (!formData.slot) {
+            onShowToast('Vui lòng chọn khung giờ làm việc', 'danger');
             return;
         }
         
@@ -158,11 +176,12 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         // Kiểm tra trùng lịch
         const conflictingSchedules = existingSchedules.filter(schedule => 
             schedule.date === formData.date && 
-            schedule.doctorId.toString() === formData.doctorId.toString()
+            schedule.doctorId.toString() === formData.doctorId.toString() &&
+            schedule.slot === formData.slot
         );
 
         if (conflictingSchedules.length > 0) {
-            onShowToast('Bác sĩ đã có lịch vào ngày này!', 'danger');
+            onShowToast('Bác sĩ đã có lịch vào khung giờ này!', 'danger');
             return;
         }
 
@@ -179,7 +198,8 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                 // Kiểm tra xem ngày mới có trùng với lịch hiện có không
                 const hasConflict = existingSchedules.some(schedule => 
                     schedule.date === newDate && 
-                    schedule.doctorId.toString() === formData.doctorId.toString()
+                    schedule.doctorId.toString() === formData.doctorId.toString() &&
+                    schedule.slot === formData.slot
                 );
                 
                 if (!hasConflict) {
@@ -191,8 +211,7 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                         doctorName: doctorName,
                         date: newDate,
                         status: formData.status,
-                        morning: formData.morning,
-                        afternoon: formData.afternoon,
+                        slot: formData.slot,
                         roomCode: formData.roomCode,
                         type: 'Khám'
                     };
@@ -218,8 +237,7 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                 doctorName: doctorName,
                 date: formData.date,
                 status: formData.status,
-                morning: formData.morning,
-                afternoon: formData.afternoon,
+                slot: formData.slot,
                 roomCode: formData.roomCode,
                 type: 'Khám'
             };
@@ -301,25 +319,23 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                             </Form.Group>
                         </Col>
                         <Col md={6}>
-                            <Form.Group className="mb-3 mt-2">
-                                <Form.Label>Buổi làm việc</Form.Label>
-                                <div className="d-flex flex-column">
-                                    <Form.Check 
-                                        type="checkbox"
-                                        name="morning"
-                                        label="Buổi sáng (8:00 - 12:00)"
-                                        checked={formData.morning}
-                                        onChange={handleChange}
-                                        className="mb-2"
-                                    />
-                                    <Form.Check 
-                                        type="checkbox"
-                                        name="afternoon"
-                                        label="Buổi chiều (13:00 - 17:00)"
-                                        checked={formData.afternoon}
-                                        onChange={handleChange}
-                                    />
-                                </div>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Khung giờ</Form.Label>
+                                <Form.Select
+                                    name="slot"
+                                    value={formData.slot}
+                                    onChange={handleChange}
+                                    required
+                                >
+                                    {timeSlots.map(slot => (
+                                        <option key={slot.value} value={slot.value}>
+                                            {slot.label}
+                                        </option>
+                                    ))}
+                                </Form.Select>
+                                <Form.Text className="text-muted">
+                                    Mỗi khung giờ có thể tiếp nhận tối đa 5 bệnh nhân
+                                </Form.Text>
                             </Form.Group>
                         </Col>
                     </Row>
