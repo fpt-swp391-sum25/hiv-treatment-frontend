@@ -2,6 +2,8 @@ import { Button, Table, Typography, Input, Select, Row, Col } from "antd";
 import { useState, useEffect } from "react";
 import { fetchUsersAPI, fetchScheduleAPI } from "../../services/api.service";
 import { useNavigate } from "react-router-dom";
+import { DatePicker } from "antd";
+import viVN from 'antd/es/date-picker/locale/vi_VN';
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -11,6 +13,7 @@ const LabTechnicianPatientList = () => {
     const [filteredData, setFilteredData] = useState([])
     const [searchName, setSearchName] = useState('');
     const [slotFilter, setSlotFilter] = useState('');
+    const [dateFilter, setDateFilter] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -56,8 +59,20 @@ const LabTechnicianPatientList = () => {
         if (slotFilter) {
             filtered = filtered.filter(item => item.slot === slotFilter);
         }
+        if (dateFilter) {
+            filtered = filtered.filter(item => {
+                return item.date && item.date.slice(0, 10) === dateFilter.format('YYYY-MM-DD');
+            });
+        }
+        // Sắp xếp theo ngày và giờ giảm dần (mới nhất lên đầu)
+        filtered = filtered.slice().sort((a, b) => {
+            // Nếu có cả ngày và giờ, nối lại để so sánh
+            const dateTimeA = a.date && a.slot ? `${a.date} ${a.slot}` : a.date || '';
+            const dateTimeB = b.date && b.slot ? `${b.date} ${b.slot}` : b.date || '';
+            return dateTimeB.localeCompare(dateTimeA);
+        });
         setFilteredData(filtered);
-    }, [searchName, slotFilter, data]);
+    }, [searchName, slotFilter, dateFilter, data]);
 
     // Lấy danh sách ca khám duy nhất
     const slotOptions = Array.from(new Set(data.map(item => item.slot))).filter(Boolean);
@@ -129,6 +144,17 @@ const LabTechnicianPatientList = () => {
                             <Option key={slot} value={slot}>{slot}</Option>
                         ))}
                     </Select>
+                </Col>
+                <Col span={5}>
+                    <DatePicker
+                        placeholder="Lọc theo ngày khám"
+                        value={dateFilter}
+                        onChange={setDateFilter}
+                        allowClear
+                        style={{ width: '100%' }}
+                        locale={viVN}
+                        format="DD/MM/YYYY"
+                    />
                 </Col>
             </Row>
             <Table columns={columns} dataSource={filteredData} rowKey={(record) => record.id} />
