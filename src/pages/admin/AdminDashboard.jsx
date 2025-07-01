@@ -1,6 +1,7 @@
 import { Card, Col, Row, Spin } from "antd";
 import { useEffect, useState } from "react";
 import { fetchAccountByRoleAPI, fetchScheduleAPI } from '../../services/api.service';
+
 import '../../styles/admin/AdminDashboard.css';
 import { Line, Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Title, Tooltip, Legend } from 'chart.js';
@@ -76,6 +77,7 @@ const AdminDashboard = () => {
         <div style={{ padding: 32 }}>
             <Row gutter={[24, 24]}>
                 <Col xs={24} sm={12} md={8} lg={6}>
+
                     <Card title="Tổng số bác sĩ" className="admin-dashboard-card">
                         <div className="dashboard-number">{counts.doctors}</div>
                     </Card>
