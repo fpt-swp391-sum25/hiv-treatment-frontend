@@ -55,6 +55,10 @@ const Login = () => {
                         navigate('/admin');
                     } else if (response.data.role === 'LAB_TECHNICIAN') {
                         navigate('/lab-technician');
+                    } else if (response.data.role === 'DOCTOR') {
+                        navigate('/doctor');
+                    } else if (response.data.role === 'MANAGER') {
+                        navigate('/manager');
                     } else {
                         navigate('/');
                     }
