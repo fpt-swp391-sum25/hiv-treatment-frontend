@@ -290,9 +290,12 @@ const ManagerSchedule = () => {
             // Định dạng hiển thị khung giờ
             const slotDisplay = slot ? slot.substring(0, 5) : '08:00';
             
+            // Tạo title với thông tin đầy đủ hơn
+            const title = `${doctorName} - ${slotDisplay} - P.${roomCode}`;
+            
             return {
                 id: id,
-                title: `${doctorName} - ${slotDisplay}`, // Hiển thị tên bác sĩ và khung giờ
+                title: title,
                 date: date,
                 doctorId: doctorId,
                 doctorName: doctorName,
