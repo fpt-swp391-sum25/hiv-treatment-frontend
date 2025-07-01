@@ -145,7 +145,7 @@ const AppHeader = () => {
         <div className="app-menu">
           <Menu
             mode="horizontal"
-            selectedKeys={[getActiveMenu(topMenuItems)]}
+            selectedKeys={[activeSetion]}
             items={mapMenuItems(topMenuItems)}
             className="main-menu"
           />
