@@ -500,6 +500,16 @@ const ManagerSchedule = () => {
         showToast('Đã làm mới dữ liệu', 'success');
     };
 
+    // Hàm chuyển đổi thứ sang tiếng Việt
+    const formatVietnameseDay = (date) => {
+        const weekdays = [
+            'Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 
+            'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'
+        ];
+        const dayOfWeek = moment(date).day(); // 0 = Chủ nhật, 1 = Thứ hai, ...
+        return weekdays[dayOfWeek];
+    };
+
     return (
         <div className="container-fluid py-4">
             <div className="schedule-header">

@@ -109,7 +109,7 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
         // Nếu là Chủ nhật, thêm class để hiển thị khác
         if (date.getDay() === 0) {
             info.el.classList.add('fc-day-sunday');
-            info.el.classList.add('fc-day-disabled');
+            // Không thêm fc-day-disabled nữa để không hiển thị gạch ngang
         }
     };
 
@@ -260,81 +260,62 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
 
     return (
         <div className="calendar-container">
-            <div className="calendar-controls mb-3 d-flex justify-content-between align-items-center">
-                <div className="d-flex align-items-center">
-                    <button className="calendar-nav-button" onClick={handlePrevClick}>
-                        <BsChevronLeft />
-                    </button>
-                    <button className="today-button" onClick={handleTodayClick}>
-                        Hôm nay
-                    </button>
-                    <button className="calendar-nav-button" onClick={handleNextClick}>
-                        <BsChevronRight />
-                    </button>
+            <div className="calendar-header">
+                <div className="calendar-nav">
+                    <button className="btn-calendar-nav" onClick={handlePrevClick}><BsChevronLeft /></button>
+                    <button className="btn-calendar-today" onClick={handleTodayClick}>Hôm nay</button>
+                    <button className="btn-calendar-nav" onClick={handleNextClick}><BsChevronRight /></button>
                 </div>
-                <div className="view-buttons">
+                <div className="calendar-title">
+                    {calendarRef.current && (
+                        <h3>{calendarRef.current.getApi().view.title}</h3>
+                    )}
+                </div>
+                <div className="calendar-view-buttons">
                     <button 
-                        className={`view-button ${view === 'dayGridMonth' ? 'active' : ''}`} 
+                        className={`btn-calendar-view ${view === 'dayGridMonth' ? 'active' : ''}`} 
                         onClick={() => handleViewChange('dayGridMonth')}
                     >
                         Tháng
                     </button>
                     <button 
-                        className={`view-button ${view === 'timeGridWeek' ? 'active' : ''}`} 
+                        className={`btn-calendar-view ${view === 'timeGridWeek' ? 'active' : ''}`} 
                         onClick={() => handleViewChange('timeGridWeek')}
                     >
                         Tuần
                     </button>
                 </div>
             </div>
-
+            
+            <div className="calendar-main">
                 <FullCalendar
-                key={calendarKey}
                     ref={calendarRef}
+                    key={calendarKey}
                     plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, bootstrap5Plugin]}
-                    initialView="dayGridMonth"
+                    initialView={view}
                     headerToolbar={false}
-                    locale={viLocale}
+                    height="auto"
+                    events={calendarEvents}
                     selectable={true}
                     selectMirror={true}
                     dayMaxEvents={true}
                     weekends={true}
+                    locale={viLocale}
                     select={handleDateSelect}
                     eventClick={handleEventClick}
                     eventContent={eventContent}
                     dayCellDidMount={dayCellDidMount}
-                    height="auto"
-                    themeSystem="bootstrap5"
-                    firstDay={1}
                     allDaySlot={false}
-                    slotMinTime="08:00:00"
-                    slotMaxTime="17:00:00"
-                    slotDuration="01:00:00"
-                    expandRows={true}
-                    contentHeight="auto"
-                    aspectRatio={1.8}
-                    views={{
-                        dayGridMonth: {
-                            titleFormat: { year: 'numeric', month: 'long' }
-                        },
-                        timeGridWeek: {
-                            titleFormat: { year: 'numeric', month: 'long', day: '2-digit' }
-                        }
-                    }}
-                    eventTimeFormat={{
+                    slotDuration={'00:30:00'}
+                    slotLabelInterval={'01:00'}
+                    slotLabelFormat={{
                         hour: '2-digit',
                         minute: '2-digit',
                         hour12: false
                     }}
-                    dayHeaderFormat={{
-                        weekday: 'long'
-                    }}
-                    eventDisplay="block"
-                    fixedWeekCount={false}
-                    showNonCurrentDates={true}
-                    handleWindowResize={true}
-                    forceEventDuration={true}
+                    firstDay={1}
                 />
+            </div>
         </div>
     );
 };

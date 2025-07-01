@@ -3,7 +3,7 @@ import { Modal, Button, Form, Row, Col, Alert, Spinner } from 'react-bootstrap';
 import { ScheduleStatus, SlotTimes, StatusMapping } from '../../../types/schedule.types';
 import './ScheduleForm.css';
 import moment from 'moment';
-import { fetchAllDoctorsAPI, checkAvailableSlotsAPI } from '../../../services/api.service';
+import { fetchAllDoctorsAPI } from '../../../services/api.service';
 
 const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCreated, existingSchedules, onShowToast }) => {
     const [doctors, setDoctors] = useState([]);
@@ -20,11 +20,6 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         roomCode: '101'
     });
     
-    // State cho kiểm tra slot khả dụng
-    const [availableSlots, setAvailableSlots] = useState([]);
-    const [checkingSlots, setCheckingSlots] = useState(false);
-    const [warningMessage, setWarningMessage] = useState('');
-
     // Sử dụng SlotTimes từ schedule.types.js
     const timeSlots = SlotTimes;
 
@@ -34,50 +29,6 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             resetForm();
         }
     }, [show, selectedDate, selectedDoctor]);
-
-    // Hàm kiểm tra slot khả dụng
-    const checkAvailableSlots = async (doctorId, date) => {
-        if (!doctorId || !date) return;
-        
-        setCheckingSlots(true);
-        setWarningMessage('');
-        
-        try {
-            const response = await checkAvailableSlotsAPI(doctorId, date);
-            console.log('Available slots response:', response);
-            
-            // Xử lý response
-            let slots = [];
-            if (response && response.data) {
-                // Nếu API trả về danh sách các slots không có :00
-                slots = response.data.map(slot => 
-                    slot.endsWith(':00') ? slot : `${slot}:00`
-                );
-            }
-            
-            setAvailableSlots(slots);
-            
-            // Nếu có ít slot khả dụng, hiện cảnh báo
-            if (slots.length < 5) {
-                setWarningMessage(`Lưu ý: Bác sĩ này chỉ còn ${slots.length} slot khả dụng trong ngày này.`);
-            }
-            
-            console.log('Processed available slots:', slots);
-        } catch (error) {
-            console.error('Error checking available slots:', error);
-            setWarningMessage('Không thể kiểm tra slot khả dụng. Vui lòng thử lại.');
-            setAvailableSlots([]);
-        } finally {
-            setCheckingSlots(false);
-        }
-    };
-
-    // Kiểm tra slot khi bác sĩ hoặc ngày thay đổi
-    useEffect(() => {
-        if (formData.doctorId && formData.date) {
-            checkAvailableSlots(formData.doctorId, formData.date);
-        }
-    }, [formData.doctorId, formData.date]);
 
     const fetchDoctors = async () => {
         setLoading(true);
@@ -158,11 +109,6 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             repeatCount: 1,
             roomCode: '101'
         });
-        
-        // Reset các state liên quan đến kiểm tra slot
-        setAvailableSlots([]);
-        setCheckingSlots(false);
-        setWarningMessage('');
     };
 
     const handleChange = (e) => {
@@ -186,20 +132,18 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                     doctorName: selectedDoc.name
                 };
                 setFormData(newFormData);
-                
-                // Kiểm tra slot khả dụng khi chọn bác sĩ mới
-                if (value && newFormData.date) {
-                    checkAvailableSlots(value, newFormData.date);
-                }
             }
         }
-        
-        // Nếu thay đổi ngày, kiểm tra slot khả dụng
-        if (name === 'date') {
-            if (updatedFormData.doctorId && value) {
-                checkAvailableSlots(updatedFormData.doctorId, value);
-            }
-        }
+    };
+
+    // Hàm chuyển đổi thứ sang tiếng Việt
+    const formatVietnameseDay = (date) => {
+        const weekdays = [
+            'Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 
+            'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'
+        ];
+        const dayOfWeek = moment(date).day(); // 0 = Chủ nhật, 1 = Thứ hai, ...
+        return weekdays[dayOfWeek];
     };
 
     const handleSubmit = (e) => {
@@ -235,6 +179,14 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             console.error('Date is in the past', formData.date);
             console.groupEnd();
             onShowToast('Không thể đặt lịch cho ngày đã qua!', 'danger');
+            return;
+        }
+
+        // Kiểm tra ngày có phải Chủ nhật không
+        if (moment(formData.date).day() === 0) { // 0 = Chủ nhật
+            console.error('Cannot schedule on Sunday', formData.date);
+            console.groupEnd();
+            onShowToast('Không thể đặt lịch vào Chủ nhật!', 'danger');
             return;
         }
 
@@ -356,16 +308,21 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                             </Form.Group>
                         </Col>
                         <Col md={6}>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Ngày</Form.Label>
-                                <Form.Control
-                                    type="date"
-                                    name="date"
-                                    value={formData.date}
-                                    onChange={handleChange}
-                                    min={moment().format('YYYY-MM-DD')}
-                                    required
-                                />
+                            <Form.Group as={Row} className="mb-3">
+                                <Form.Label column sm="4">Ngày khám</Form.Label>
+                                <Col sm="8">
+                                    <Form.Control
+                                        type="date"
+                                        name="date"
+                                        value={formData.date}
+                                        onChange={handleChange}
+                                        min={moment().format('YYYY-MM-DD')}
+                                        required
+                                    />
+                                    <small className="form-text text-muted">
+                                        {formData.date && `Ngày ${moment(formData.date).format('DD/MM/YYYY')} (${formatVietnameseDay(formData.date)})`}
+                                    </small>
+                                </Col>
                             </Form.Group>
                         </Col>
                     </Row>
@@ -401,28 +358,14 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                                         <option 
                                             key={slot.value} 
                                             value={slot.value}
-                                            // Vô hiệu hóa option nếu slot không khả dụng và có dữ liệu availableSlots
-                                            disabled={availableSlots.length > 0 && !availableSlots.includes(slot.value)}
                                         >
                                             {slot.label}
-                                            {availableSlots.length > 0 && !availableSlots.includes(slot.value) ? ' (Đã hết chỗ)' : ''}
                                         </option>
                                     ))}
                                 </Form.Select>
-                                {checkingSlots && (
-                                    <div className="d-flex align-items-center mt-1">
-                                        <Spinner animation="border" size="sm" className="me-1" />
-                                        <small className="text-info">Đang kiểm tra khả dụng...</small>
-                                    </div>
-                                )}
-                                {warningMessage && (
-                                    <small className="text-warning mt-1 d-block">{warningMessage}</small>
-                                )}
-                                {!warningMessage && !checkingSlots && (
-                                    <Form.Text className="text-muted">
-                                        Mỗi khung giờ có thể tiếp nhận tối đa 5 bệnh nhân
-                                    </Form.Text>
-                                )}
+                                <Form.Text className="text-muted">
+                                    Thiết lập thời gian làm việc cho bác sĩ
+                                </Form.Text>
                             </Form.Group>
                         </Col>
                     </Row>
