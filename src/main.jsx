@@ -285,23 +285,30 @@ const router = createBrowserRouter([
   // Path for lab technician pages
   {
     path: '/lab-technician',
-    element: <LabTechnicianHomePage />,
+    element: (
+      <PrivateRoute children={<LabTechnicianHomePage />} requiredRole={['LAB_TECHNICIAN']} />
+    ),
     errorElement: <Errors />,
-
     children: [
       {
         index: true,
-        element: <LabTechnicianPatientList />,
+        element: (
+          <PrivateRoute children={<LabTechnicianPatientList />} requiredRole={['LAB_TECHNICIAN']} />
+        ),
         errorElement: <Errors />
       },
       {
         path: 'patient-detail/:id',
-        element: <PatientDetail />,
+        element: (
+          <PrivateRoute children={<PatientDetail />} requiredRole={['LAB_TECHNICIAN']} />
+        ),
         errorElement: <Errors />
       },
       {
         path: 'profile',
-        element: <LabTechnicianProfile />,
+        element: (
+          <PrivateRoute children={<LabTechnicianProfile />} requiredRole={['LAB_TECHNICIAN']} />
+        ),
         errorElement: <Errors />
       }
     ]
