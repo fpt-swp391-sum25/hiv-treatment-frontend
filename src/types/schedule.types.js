@@ -19,7 +19,24 @@ export const ScheduleStatus = {
     UNAVAILABLE: 'UNAVAILABLE'  // Không làm việc
 };
 
-// Time slots for schedule
+// Mapping giữa Status FE và BE
+export const StatusMapping = {
+    // FE -> BE
+    'available': 'Trống',
+    'UNAVAILABLE': 'Đã hủy',
+    'active': 'Đang hoạt động',
+    
+    // BE -> FE
+    'Trống': 'available',
+    'Đã hủy': 'cancelled',
+    'Đang hoạt động': 'active',
+    'Đang chờ': 'booked',
+    'Đang chờ thanh toán': 'pending_payment',
+    'Đã thanh toán': 'confirmed',
+    'Hoàn thành': 'completed'
+};
+
+// Time slots for schedule - 15 slots chính xác từ BE
 export const SlotTimes = [
     { value: '08:00:00', label: '08:00' },
     { value: '08:30:00', label: '08:30' },
@@ -28,7 +45,6 @@ export const SlotTimes = [
     { value: '10:00:00', label: '10:00' },
     { value: '10:30:00', label: '10:30' },
     { value: '11:00:00', label: '11:00' },
-    { value: '11:30:00', label: '11:30' },
     { value: '13:00:00', label: '13:00' },
     { value: '13:30:00', label: '13:30' },
     { value: '14:00:00', label: '14:00' },

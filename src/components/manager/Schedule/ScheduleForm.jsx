@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button, Form, Row, Col, Alert, Spinner } from 'react-bootstrap';
-import { ScheduleStatus } from '../../../types/schedule.types';
+import { ScheduleStatus, SlotTimes, StatusMapping } from '../../../types/schedule.types';
 import './ScheduleForm.css';
 import moment from 'moment';
-import { fetchAllDoctorsAPI } from '../../../services/api.service';
+import { fetchAllDoctorsAPI, checkAvailableSlotsAPI } from '../../../services/api.service';
 
 const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCreated, existingSchedules, onShowToast }) => {
     const [doctors, setDoctors] = useState([]);
@@ -19,26 +19,14 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         repeatCount: 1,
         roomCode: '101'
     });
+    
+    // State cho kiểm tra slot khả dụng
+    const [availableSlots, setAvailableSlots] = useState([]);
+    const [checkingSlots, setCheckingSlots] = useState(false);
+    const [warningMessage, setWarningMessage] = useState('');
 
-    // Định nghĩa các khung giờ làm việc
-    const timeSlots = [
-        { value: '08:00:00', label: '08:00' },
-        { value: '08:30:00', label: '08:30' },
-        { value: '09:00:00', label: '09:00' },
-        { value: '09:30:00', label: '09:30' },
-        { value: '10:00:00', label: '10:00' },
-        { value: '10:30:00', label: '10:30' },
-        { value: '11:00:00', label: '11:00' },
-        { value: '11:30:00', label: '11:30' },
-        { value: '13:00:00', label: '13:00' },
-        { value: '13:30:00', label: '13:30' },
-        { value: '14:00:00', label: '14:00' },
-        { value: '14:30:00', label: '14:30' },
-        { value: '15:00:00', label: '15:00' },
-        { value: '15:30:00', label: '15:30' },
-        { value: '16:00:00', label: '16:00' },
-        { value: '16:30:00', label: '16:30' }
-    ];
+    // Sử dụng SlotTimes từ schedule.types.js
+    const timeSlots = SlotTimes;
 
     useEffect(() => {
         if (show) {
@@ -46,6 +34,50 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             resetForm();
         }
     }, [show, selectedDate, selectedDoctor]);
+
+    // Hàm kiểm tra slot khả dụng
+    const checkAvailableSlots = async (doctorId, date) => {
+        if (!doctorId || !date) return;
+        
+        setCheckingSlots(true);
+        setWarningMessage('');
+        
+        try {
+            const response = await checkAvailableSlotsAPI(doctorId, date);
+            console.log('Available slots response:', response);
+            
+            // Xử lý response
+            let slots = [];
+            if (response && response.data) {
+                // Nếu API trả về danh sách các slots không có :00
+                slots = response.data.map(slot => 
+                    slot.endsWith(':00') ? slot : `${slot}:00`
+                );
+            }
+            
+            setAvailableSlots(slots);
+            
+            // Nếu có ít slot khả dụng, hiện cảnh báo
+            if (slots.length < 5) {
+                setWarningMessage(`Lưu ý: Bác sĩ này chỉ còn ${slots.length} slot khả dụng trong ngày này.`);
+            }
+            
+            console.log('Processed available slots:', slots);
+        } catch (error) {
+            console.error('Error checking available slots:', error);
+            setWarningMessage('Không thể kiểm tra slot khả dụng. Vui lòng thử lại.');
+            setAvailableSlots([]);
+        } finally {
+            setCheckingSlots(false);
+        }
+    };
+
+    // Kiểm tra slot khi bác sĩ hoặc ngày thay đổi
+    useEffect(() => {
+        if (formData.doctorId && formData.date) {
+            checkAvailableSlots(formData.doctorId, formData.date);
+        }
+    }, [formData.doctorId, formData.date]);
 
     const fetchDoctors = async () => {
         setLoading(true);
@@ -120,30 +152,52 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             doctorId: selectedDoctor || '',
             doctorName: '',
             date: moment(selectedDate).format('YYYY-MM-DD'),
-            status: 'Đang hoạt động',
+            status: 'available',
             slot: '08:00:00',
             repeatWeekly: false,
             repeatCount: 1,
             roomCode: '101'
         });
+        
+        // Reset các state liên quan đến kiểm tra slot
+        setAvailableSlots([]);
+        setCheckingSlots(false);
+        setWarningMessage('');
     };
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
-        setFormData({
+        
+        // Cập nhật formData
+        const updatedFormData = {
             ...formData,
             [name]: type === 'checkbox' ? checked : value
-        });
+        };
+        
+        setFormData(updatedFormData);
 
         // Nếu thay đổi bác sĩ, cập nhật doctorName
         if (name === 'doctorId') {
             const selectedDoc = doctors.find(doc => doc.id.toString() === value.toString());
             if (selectedDoc) {
-                setFormData(prev => ({
-                    ...prev,
+                const newFormData = {
+                    ...updatedFormData,
                     doctorId: value,
                     doctorName: selectedDoc.name
-                }));
+                };
+                setFormData(newFormData);
+                
+                // Kiểm tra slot khả dụng khi chọn bác sĩ mới
+                if (value && newFormData.date) {
+                    checkAvailableSlots(value, newFormData.date);
+                }
+            }
+        }
+        
+        // Nếu thay đổi ngày, kiểm tra slot khả dụng
+        if (name === 'date') {
+            if (updatedFormData.doctorId && value) {
+                checkAvailableSlots(updatedFormData.doctorId, value);
             }
         }
     };
@@ -151,24 +205,35 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
     const handleSubmit = (e) => {
         e.preventDefault();
         
+        console.group('Schedule Form Submission');
+        console.log('Form data:', formData);
+        
         if (!formData.doctorId) {
+            console.error('Missing doctorId');
+            console.groupEnd();
             onShowToast('Vui lòng chọn bác sĩ', 'danger');
             return;
         }
         
         if (!formData.slot) {
+            console.error('Missing slot');
+            console.groupEnd();
             onShowToast('Vui lòng chọn khung giờ làm việc', 'danger');
             return;
         }
         
         // Kiểm tra ngày
         if (!formData.date) {
+            console.error('Missing date');
+            console.groupEnd();
             onShowToast('Vui lòng chọn ngày', 'danger');
             return;
         }
 
         // Kiểm tra ngày có phải là quá khứ không
         if (moment(formData.date).isBefore(moment(), 'day')) {
+            console.error('Date is in the past', formData.date);
+            console.groupEnd();
             onShowToast('Không thể đặt lịch cho ngày đã qua!', 'danger');
             return;
         }
@@ -181,11 +246,14 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         );
 
         if (conflictingSchedules.length > 0) {
+            console.error('Schedule conflicts with existing schedules', conflictingSchedules);
+            console.groupEnd();
             onShowToast('Bác sĩ đã có lịch vào khung giờ này!', 'danger');
             return;
         }
 
-        console.log('Form data before submission:', formData);
+        console.log('Form validation successful');
+        console.groupEnd();
 
         // Tạo lịch mới
         if (formData.repeatWeekly && formData.repeatCount > 1) {
@@ -210,10 +278,11 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                         doctorId: formData.doctorId,
                         doctorName: doctorName,
                         date: newDate,
-                        status: formData.status,
+                        status: StatusMapping[formData.status] || 'Trống',
                         slot: formData.slot,
                         roomCode: formData.roomCode,
-                        type: 'Khám'
+                        type: null,
+                        patient_id: null
                     };
                     
                     schedules.push(newSchedule);
@@ -236,10 +305,11 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                 doctorId: formData.doctorId,
                 doctorName: doctorName,
                 date: formData.date,
-                status: formData.status,
+                status: StatusMapping[formData.status] || 'Trống',
                 slot: formData.slot,
                 roomCode: formData.roomCode,
-                type: 'Khám'
+                type: null,
+                patient_id: null
             };
             
             console.log('Creating single schedule:', newSchedule);
@@ -328,14 +398,31 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                                     required
                                 >
                                     {timeSlots.map(slot => (
-                                        <option key={slot.value} value={slot.value}>
+                                        <option 
+                                            key={slot.value} 
+                                            value={slot.value}
+                                            // Vô hiệu hóa option nếu slot không khả dụng và có dữ liệu availableSlots
+                                            disabled={availableSlots.length > 0 && !availableSlots.includes(slot.value)}
+                                        >
                                             {slot.label}
+                                            {availableSlots.length > 0 && !availableSlots.includes(slot.value) ? ' (Đã hết chỗ)' : ''}
                                         </option>
                                     ))}
                                 </Form.Select>
-                                <Form.Text className="text-muted">
-                                    Mỗi khung giờ có thể tiếp nhận tối đa 5 bệnh nhân
-                                </Form.Text>
+                                {checkingSlots && (
+                                    <div className="d-flex align-items-center mt-1">
+                                        <Spinner animation="border" size="sm" className="me-1" />
+                                        <small className="text-info">Đang kiểm tra khả dụng...</small>
+                                    </div>
+                                )}
+                                {warningMessage && (
+                                    <small className="text-warning mt-1 d-block">{warningMessage}</small>
+                                )}
+                                {!warningMessage && !checkingSlots && (
+                                    <Form.Text className="text-muted">
+                                        Mỗi khung giờ có thể tiếp nhận tối đa 5 bệnh nhân
+                                    </Form.Text>
+                                )}
                             </Form.Group>
                         </Col>
                     </Row>

@@ -56,11 +56,21 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
     const getStatusColor = (status) => {
         switch (status) {
             case ScheduleStatus.AVAILABLE:
-                return '#28a745'; // success
-            case ScheduleStatus.ON_LEAVE:
-                return '#ffc107'; // warning
+                return '#28a745'; // success - xanh lá (lịch trống)
+            case 'cancelled':
+                return '#dc3545'; // danger - đỏ (đã hủy)
+            case 'active':
+                return '#17a2b8'; // info - xanh dương (đang hoạt động)
+            case 'booked':
+                return '#ffc107'; // warning - vàng (đang chờ)
+            case 'pending_payment':
+                return '#fd7e14'; // orange - cam (chờ thanh toán)
+            case 'confirmed':
+                return '#6f42c1'; // purple - tím (đã thanh toán)
+            case 'completed':
+                return '#20c997'; // teal - xanh ngọc (hoàn thành)
             default:
-                return '#6c757d'; // secondary
+                return '#6c757d'; // secondary - xám (khác)
         }
     };
 

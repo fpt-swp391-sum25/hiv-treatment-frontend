@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button, Form, Alert, Row, Col, Spinner } from 'react-bootstrap';
-import { ScheduleStatus } from '../../../types/schedule.types';
+import { ScheduleStatus, SlotTimes, StatusMapping } from '../../../types/schedule.types';
 import moment from 'moment';
 import { deleteScheduleAPI } from '../../../services/api.service';
 import './ScheduleDetail.css';
@@ -19,25 +19,8 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
     const [confirmDelete, setConfirmDelete] = useState(false);
     const [deleting, setDeleting] = useState(false);
 
-    // Định nghĩa các khung giờ làm việc
-    const timeSlots = [
-        { value: '08:00:00', label: '08:00' },
-        { value: '08:30:00', label: '08:30' },
-        { value: '09:00:00', label: '09:00' },
-        { value: '09:30:00', label: '09:30' },
-        { value: '10:00:00', label: '10:00' },
-        { value: '10:30:00', label: '10:30' },
-        { value: '11:00:00', label: '11:00' },
-        { value: '11:30:00', label: '11:30' },
-        { value: '13:00:00', label: '13:00' },
-        { value: '13:30:00', label: '13:30' },
-        { value: '14:00:00', label: '14:00' },
-        { value: '14:30:00', label: '14:30' },
-        { value: '15:00:00', label: '15:00' },
-        { value: '15:30:00', label: '15:30' },
-        { value: '16:00:00', label: '16:00' },
-        { value: '16:30:00', label: '16:30' }
-    ];
+    // Sử dụng SlotTimes từ schedule.types.js
+    const timeSlots = SlotTimes;
 
     useEffect(() => {
         if (schedule) {
@@ -68,17 +51,21 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        if (!formData.slot && formData.status === ScheduleStatus.AVAILABLE) {
+        if (!formData.slot && formData.status === "available") {
             onShowToast('Vui lòng chọn khung giờ làm việc', 'danger');
             return;
         }
 
         setLoading(true);
         try {
+            // Chuyển đổi status từ FE sang BE
+            const beStatus = StatusMapping[formData.status] || formData.status;
+            
             // Cập nhật title dựa trên trạng thái
             const updatedSchedule = {
                 ...formData,
-                title: `${formData.doctorName} - ${formData.status === ScheduleStatus.AVAILABLE ? 'Làm việc' : 'Nghỉ phép'}`
+                title: `${formData.doctorName} - ${formData.slot.substring(0, 5)}`,
+                original_status: beStatus // Lưu trữ status BE
             };
             
             console.log('ScheduleDetail: Updating schedule:', updatedSchedule);
@@ -184,12 +171,13 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                             value={formData.status}
                             onChange={handleChange}
                         >
-                            <option value={ScheduleStatus.AVAILABLE}>Làm việc</option>
-                            <option value={ScheduleStatus.ON_LEAVE}>Nghỉ phép</option>
+                            <option value="available">Làm việc</option>
+                            <option value="cancelled">Đã hủy</option>
+                            <option value="active">Đang hoạt động</option>
                         </Form.Select>
                     </Form.Group>
 
-                    {formData.status === ScheduleStatus.AVAILABLE && (
+                    {formData.status === "available" && (
                         <Form.Group className="mb-3">
                             <Form.Label>Khung giờ</Form.Label>
                             <Form.Select
