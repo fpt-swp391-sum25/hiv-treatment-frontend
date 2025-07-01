@@ -3,7 +3,47 @@
 }
 
 .doctor-select {
-  max-width: 300px;
+  width: 100%;
+  font-size: 14px;
+}
+
+/* Cập nhật styling cho Ant Design Select */
+.doctor-select .ant-select-selector {
+  border-radius: 8px !important;
+  border: 1px solid #e0e0e0 !important;
+  height: 40px !important;
+  padding: 4px 15px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.3s ease !important;
+}
+
+.doctor-select.ant-select-focused .ant-select-selector {
+  border-color: #4daddf !important;
+  box-shadow: 0 0 0 0.2rem rgba(77, 173, 223, 0.25) !important;
+}
+
+.doctor-select:hover .ant-select-selector {
+  border-color: #4daddf !important;
+}
+
+.doctor-select .ant-select-selection-placeholder {
+  color: #777;
+  line-height: 32px;
+}
+
+.doctor-select .ant-select-selection-item {
+  line-height: 32px;
+}
+
+.filter-group {
+  margin-bottom: 15px;
+}
+
+.form-label {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 8px;
+  color: #333;
 }
 
 .doctor-filter .input-group-text {
@@ -32,13 +72,6 @@ appearance: none;
 .form-select:focus {
 border-color: #4daddf;
 box-shadow: 0 0 0 0.2rem rgba(77, 173, 223, 0.25);
-}
-
-.form-label {
-font-weight: 600;
-font-size: 14px;
-margin-bottom: 8px;
-color: #333;
 }
 
 /* Gradient border on hover */

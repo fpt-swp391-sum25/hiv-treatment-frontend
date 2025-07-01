@@ -380,18 +380,20 @@
 
 .view-buttons {
   display: flex;
-  gap: 5px;
+  gap: 8px;
 }
 
 .view-button {
   background-color: #f8f9fa;
   border: 1px solid #dee2e6;
   color: #495057;
-  padding: 6px 12px;
+  padding: 8px 16px;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   transition: all 0.2s;
+  min-width: 80px;
+  text-align: center;
 }
 
 .view-button:hover {

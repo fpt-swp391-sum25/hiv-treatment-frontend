@@ -215,10 +215,13 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
 
     // Xử lý thay đổi view
     const handleViewChange = (newView) => {
-        if (calendarRef.current) {
-            const calendarApi = calendarRef.current.getApi();
-            calendarApi.changeView(newView);
-            setView(newView);
+        // Chỉ cho phép các view được hỗ trợ: tháng và tuần
+        if (newView === 'dayGridMonth' || newView === 'timeGridWeek') {
+            if (calendarRef.current) {
+                const calendarApi = calendarRef.current.getApi();
+                calendarApi.changeView(newView);
+                setView(newView);
+            }
         }
     };
 
@@ -277,12 +280,6 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
                     >
                         Tuần
                     </button>
-                    <button 
-                        className={`view-button ${view === 'timeGridDay' ? 'active' : ''}`} 
-                        onClick={() => handleViewChange('timeGridDay')}
-                    >
-                        Ngày
-                    </button>
                 </div>
             </div>
 
@@ -291,8 +288,8 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
                     ref={calendarRef}
                     plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, bootstrap5Plugin]}
                     initialView="dayGridMonth"
-                headerToolbar={false}
-                locale={viLocale}
+                    headerToolbar={false}
+                    locale={viLocale}
                     selectable={true}
                     selectMirror={true}
                     dayMaxEvents={true}
@@ -300,30 +297,38 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
                     select={handleDateSelect}
                     eventClick={handleEventClick}
                     eventContent={eventContent}
-                dayCellDidMount={dayCellDidMount}
+                    dayCellDidMount={dayCellDidMount}
                     height="auto"
                     themeSystem="bootstrap5"
-                firstDay={1}
-                allDaySlot={false}
-                slotMinTime="08:00:00"
-                slotMaxTime="17:00:00"
-                slotDuration="01:00:00"
-                expandRows={true}
-                contentHeight="auto"
-                aspectRatio={1.8}
-                eventTimeFormat={{
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: false
-                }}
-                dayHeaderFormat={{
-                    weekday: 'long'
-                }}
-                eventDisplay="block"
-                fixedWeekCount={false}
-                showNonCurrentDates={true}
-                handleWindowResize={true}
-                forceEventDuration={true}
+                    firstDay={1}
+                    allDaySlot={false}
+                    slotMinTime="08:00:00"
+                    slotMaxTime="17:00:00"
+                    slotDuration="01:00:00"
+                    expandRows={true}
+                    contentHeight="auto"
+                    aspectRatio={1.8}
+                    views={{
+                        dayGridMonth: {
+                            titleFormat: { year: 'numeric', month: 'long' }
+                        },
+                        timeGridWeek: {
+                            titleFormat: { year: 'numeric', month: 'long', day: '2-digit' }
+                        }
+                    }}
+                    eventTimeFormat={{
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: false
+                    }}
+                    dayHeaderFormat={{
+                        weekday: 'long'
+                    }}
+                    eventDisplay="block"
+                    fixedWeekCount={false}
+                    showNonCurrentDates={true}
+                    handleWindowResize={true}
+                    forceEventDuration={true}
                 />
         </div>
     );

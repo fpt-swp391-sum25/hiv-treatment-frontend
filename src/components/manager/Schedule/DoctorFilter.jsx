@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Spinner } from 'react-bootstrap';
+import { Form } from 'react-bootstrap';
+import { Select, Spin } from 'antd';
 import './DoctorFilter.css';
 import { fetchAllDoctorsAPI } from '../../../services/api.service';
 
@@ -69,53 +70,60 @@ const DoctorFilter = ({ selectedDoctor, onDoctorSelect }) => {
     }
   };
 
-  const handleDoctorChange = (e) => {
-    const value = e.target.value;
+  const handleDoctorChange = (value) => {
     onDoctorSelect(value ? value : null);
   };
 
-  const handleRefreshDoctors = () => {
-    fetchDoctors();
-  };
+  // Tạo danh sách options cho Select
+  const doctorOptions = [
+    { value: '', label: 'Tất cả bác sĩ' },
+    ...doctors.map(doctor => ({
+      value: doctor.id.toString(),
+      label: doctor.name
+    }))
+  ];
+
+  // Hiển thị error nếu có
+  const errorMessage = error && (
+    <div className="text-danger mt-1 small">{error}</div>
+  );
+
+  // Thông báo không có bác sĩ
+  const emptyMessage = doctors.length === 0 && !error && (
+    <div className="text-info mt-1 small">Không có bác sĩ nào</div>
+  );
 
   return (
     <Form.Group className="filter-group">
-      <Form.Label className="d-flex justify-content-between align-items-center">
+      <Form.Label>
         <span>Bác sĩ:</span>
-        <button 
-          type="button" 
-          className="btn btn-sm btn-outline-secondary" 
-          onClick={handleRefreshDoctors}
-          disabled={loading}
-        >
-          Làm mới
-        </button>
       </Form.Label>
       
       {loading ? (
         <div className="d-flex align-items-center">
-          <Spinner animation="border" size="sm" className="me-2" />
+          <Spin size="small" className="me-2" />
           <span>Đang tải...</span>
         </div>
       ) : (
         <>
-          <Form.Select
+          <Select
+            showSearch
+            style={{ width: '100%' }}
+            placeholder="Tìm kiếm bác sĩ"
+            optionFilterProp="label"
             value={selectedDoctor || ''}
             onChange={handleDoctorChange}
-            className="filter-select"
+            filterOption={(input, option) => 
+              (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+            }
+            options={doctorOptions}
+            loading={loading}
             disabled={loading || doctors.length === 0}
-          >
-            <option value="">Tất cả bác sĩ</option>
-            {doctors.map(doctor => (
-              <option key={doctor.id} value={doctor.id}>
-                {doctor.name}
-              </option>
-            ))}
-          </Form.Select>
-          {error && <div className="text-danger mt-1 small">{error}</div>}
-          {doctors.length === 0 && !error && (
-            <div className="text-info mt-1 small">Không có bác sĩ nào</div>
-          )}
+            notFoundContent="Không tìm thấy bác sĩ"
+            className="doctor-select"
+          />
+          {errorMessage}
+          {emptyMessage}
         </>
       )}
     </Form.Group>
