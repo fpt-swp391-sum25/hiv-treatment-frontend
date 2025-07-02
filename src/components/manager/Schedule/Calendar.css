@@ -914,7 +914,7 @@
 /* Thêm CSS cho hiển thị sự kiện trong chế độ xem tháng */
 .month-event-content {
   display: flex;
-  flex-direction: column;
+    flex-direction: column;
   background-color: #ffffff !important;
   border-radius: 4px;
   padding: 4px 6px;
@@ -923,8 +923,8 @@
   overflow: hidden;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
-}
-
+  }
+  
 .month-event-content:hover {
   transform: translateY(-1px);
   box-shadow: 0 2px 5px rgba(0,0,0,0.15);
@@ -1129,7 +1129,7 @@
   border-radius: 6px !important;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
   border: 1px solid #dee2e6 !important;
-}
+  }
 
 .fc-popover-header {
   background-color: #f8f9fa !important;

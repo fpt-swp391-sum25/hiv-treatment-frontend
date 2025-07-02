@@ -181,37 +181,51 @@ const router = createBrowserRouter([
   // Path for doctor pages
   {
     path: '/doctor',
-    element: <DoctorHome />,
+    element: (
+      <PrivateRoute children={<DoctorHome />} requiredRole={['DOCTOR']} />
+    ),
     errorElement: <Errors />,
     children: [
       {
         index: true,
-        element: <DoctorSchedule />,
+        element: (
+          <PrivateRoute children={<DoctorSchedule />} requiredRole={['DOCTOR']} />
+        ),
         errorElement: <Errors />,
       },
       {
         path: 'profile',
-        element: <DoctorProfile />,
+        element: (
+          <PrivateRoute children={<DoctorProfile />} requiredRole={['DOCTOR']} />
+        ),
         errorElement: <Errors />,
       },
       {
         path: 'schedule',
-        element: <DoctorSchedule />,
+        element: (
+          <PrivateRoute children={<DoctorSchedule />} requiredRole={['DOCTOR']} />
+        ),
         errorElement: <Errors />,
       },
       {
         path: 'patients',
-        element: <PatientList />,
+        element: (
+          <PrivateRoute children={<PatientList />} requiredRole={['DOCTOR']} />
+        ),
         errorElement: <Errors />,
       },
       {
         path: 'patients/:id',
-        element: <ViewOnlyPatientDetail />,
+        element: (
+          <PrivateRoute children={<ViewOnlyPatientDetail />} requiredRole={['DOCTOR']} />
+        ),
         errorElement: <Errors />
       },
       {
         path: 'regimens',
-        element: <RegimenList />,
+        element: (
+          <PrivateRoute children={<RegimenList />} requiredRole={['DOCTOR']} />
+        ),
         errorElement: <Errors />,
       },
     ]
@@ -251,27 +265,39 @@ const router = createBrowserRouter([
   },
   {
     path: '/manager',
-    element: <ManagerPage />,
+    element: (
+      <PrivateRoute children={<ManagerPage />} requiredRole={['MANAGER']} />
+    ),
     children: [
       {
         index: true,
-        element: <ManagerDashboard />,
+        element: (
+          <PrivateRoute children={<ManagerDashboard />} requiredRole={['MANAGER']} />
+        ),
         errorElement: <Errors />,
       }, {
         path: 'schedule',
-        element: <ManagerSchedule />,
+        element: (
+          <PrivateRoute children={<ManagerSchedule />} requiredRole={['MANAGER']} />
+        ),
         errorElement: <Errors />,
       }, {
         path: 'doctors',
-        element: <DoctorManagement />,
+        element: (
+          <PrivateRoute children={<DoctorManagement />} requiredRole={['MANAGER']} />
+        ),
         errorElement: <Errors />,
       }, {
         path: 'lab-technicians',
-        element: <LabTechnicianManagement />,
+        element: (
+          <PrivateRoute children={<LabTechnicianManagement />} requiredRole={['MANAGER']} />
+        ),
         errorElement: <Errors />,
       }, {
         path: 'reports',
-        element: <Reports />,
+        element: (
+          <PrivateRoute children={<Reports />} requiredRole={['MANAGER']} />
+        ),
         errorElement: <Errors />,
       }
     ]
@@ -279,23 +305,30 @@ const router = createBrowserRouter([
   // Path for lab technician pages
   {
     path: '/lab-technician',
-    element: <LabTechnicianHomePage />,
+    element: (
+      <PrivateRoute children={<LabTechnicianHomePage />} requiredRole={['LAB_TECHNICIAN']} />
+    ),
     errorElement: <Errors />,
-
     children: [
       {
         index: true,
-        element: <LabTechnicianPatientList />,
+        element: (
+          <PrivateRoute children={<LabTechnicianPatientList />} requiredRole={['LAB_TECHNICIAN']} />
+        ),
         errorElement: <Errors />
       },
       {
         path: 'patient-detail/:id',
-        element: <PatientDetail />,
+        element: (
+          <PrivateRoute children={<PatientDetail />} requiredRole={['LAB_TECHNICIAN']} />
+        ),
         errorElement: <Errors />
       },
       {
         path: 'profile',
-        element: <LabTechnicianProfile />,
+        element: (
+          <PrivateRoute children={<LabTechnicianProfile />} requiredRole={['LAB_TECHNICIAN']} />
+        ),
         errorElement: <Errors />
       }
     ]

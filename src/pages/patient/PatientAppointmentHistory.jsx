@@ -122,6 +122,16 @@ export default function PatientAppointmentHistory() {
     'Tư vấn': records.filter(r => r.type && r.type.trim() === 'Tư vấn').length
   };
 
+  const formatDateVN = (dateStr) => {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    if (isNaN(d)) return dateStr;
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
   const columns = [
     {
       title: 'Loại lịch',
@@ -136,7 +146,7 @@ export default function PatientAppointmentHistory() {
       render: (date) => (
         <div>
           <CalendarOutlined style={{ marginRight: 8 }} />
-          {date}
+          {formatDateVN(date)}
         </div>
       ),
     },
@@ -161,12 +171,6 @@ export default function PatientAppointmentHistory() {
           {text || 'Không rõ bác sĩ'}
         </div>
       ),
-    },
-    {
-      title: 'Trạng thái',
-      dataIndex: 'status',
-      key: 'status',
-      render: (status) => <Tag color="green">{status}</Tag>,
     },
     {
       title: '',
@@ -289,7 +293,7 @@ export default function PatientAppointmentHistory() {
           <div>
             {/* Thông tin lịch khám */}
             <Descriptions title="Thông tin lịch khám" bordered size="small" column={2}>
-              <Descriptions.Item label="Ngày">{healthRecord.schedule?.date}</Descriptions.Item>
+              <Descriptions.Item label="Ngày">{formatDateVN(healthRecord.schedule?.date)}</Descriptions.Item>
               <Descriptions.Item label="Khung giờ">{healthRecord.schedule?.slot ? healthRecord.schedule.slot.split(":").slice(0,2).join(":") : ''}</Descriptions.Item>
               <Descriptions.Item label="Loại lịch">{healthRecord.schedule?.type}</Descriptions.Item>
               <Descriptions.Item label="Bác sĩ">{healthRecord.schedule?.doctor?.fullName}</Descriptions.Item>
@@ -307,7 +311,6 @@ export default function PatientAppointmentHistory() {
               <Descriptions.Item label="Cân nặng">{healthRecord.weight}</Descriptions.Item>
               <Descriptions.Item label="Nhóm máu">{healthRecord.bloodType}</Descriptions.Item>
               <Descriptions.Item label="Trạng thái HIV">{healthRecord.hivStatus}</Descriptions.Item>
-              <Descriptions.Item label="Trạng thái điều trị">{healthRecord.treatmentStatus}</Descriptions.Item>
             </Descriptions>
             <Divider orientation="center">Phác đồ điều trị</Divider>
             {!healthRecord.regimen ? (
