@@ -2,46 +2,212 @@
   margin-bottom: 1rem;
 }
 
+.filter-container {
+  display: flex;
+  flex-direction: column;
+}
+
 .doctor-select {
   max-width: 300px;
 }
 
-.doctor-filter .input-group-text {
+.input-group .input-group-text {
   background-color: #fff;
   color: #0d6efd;
+  border-right: none;
 }
 
-.doctor-filter .form-select:focus {
+.form-control:focus {
   border-color: #86b7fe;
   box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+  z-index: 0 !important;
 }
 
-/* Styling for Doctor Filter */
-.form-select {
-border-radius: 8px;
-border: 1px solid #e0e0e0;
-padding: 10px 15px;
-font-size: 14px;
-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-transition: all 0.3s ease;
-background-color: white;
-color: #333;
-appearance: none;
+.filter-select {
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  padding: 10px 15px;
+  font-size: 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  background-color: white;
+  color: #333;
+  appearance: none;
 }
 
-.form-select:focus {
-border-color: #4daddf;
-box-shadow: 0 0 0 0.2rem rgba(77, 173, 223, 0.25);
+.filter-select:focus {
+  border-color: #4daddf;
+  box-shadow: 0 0 0 0.2rem rgba(77, 173, 223, 0.25);
 }
 
 .form-label {
-font-weight: 600;
-font-size: 14px;
-margin-bottom: 8px;
-color: #333;
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 8px;
+  color: #333;
 }
 
 /* Gradient border on hover */
-.form-select:hover {
-border-color: #4daddf;
+.form-select:hover,
+.form-control:hover {
+  border-color: #4daddf;
+}
+
+/* Styles for integrated search dropdown */
+.doctor-search-dropdown {
+  position: relative;
+  width: 100%;
+}
+
+/* Ensure input group has same height as Form.Select */
+.doctor-search-dropdown .input-group {
+  height: 38px; /* Standard Bootstrap Form.Select height */
+}
+
+.doctor-search-dropdown .input-group-text {
+  background-color: #fff;
+  color: #6c757d;
+  border: 1px solid #e0e0e0;
+  border-right: none;
+  padding: 0 12px; /* Adjust padding to center icon vertically */
+  display: flex;
+  align-items: center;
+  height: 38px;
+}
+
+.search-input {
+  border: 1px solid #e0e0e0 !important;
+  border-left: none !important;
+  border-right: none !important;
+  padding: 8px 12px !important; /* Adjust padding for consistent height */
+  font-size: 14px !important;
+  background-color: white !important;
+  color: #333 !important;
+  height: 38px !important; /* Match Form.Select height */
+  line-height: 1.5 !important;
+}
+
+.dropdown-toggle-btn {
+  background-color: #fff !important;
+  color: #6c757d !important;
+  border: 1px solid #e0e0e0 !important;
+  border-left: none !important;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0 12px !important; /* Adjust padding to center icon vertically */
+  display: flex !important;
+  align-items: center !important;
+  height: 38px !important;
+}
+
+.search-input:focus {
+  border-color: #4daddf !important;
+  box-shadow: none !important;
+  z-index: 1;
+}
+
+.dropdown-toggle-btn:hover {
+  background-color: #f8f9fa !important;
+  color: #495057 !important;
+}
+
+/* Input group styling to match Form.Select */
+.doctor-search-dropdown .input-group {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.doctor-search-dropdown .input-group:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.doctor-search-dropdown .input-group:hover .input-group-text,
+.doctor-search-dropdown .input-group:hover .search-input,
+.doctor-search-dropdown .input-group:hover .dropdown-toggle-btn {
+  border-color: #4daddf;
+}
+
+/* Focus state for entire input group */
+.doctor-search-dropdown:focus-within .input-group {
+  box-shadow: 0 0 0 0.2rem rgba(77, 173, 223, 0.25);
+}
+
+.doctor-search-dropdown:focus-within .input-group-text,
+.doctor-search-dropdown:focus-within .dropdown-toggle-btn {
+  border-color: #4daddf;
+}
+
+/* Dropdown menu styling */
+.dropdown-menu-custom {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 0 0 8px 8px;
+  border-top: none;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  margin-top: -1px; /* Overlap with input border */
+}
+
+.dropdown-item-custom {
+  padding: 12px 15px;
+  cursor: pointer;
+  border-bottom: 1px solid #f8f9fa;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  color: #333;
+}
+
+.dropdown-item-custom:hover {
+  background-color: #f8f9fa;
+  color: #495057;
+}
+
+.dropdown-item-custom:last-child {
+  border-bottom: none;
+  border-radius: 0 0 8px 8px;
+}
+
+.dropdown-item-custom.selected {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  font-weight: 500;
+}
+
+.dropdown-item-custom.selected:hover {
+  background-color: #e3f2fd;
+}
+
+.dropdown-item-custom.disabled {
+  color: #6c757d;
+  cursor: not-allowed;
+  background-color: #f8f9fa;
+  font-style: italic;
+}
+
+.dropdown-item-custom.disabled:hover {
+  background-color: #f8f9fa;
+  color: #6c757d;
+}
+
+/* Input group styling */
+.doctor-search-dropdown .input-group {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.doctor-search-dropdown .input-group-text:first-child {
+  border-radius: 8px 0 0 8px;
+}
+
+.doctor-search-dropdown .input-group-text:last-child {
+  border-radius: 0 8px 8px 0;
 }

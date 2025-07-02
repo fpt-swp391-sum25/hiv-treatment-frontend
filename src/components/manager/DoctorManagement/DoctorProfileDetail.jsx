@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react';
 import { Modal, Descriptions, Tag, Row, Col, Card, Statistic, Button, Spin } from 'antd';
-import { UserOutlined, ClockCircleOutlined, TeamOutlined } from '@ant-design/icons';
+import { UserOutlined, ClockCircleOutlined, TeamOutlined, EditOutlined } from '@ant-design/icons';
 import './DoctorProfileDetail.css';
 
-const DoctorProfileDetail = ({ visible, onClose, doctor, loading }) => {
+const DoctorProfileDetail = ({ visible, onClose, doctor, loading, onEditProfile }) => {
     // Debug log
     useEffect(() => {
         console.log('DoctorProfileDetail rendered:', { visible, doctor, loading });
@@ -14,6 +14,11 @@ const DoctorProfileDetail = ({ visible, onClose, doctor, loading }) => {
     const handleClose = () => {
         console.log('Closing doctor profile modal');
         if (onClose) onClose();
+    };
+    
+    const handleEditProfile = () => {
+        console.log('Edit profile button clicked for doctor:', doctor);
+        if (onEditProfile) onEditProfile(doctor);
     };
 
     // Kiểm tra xem có dữ liệu từ doctor_profile không
@@ -26,6 +31,15 @@ const DoctorProfileDetail = ({ visible, onClose, doctor, loading }) => {
             open={visible}
             onCancel={handleClose}
             footer={[
+                <Button 
+                    key="edit" 
+                    type="primary" 
+                    icon={<EditOutlined />}
+                    onClick={handleEditProfile}
+                    style={{ marginRight: 8 }}
+                >
+                    Cập nhật thông tin chuyên môn
+                </Button>,
                 <Button key="back" onClick={handleClose}>
                     Đóng
                 </Button>

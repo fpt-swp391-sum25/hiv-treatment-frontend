@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button, Form, Row, Col, Alert, Spinner } from 'react-bootstrap';
-import { ScheduleStatus } from '../../../types/schedule.types';
+import { ScheduleStatus, SlotTimes, StatusMapping } from '../../../types/schedule.types';
 import './ScheduleForm.css';
 import moment from 'moment';
 import { fetchAllDoctorsAPI } from '../../../services/api.service';
@@ -14,12 +14,14 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         doctorName: '',
         date: moment(selectedDate).format('YYYY-MM-DD'),
         status: ScheduleStatus.AVAILABLE,
-        morning: true,
-        afternoon: true,
+        slot: '08:00:00',
         repeatWeekly: false,
         repeatCount: 1,
         roomCode: '101'
     });
+    
+    // Sử dụng SlotTimes từ schedule.types.js
+    const timeSlots = SlotTimes;
 
     useEffect(() => {
         if (show) {
@@ -101,9 +103,8 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             doctorId: selectedDoctor || '',
             doctorName: '',
             date: moment(selectedDate).format('YYYY-MM-DD'),
-            status: 'Đang hoạt động',
-            morning: true,
-            afternoon: true,
+            status: 'available',
+            slot: '08:00:00',
             repeatWeekly: false,
             repeatCount: 1,
             roomCode: '101'
@@ -112,61 +113,99 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
-        setFormData({
+        
+        // Cập nhật formData
+        const updatedFormData = {
             ...formData,
             [name]: type === 'checkbox' ? checked : value
-        });
+        };
+        
+        setFormData(updatedFormData);
 
         // Nếu thay đổi bác sĩ, cập nhật doctorName
         if (name === 'doctorId') {
             const selectedDoc = doctors.find(doc => doc.id.toString() === value.toString());
             if (selectedDoc) {
-                setFormData(prev => ({
-                    ...prev,
+                const newFormData = {
+                    ...updatedFormData,
                     doctorId: value,
                     doctorName: selectedDoc.name
-                }));
+                };
+                setFormData(newFormData);
             }
         }
+    };
+
+    // Hàm chuyển đổi thứ sang tiếng Việt
+    const formatVietnameseDay = (date) => {
+        const weekdays = [
+            'Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 
+            'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'
+        ];
+        const dayOfWeek = moment(date).day(); // 0 = Chủ nhật, 1 = Thứ hai, ...
+        return weekdays[dayOfWeek];
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
         
+        console.group('Schedule Form Submission');
+        console.log('Form data:', formData);
+        
         if (!formData.doctorId) {
+            console.error('Missing doctorId');
+            console.groupEnd();
             onShowToast('Vui lòng chọn bác sĩ', 'danger');
             return;
         }
         
-        if (!formData.morning && !formData.afternoon) {
-            onShowToast('Vui lòng chọn ít nhất một buổi làm việc', 'danger');
+        if (!formData.slot) {
+            console.error('Missing slot');
+            console.groupEnd();
+            onShowToast('Vui lòng chọn khung giờ làm việc', 'danger');
             return;
         }
         
         // Kiểm tra ngày
         if (!formData.date) {
+            console.error('Missing date');
+            console.groupEnd();
             onShowToast('Vui lòng chọn ngày', 'danger');
             return;
         }
 
         // Kiểm tra ngày có phải là quá khứ không
         if (moment(formData.date).isBefore(moment(), 'day')) {
+            console.error('Date is in the past', formData.date);
+            console.groupEnd();
             onShowToast('Không thể đặt lịch cho ngày đã qua!', 'danger');
+            return;
+        }
+
+        // Kiểm tra ngày có phải Chủ nhật không
+        if (moment(formData.date).day() === 0) { // 0 = Chủ nhật
+            console.error('Cannot schedule on Sunday', formData.date);
+            console.groupEnd();
+            onShowToast('Không thể đặt lịch vào Chủ nhật!', 'danger');
             return;
         }
 
         // Kiểm tra trùng lịch
         const conflictingSchedules = existingSchedules.filter(schedule => 
             schedule.date === formData.date && 
-            schedule.doctorId.toString() === formData.doctorId.toString()
+            schedule.doctorId.toString() === formData.doctorId.toString() &&
+            schedule.slot === formData.slot
         );
 
         if (conflictingSchedules.length > 0) {
-            onShowToast('Bác sĩ đã có lịch vào ngày này!', 'danger');
+            console.error('Schedule conflicts with existing schedules', conflictingSchedules);
+            console.groupEnd();
+            onShowToast('Bác sĩ đã có lịch vào khung giờ này!', 'danger');
             return;
         }
 
-        console.log('Form data before submission:', formData);
+        console.log('Form validation successful');
+        console.groupEnd();
 
         // Tạo lịch mới
         if (formData.repeatWeekly && formData.repeatCount > 1) {
@@ -179,7 +218,8 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                 // Kiểm tra xem ngày mới có trùng với lịch hiện có không
                 const hasConflict = existingSchedules.some(schedule => 
                     schedule.date === newDate && 
-                    schedule.doctorId.toString() === formData.doctorId.toString()
+                    schedule.doctorId.toString() === formData.doctorId.toString() &&
+                    schedule.slot === formData.slot
                 );
                 
                 if (!hasConflict) {
@@ -190,11 +230,11 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                         doctorId: formData.doctorId,
                         doctorName: doctorName,
                         date: newDate,
-                        status: formData.status,
-                        morning: formData.morning,
-                        afternoon: formData.afternoon,
+                        status: StatusMapping[formData.status] || 'Trống',
+                        slot: formData.slot,
                         roomCode: formData.roomCode,
-                        type: 'Khám'
+                        type: null,
+                        patient_id: null
                     };
                     
                     schedules.push(newSchedule);
@@ -217,11 +257,11 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                 doctorId: formData.doctorId,
                 doctorName: doctorName,
                 date: formData.date,
-                status: formData.status,
-                morning: formData.morning,
-                afternoon: formData.afternoon,
+                status: StatusMapping[formData.status] || 'Trống',
+                slot: formData.slot,
                 roomCode: formData.roomCode,
-                type: 'Khám'
+                type: null,
+                patient_id: null
             };
             
             console.log('Creating single schedule:', newSchedule);
@@ -268,16 +308,21 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                             </Form.Group>
                         </Col>
                         <Col md={6}>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Ngày</Form.Label>
-                                <Form.Control
-                                    type="date"
-                                    name="date"
-                                    value={formData.date}
-                                    onChange={handleChange}
-                                    min={moment().format('YYYY-MM-DD')}
-                                    required
-                                />
+                            <Form.Group as={Row} className="mb-3">
+                                <Form.Label column sm="4">Ngày khám</Form.Label>
+                                <Col sm="8">
+                                    <Form.Control
+                                        type="date"
+                                        name="date"
+                                        value={formData.date}
+                                        onChange={handleChange}
+                                        min={moment().format('YYYY-MM-DD')}
+                                        required
+                                    />
+                                    <small className="form-text text-muted">
+                                        {formData.date && `Ngày ${moment(formData.date).format('DD/MM/YYYY')} (${formatVietnameseDay(formData.date)})`}
+                                    </small>
+                                </Col>
                             </Form.Group>
                         </Col>
                     </Row>
@@ -301,25 +346,26 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                             </Form.Group>
                         </Col>
                         <Col md={6}>
-                            <Form.Group className="mb-3 mt-2">
-                                <Form.Label>Buổi làm việc</Form.Label>
-                                <div className="d-flex flex-column">
-                                    <Form.Check 
-                                        type="checkbox"
-                                        name="morning"
-                                        label="Buổi sáng (8:00 - 12:00)"
-                                        checked={formData.morning}
-                                        onChange={handleChange}
-                                        className="mb-2"
-                                    />
-                                    <Form.Check 
-                                        type="checkbox"
-                                        name="afternoon"
-                                        label="Buổi chiều (13:00 - 17:00)"
-                                        checked={formData.afternoon}
-                                        onChange={handleChange}
-                                    />
-                                </div>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Khung giờ</Form.Label>
+                                <Form.Select
+                                    name="slot"
+                                    value={formData.slot}
+                                    onChange={handleChange}
+                                    required
+                                >
+                                    {timeSlots.map(slot => (
+                                        <option 
+                                            key={slot.value} 
+                                            value={slot.value}
+                                        >
+                                            {slot.label}
+                                        </option>
+                                    ))}
+                                </Form.Select>
+                                <Form.Text className="text-muted">
+                                    Thiết lập thời gian làm việc cho bác sĩ
+                                </Form.Text>
                             </Form.Group>
                         </Col>
                     </Row>
