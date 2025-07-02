@@ -4,14 +4,20 @@ import {
   fetchHealthRecordByScheduleIdAPI,
   fetchTestResultByHealthRecordIdAPI,
   fetchRegimensByDoctorIdAPI,
-  updateHealthRecordAPI
+  updateHealthRecordAPI,
+  createTestResultAPI,
+  deleteTestResultAPI,
+  updateTestResultAPI
 } from "../../services/api.service.js";
 import {
   Typography, Space, Button, Card, Form, Row,
   Col, Divider, notification, Modal,
-  Select
+  Select, Input, DatePicker
 } from 'antd';
 import '../../styles/ReturnButton.css'
+import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
+import dayjs from 'dayjs';
+import { Popconfirm } from 'antd';
 
 const ViewOnlyPatientDetail = () => {
   const [healthRecordData, setHealthRecordData] = useState({})
@@ -19,6 +25,12 @@ const ViewOnlyPatientDetail = () => {
   const [isIndiateRegimenModalOpen, setIsIndiateRegimenModalOpen] = useState(false)
   const [regimenOptions, setRegimenOptions] = useState([]);
   const [selectedRegimenId, setSelectedRegimenId] = useState(null);
+  const [isCreateTestResultModalOpen, setIsCreateTestResultModalOpen] = useState(false);
+  const [isUpdateTestResultModalOpen, setIsUpdateTestResultModalOpen] = useState(false);
+  const [type, setType] = useState("");
+  const [note, setNote] = useState("");
+  const [expectedResultTime, setExpectedResultTime] = useState("");
+  const [dataUpdate, setDataUpdate] = useState({});
 
   const { id } = useParams();
   const { Title } = Typography;
@@ -80,7 +92,13 @@ const ViewOnlyPatientDetail = () => {
 
   const resetAndClose = () => {
     setSelectedRegimenId(null);
-    setIsIndiateRegimenModalOpen(false)
+    setIsIndiateRegimenModalOpen(false);
+    setIsCreateTestResultModalOpen(false);
+    setIsUpdateTestResultModalOpen(false);
+    setType("");
+    setNote("");
+    setExpectedResultTime("");
+    setDataUpdate({});
   }
 
   const handleUpdateTreatmentStatus = async (newStatus) => {
@@ -111,6 +129,74 @@ const ViewOnlyPatientDetail = () => {
         showProgress: true,
         pauseOnHover: true,
         description: "Cập nhật trạng thái điều trị thất bại"
+      });
+    }
+  };
+
+  const handleCreateTestResult = async () => {
+    try {
+      const response = await createTestResultAPI(type, note, expectedResultTime, healthRecordData.id);
+      if (response.data) {
+        notification.success({
+          message: 'Hệ thống',
+          showProgress: true,
+          pauseOnHover: true,
+          description: 'Tạo kết quả xét nghiệm thành công!'
+        });
+      }
+      resetAndClose();
+      await loadData();
+    } catch (error) {
+      notification.error({
+        message: 'Lỗi',
+        showProgress: true,
+        pauseOnHover: true,
+        description: 'Không thể tạo kết quả xét nghiệm'
+      });
+    }
+  };
+
+  const handleDeleteTestResult = async (testResultId) => {
+    try {
+      const response = await deleteTestResultAPI(testResultId);
+      if (response.data) {
+        notification.success({
+          message: 'Hệ thống',
+          showProgress: true,
+          pauseOnHover: true,
+          description: 'Xóa kết quả xét nghiệm thành công!'
+        });
+        await loadData();
+      }
+    } catch (error) {
+      notification.error({
+        message: 'Lỗi',
+        showProgress: true,
+        pauseOnHover: true,
+        description: 'Không thể xóa kết quả xét nghiệm'
+      });
+    }
+  };
+
+  const handleUpdateTestResult = async () => {
+    try {
+      const response = await updateTestResultAPI(dataUpdate.id, type, note, expectedResultTime);
+      if (response.data) {
+        notification.success({
+          message: 'Hệ thống',
+          showProgress: true,
+          pauseOnHover: true,
+          description: 'Cập nhật kết quả xét nghiệm thành công!'
+        });
+      }
+      resetAndClose();
+      await loadData();
+    } catch (error) {
+      notification.error({
+        message: 'Lỗi',
+        showProgress: true,
+        pauseOnHover: true,
+        description: 'Không thể cập nhật kết quả xét nghiệm'
       });
     }
   };
@@ -177,13 +263,71 @@ const ViewOnlyPatientDetail = () => {
 
       <Divider orientation="center" style={{ marginTop: 10 + 'vh' }}>Kết quả xét nghiệm</Divider>
 
+      <Button type="primary" icon={<PlusOutlined />} onClick={() => setIsCreateTestResultModalOpen(true)} style={{ marginBottom: 16 }}>
+        Tạo mới
+      </Button>
+
+      {/* Modal tạo mới */}
+      <Modal
+        title="Tạo kết quả xét nghiệm"
+        open={isCreateTestResultModalOpen}
+        onOk={handleCreateTestResult}
+        onCancel={resetAndClose}
+        okText="Tạo"
+        cancelText="Hủy"
+      >
+        <Form layout="vertical">
+          <Form.Item label="Loại xét nghiệm">
+            <Input value={type} onChange={e => setType(e.target.value)} />
+          </Form.Item>
+          <Form.Item label="Ghi chú">
+            <Input value={note} onChange={e => setNote(e.target.value)} />
+          </Form.Item>
+          <Form.Item label="Thời gian dự kiến">
+            <DatePicker
+              format="HH:mm DD/MM/YYYY"
+              showTime
+              onChange={value => setExpectedResultTime(value ? value.format('YYYY-MM-DDTHH:mm:ss') : '')}
+              value={expectedResultTime ? dayjs(expectedResultTime) : null}
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* Modal cập nhật */}
+      <Modal
+        title="Cập nhật kết quả xét nghiệm"
+        open={isUpdateTestResultModalOpen}
+        onOk={handleUpdateTestResult}
+        onCancel={resetAndClose}
+        okText="Cập nhật"
+        cancelText="Hủy"
+      >
+        <Form layout="vertical">
+          <Form.Item label="Loại xét nghiệm">
+            <Input value={type} onChange={e => setType(e.target.value)} />
+          </Form.Item>
+          <Form.Item label="Ghi chú">
+            <Input value={note} onChange={e => setNote(e.target.value)} />
+          </Form.Item>
+          <Form.Item label="Thời gian dự kiến">
+            <DatePicker
+              format="HH:mm DD/MM/YYYY"
+              showTime
+              onChange={value => setExpectedResultTime(value ? value.format('YYYY-MM-DDTHH:mm:ss') : '')}
+              value={expectedResultTime ? dayjs(expectedResultTime) : null}
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* Danh sách kết quả xét nghiệm */}
       {testResultData.map((test) => (
         <Card key={test.id} style={{ marginTop: 16 }}>
-          <Row gutter={5 + "vw"}>
+          <Row gutter={5 + "vw"} align="middle">
             <Col span={8}>
               <p><strong>Loại:</strong> {test.type}</p>
             </Col>
-
             <Col span={8}>
               <p><strong>Kết quả:</strong> {test.result} {test.unit}</p>
             </Col>
@@ -191,10 +335,52 @@ const ViewOnlyPatientDetail = () => {
               <p><strong>Ghi chú:</strong> {test.note}</p>
             </Col>
             <Col span={8}>
-              <p><strong>Thời gian dự kiến:</strong> {new Date(test.expectedResultTime).toLocaleString('vi-VN')}</p>
+              <p><strong>Thời gian dự kiến:</strong> {test.expectedResultTime && !isNaN(new Date(test.expectedResultTime))
+                ? new Intl.DateTimeFormat('vi-VN', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  day: '2-digit',
+                  month: '2-digit',
+                  year: 'numeric',
+                  hour12: false,
+                }).format(new Date(test.expectedResultTime))
+                : ''
+              }</p>
             </Col>
             <Col span={8}>
-              <p><strong>Thời gian nhận kết quả:</strong> {new Date(test.actualResultTime).toLocaleString('vi-VN')}</p>
+              <p><strong>Thời gian nhận kết quả:</strong> {test.actualResultTime && !isNaN(new Date(test.actualResultTime))
+                ? new Intl.DateTimeFormat('vi-VN', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  day: '2-digit',
+                  month: '2-digit',
+                  year: 'numeric',
+                  hour12: false,
+                }).format(new Date(test.actualResultTime))
+                : ''
+              }</p>
+            </Col>
+            <Col span={8} style={{ display: 'flex', alignItems: 'center' }}>
+              <Space>
+                <EditOutlined
+                  style={{ color: 'orange', cursor: 'pointer' }}
+                  onClick={() => {
+                    setDataUpdate(test);
+                    setType(test.type);
+                    setNote(test.note);
+                    setExpectedResultTime(test.expectedResultTime);
+                    setIsUpdateTestResultModalOpen(true);
+                  }}
+                />
+                <Popconfirm
+                  title="Xoá kết quả?"
+                  onConfirm={() => handleDeleteTestResult(test.id)}
+                  okText="Có"
+                  cancelText="Không"
+                >
+                  <DeleteOutlined style={{ color: 'red', cursor: 'pointer' }} />
+                </Popconfirm>
+              </Space>
             </Col>
           </Row>
         </Card>

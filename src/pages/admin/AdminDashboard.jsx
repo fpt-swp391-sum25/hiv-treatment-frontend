@@ -5,6 +5,7 @@ import { fetchAccountByRoleAPI, fetchScheduleAPI } from '../../services/api.serv
 import '../../styles/admin/AdminDashboard.css';
 import { Line, Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Title, Tooltip, Legend } from 'chart.js';
+import ScheduleByDayChart from '../../components/admin/ScheduleByDayChart';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Title, Tooltip, Legend);
 
@@ -170,6 +171,11 @@ const AdminDashboard = () => {
                             }}
                         />
                     </Card>
+                </Col>
+            </Row>
+            <Row gutter={[24, 24]} style={{ marginTop: 32 }}>
+                <Col xs={24}>
+                    <ScheduleByDayChart />
                 </Col>
             </Row>
         </div>
