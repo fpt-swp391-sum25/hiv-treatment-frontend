@@ -114,7 +114,7 @@ const AppointmentList = () => {
             title: 'Ngày',
             dataIndex: 'date',
             key: 'date',
-            render: (date) => date,
+            render: (date) => dayjs(date).format('DD-MM-YYYY'),
         },
         {
             title: 'Khung giờ',
