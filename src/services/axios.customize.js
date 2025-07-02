@@ -42,7 +42,12 @@ instance.interceptors.request.use(function (config) {
 instance.interceptors.response.use(function (response) {
     // Any status code that lie within the range of 2xx cause this function to trigger
     // Do something with response data
-    console.log("Response received:", response);
+    console.log("Response received from " + response.config.url + ":", {
+        status: response.status,
+        statusText: response.statusText,
+        headers: response.headers,
+        data: response.data
+    });
 
     // Handle different response formats
     if (response.data) {
@@ -58,7 +63,7 @@ instance.interceptors.response.use(function (response) {
 }, function (error) {
     // Any status codes that falls outside the range of 2xx cause this function to trigger
     // More detailed error logging
-    console.log("API Error:", error);
+    console.error("API Error on " + (error.config?.url || 'unknown endpoint') + ":");
 
     if (error.response) {
         // The request was made and the server responded with a status code
@@ -66,6 +71,11 @@ instance.interceptors.response.use(function (response) {
         console.error('Error response status:', error.response.status);
         console.error('Error response headers:', error.response.headers);
         console.error('Error response data:', error.response.data);
+        console.error('Request that caused the error:', {
+            method: error.config?.method?.toUpperCase(),
+            url: error.config?.url,
+            data: error.config?.data
+        });
 
         // Chỉ thông báo lỗi xác thực, không tự động chuyển hướng
         if (error.response.status === 403) {

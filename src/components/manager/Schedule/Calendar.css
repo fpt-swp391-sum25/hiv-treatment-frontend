@@ -310,12 +310,24 @@
 
 /* Style cho ngày Chủ nhật */
 .fc-day-sunday {
-  background-color: #f8f9fa !important;
-  position: relative;
+  background-color: rgba(253, 237, 237, 0.5);
 }
 
-.fc .fc-day-disabled {
-  pointer-events: none;
+.fc-day-sunday .fc-daygrid-day-number {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+/* Không còn hiển thị gạch ngang cho ngày Chủ Nhật */
+.fc-day-disabled {
+  color: #dc3545;
+  cursor: not-allowed;
+}
+
+/* Định dạng cho ngày quá khứ */
+.fc-day-past {
+  opacity: 0.7;
+  background-color: rgba(0, 0, 0, 0.03);
 }
 
 /* Responsive */
@@ -331,233 +343,805 @@
 }
 
 .calendar-container {
-  width: 100%;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  background-color: #fff;
   padding: 16px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   margin-bottom: 20px;
 }
 
-.calendar-controls {
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 15px;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
-.calendar-nav-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 16px;
-  color: #495057;
+.calendar-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.calendar-title h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Nút điều hướng */
+.btn-calendar-nav {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  transition: background-color 0.2s;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.calendar-nav-button:hover {
+.btn-calendar-nav:hover {
   background-color: #e9ecef;
 }
 
-.today-button {
-  background-color: #2c7bbf;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 6px 12px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  margin: 0 10px;
-}
-
-.today-button:hover {
-  background-color: #236aa8;
-}
-
-.view-buttons {
-  display: flex;
-  gap: 5px;
-}
-
-.view-button {
+.btn-calendar-today {
   background-color: #f8f9fa;
   border: 1px solid #dee2e6;
-  color: #495057;
-  padding: 6px 12px;
   border-radius: 4px;
+  height: 32px;
+  padding: 0 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  font-size: 0.9rem;
-  transition: all 0.2s;
+  font-size: 14px;
+  transition: all 0.2s ease;
 }
 
-.view-button:hover {
+.btn-calendar-today:hover {
   background-color: #e9ecef;
 }
 
-.view-button.active {
-  background-color: #2c7bbf;
-  color: white;
-  border-color: #2c7bbf;
+/* Nút chuyển đổi view */
+.calendar-view-buttons {
+  display: flex;
+  gap: 1px;
 }
 
-/* Tùy chỉnh các ngày trong lịch */
-.fc .fc-daygrid-day {
+.btn-calendar-view {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  padding: 6px 12px;
   cursor: pointer;
-  transition: background-color 0.2s;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s ease;
 }
 
-.fc .fc-daygrid-day:hover {
-  background-color: rgba(0, 123, 255, 0.05);
+.btn-calendar-view:first-child {
+  border-radius: 4px 0 0 4px;
 }
 
-.fc .fc-daygrid-day.fc-day-today {
-  background-color: rgba(0, 123, 255, 0.1);
+.btn-calendar-view:last-child {
+  border-radius: 0 4px 4px 0;
 }
 
-/* Tùy chỉnh header của lịch */
-.fc .fc-toolbar-title {
-  font-size: 1.5rem;
+.btn-calendar-view.active {
+  background-color: #0d6efd;
+  color: white;
+  border-color: #0d6efd;
+}
+
+.view-icon {
+  font-size: 16px;
+}
+
+/* Chế độ xem tháng */
+.fc-daygrid-day-frame {
+  min-height: 80px;
+}
+
+.fc-daygrid-day-number {
+  font-size: 14px;
+  font-weight: 500;
+  color: #495057;
+  text-decoration: none !important;
+}
+
+.fc-day-today .fc-daygrid-day-number {
+  color: #0d6efd;
   font-weight: 600;
 }
 
-/* Tùy chỉnh nút trong FullCalendar */
-.fc .fc-button-primary {
-  background-color: #2c7bbf;
-  border-color: #2c7bbf;
+/* Chế độ xem danh sách tuần */
+.fc-list-day-cushion {
+  background-color: #f8f9fa !important;
+  padding: 8px 14px !important;
 }
 
-.fc .fc-button-primary:hover {
-  background-color: #236aa8;
-  border-color: #236aa8;
+.fc-list-day-text {
+  color: #495057 !important;
+  font-weight: 600 !important;
+  font-size: 15px !important;
+  text-decoration: none !important;
 }
 
-/* Tùy chỉnh ngày quá khứ */
-.fc-day-past {
+.fc-list-day-side-text {
+  color: #6c757d !important;
+  font-weight: 500 !important;
+  font-size: 14px !important;
+  text-decoration: none !important;
+}
+
+.fc-list-event {
+  cursor: pointer !important;
+  transition: background-color 0.2s ease !important;
+}
+
+.fc-list-event:hover {
+  background-color: rgba(13, 110, 253, 0.05) !important;
+}
+
+.fc-list-event-dot {
+  border-color: #28a745 !important;
+}
+
+.fc-list-event-title {
+  font-weight: 500 !important;
+  color: #212529 !important;
+}
+
+.fc-list-event-time {
+  font-weight: 500 !important;
+  color: #495057 !important;
+  width: 100px !important;
+}
+
+/* Tùy chỉnh nội dung sự kiện trong danh sách */
+.list-event-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.list-event-title {
+  font-weight: 600;
+  color: #212529;
+  font-size: 14px;
+}
+
+.list-event-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.list-event-time {
+  background-color: #e9ecef;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #495057;
+}
+
+.list-event-room {
   background-color: #f8f9fa;
-  opacity: 0.7;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #495057;
+  border: 1px solid #dee2e6;
 }
 
-/* Tùy chỉnh nội dung sự kiện */
-.custom-event-content .event-title {
+/* Tùy chỉnh hiển thị khi không có sự kiện */
+.no-events-message {
+  padding: 30px;
+  text-align: center;
+  color: #6c757d;
+  font-style: italic;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  margin: 20px 0;
+}
+
+/* Hiển thị sự kiện trong chế độ xem tháng */
+.custom-event-content {
+  padding: 3px 6px;
+  border-radius: 4px;
+  margin: 1px 0;
+  background-color: rgba(25, 135, 84, 0.1);
+  border-left: 3px solid #28a745;
+}
+
+.event-title {
   font-weight: 600;
+  font-size: 12px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-bottom: 2px;
-  font-size: 0.9rem;
+  color: #212529;
 }
 
-.custom-event-content .event-status {
-  font-size: 0.8rem;
-  opacity: 0.8;
+.event-status {
+  font-size: 11px;
+  color: #495057;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* Chủ nhật */
+/* Định dạng cho ngày Chủ nhật */
 .fc-day-sunday {
-  background-color: #f8f9fa;
-}
-
-/* Ngày bị vô hiệu hóa */
-.fc .fc-day-disabled {
-  background-color: #f8f9fa;
-  cursor: not-allowed;
+  background-color: rgba(253, 237, 237, 0.3);
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-  .fc .fc-toolbar {
+  .calendar-header {
     flex-direction: column;
-    gap: 10px;
+    align-items: flex-start;
   }
   
-  .fc .fc-toolbar-title {
-    font-size: 1.2rem;
-  }
-}
-
-/* Nút làm mới dữ liệu */
-.refresh-button {
-  background-color: #6c757d;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 6px 12px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.refresh-button:hover {
-  background-color: #5a6268;
-}
-
-/* Nút thêm lịch mới */
-.add-schedule-button {
-  background-color: #28a745;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 8px 16px;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  display: flex;
-  align-items: center;
-}
-
-.add-schedule-button:hover {
-  background-color: #218838;
-}
-
-.add-schedule-button:disabled {
-  background-color: #6c757d;
-  cursor: not-allowed;
-}
-
-/* Hiển thị loading */
-.loading-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 40px;
-}
-
-/* Hiển thị không có dữ liệu */
-.no-data-container {
-  text-align: center;
-  padding: 30px;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  margin: 20px 0;
-}
-
-.no-data-message {
-  color: #6c757d;
-  font-style: italic;
-}
-
-/* Cải thiện hiển thị trên các thiết bị nhỏ */
-@media (max-width: 576px) {
-  .calendar-controls {
-    flex-direction: column;
-    gap: 10px;
-  }
-  
-  .view-buttons {
+  .calendar-title {
+    order: -1;
+    margin-bottom: 10px;
     width: 100%;
-    justify-content: space-between;
-  }
-  
-  .view-button {
-    flex: 1;
     text-align: center;
   }
+  
+  .calendar-nav {
+    margin-bottom: 10px;
+  }
+  
+  .view-text {
+    display: none;
+  }
+  
+  .btn-calendar-view {
+    padding: 6px;
+  }
+}
+
+/* Đảm bảo tiếng Việt hiển thị đúng */
+.fc .fc-toolbar-title,
+.fc .fc-col-header-cell-cushion,
+.fc .fc-daygrid-day-number,
+.fc .fc-list-day-text,
+.fc .fc-list-day-side-text {
+  font-family: 'Roboto', 'Segoe UI', sans-serif;
+}
+
+/* Tùy chỉnh hiển thị cho chế độ xem tuần */
+.fc-timegrid-event {
+  background-color: rgba(25, 135, 84, 0.2) !important;
+  border-left: 4px solid #198754 !important;
+  border: none !important;
+  color: #0a3622 !important;
+  border-radius: 4px !important;
+  padding: 4px !important;
+  margin: 1px 2px !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+}
+
+.fc-timegrid-event .fc-event-main {
+  padding: 4px !important;
+}
+
+.fc-timegrid-event .fc-event-time {
+  font-weight: bold !important;
+  font-size: 0.85rem !important;
+  margin-bottom: 2px !important;
+  color: #0a3622 !important;
+}
+
+.fc-timegrid-event .fc-event-title {
+  font-weight: 600 !important;
+  font-size: 0.85rem !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* Custom event content cho chế độ xem tuần */
+.custom-event-content-week {
+  padding: 2px 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.event-title-week {
+  font-weight: 700;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #0a3622;
+}
+
+.event-room-week {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #0a3622;
+}
+
+/* Tùy chỉnh hiển thị cho các ô thời gian */
+.fc-timegrid-slot {
+  height: 40px !important;
+  border-bottom: 1px dashed #e9ecef !important;
+}
+
+.fc-timegrid-slot-label {
+  font-weight: 600 !important;
+  color: #495057 !important;
+}
+
+.fc-timegrid-slot-label-cushion {
+  font-size: 0.85rem !important;
+}
+
+/* Tùy chỉnh hiển thị cho các cột ngày trong chế độ xem tuần */
+.fc-timegrid-col-frame {
+  background-color: #ffffff !important;
+}
+
+/* Tùy chỉnh hiển thị cho ngày hiện tại trong chế độ xem tuần */
+.fc-timegrid-col.fc-day-today {
+  background-color: rgba(0, 123, 255, 0.05) !important;
+}
+
+/* Tùy chỉnh hiển thị cho Chủ nhật trong chế độ xem tuần */
+.fc-day-sun .fc-timegrid-col-frame {
+  background-color: rgba(253, 237, 237, 0.3) !important;
+}
+
+/* Tùy chỉnh hiển thị cho sự kiện khi hover trong chế độ xem tuần */
+.fc-timegrid-event:hover {
+  background-color: rgba(25, 135, 84, 0.3) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+  transform: translateY(-1px) !important;
+  transition: all 0.2s ease !important;
+  cursor: pointer !important;
+}
+
+/* Tùy chỉnh hiển thị cho tiêu đề ngày trong chế độ xem tuần */
+.fc-col-header-cell-cushion {
+  font-weight: 600 !important;
+  color: #343a40 !important;
+  text-decoration: none !important;
+  padding: 8px 4px !important;
+  font-size: 0.95rem !important;
+}
+
+/* Tùy chỉnh hiển thị cho tiêu đề ngày Chủ nhật */
+.fc-day-sun .fc-col-header-cell-cushion {
+  color: #dc3545 !important;
+}
+
+/* Tùy chỉnh hiển thị cho thanh giờ hiện tại */
+.fc-timegrid-now-indicator-line {
+  border-color: #dc3545 !important;
+  border-width: 2px !important;
+}
+
+.fc-timegrid-now-indicator-arrow {
+  border-color: #dc3545 !important;
+  border-width: 5px !important;
+}
+
+/* Tùy chỉnh hiển thị cho vùng giờ làm việc */
+.fc-timegrid-col.fc-day-today .fc-timegrid-col-frame {
+  background-color: rgba(0, 123, 255, 0.05) !important;
+}
+
+.fc-timegrid-col.fc-day-today .fc-timegrid-now-indicator-line {
+  z-index: 4 !important;
+}
+
+.fc-non-business {
+  background-color: rgba(0, 0, 0, 0.03) !important;
+}
+
+/* Tùy chỉnh kích thước và hiển thị tiêu đề các ngày trong tuần */
+.fc-col-header {
+  background-color: #f8f9fa !important;
+  border-bottom: 2px solid #dee2e6 !important;
+}
+
+.fc-col-header-cell {
+  padding: 8px 0 !important;
+}
+
+/* Chế độ xem tuần tùy chỉnh */
+.week-view-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.week-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #495057;
+  text-align: center;
+  padding: 5px 0;
+}
+
+.week-days-list {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+}
+
+.week-day-item {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+  min-height: 200px;
+  border: 1px solid #e9ecef;
+}
+
+.week-day-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.week-day-item.today {
+  border: 2px solid #0d6efd;
+}
+
+.week-day-header {
+  background-color: #f8f9fa;
+  padding: 10px;
+  border-bottom: 1px solid #e9ecef;
+  text-align: center;
+}
+
+.week-day-name {
+  font-weight: 600;
+  color: #343a40;
+  font-size: 14px;
+}
+
+.week-day-number {
+  font-size: 12px;
+  color: #6c757d;
+  margin-top: 2px;
+}
+
+.week-day-events {
+  padding: 10px;
+  flex-grow: 1;
+  overflow-y: auto;
+  max-height: 300px;
+}
+
+.week-day-event {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px;
+  margin-bottom: 8px;
+  background-color: rgba(25, 135, 84, 0.1);
+  border-left: 3px solid #28a745;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.week-day-event:hover {
+  background-color: rgba(25, 135, 84, 0.2);
+}
+
+.week-event-time {
+  background-color: #28a745;
+  color: #fff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.week-event-content {
+  flex-grow: 1;
+}
+
+.week-event-title {
+  font-weight: 600;
+  font-size: 13px;
+  color: #212529;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.week-event-room {
+  font-size: 12px;
+  color: #6c757d;
+  background-color: #f8f9fa;
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 3px;
+  border: 1px solid #e9ecef;
+}
+
+.no-events-day {
+  color: #6c757d;
+  font-style: italic;
+  text-align: center;
+  padding: 20px 0;
+  font-size: 13px;
+}
+
+/* Responsive cho chế độ xem tuần */
+@media (max-width: 992px) {
+  .week-days-list {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .week-days-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 576px) {
+  .week-days-list {
+    grid-template-columns: 1fr;
+  }
+  
+  .week-day-item {
+    min-height: 150px;
+  }
+}
+
+/* Thêm CSS cho hiển thị sự kiện trong chế độ xem tháng */
+.month-event-content {
+  display: flex;
+    flex-direction: column;
+  background-color: #ffffff !important;
+  border-radius: 4px;
+  padding: 4px 6px;
+  margin: 1px 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  }
+  
+.month-event-content:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+}
+
+.month-event-time {
+  font-size: 0.75rem;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.month-event-title {
+  font-weight: 600;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #212529;
+}
+
+.month-event-room {
+  font-size: 0.75rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #6c757d;
+}
+
+/* Cập nhật CSS cho fc-event trong chế độ xem tháng */
+.fc-daygrid-event {
+  background-color: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 1px 0 !important;
+}
+
+.fc-daygrid-event .fc-event-main {
+  padding: 0 !important;
+}
+
+.fc-daygrid-event .fc-event-title {
+  display: none !important; /* Ẩn tiêu đề mặc định */
+}
+
+/* Đảm bảo sự kiện hiển thị đúng trong chế độ xem tháng */
+.fc-daygrid-day-events {
+  padding: 0 2px !important;
+}
+
+/* Tùy chỉnh hiển thị cho sự kiện trong chế độ xem tháng */
+.fc-daygrid-day-events .week-day-event {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 4px;
+  margin-bottom: 4px;
+  background-color: rgba(25, 135, 84, 0.1);
+  border-left: 3px solid #28a745;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.fc-daygrid-day-events .week-day-event:hover {
+  background-color: rgba(25, 135, 84, 0.2);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+.fc-daygrid-day-events .week-event-time {
+  background-color: #28a745;
+  color: #fff;
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.fc-daygrid-day-events .week-event-content {
+  flex-grow: 1;
+  min-width: 0; /* Đảm bảo text-overflow hoạt động */
+}
+
+.fc-daygrid-day-events .week-event-title {
+  font-weight: 600;
+  font-size: 0.75rem;
+  color: #212529;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fc-daygrid-day-events .week-event-room {
+  font-size: 0.7rem;
+  color: #6c757d;
+  background-color: #f8f9fa;
+  display: inline-block;
+  padding: 0px 4px;
+  border-radius: 2px;
+  border: 1px solid #e9ecef;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Tăng kích thước tối thiểu cho ô ngày trong chế độ xem tháng */
+.fc-daygrid-day-frame {
+  min-height: 100px !important;
+}
+
+/* Responsive cho chế độ xem tháng */
+@media (max-width: 768px) {
+  .fc-daygrid-day-events .week-day-event {
+    padding: 2px;
+    margin-bottom: 2px;
+  }
+  
+  .fc-daygrid-day-events .week-event-time {
+    font-size: 0.65rem;
+    padding: 1px 3px;
+  }
+  
+  .fc-daygrid-day-events .week-event-title {
+    font-size: 0.7rem;
+  }
+  
+  .fc-daygrid-day-events .week-event-room {
+    font-size: 0.65rem;
+    padding: 0px 2px;
+  }
+  
+  .fc-daygrid-day-frame {
+    min-height: 80px !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .fc-daygrid-day-frame {
+    min-height: 60px !important;
+  }
+  
+  .fc-daygrid-day-events .week-event-room {
+    display: none; /* Ẩn thông tin phòng trên màn hình nhỏ */
+  }
+}
+
+/* Loại bỏ các hiệu ứng mặc định của FullCalendar cho sự kiện */
+.fc-event, .fc-event-dot {
+  background-color: transparent !important;
+  border: none !important;
+}
+
+.fc-event-main {
+  padding: 0 !important;
+}
+
+/* Đảm bảo các sự kiện hiển thị đúng trong FullCalendar */
+.fc .fc-daygrid-event-harness {
+  margin-bottom: 1px !important;
+}
+
+/* Đảm bảo sự kiện không bị cắt trong chế độ xem tháng */
+.fc-daygrid-event-harness {
+  margin-top: 1px !important;
+  margin-bottom: 1px !important;
+}
+
+/* Đảm bảo sự kiện không bị che khuất bởi các sự kiện khác */
+.fc-daygrid-event-harness-abs {
+  visibility: visible !important;
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+}
+
+/* Đảm bảo hiển thị đúng khi có nhiều sự kiện */
+.fc-daygrid-more-link {
+  background-color: #f8f9fa !important;
+  border: 1px solid #e9ecef !important;
+  border-radius: 4px !important;
+  padding: 1px 4px !important;
+  font-size: 0.75rem !important;
+  color: #495057 !important;
+  font-weight: 500 !important;
+  margin-top: 2px !important;
+}
+
+.fc-daygrid-more-link:hover {
+  background-color: #e9ecef !important;
+  color: #212529 !important;
+}
+
+/* Đảm bảo popup hiển thị đúng */
+.fc-popover {
+  border-radius: 6px !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+  border: 1px solid #dee2e6 !important;
+  }
+
+.fc-popover-header {
+  background-color: #f8f9fa !important;
+  padding: 8px 10px !important;
+  font-weight: 600 !important;
+}
+
+.fc-popover-body {
+  padding: 8px !important;
+}
+
+/* Đảm bảo sự kiện trong popup hiển thị đúng */
+.fc-popover .week-day-event {
+  margin-bottom: 6px !important;
 }

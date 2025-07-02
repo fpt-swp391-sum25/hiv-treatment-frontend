@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Button, Form, Alert, Row, Col, Spinner } from 'react-bootstrap';
-import { ScheduleStatus } from '../../../types/schedule.types';
+import { Modal, Button, Form, Alert, Row, Col, Spinner, Badge } from 'react-bootstrap';
+import { ScheduleStatus, SlotTimes, StatusMapping } from '../../../types/schedule.types';
 import moment from 'moment';
 import { deleteScheduleAPI } from '../../../services/api.service';
 import './ScheduleDetail.css';
+import { BsCalendarWeek, BsClock, BsDoorOpen, BsPerson } from 'react-icons/bs';
 
 const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToast }) => {
     const [formData, setFormData] = useState({
@@ -12,13 +13,16 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
         doctorName: '',
         date: '',
         status: ScheduleStatus.AVAILABLE,
-        morning: true,
-        afternoon: true,
-        note: ''
+        slot: '',
+        roomCode: '',
+        original_status: ScheduleStatus.AVAILABLE
     });
     const [loading, setLoading] = useState(false);
     const [confirmDelete, setConfirmDelete] = useState(false);
     const [deleting, setDeleting] = useState(false);
+
+    // Sử dụng SlotTimes từ schedule.types.js
+    const timeSlots = SlotTimes;
 
     useEffect(() => {
         if (schedule) {
@@ -29,9 +33,9 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                 doctorName: schedule.doctorName,
                 date: schedule.date,
                 status: schedule.status,
-                morning: schedule.morning,
-                afternoon: schedule.afternoon,
-                note: schedule.note || ''
+                slot: schedule.slot || '08:00:00',
+                roomCode: schedule.roomCode || '',
+                original_status: schedule.original_status // Lưu trạng thái gốc từ BE
             });
         }
         
@@ -50,17 +54,21 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        if (!formData.morning && !formData.afternoon && formData.status === ScheduleStatus.AVAILABLE) {
-            onShowToast('Vui lòng chọn ít nhất một buổi làm việc', 'danger');
+        if (!formData.slot && formData.status === "available") {
+            onShowToast('Vui lòng chọn khung giờ làm việc', 'danger');
             return;
         }
 
         setLoading(true);
         try {
+            // Chuyển đổi status từ FE sang BE
+            const beStatus = StatusMapping[formData.status] || formData.status;
+            
             // Cập nhật title dựa trên trạng thái
             const updatedSchedule = {
                 ...formData,
-                title: `${formData.doctorName} - ${formData.status === ScheduleStatus.AVAILABLE ? 'Làm việc' : 'Nghỉ phép'}`
+                title: `${formData.doctorName} - ${formData.slot.substring(0, 5)}`,
+                original_status: beStatus // Lưu trữ status BE
             };
             
             console.log('ScheduleDetail: Updating schedule:', updatedSchedule);
@@ -124,102 +132,156 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
         return moment(dateString).format('DD/MM/YYYY');
     };
 
+    // Hàm chuyển đổi thứ sang tiếng Việt
+    const formatVietnameseDay = (date) => {
+        const weekdays = [
+            'Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 
+            'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'
+        ];
+        const dayOfWeek = moment(date).day(); // 0 = Chủ nhật, 1 = Thứ hai, ...
+        return weekdays[dayOfWeek];
+    };
+
+    const formatTime = (timeString) => {
+        if (!timeString) return '';
+        const slot = timeSlots.find(slot => slot.value === timeString);
+        return slot ? slot.label : timeString.substring(0, 5);
+    };
+
     if (!schedule) {
         return null;
     }
 
     return (
-        <Modal show={show} onHide={handleClose} centered className="schedule-detail-modal">
-            <Modal.Header closeButton>
+        <Modal show={show} onHide={handleClose} centered size="lg" className="schedule-detail-modal">
+            <Modal.Header closeButton className="bg-light">
                 <Modal.Title>Chi tiết lịch làm việc</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <Form onSubmit={handleSubmit}>
-                    <Form.Group className="mb-3">
-                        <Form.Label>Bác sĩ</Form.Label>
-                        <Form.Control
-                            type="text"
-                            value={formData.doctorName}
-                            disabled
-                        />
-                    </Form.Group>
-
-                    <Form.Group className="mb-3">
-                        <Form.Label>Ngày</Form.Label>
-                        <Form.Control
-                            type="text"
-                            value={formatDate(formData.date)}
-                            disabled
-                        />
-                    </Form.Group>
-
-                    <Form.Group className="mb-3">
-                        <Form.Label>Trạng thái</Form.Label>
-                        <Form.Select
-                            name="status"
-                            value={formData.status}
-                            onChange={handleChange}
-                        >
-                            <option value={ScheduleStatus.AVAILABLE}>Làm việc</option>
-                            <option value={ScheduleStatus.ON_LEAVE}>Nghỉ phép</option>
-                        </Form.Select>
-                    </Form.Group>
-
-                    {formData.status === ScheduleStatus.AVAILABLE && (
-                        <Row>
-                            <Col md={6}>
-                                <Form.Group className="mb-3">
-                                    <Form.Check 
-                                        type="checkbox"
-                                        id="detail-morning-check"
-                                        label="Buổi sáng (8:00 - 12:00)"
-                                        name="morning"
-                                        checked={formData.morning}
-                                        onChange={handleChange}
-                                    />
-                                </Form.Group>
-                            </Col>
-                            <Col md={6}>
-                                <Form.Group className="mb-3">
-                                    <Form.Check 
-                                        type="checkbox"
-                                        id="detail-afternoon-check"
-                                        label="Buổi chiều (13:00 - 17:00)"
-                                        name="afternoon"
-                                        checked={formData.afternoon}
-                                        onChange={handleChange}
-                                    />
-                                </Form.Group>
-                            </Col>
-                        </Row>
-                    )}
-
-                    <Form.Group className="mb-3">
-                        <Form.Label>Ghi chú</Form.Label>
-                        <Form.Control
-                            as="textarea"
-                            rows={3}
-                            name="note"
-                            value={formData.note}
-                            onChange={handleChange}
-                            placeholder="Nhập ghi chú (nếu có)"
-                        />
-                    </Form.Group>
-                </Form>
-
-                {confirmDelete && (
+                {confirmDelete ? (
                     <Alert variant="danger">
                         <p className="mb-2"><strong>Xác nhận xóa lịch làm việc</strong></p>
-                        <p className="mb-2">Bạn có chắc chắn muốn xóa lịch làm việc của bác sĩ {formData.doctorName} vào ngày {formatDate(formData.date)}?</p>
+                        <p className="mb-2">Bạn có chắc chắn muốn xóa lịch làm việc của bác sĩ {formData.doctorName} vào ngày {formatDate(formData.date)} lúc {formatTime(formData.slot)}?</p>
                         <p className="mb-0">Thao tác này không thể hoàn tác và sẽ xóa dữ liệu khỏi hệ thống.</p>
                     </Alert>
+                ) : (
+                    <Form onSubmit={handleSubmit}>
+                        {/* Thông tin cơ bản */}
+                        <div className="schedule-info-section mb-4 p-3 border rounded bg-light">
+                            <h5 className="mb-3">Thông tin chung</h5>
+                            
+                            <Row className="mb-3">
+                                <Col md={6} className="d-flex align-items-center mb-2">
+                                    <BsPerson className="text-primary me-2" size={20} />
+                                    <div>
+                                        <div className="text-muted small">Bác sĩ</div>
+                                        <strong>{formData.doctorName}</strong>
+                                    </div>
+                                </Col>
+                                
+                                <Col md={6} className="d-flex align-items-center mb-2">
+                                    <BsDoorOpen className="text-success me-2" size={20} />
+                                    <div>
+                                        <div className="text-muted small">Phòng</div>
+                                        <strong>Phòng {formData.roomCode}</strong>
+                                    </div>
+                                </Col>
+                            </Row>
+                            
+                            <Row>
+                                <Col md={6} className="d-flex align-items-center">
+                                    <BsCalendarWeek className="text-info me-2" size={20} />
+                                    <div>
+                                        <div className="text-muted small">Ngày</div>
+                                        <div className="schedule-date-value">
+                                            <i className="bi bi-calendar-event text-primary me-2"></i>
+                                            <strong>{formatDate(formData.date)}</strong> 
+                                            <span className="ms-2 text-muted small">
+                                                ({formatVietnameseDay(formData.date)})
+                                            </span>
+                                        </div>
+                                    </div>
+                                </Col>
+                                
+                                <Col md={6} className="d-flex align-items-center">
+                                    <BsClock className="text-warning me-2" size={20} />
+                                    <div>
+                                        <div className="text-muted small">Khung giờ</div>
+                                        <strong>{formatTime(formData.slot)}</strong>
+                                    </div>
+                                </Col>
+                            </Row>
+                        </div>
+                        
+                        {/* Thông tin cập nhật */}
+                        <div className="update-section mb-3 p-3 border rounded">
+                            <h5 className="mb-3">Cập nhật thông tin</h5>
+                            
+                            <Form.Group className="mb-3">
+                                <Form.Label>Trạng thái</Form.Label>
+                                <div className="d-flex align-items-center mb-2">
+                                    <div className="current-status me-3">
+                                        <Badge 
+                                            bg={formData.status === "available" ? "success" : 
+                                                formData.status === "cancelled" ? "danger" : "primary"}
+                                            className="p-2"
+                                        >
+                                            {formData.status === "available" ? "Làm việc" : 
+                                             formData.status === "cancelled" ? "Đã hủy" : "Đang hoạt động"}
+                                        </Badge>
+                                    </div>
+                                    {formData.original_status && formData.original_status !== StatusMapping[formData.status] && (
+                                        <div className="text-muted small">
+                                            (Hiện trạng thái trong DB: {formData.original_status})
+                                        </div>
+                                    )}
+                                </div>
+                                <Form.Select
+                                    name="status"
+                                    value={formData.status}
+                                    onChange={handleChange}
+                                    className="mt-2"
+                                >
+                                    <option value="available">Làm việc</option>
+                                    <option value="cancelled">Đã hủy</option>
+                                    <option value="active">Đang hoạt động</option>
+                                </Form.Select>
+                            </Form.Group>
+
+                            {formData.status === "available" && (
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Khung giờ</Form.Label>
+                                    <Form.Select
+                                        name="slot"
+                                        value={formData.slot}
+                                        onChange={handleChange}
+                                    >
+                                        {timeSlots.map(slot => (
+                                            <option key={slot.value} value={slot.value}>
+                                                {slot.label}
+                                            </option>
+                                        ))}
+                                    </Form.Select>
+                                    <Form.Text className="text-muted">
+                                        Thiết lập thời gian làm việc cho bác sĩ
+                                    </Form.Text>
+                                </Form.Group>
+                            )}
+                        </div>
+                        
+                        {/* Thông tin hệ thống */}
+                        <div className="system-info p-2 border-top mt-3">
+                            <small className="d-block text-muted mb-1">ID lịch: {formData.id}</small>
+                            <small className="d-block text-muted">Cập nhật gần nhất: {moment().format('DD/MM/YYYY HH:mm')}</small>
+                        </div>
+                    </Form>
                 )}
             </Modal.Body>
             <Modal.Footer>
                 <div className="d-flex justify-content-between w-100">
                     {!confirmDelete ? (
                         <Button 
-                            variant="danger" 
+                            variant="outline-danger" 
                             onClick={showDeleteConfirmation} 
                             disabled={deleting}
                         >
@@ -260,20 +322,22 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                         >
                             Đóng
                         </Button>
-                        <Button 
-                            variant="primary" 
-                            onClick={handleSubmit} 
-                            disabled={loading || confirmDelete}
-                        >
-                            {loading && !confirmDelete ? (
-                                <>
-                                    <Spinner animation="border" size="sm" className="me-1" />
-                                    Đang xử lý...
-                                </>
-                            ) : (
-                                'Cập nhật'
-                            )}
-                        </Button>
+                        {!confirmDelete && (
+                            <Button 
+                                variant="primary" 
+                                onClick={handleSubmit} 
+                                disabled={loading}
+                            >
+                                {loading ? (
+                                    <>
+                                        <Spinner animation="border" size="sm" className="me-1" />
+                                        Đang xử lý...
+                                    </>
+                                ) : (
+                                    'Cập nhật'
+                                )}
+                            </Button>
+                        )}
                     </div>
                 </div>
             </Modal.Footer>
