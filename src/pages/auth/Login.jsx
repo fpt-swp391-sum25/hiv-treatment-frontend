@@ -42,8 +42,7 @@ const Login = () => {
             if (response.data && response.data.token) {
                 // Lưu token trực tiếp vào localStorage
                 localStorage.setItem('access_token', response.data.token);
-                setUser(response.data)
-                navigate(response.data.role === 'ADMIN' ? '/admin' : '/');
+                setUser(response.data);
 
                 // Kiểm tra xem có URL redirect không
                 const redirectPath = localStorage.getItem('redirect_after_login');
@@ -52,7 +51,17 @@ const Login = () => {
                     navigate(redirectPath);
                 } else {
                     // Điều hướng theo role
-                    navigate(response.data.role === 'ADMIN' ? '/admin' : '/');
+                    if (response.data.role === 'ADMIN') {
+                        navigate('/admin');
+                    } else if (response.data.role === 'LAB_TECHNICIAN') {
+                        navigate('/lab-technician');
+                    } else if (response.data.role === 'DOCTOR') {
+                        navigate('/doctor');
+                    } else if (response.data.role === 'MANAGER') {
+                        navigate('/manager');
+                    } else {
+                        navigate('/');
+                    }
                 }
 
                 notification.success({
