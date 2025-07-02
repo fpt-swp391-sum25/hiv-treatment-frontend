@@ -169,18 +169,29 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
         // Lấy thông tin khung giờ
         const slotTime = eventData.slot ? eventData.slot.substring(0, 5) : '';
         
+        // Lấy màu sắc theo trạng thái
+        const statusColor = getStatusColor(eventData.status);
+        
         // Kiểm tra loại view hiện tại
         const viewType = eventInfo.view.type;
         
         // Hiển thị theo từng loại view
         if (viewType === 'dayGridMonth') {
-            // Hiển thị cho chế độ xem tháng
+            // Hiển thị cho chế độ xem tháng - cập nhật để giống với chế độ xem tuần
             return (
-                <div className="custom-event-content status-available">
-                    <div className="event-title">{eventData.doctorName || 'Không có tên'}</div>
-                    <div className="event-status">
-                        {slotTime && `Giờ: ${slotTime}`}
-                        {roomInfo && ` - ${roomInfo}`}
+                <div className="week-day-event">
+                    <div className="week-event-time">
+                        {slotTime}
+                    </div>
+                    <div className="week-event-content">
+                        <div className="week-event-title">
+                            {eventData.doctorName || 'Không có tên'}
+                        </div>
+                        {roomInfo && (
+                            <div className="week-event-room">
+                                {roomInfo}
+                            </div>
+                        )}
                     </div>
                 </div>
             );

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Container } from 'react-bootstrap';
-import ManagerSchedule from './Schedule/ManagerSchedule';
+
 
 const ManagerDashboard = () => {
   return (

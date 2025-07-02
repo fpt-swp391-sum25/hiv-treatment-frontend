@@ -31,12 +31,11 @@ import AccountPatients from './pages/admin/AccountPatients';
 
 // Import for manager pages
 import ManagerPage from './pages/manager/ManagerPage';
-import ManagerDashboard from './components/manager/Dashboard';
+import ManagerDashboard from './components/manager/Dashboard/Dashboard';
 import ManagerSchedule from './components/manager/Schedule/ManagerSchedule';
 import DoctorManagement from './components/manager/DoctorManagement/DoctorManagement';
 import LabTechnicianManagement from './components/manager/LabTechnicianManagement/LabTechnicianManagement';
 import Reports from './components/manager/Reports/Reports';
-import AuthTest from './components/manager/AuthTest';
 
 // Import for doctor pages
 import DoctorHome from './pages/doctor/DoctorHome';
@@ -273,11 +272,6 @@ const router = createBrowserRouter([
       }, {
         path: 'reports',
         element: <Reports />,
-        errorElement: <Errors />,
-      },
-      {
-        path: 'auth-test',
-        element: <AuthTest />,
         errorElement: <Errors />,
       }
     ]
