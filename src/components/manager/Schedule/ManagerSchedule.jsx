@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Calendar from './Calendar';
 import DoctorFilter from './DoctorFilter';
-import StatusFilter from './StatusFilter';
 import ScheduleForm from './ScheduleForm';
 import ScheduleDetail from './ScheduleDetail';
 import { Row, Col, ToastContainer, Toast, Form, Spinner, Alert } from 'react-bootstrap';
@@ -17,7 +16,6 @@ const ManagerSchedule = () => {
     const [showDetail, setShowDetail] = useState(false);
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [selectedDoctor, setSelectedDoctor] = useState(null);
-    const [selectedStatus, setSelectedStatus] = useState(null);
     const [selectedSchedule, setSelectedSchedule] = useState(null);
     const [schedules, setSchedules] = useState([]);
     const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
@@ -433,11 +431,6 @@ const ManagerSchedule = () => {
             match = match && schedule.doctorId?.toString() === selectedDoctor.toString();
         }
         
-        // Lọc theo trạng thái
-        if (selectedStatus) {
-            match = match && schedule.status === selectedStatus;
-        }
-        
         return match;
     }) : [];
 
@@ -543,19 +536,13 @@ const ManagerSchedule = () => {
             )}
 
             <Row className="mb-4 filter-row">
-                <Col md={4} className="filter-col">
+                <Col md={3} className="filter-col">
                     <DoctorFilter 
                         onDoctorSelect={setSelectedDoctor} 
                         selectedDoctor={selectedDoctor} 
                     />
                 </Col>
-                <Col md={4} className="filter-col">
-                    <StatusFilter 
-                        onStatusSelect={setSelectedStatus} 
-                        selectedStatus={selectedStatus} 
-                    />
-                </Col>
-                <Col md={4} className="filter-col text-end">
+                <Col md={9} className="filter-col text-end">
                     <div className="button-container">
                         <button 
                             className="add-schedule-button"

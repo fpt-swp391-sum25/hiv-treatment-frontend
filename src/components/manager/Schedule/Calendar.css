@@ -910,3 +910,238 @@
     min-height: 150px;
   }
 }
+
+/* Thêm CSS cho hiển thị sự kiện trong chế độ xem tháng */
+.month-event-content {
+  display: flex;
+    flex-direction: column;
+  background-color: #ffffff !important;
+  border-radius: 4px;
+  padding: 4px 6px;
+  margin: 1px 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  }
+  
+.month-event-content:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+}
+
+.month-event-time {
+  font-size: 0.75rem;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.month-event-title {
+  font-weight: 600;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #212529;
+}
+
+.month-event-room {
+  font-size: 0.75rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #6c757d;
+}
+
+/* Cập nhật CSS cho fc-event trong chế độ xem tháng */
+.fc-daygrid-event {
+  background-color: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 1px 0 !important;
+}
+
+.fc-daygrid-event .fc-event-main {
+  padding: 0 !important;
+}
+
+.fc-daygrid-event .fc-event-title {
+  display: none !important; /* Ẩn tiêu đề mặc định */
+}
+
+/* Đảm bảo sự kiện hiển thị đúng trong chế độ xem tháng */
+.fc-daygrid-day-events {
+  padding: 0 2px !important;
+}
+
+/* Tùy chỉnh hiển thị cho sự kiện trong chế độ xem tháng */
+.fc-daygrid-day-events .week-day-event {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 4px;
+  margin-bottom: 4px;
+  background-color: rgba(25, 135, 84, 0.1);
+  border-left: 3px solid #28a745;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.fc-daygrid-day-events .week-day-event:hover {
+  background-color: rgba(25, 135, 84, 0.2);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+.fc-daygrid-day-events .week-event-time {
+  background-color: #28a745;
+  color: #fff;
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.fc-daygrid-day-events .week-event-content {
+  flex-grow: 1;
+  min-width: 0; /* Đảm bảo text-overflow hoạt động */
+}
+
+.fc-daygrid-day-events .week-event-title {
+  font-weight: 600;
+  font-size: 0.75rem;
+  color: #212529;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fc-daygrid-day-events .week-event-room {
+  font-size: 0.7rem;
+  color: #6c757d;
+  background-color: #f8f9fa;
+  display: inline-block;
+  padding: 0px 4px;
+  border-radius: 2px;
+  border: 1px solid #e9ecef;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Tăng kích thước tối thiểu cho ô ngày trong chế độ xem tháng */
+.fc-daygrid-day-frame {
+  min-height: 100px !important;
+}
+
+/* Responsive cho chế độ xem tháng */
+@media (max-width: 768px) {
+  .fc-daygrid-day-events .week-day-event {
+    padding: 2px;
+    margin-bottom: 2px;
+  }
+  
+  .fc-daygrid-day-events .week-event-time {
+    font-size: 0.65rem;
+    padding: 1px 3px;
+  }
+  
+  .fc-daygrid-day-events .week-event-title {
+    font-size: 0.7rem;
+  }
+  
+  .fc-daygrid-day-events .week-event-room {
+    font-size: 0.65rem;
+    padding: 0px 2px;
+  }
+  
+  .fc-daygrid-day-frame {
+    min-height: 80px !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .fc-daygrid-day-frame {
+    min-height: 60px !important;
+  }
+  
+  .fc-daygrid-day-events .week-event-room {
+    display: none; /* Ẩn thông tin phòng trên màn hình nhỏ */
+  }
+}
+
+/* Loại bỏ các hiệu ứng mặc định của FullCalendar cho sự kiện */
+.fc-event, .fc-event-dot {
+  background-color: transparent !important;
+  border: none !important;
+}
+
+.fc-event-main {
+  padding: 0 !important;
+}
+
+/* Đảm bảo các sự kiện hiển thị đúng trong FullCalendar */
+.fc .fc-daygrid-event-harness {
+  margin-bottom: 1px !important;
+}
+
+/* Đảm bảo sự kiện không bị cắt trong chế độ xem tháng */
+.fc-daygrid-event-harness {
+  margin-top: 1px !important;
+  margin-bottom: 1px !important;
+}
+
+/* Đảm bảo sự kiện không bị che khuất bởi các sự kiện khác */
+.fc-daygrid-event-harness-abs {
+  visibility: visible !important;
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+}
+
+/* Đảm bảo hiển thị đúng khi có nhiều sự kiện */
+.fc-daygrid-more-link {
+  background-color: #f8f9fa !important;
+  border: 1px solid #e9ecef !important;
+  border-radius: 4px !important;
+  padding: 1px 4px !important;
+  font-size: 0.75rem !important;
+  color: #495057 !important;
+  font-weight: 500 !important;
+  margin-top: 2px !important;
+}
+
+.fc-daygrid-more-link:hover {
+  background-color: #e9ecef !important;
+  color: #212529 !important;
+}
+
+/* Đảm bảo popup hiển thị đúng */
+.fc-popover {
+  border-radius: 6px !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+  border: 1px solid #dee2e6 !important;
+  }
+
+.fc-popover-header {
+  background-color: #f8f9fa !important;
+  padding: 8px 10px !important;
+  font-weight: 600 !important;
+}
+
+.fc-popover-body {
+  padding: 8px !important;
+}
+
+/* Đảm bảo sự kiện trong popup hiển thị đúng */
+.fc-popover .week-day-event {
+  margin-bottom: 6px !important;
+}
