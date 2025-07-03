@@ -4,7 +4,7 @@ import { Form, Input, Button, Alert, Segmented, Typography, Divider, notificatio
 import { useGoogleLogin } from '@react-oauth/google';
 import { GoogleOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { loginAPI } from '../../services/api.service';
+import { googleLoginAPI, loginAPI } from '../../services/api.service';
 import { useForm } from 'antd/es/form/Form';
 import { AuthContext } from '../../components/context/AuthContext';
 
@@ -26,7 +26,7 @@ const Login = () => {
                 message: 'Hệ thống',
                 showProgress: true,
                 pauseOnHover: true,
-                description: 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.'
+                description: authError
             });
             localStorage.removeItem('auth_error');
         }
@@ -68,7 +68,7 @@ const Login = () => {
                     message: "Đăng nhập thành công",
                     showProgress: true,
                     pauseOnHover: true,
-                    description: `Xin chào, ${response.data.name || username}!`
+                    description: `Xin chào, ${response.data.fullName || username}!`
                 });
             } else {
                 notification.error({
@@ -101,9 +101,46 @@ const Login = () => {
         }
     };
 
-    const login = useGoogleLogin({
-        onSuccess: codeResponse => console.log(codeResponse),
+    const handleGoogleLogin = useGoogleLogin({
         flow: 'auth-code',
+        scope: 'profile email',
+        onSuccess: async (codeResponse) => {
+            try {
+                setLoading(true);
+                const response = await googleLoginAPI({ code: codeResponse.code });
+
+                if (response.data?.token) {
+                    localStorage.setItem('access_token', response.data.token);
+                    setUser(response.data);
+
+                    notification.success({
+                        message: "Đăng nhập thành công",
+                        description: `Xin chào, ${response.data.name || 'người dùng'}!`,
+                        duration: 3
+                    });
+                    navigate("/");
+                } else {
+                    throw new Error(response.message || "Không nhận được token từ server");
+                }
+            } catch (error) {
+                const errorMessage = error?.response?.data?.message || 'Đăng nhập bằng Google thất bại!';
+                setError(errorMessage);
+                notification.error({
+                    message: 'Lỗi đăng nhập',
+                    description: errorMessage,
+                    duration: 3
+                });
+            } finally {
+                setLoading(false);
+            }
+        },
+        onError: () => {
+            setError('Không thể xác thực với Google');
+            notification.error({
+                message: 'Lỗi đăng nhập',
+                description: 'Không thể xác thực với Google'
+            });
+        }
     });
 
     const [userType, setUserType] = useState('Bệnh nhân')
@@ -171,7 +208,7 @@ const Login = () => {
                     </div>
 
                     <div style={{ textAlign: 'center' }}>
-                        <Button onClick={() => login()}><GoogleOutlined />Đăng nhập với Google</Button>
+                        <Button onClick={handleGoogleLogin} loading={loading}><GoogleOutlined />Đăng nhập với Google</Button>
                     </div>
                 </Form>
             ) : (

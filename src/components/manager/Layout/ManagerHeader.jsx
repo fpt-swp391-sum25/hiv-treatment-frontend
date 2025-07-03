@@ -11,35 +11,47 @@ const { Title } = Typography;
 const ManagerHeader = ({ user }) => {
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    // TODO: Implement logout logic
-    navigate('/login');
+  const handleLogout = async () => {
+    const response = await logoutAPI()
+    if (response.data) {
+      localStorage.removeItem("access_token")
+      setUser({
+        id: '',
+        username: '',
+        email: '',
+        fullName: '',
+        status: '',
+        role: ''
+      })
+      message.success("Đăng xuất thành công")
+      navigate("/login")
+    }
   };
 
   return (
     <Header className="manager-header-fixed">
       <div className="header-left">
         <div className="logo-container">
-          <img 
-            src={appLogo} 
-            alt="Logo" 
+          <img
+            src={appLogo}
+            alt="Logo"
             className="app-logo"
             onClick={() => navigate('/manager/dashboard')}
           />
         </div>
       </div>
 
-      <Title 
-        level={4} 
+      <Title
+        level={4}
         className="header-title"
       >
         Chào mừng Quản lí
       </Title>
 
       <div className="header-right">
-        <Avatar 
+        <Avatar
           icon={<UserOutlined />}
-          size={46} 
+          size={46}
           className="user-avatar"
         />
         <Button

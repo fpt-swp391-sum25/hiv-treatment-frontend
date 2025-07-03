@@ -9,6 +9,11 @@ const loginAPI = (username, password) => {
     return axios.post(URL_BACKEND, data)
 }
 
+const googleLoginAPI = (data) => {
+    const URL_BACKEND = '/api/auth/google'
+    return axios.post(URL_BACKEND, data)
+}
+
 const registerAPI = (values) => {
     const URL_BACKEND = '/api/auth/register'
     const data = {
@@ -160,7 +165,7 @@ const updateDoctorProfileAPI = (doctorProfileId, profileData) => {
     if (profileData.startYear !== null && profileData.startYear !== undefined) {
         profileData.startYear = String(profileData.startYear);
     }
-    
+
     console.log(`Updating doctor profile ID ${doctorProfileId} with data:`, profileData);
     const URL_BACKEND = `/api/doctor-profile/${doctorProfileId}`;
     return axios.put(URL_BACKEND, profileData);
@@ -302,17 +307,17 @@ const debugRequest = (endpoint, method, data) => {
         data: data ? JSON.stringify(data) : null,
         timestamp: new Date().toISOString()
     };
-    
+
     console.log(`%c🔍 API Request: ${method} ${endpoint}`, 'color: blue; font-weight: bold');
     console.table(debugInfo);
     if (data) console.log('Request Payload:', data);
-    
+
     return debugInfo;
 };
 
 const createScheduleAPI = (scheduleData) => {
     const URL_BACKEND = '/api/schedule';
-    
+
     // Log chi tiết thông tin request
     debugRequest(URL_BACKEND, 'POST', scheduleData);
 
@@ -334,7 +339,7 @@ const createScheduleAPI = (scheduleData) => {
     }
 
     console.log('Formatted data for API:', formattedData);
-    
+
     // Thêm một số giá trị để debug
     console.log('Debug values:', {
         'doctorId type': typeof formattedData.doctorId,
@@ -343,7 +348,7 @@ const createScheduleAPI = (scheduleData) => {
         'date format': formattedData.date.match(/^\d{4}-\d{2}-\d{2}$/) ? 'valid' : 'invalid',
         'patient_id': formattedData.patient_id === null ? 'explicitly null' : formattedData.patient_id
     });
-    
+
     return axios.post(URL_BACKEND, formattedData)
         .then(response => {
             console.log('Create schedule successful:', response);
@@ -368,12 +373,12 @@ const getAllSchedulesAPI = () => {
     // Try the new endpoint first, with fallback to the old one if needed
     const URL_BACKEND = '/api/schedule/list';
     console.log('Fetching schedules from:', URL_BACKEND);
-    
+
     return axios.get(URL_BACKEND)
         .catch(error => {
             console.error('Error fetching from /api/schedule/list:', error);
             console.log('Trying fallback endpoint /api/schedule...');
-            
+
             // If the first endpoint fails, try the fallback
             return axios.get('/api/schedule');
         });
@@ -401,16 +406,16 @@ const getSchedulesByStatusAPI = (status) => {
 
 const updateScheduleAPI = (scheduleId, scheduleData) => {
     const URL_BACKEND = `/api/schedule/update/schedule-id/${scheduleId}`;
-    
+
     // Import StatusMapping
     const { StatusMapping } = require('../types/schedule.types');
-    
+
     // Chuyển đổi status từ FE sang BE
     let beStatus = scheduleData.status;
     if (StatusMapping[scheduleData.status]) {
         beStatus = StatusMapping[scheduleData.status];
     }
-    
+
     // Đảm bảo scheduleData có định dạng đúng theo yêu cầu của BE
     const formattedData = {
         date: scheduleData.date,
@@ -419,7 +424,7 @@ const updateScheduleAPI = (scheduleId, scheduleData) => {
         status: beStatus,
         doctorId: parseInt(scheduleData.doctorId)
     };
-    
+
     console.log(`Updating schedule ${scheduleId} with data:`, formattedData);
     return axios.put(URL_BACKEND, formattedData);
 }
@@ -479,6 +484,7 @@ const checkAvailableSlotsAPI = (doctorId, date) => {
 
 export {
     loginAPI,
+    googleLoginAPI,
     registerAPI,
     bookingAPI,
     cancelBookingAPI,
