@@ -1,13 +1,14 @@
 .schedule-detail-modal .modal-content {
     border-radius: 8px;
+    overflow: hidden;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     border: none;
 }
 
 .schedule-detail-modal .modal-header {
     background-color: #f8f9fa;
-    border-bottom: 1px solid #eee;
-    padding: 15px 20px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 1.2rem 1.5rem;
 }
 
 .schedule-detail-modal .modal-title {
@@ -20,8 +21,8 @@
 }
 
 .schedule-detail-modal .modal-footer {
-    border-top: 1px solid #eee;
-    padding: 15px 20px;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 1.2rem 1.5rem;
 }
 
 .schedule-detail-modal .form-control,
@@ -34,8 +35,8 @@
 
 .schedule-detail-modal .form-control:focus,
 .schedule-detail-modal .form-select:focus {
-    border-color: #4daddf;
-    box-shadow: 0 0 0 0.2rem rgba(77, 173, 223, 0.25);
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
 }
 
 .schedule-detail-modal .form-label {
@@ -94,14 +95,44 @@
 }
 
 .system-info {
+    font-size: 0.8rem;
     color: #6c757d;
-    font-size: 0.85rem;
 }
 
 .schedule-detail-modal .badge {
-    font-size: 0.85rem;
-    padding: 5px 10px;
+    font-size: 0.9rem;
+    padding: 6px 10px;
     border-radius: 4px;
+}
+
+.badge.bg-info {
+    background-color: rgba(13, 202, 240, 0.18) !important;
+    color: #0aa2c0 !important;
+    border: 1px solid rgba(13, 202, 240, 0.3);
+}
+
+.badge.bg-warning {
+    background-color: rgba(255, 193, 7, 0.18) !important;
+    color: #b78300 !important;
+    border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.badge.bg-success {
+    background-color: rgba(25, 135, 84, 0.18) !important;
+    color: #157347 !important;
+    border: 1px solid rgba(25, 135, 84, 0.3);
+}
+
+.badge.bg-danger {
+    background-color: rgba(220, 53, 69, 0.18) !important;
+    color: #b02a37 !important;
+    border: 1px solid rgba(220, 53, 69, 0.3);
+}
+
+.badge.bg-primary {
+    background-color: rgba(13, 110, 253, 0.18) !important;
+    color: #0a58ca !important;
+    border: 1px solid rgba(13, 110, 253, 0.3);
 }
 
 .schedule-detail-modal h5 {
@@ -112,4 +143,9 @@
 
 .schedule-detail-modal .text-muted {
     color: #6c757d !important;
+}
+
+/* Animate when changing values */
+.form-select {
+    transition: all 0.3s ease;
 }

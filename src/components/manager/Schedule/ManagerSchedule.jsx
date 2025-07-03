@@ -233,7 +233,8 @@ const ManagerSchedule = () => {
             slot: schedule.slot, // Sử dụng slot từ form (định dạng HH:mm:ss)
             doctorId: parseInt(schedule.doctorId),
             status: 'Trống', // Đặt trạng thái là "Trống" theo yêu cầu của BE
-            patient_id: null // Thêm patient_id: null theo schema DB
+            patient_id: null, // Thêm patient_id: null theo schema DB
+            shiftType: schedule.shiftType || null // Thêm thông tin ca làm việc (nếu có)
         };
     };
 
@@ -285,11 +286,20 @@ const ManagerSchedule = () => {
             const type = schedule.type || null;
             const roomCode = schedule.roomCode || schedule.room_code || '100';
             
+            // Lấy thông tin ca làm việc (nếu có)
+            const shiftType = schedule.shiftType || null;
+            
             // Định dạng hiển thị khung giờ
             const slotDisplay = slot ? slot.substring(0, 5) : '08:00';
             
             // Tạo title với thông tin đầy đủ hơn
-            const title = `${doctorName} - ${slotDisplay} - P.${roomCode}`;
+            let title = `${doctorName} - ${slotDisplay} - P.${roomCode}`;
+            
+            // Thêm thông tin ca làm việc vào title nếu có
+            if (shiftType) {
+                const shiftName = shiftType === 'morning' ? 'Ca sáng' : 'Ca chiều';
+                title = `${doctorName} - ${shiftName} - ${slotDisplay} - P.${roomCode}`;
+            }
             
             return {
                 id: id,
@@ -301,7 +311,8 @@ const ManagerSchedule = () => {
                 type: type,
                 roomCode: roomCode,
                 slot: slot,
-                original_status: schedule.status // Lưu trữ status nguyên bản từ BE
+                original_status: schedule.status, // Lưu trữ status nguyên bản từ BE
+                shiftType: shiftType // Thêm thông tin ca làm việc
             };
         } catch (error) {
             console.error('Error formatting schedule:', error, schedule);

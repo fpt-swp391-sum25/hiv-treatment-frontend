@@ -4,7 +4,7 @@ import { ScheduleStatus, SlotTimes, StatusMapping } from '../../../types/schedul
 import moment from 'moment';
 import { deleteScheduleAPI } from '../../../services/api.service';
 import './ScheduleDetail.css';
-import { BsCalendarWeek, BsClock, BsDoorOpen, BsPerson } from 'react-icons/bs';
+import { BsCalendarWeek, BsClock, BsDoorOpen, BsPerson, BsBriefcase } from 'react-icons/bs';
 
 const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToast }) => {
     const [formData, setFormData] = useState({
@@ -15,7 +15,8 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
         status: ScheduleStatus.AVAILABLE,
         slot: '',
         roomCode: '',
-        original_status: ScheduleStatus.AVAILABLE
+        original_status: ScheduleStatus.AVAILABLE,
+        shiftType: null // Thêm trường thông tin ca làm việc
     });
     const [loading, setLoading] = useState(false);
     const [confirmDelete, setConfirmDelete] = useState(false);
@@ -23,6 +24,15 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
 
     // Sử dụng SlotTimes từ schedule.types.js
     const timeSlots = SlotTimes;
+    
+    // Định nghĩa ca sáng và ca chiều
+    const morningShiftSlots = timeSlots.filter(slot => 
+        ['08:00:00', '08:30:00', '09:00:00', '09:30:00', '10:00:00', '10:30:00', '11:00:00'].includes(slot.value)
+    );
+    
+    const afternoonShiftSlots = timeSlots.filter(slot => 
+        ['13:00:00', '13:30:00', '14:00:00', '14:30:00', '15:00:00', '15:30:00', '16:00:00', '16:30:00'].includes(slot.value)
+    );
 
     useEffect(() => {
         if (schedule) {
@@ -35,13 +45,26 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                 status: schedule.status,
                 slot: schedule.slot || '08:00:00',
                 roomCode: schedule.roomCode || '',
-                original_status: schedule.original_status // Lưu trạng thái gốc từ BE
+                original_status: schedule.original_status, // Lưu trạng thái gốc từ BE
+                shiftType: schedule.shiftType || null // Thêm thông tin ca làm việc
             });
         }
         
         // Reset confirmDelete state when modal is shown
         setConfirmDelete(false);
     }, [schedule, show]);
+
+    // Kiểm tra xem slot có thuộc ca nào không nếu chưa có shiftType
+    useEffect(() => {
+        if (formData.slot && !formData.shiftType) {
+            // Kiểm tra xem slot thuộc ca sáng hay ca chiều
+            if (morningShiftSlots.some(item => item.value === formData.slot)) {
+                setFormData(prev => ({...prev, shiftType: 'morning'}));
+            } else if (afternoonShiftSlots.some(item => item.value === formData.slot)) {
+                setFormData(prev => ({...prev, shiftType: 'afternoon'}));
+            }
+        }
+    }, [formData.slot, formData.shiftType]);
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -65,9 +88,17 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
             const beStatus = StatusMapping[formData.status] || formData.status;
             
             // Cập nhật title dựa trên trạng thái
+            let title = `${formData.doctorName} - ${formData.slot.substring(0, 5)}`;
+            
+            // Thêm thông tin ca làm việc vào title nếu có
+            if (formData.shiftType) {
+                const shiftName = formData.shiftType === 'morning' ? 'Ca sáng' : 'Ca chiều';
+                title = `${formData.doctorName} - ${shiftName} - ${formData.slot.substring(0, 5)}`;
+            }
+            
             const updatedSchedule = {
                 ...formData,
-                title: `${formData.doctorName} - ${formData.slot.substring(0, 5)}`,
+                title: title,
                 original_status: beStatus // Lưu trữ status BE
             };
             
@@ -147,6 +178,12 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
         const slot = timeSlots.find(slot => slot.value === timeString);
         return slot ? slot.label : timeString.substring(0, 5);
     };
+    
+    // Lấy tên ca làm việc
+    const getShiftName = (shiftType) => {
+        if (!shiftType) return null;
+        return shiftType === 'morning' ? 'Ca sáng (08:00 - 11:30)' : 'Ca chiều (13:00 - 16:30)';
+    };
 
     if (!schedule) {
         return null;
@@ -211,6 +248,24 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                                     </div>
                                 </Col>
                             </Row>
+                            
+                            {/* Hiển thị thông tin ca làm việc nếu có */}
+                            {formData.shiftType && (
+                                <Row className="mt-3">
+                                    <Col md={12} className="d-flex align-items-center">
+                                        <BsBriefcase className="text-primary me-2" size={20} />
+                                        <div>
+                                            <div className="text-muted small">Ca làm việc</div>
+                                            <Badge 
+                                                bg={formData.shiftType === 'morning' ? 'info' : 'warning'}
+                                                className="p-2"
+                                            >
+                                                {getShiftName(formData.shiftType)}
+                                            </Badge>
+                                        </div>
+                                    </Col>
+                                </Row>
+                            )}
                         </div>
                         
                         {/* Thông tin cập nhật */}
@@ -267,6 +322,23 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                                     </Form.Text>
                                 </Form.Group>
                             )}
+                            
+                            {/* Thông tin ca làm việc */}
+                            <Form.Group className="mb-3">
+                                <Form.Label>Ca làm việc</Form.Label>
+                                <Form.Select
+                                    name="shiftType"
+                                    value={formData.shiftType || ''}
+                                    onChange={handleChange}
+                                >
+                                    <option value="">Không thuộc ca nào</option>
+                                    <option value="morning">Ca sáng (08:00 - 11:30)</option>
+                                    <option value="afternoon">Ca chiều (13:00 - 16:30)</option>
+                                </Form.Select>
+                                <Form.Text className="text-muted">
+                                    Đánh dấu lịch này thuộc ca làm việc nào
+                                </Form.Text>
+                            </Form.Group>
                         </div>
                         
                         {/* Thông tin hệ thống */}
