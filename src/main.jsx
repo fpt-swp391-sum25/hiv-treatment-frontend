@@ -263,6 +263,7 @@ const router = createBrowserRouter([
       }
     ]
   },
+   // Path for admin pages
   {
     path: '/manager',
     element: (
@@ -298,16 +299,6 @@ const router = createBrowserRouter([
         element: (
           <PrivateRoute children={<Reports />} requiredRole={['MANAGER']} />
         ),
-<<<<<<< HEAD
-        errorElement: <Errors />,
-      },
-      {
-        path: 'auth-test',
-        element: (
-          <PrivateRoute children={<AuthTest />} requiredRole={['MANAGER']} />
-        ),
-=======
->>>>>>> 1a92423225174c160aa8d28732c6137d68fe635f
         errorElement: <Errors />,
       }
     ]
