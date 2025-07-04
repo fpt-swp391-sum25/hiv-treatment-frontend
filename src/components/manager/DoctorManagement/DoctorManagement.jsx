@@ -255,7 +255,7 @@ const DoctorManagement = () => {
 
             <div className="doctor-filters">
                 <Row gutter={16} align="middle">
-                    <Col xs={24} md={8}>
+                    {/* <Col xs={24} md={12}>
                         <Select
                             style={{ width: '100%' }}
                             placeholder="Chọn bác sĩ"
@@ -269,19 +269,14 @@ const DoctorManagement = () => {
                                 </Select.Option>
                             ))}
                         </Select>
-                    </Col>
-                    <Col xs={24} md={8}>
+                    </Col> */}
+                    <Col xs={24} md={12}>
                         <Input
                             placeholder="Tìm kiếm theo tên"
                             value={searchText}
                             onChange={(e) => setSearchText(e.target.value)}
                             allowClear
                         />
-                    </Col>
-                    <Col xs={24} md={8}>
-                        <Button type="primary" onClick={loadDoctors} loading={loading}>
-                            Làm mới dữ liệu
-                        </Button>
                     </Col>
                 </Row>
             </div>
