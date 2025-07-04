@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card } from 'antd';
-import { ArrowUpOutlined, ArrowDownOutlined, MinusOutlined } from '@ant-design/icons';
+import { ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons';
 import './Dashboard.css';
 
 /**
@@ -27,33 +27,37 @@ const KPICard = ({
   const cardClassName = `kpi-card kpi-card-${type}`;
   
   // Xác định class và icon cho trend
-  let trendClass = 'trend-neutral';
-  let TrendIcon = MinusOutlined;
+  let trendClass = '';
+  let TrendIcon = null;
   
-  if (trend > 0) {
-    trendClass = 'trend-up';
-    TrendIcon = ArrowUpOutlined;
-  } else if (trend < 0) {
-    trendClass = 'trend-down';
-    TrendIcon = ArrowDownOutlined;
+  if (trend !== null) {
+    if (trend > 0) {
+      trendClass = 'trend-up';
+      TrendIcon = ArrowUpOutlined;
+    } else if (trend < 0) {
+      trendClass = 'trend-down';
+      TrendIcon = ArrowDownOutlined;
+    }
   }
   
   return (
     <Card 
       className={cardClassName}
       loading={loading}
-      title={title}
+      bordered={false}
+      bodyStyle={{ padding: '16px' }}
     >
-      <div className="kpi-card-content">
-        <div className="kpi-card-value-container">
-          {icon && <div className="kpi-card-icon">{icon}</div>}
-          <h2>{value}</h2>
+      <div className="kpi-title">{title}</div>
+      <div className="kpi-content">
+        <div className="kpi-value-container">
+          {icon && <div className="kpi-icon">{icon}</div>}
+          <div className="kpi-value">{value}</div>
         </div>
         
-        {trend !== null && (
-          <div className={`trend-indicator ${trendClass}`}>
+        {trend !== null && TrendIcon && (
+          <div className={`kpi-trend ${trendClass}`}>
             <TrendIcon />
-            <span className="trend-value">
+            <span>
               {Math.abs(trend)}% {trendLabel}
             </span>
           </div>

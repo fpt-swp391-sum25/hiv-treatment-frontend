@@ -68,6 +68,7 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
+        console.log(`Field changed: ${name}, new value: ${value}`);
         setFormData({
             ...formData,
             [name]: type === 'checkbox' ? checked : value
@@ -84,16 +85,16 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
 
         setLoading(true);
         try {
-            // Chuyển đổi status từ FE sang BE
-            const beStatus = StatusMapping[formData.status] || formData.status;
+            // Giữ nguyên trạng thái hiện tại
+            const beStatus = formData.original_status || StatusMapping[formData.status] || formData.status;
             
             // Cập nhật title dựa trên trạng thái
-            let title = `${formData.doctorName} - ${formData.slot.substring(0, 5)}`;
+            let title = `${formData.doctorName} - ${formData.slot.substring(0, 5)} - P.${formData.roomCode}`;
             
             // Thêm thông tin ca làm việc vào title nếu có
             if (formData.shiftType) {
                 const shiftName = formData.shiftType === 'morning' ? 'Ca sáng' : 'Ca chiều';
-                title = `${formData.doctorName} - ${shiftName} - ${formData.slot.substring(0, 5)}`;
+                title = `${formData.doctorName} - ${shiftName} - ${formData.slot.substring(0, 5)} - P.${formData.roomCode}`;
             }
             
             const updatedSchedule = {
@@ -102,7 +103,7 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                 original_status: beStatus // Lưu trữ status BE
             };
             
-            console.log('ScheduleDetail: Updating schedule:', updatedSchedule);
+            console.log('ScheduleDetail: Updating schedule with room:', updatedSchedule.roomCode);
             
             // Gọi hàm cập nhật từ component cha
             onUpdate(updatedSchedule);
@@ -271,37 +272,6 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                         {/* Thông tin cập nhật */}
                         <div className="update-section mb-3 p-3 border rounded">
                             <h5 className="mb-3">Cập nhật thông tin</h5>
-                            
-                            <Form.Group className="mb-3">
-                                <Form.Label>Trạng thái</Form.Label>
-                                <div className="d-flex align-items-center mb-2">
-                                    <div className="current-status me-3">
-                                        <Badge 
-                                            bg={formData.status === "available" ? "success" : 
-                                                formData.status === "cancelled" ? "danger" : "primary"}
-                                            className="p-2"
-                                        >
-                                            {formData.status === "available" ? "Làm việc" : 
-                                             formData.status === "cancelled" ? "Đã hủy" : "Đang hoạt động"}
-                                        </Badge>
-                                    </div>
-                                    {formData.original_status && formData.original_status !== StatusMapping[formData.status] && (
-                                        <div className="text-muted small">
-                                            (Hiện trạng thái trong DB: {formData.original_status})
-                                        </div>
-                                    )}
-                                </div>
-                                <Form.Select
-                                    name="status"
-                                    value={formData.status}
-                                    onChange={handleChange}
-                                    className="mt-2"
-                                >
-                                    <option value="available">Làm việc</option>
-                                    <option value="cancelled">Đã hủy</option>
-                                    <option value="active">Đang hoạt động</option>
-                                </Form.Select>
-                            </Form.Group>
 
                             {formData.status === "available" && (
                                 <Form.Group className="mb-3">
@@ -339,6 +309,28 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                                     Đánh dấu lịch này thuộc ca làm việc nào
                                 </Form.Text>
                             </Form.Group>
+                            
+                            {/* Thêm phần cập nhật phòng làm việc */}
+                            <Form.Group className="mb-3">
+                                <Form.Label>Phòng làm việc</Form.Label>
+                                <div className="d-flex align-items-center">
+                                    <BsDoorOpen className="text-success me-2" size={20} />
+                                    <Form.Select
+                                        name="roomCode"
+                                        value={formData.roomCode}
+                                        onChange={handleChange}
+                                    >
+                                        <option value="101">Phòng 101</option>
+                                        <option value="102">Phòng 102</option>
+                                        <option value="103">Phòng 103</option>
+                                        <option value="201">Phòng 201</option>
+                                        <option value="202">Phòng 202</option>
+                                    </Form.Select>
+                                </div>
+                                <Form.Text className="text-muted">
+                                    Cập nhật phòng làm việc cho bác sĩ
+                                </Form.Text>
+                            </Form.Group>
                         </div>
                         
                         {/* Thông tin hệ thống */}
@@ -350,21 +342,22 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                 )}
             </Modal.Body>
             <Modal.Footer>
-                <div className="d-flex justify-content-between w-100">
+                <div className="button-container">
                     {!confirmDelete ? (
                         <Button 
                             variant="outline-danger" 
                             onClick={showDeleteConfirmation} 
                             disabled={deleting}
+                            className="btn-action"
                         >
                             Xóa lịch
                         </Button>
                     ) : (
-                        <div className="d-flex">
+                        <>
                             <Button 
                                 variant="secondary" 
                                 onClick={cancelDelete} 
-                                className="me-2"
+                                className="btn-action"
                                 disabled={deleting}
                             >
                                 Hủy xóa
@@ -373,6 +366,7 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                                 variant="danger" 
                                 onClick={handleDelete} 
                                 disabled={deleting}
+                                className="btn-action"
                             >
                                 {deleting ? (
                                     <>
@@ -383,22 +377,23 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                                     'Xác nhận xóa'
                                 )}
                             </Button>
-                        </div>
+                        </>
                     )}
                     
-                    <div>
+                    <div className="action-buttons">
                         <Button 
-                            variant="secondary" 
+                            variant="outline-secondary" 
                             onClick={handleClose} 
-                            className="me-2"
+                            className="btn-action"
                         >
                             Đóng
                         </Button>
                         {!confirmDelete && (
                             <Button 
-                                variant="primary" 
+                                variant="outline-primary" 
                                 onClick={handleSubmit} 
                                 disabled={loading}
+                                className="btn-action"
                             >
                                 {loading ? (
                                     <>

@@ -288,80 +288,80 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             }
         } else {
             // Đặt lịch theo khung giờ đơn (cách hiện tại)
-            // Kiểm tra trùng lịch
-            const conflictingSchedules = existingSchedules.filter(schedule => 
-                schedule.date === formData.date && 
-                schedule.doctorId.toString() === formData.doctorId.toString() &&
-                schedule.slot === formData.slot
-            );
+        // Kiểm tra trùng lịch
+        const conflictingSchedules = existingSchedules.filter(schedule => 
+            schedule.date === formData.date && 
+            schedule.doctorId.toString() === formData.doctorId.toString() &&
+            schedule.slot === formData.slot
+        );
 
-            if (conflictingSchedules.length > 0) {
-                console.error('Schedule conflicts with existing schedules', conflictingSchedules);
-                console.groupEnd();
-                onShowToast('Bác sĩ đã có lịch vào khung giờ này!', 'danger');
-                return;
+        if (conflictingSchedules.length > 0) {
+            console.error('Schedule conflicts with existing schedules', conflictingSchedules);
+            console.groupEnd();
+            onShowToast('Bác sĩ đã có lịch vào khung giờ này!', 'danger');
+            return;
+        }
+
+        // Tạo lịch mới
+        if (formData.repeatWeekly && formData.repeatCount > 1) {
+            // Tạo nhiều lịch lặp lại theo tuần
+            const schedules = [];
+            
+            for (let i = 0; i < formData.repeatCount; i++) {
+                const newDate = moment(formData.date).add(i * 7, 'days').format('YYYY-MM-DD');
+                
+                // Kiểm tra xem ngày mới có trùng với lịch hiện có không
+                const hasConflict = existingSchedules.some(schedule => 
+                    schedule.date === newDate && 
+                    schedule.doctorId.toString() === formData.doctorId.toString() &&
+                    schedule.slot === formData.slot
+                );
+                
+                if (!hasConflict) {
+                    const selectedDoc = doctors.find(doc => doc.id.toString() === formData.doctorId.toString());
+                    const doctorName = selectedDoc ? selectedDoc.name : '';
+                    
+                    const newSchedule = {
+                        doctorId: formData.doctorId,
+                        doctorName: doctorName,
+                        date: newDate,
+                        status: StatusMapping[formData.status] || 'Trống',
+                        slot: formData.slot,
+                        roomCode: formData.roomCode,
+                        type: null,
+                        patient_id: null
+                    };
+                    
+                    schedules.push(newSchedule);
+                }
             }
-
-            // Tạo lịch mới
-            if (formData.repeatWeekly && formData.repeatCount > 1) {
-                // Tạo nhiều lịch lặp lại theo tuần
-                const schedules = [];
-                
-                for (let i = 0; i < formData.repeatCount; i++) {
-                    const newDate = moment(formData.date).add(i * 7, 'days').format('YYYY-MM-DD');
-                    
-                    // Kiểm tra xem ngày mới có trùng với lịch hiện có không
-                    const hasConflict = existingSchedules.some(schedule => 
-                        schedule.date === newDate && 
-                        schedule.doctorId.toString() === formData.doctorId.toString() &&
-                        schedule.slot === formData.slot
-                    );
-                    
-                    if (!hasConflict) {
-                        const selectedDoc = doctors.find(doc => doc.id.toString() === formData.doctorId.toString());
-                        const doctorName = selectedDoc ? selectedDoc.name : '';
-                        
-                        const newSchedule = {
-                            doctorId: formData.doctorId,
-                            doctorName: doctorName,
-                            date: newDate,
-                            status: StatusMapping[formData.status] || 'Trống',
-                            slot: formData.slot,
-                            roomCode: formData.roomCode,
-                            type: null,
-                            patient_id: null
-                        };
-                        
-                        schedules.push(newSchedule);
-                    }
-                }
-                
-                // Thông báo số lịch được tạo
-                if (schedules.length > 0) {
-                    console.log('Creating multiple schedules:', schedules);
-                    onScheduleCreated(schedules);
+            
+            // Thông báo số lịch được tạo
+            if (schedules.length > 0) {
+                console.log('Creating multiple schedules:', schedules);
+                onScheduleCreated(schedules);
                     onShowToast(`Đã tạo ${schedules.length} lịch thành công!`, 'success');
-                } else {
-                    onShowToast('Không thể tạo lịch do trùng lặp với lịch hiện có', 'warning');
-                }
             } else {
-                // Tạo một lịch đơn
-                const selectedDoc = doctors.find(doc => doc.id.toString() === formData.doctorId.toString());
-                const doctorName = selectedDoc ? selectedDoc.name : '';
-                
-                const newSchedule = {
-                    doctorId: formData.doctorId,
-                    doctorName: doctorName,
-                    date: formData.date,
-                    status: StatusMapping[formData.status] || 'Trống',
-                    slot: formData.slot,
-                    roomCode: formData.roomCode,
-                    type: null,
-                    patient_id: null
-                };
-                
-                console.log('Creating single schedule:', newSchedule);
-                onScheduleCreated(newSchedule);
+                onShowToast('Không thể tạo lịch do trùng lặp với lịch hiện có', 'warning');
+            }
+        } else {
+            // Tạo một lịch đơn
+            const selectedDoc = doctors.find(doc => doc.id.toString() === formData.doctorId.toString());
+            const doctorName = selectedDoc ? selectedDoc.name : '';
+            
+            const newSchedule = {
+                doctorId: formData.doctorId,
+                doctorName: doctorName,
+                date: formData.date,
+                status: StatusMapping[formData.status] || 'Trống',
+                slot: formData.slot,
+                roomCode: formData.roomCode,
+                type: null,
+                patient_id: null
+            };
+            
+            console.log('Creating single schedule:', newSchedule);
+            onScheduleCreated(newSchedule);
             }
         }
         
@@ -384,50 +384,50 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                     <div className="schedule-section mb-3">
                         <h6 className="section-title">Thông tin cơ bản</h6>
                         <div className="section-content">
-                            <Row>
+                    <Row>
                                 <Col md={6} className="mb-3">
                                     <Form.Group>
                                         <Form.Label className="d-flex align-items-center">
                                             <BsPerson className="me-2 text-primary" />
                                             Bác sĩ
                                         </Form.Label>
-                                        {loading ? (
-                                            <div className="d-flex align-items-center">
-                                                <Spinner animation="border" size="sm" className="me-2" />
-                                                <span>Đang tải danh sách bác sĩ...</span>
-                                            </div>
-                                        ) : (
-                                            <Form.Select
-                                                name="doctorId"
-                                                value={formData.doctorId}
-                                                onChange={handleChange}
-                                                disabled={loading || doctors.length === 0}
-                                                required
-                                            >
-                                                <option value="">Chọn bác sĩ</option>
-                                                {doctors.map(doctor => (
-                                                    <option key={doctor.id} value={doctor.id}>
-                                                        {doctor.name}
-                                                    </option>
-                                                ))}
-                                            </Form.Select>
-                                        )}
-                                    </Form.Group>
-                                </Col>
+                                {loading ? (
+                                    <div className="d-flex align-items-center">
+                                        <Spinner animation="border" size="sm" className="me-2" />
+                                        <span>Đang tải danh sách bác sĩ...</span>
+                                    </div>
+                                ) : (
+                                    <Form.Select
+                                        name="doctorId"
+                                        value={formData.doctorId}
+                                        onChange={handleChange}
+                                        disabled={loading || doctors.length === 0}
+                                        required
+                                    >
+                                        <option value="">Chọn bác sĩ</option>
+                                        {doctors.map(doctor => (
+                                            <option key={doctor.id} value={doctor.id}>
+                                                {doctor.name}
+                                            </option>
+                                        ))}
+                                    </Form.Select>
+                                )}
+                            </Form.Group>
+                        </Col>
                                 <Col md={6} className="mb-3">
                                     <Form.Group>
                                         <Form.Label className="d-flex align-items-center">
                                             <BsCalendarCheck className="me-2 text-primary" />
                                             Ngày khám
                                         </Form.Label>
-                                        <Form.Control
-                                            type="date"
-                                            name="date"
-                                            value={formData.date}
-                                            onChange={handleChange}
-                                            min={moment().format('YYYY-MM-DD')}
-                                            required
-                                        />
+                                    <Form.Control
+                                        type="date"
+                                        name="date"
+                                        value={formData.date}
+                                        onChange={handleChange}
+                                        min={moment().format('YYYY-MM-DD')}
+                                        required
+                                    />
                                         {formData.date && (
                                             <div className="date-display">
                                                 <span className="date-badge">
@@ -436,29 +436,29 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                                             </div>
                                         )}
                                     </Form.Group>
-                                </Col>
-                            </Row>
-                            <Row>
-                                <Col md={6}>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col md={6}>
                                     <Form.Group>
                                         <Form.Label className="d-flex align-items-center">
                                             <BsDoorOpen className="me-2 text-primary" />
                                             Phòng khám
                                         </Form.Label>
-                                        <Form.Select
-                                            name="roomCode"
-                                            value={formData.roomCode}
-                                            onChange={handleChange}
-                                            required
-                                        >
-                                            <option value="101">Phòng 101</option>
-                                            <option value="102">Phòng 102</option>
-                                            <option value="103">Phòng 103</option>
-                                            <option value="201">Phòng 201</option>
-                                            <option value="202">Phòng 202</option>
-                                        </Form.Select>
-                                    </Form.Group>
-                                </Col>
+                                <Form.Select
+                                    name="roomCode"
+                                    value={formData.roomCode}
+                                    onChange={handleChange}
+                                    required
+                                >
+                                    <option value="101">Phòng 101</option>
+                                    <option value="102">Phòng 102</option>
+                                    <option value="103">Phòng 103</option>
+                                    <option value="201">Phòng 201</option>
+                                    <option value="202">Phòng 202</option>
+                                </Form.Select>
+                            </Form.Group>
+                        </Col>
                             </Row>
                         </div>
                     </div>
@@ -522,22 +522,22 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                                             <BsClock className="me-2 text-primary" />
                                             Chọn khung giờ
                                         </Form.Label>
-                                        <Form.Select
-                                            name="slot"
-                                            value={formData.slot}
-                                            onChange={handleChange}
-                                            required
-                                        >
-                                            {timeSlots.map(slot => (
+                                <Form.Select
+                                    name="slot"
+                                    value={formData.slot}
+                                    onChange={handleChange}
+                                    required
+                                >
+                                    {timeSlots.map(slot => (
                                                 <option key={slot.value} value={slot.value}>
-                                                    {slot.label}
-                                                </option>
-                                            ))}
-                                        </Form.Select>
-                                        <Form.Text className="text-muted">
-                                            Thiết lập thời gian làm việc cho bác sĩ
-                                        </Form.Text>
-                                    </Form.Group>
+                                            {slot.label}
+                                        </option>
+                                    ))}
+                                </Form.Select>
+                                <Form.Text className="text-muted">
+                                    Thiết lập thời gian làm việc cho bác sĩ
+                                </Form.Text>
+                            </Form.Group>
                                 </div>
                             ) : (
                                 <div className="mt-3">
@@ -584,7 +584,7 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                         <div className="section-content">
                             <div className="d-flex align-items-center mb-2">
                                 <BsArrowRepeat className="me-2 text-primary" />
-                                <Form.Check
+                                <Form.Check 
                                     type="checkbox"
                                     id="repeatWeekly"
                                     name="repeatWeekly"
@@ -600,17 +600,17 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                             {formData.repeatWeekly && (
                                 <div className="repeat-options ms-4 mt-3">
                                     <Form.Group>
-                                        <Form.Label>Số tuần lặp lại</Form.Label>
-                                        <Form.Control
-                                            type="number"
-                                            name="repeatCount"
-                                            value={formData.repeatCount}
-                                            onChange={handleChange}
-                                            min={1}
-                                            max={12}
+                                    <Form.Label>Số tuần lặp lại</Form.Label>
+                                    <Form.Control
+                                        type="number"
+                                        name="repeatCount"
+                                        value={formData.repeatCount}
+                                        onChange={handleChange}
+                                        min={1}
+                                        max={12}
                                             className="repeat-count"
-                                        />
-                                    </Form.Group>
+                                    />
+                                </Form.Group>
                                 </div>
                             )}
                         </div>
@@ -618,12 +618,33 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                 </Form>
             </Modal.Body>
             <Modal.Footer>
-                <Button variant="secondary" onClick={onHide}>
-                    Hủy
-                </Button>
-                <Button variant="primary" onClick={handleSubmit}>
-                    Tạo lịch
-                </Button>
+                <div className="button-container">
+                    <div></div>
+                    <div className="action-buttons">
+                        <Button 
+                            variant="outline-secondary" 
+                            onClick={onHide}
+                            className="btn-action"
+                        >
+                            Hủy
+                        </Button>
+                        <Button 
+                            variant="outline-primary" 
+                            onClick={handleSubmit}
+                            className="btn-action"
+                            disabled={loading}
+                        >
+                            {loading ? (
+                                <>
+                                    <Spinner animation="border" size="sm" className="me-1" />
+                                    Đang xử lý...
+                                </>
+                            ) : (
+                                'Tạo lịch'
+                            )}
+                        </Button>
+                    </div>
+                </div>
             </Modal.Footer>
         </Modal>
     );

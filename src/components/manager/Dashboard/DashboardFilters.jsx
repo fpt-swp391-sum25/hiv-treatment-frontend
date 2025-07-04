@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { DatePicker, Select, Button, Row, Col, Space } from 'antd';
+import { DatePicker, Select, Button, Row, Col, Space, Card } from 'antd';
 import { FilterOutlined, ReloadOutlined } from '@ant-design/icons';
 import moment from 'moment';
 import './Dashboard.css';
@@ -71,6 +71,14 @@ const DashboardFilters = ({ onFilterChange, doctors = [], initialFilters = {} })
     setDateRange([null, null]);
     setPeriod('month');
     setDoctorId(null);
+    
+    if (onFilterChange) {
+      onFilterChange({
+        dateRange: [null, null],
+        period: 'month',
+        doctorId: null
+      });
+    }
   };
   
   // Xử lý khi nhấn nút lọc
@@ -85,7 +93,7 @@ const DashboardFilters = ({ onFilterChange, doctors = [], initialFilters = {} })
   };
   
   return (
-    <div className="dashboard-filters">
+    <Card className="dashboard-filters-card mb-4">
       <Row gutter={[16, 16]} align="middle">
         <Col xs={24} sm={24} md={8} lg={6}>
           <div className="filter-item">
@@ -154,7 +162,7 @@ const DashboardFilters = ({ onFilterChange, doctors = [], initialFilters = {} })
           </Space>
         </Col>
       </Row>
-    </div>
+    </Card>
   );
 };
 

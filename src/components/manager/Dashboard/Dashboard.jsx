@@ -2,9 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Row, Col, Tabs, Spin, Empty, message, Table, Card } from 'antd';
 import { 
   UserOutlined, 
-  MedicineBoxOutlined, 
   CalendarOutlined, 
-  DollarOutlined,
   TeamOutlined
 } from '@ant-design/icons';
 import axios from '../../../services/axios.customize';
@@ -13,13 +11,29 @@ import {
   fetchStaffStatisticsAPI, 
   fetchPatientStatisticsAPI,
   fetchAppointmentStatisticsAPI,
-  fetchTreatmentStatisticsAPI,
-  fetchFinancialStatisticsAPI,
   fetchAllDoctorsAPI
 } from '../../../services/api.service';
+import { 
+  getDashboardStatistics,
+  getStaffStatistics,
+  getPatientStatistics,
+  getAppointmentStatistics
+} from '../../../services/statistics.service';
 import './Dashboard.css';
 import KPICard from './KPICard';
 import DashboardFilters from './DashboardFilters';
+
+// Import các biểu đồ mới
+import AppointmentStatusChart from './AppointmentStatusChart';
+import MonthlyTrendChart from './MonthlyTrendChart';
+import GenderDistributionChart from './GenderDistributionChart';
+import AgeDistributionChart from './AgeDistributionChart';
+import DayOfWeekChart from './DayOfWeekChart';
+import StaffWorkloadChart from './StaffWorkloadChart';
+import StaffDistributionChart from './StaffDistributionChart';
+import StaffPerformanceChart from './StaffPerformanceChart';
+import PatientAppointmentRatioChart from './PatientAppointmentRatioChart';
+import PatientRegistrationTrendChart from './PatientRegistrationTrendChart';
 
 const { TabPane } = Tabs;
 
@@ -31,11 +45,10 @@ const Dashboard = () => {
   // State để lưu trữ dữ liệu thống kê
   const [loading, setLoading] = useState(true);
   const [statistics, setStatistics] = useState({
-    staff: {},
-    patients: {},
-    appointments: {},
-    treatments: {},
-    finances: {}
+    overview: null,
+    staff: null,
+    patients: null,
+    appointments: null
   });
   
   // State cho bộ lọc
@@ -43,7 +56,6 @@ const Dashboard = () => {
     dateRange: [null, null],
     period: 'month', // 'day', 'week', 'month', 'year'
     doctorId: null,
-    patientId: null
   });
 
   // State cho danh sách bác sĩ
@@ -53,16 +65,20 @@ const Dashboard = () => {
 
   // Fetch danh sách bác sĩ
   useEffect(() => {
-    const fetchDoctors = async () => {
+    const loadDoctors = async () => {
       try {
         const response = await fetchAllDoctorsAPI();
+        console.log('Doctors API response:', response);
+        
         if (response && response.data) {
-          // Chuyển đổi dữ liệu từ API sang định dạng cần thiết
-          const formattedDoctors = response.data.map(doctor => ({
-            id: doctor.id,
-            name: doctor.fullName || `${doctor.username || 'BS.'}`
-          }));
-          setDoctors(formattedDoctors);
+          // Chuẩn hóa dữ liệu bác sĩ
+          const doctorsList = response.data.map(doctor => {
+            return {
+              id: doctor.id || doctor.userId || doctor.user_id,
+              name: doctor.full_name || doctor.fullName || doctor.name || doctor.username || `BS. ${doctor.id}`
+            };
+          });
+          setDoctors(doctorsList);
         }
       } catch (error) {
         console.error('Error fetching doctors:', error);
@@ -70,166 +86,76 @@ const Dashboard = () => {
       }
     };
 
-    fetchDoctors();
+    loadDoctors();
   }, []);
 
-  // Chuyển đổi filters thành params cho API
-  const getApiParams = useCallback((currentFilters) => {
-    const params = {};
-    
-    if (currentFilters.dateRange && currentFilters.dateRange[0] && currentFilters.dateRange[1]) {
-      params.startDate = currentFilters.dateRange[0].format('YYYY-MM-DD');
-      params.endDate = currentFilters.dateRange[1].format('YYYY-MM-DD');
-    }
-    
-    if (currentFilters.period) {
-      params.period = currentFilters.period;
-    }
-    
-    if (currentFilters.doctorId) {
-      params.doctorId = currentFilters.doctorId;
-    }
-    
-    return params;
-  }, []);
-
-  // Fetch dữ liệu thống kê tổng quan
+  // Fetch tổng quan thống kê 
   const fetchOverviewStatistics = useCallback(async () => {
     if (activeTab !== 'overview') return;
     
     setLoading(true);
     try {
-      const params = getApiParams(filters);
-      const response = await fetchDashboardStatisticsAPI(params);
-      
-      if (response && response.data) {
-        setStatistics(prevStats => ({
-          ...prevStats,
-          ...response.data
-        }));
-      }
+      const data = await getDashboardStatistics(filters);
+      console.log('Overview statistics:', data);
+      setStatistics(prev => ({ ...prev, overview: data }));
     } catch (error) {
       console.error('Error fetching overview statistics:', error);
       message.error('Không thể tải dữ liệu thống kê tổng quan');
     } finally {
       setLoading(false);
     }
-  }, [activeTab, filters, getApiParams]);
+  }, [filters, activeTab]);
 
-  // Fetch dữ liệu thống kê nhân sự
+  // Fetch thống kê nhân viên
   const fetchStaffStatistics = useCallback(async () => {
     if (activeTab !== 'staff') return;
     
     setLoading(true);
     try {
-      const params = getApiParams(filters);
-      const response = await fetchStaffStatisticsAPI(params);
-      
-      if (response && response.data) {
-        setStatistics(prevStats => ({
-          ...prevStats,
-          staff: response.data
-        }));
-      }
+      const data = await getStaffStatistics(filters);
+      console.log('Staff statistics:', data);
+      setStatistics(prev => ({ ...prev, staff: data }));
     } catch (error) {
       console.error('Error fetching staff statistics:', error);
-      message.error('Không thể tải dữ liệu thống kê nhân sự');
+      message.error('Không thể tải dữ liệu thống kê nhân viên');
     } finally {
       setLoading(false);
     }
-  }, [activeTab, filters, getApiParams]);
+  }, [filters, activeTab]);
 
-  // Fetch dữ liệu thống kê bệnh nhân
+  // Fetch thống kê bệnh nhân
   const fetchPatientStatistics = useCallback(async () => {
     if (activeTab !== 'patients') return;
     
     setLoading(true);
     try {
-      const params = getApiParams(filters);
-      const response = await fetchPatientStatisticsAPI(params);
-      
-      if (response && response.data) {
-        setStatistics(prevStats => ({
-          ...prevStats,
-          patients: response.data
-        }));
-      }
+      const data = await getPatientStatistics(filters);
+      console.log('Patient statistics:', data);
+      setStatistics(prev => ({ ...prev, patients: data }));
     } catch (error) {
       console.error('Error fetching patient statistics:', error);
       message.error('Không thể tải dữ liệu thống kê bệnh nhân');
     } finally {
       setLoading(false);
     }
-  }, [activeTab, filters, getApiParams]);
+  }, [filters, activeTab]);
 
-  // Fetch dữ liệu thống kê lịch hẹn
+  // Fetch thống kê lịch hẹn
   const fetchAppointmentStatistics = useCallback(async () => {
     if (activeTab !== 'appointments') return;
     
     setLoading(true);
     try {
-      const params = getApiParams(filters);
-      const response = await fetchAppointmentStatisticsAPI(params);
-      
-      if (response && response.data) {
-        setStatistics(prevStats => ({
-          ...prevStats,
-          appointments: response.data
-        }));
-      }
+      const data = await getAppointmentStatistics(filters);
+      console.log('Appointment statistics:', data);
+      setStatistics(prev => ({ ...prev, appointments: data }));
     } catch (error) {
       console.error('Error fetching appointment statistics:', error);
       message.error('Không thể tải dữ liệu thống kê lịch hẹn');
     } finally {
       setLoading(false);
     }
-  }, [activeTab, filters, getApiParams]);
-
-  // Fetch dữ liệu thống kê điều trị
-  const fetchTreatmentStatistics = useCallback(async () => {
-    if (activeTab !== 'treatments') return;
-    
-    setLoading(true);
-    try {
-      const params = getApiParams(filters);
-      const response = await fetchTreatmentStatisticsAPI(params);
-      
-      if (response && response.data) {
-        setStatistics(prevStats => ({
-          ...prevStats,
-          treatments: response.data
-        }));
-      }
-    } catch (error) {
-      console.error('Error fetching treatment statistics:', error);
-      message.error('Không thể tải dữ liệu thống kê điều trị');
-    } finally {
-      setLoading(false);
-    }
-  }, [activeTab, filters, getApiParams]);
-
-  // Fetch dữ liệu thống kê tài chính
-  const fetchFinancialStatistics = useCallback(async () => {
-    if (activeTab !== 'finances') return;
-    
-    setLoading(true);
-    try {
-      const params = getApiParams(filters);
-      const response = await fetchFinancialStatisticsAPI(params);
-      
-      if (response && response.data) {
-        setStatistics(prevStats => ({
-          ...prevStats,
-          finances: response.data
-        }));
-      }
-    } catch (error) {
-      console.error('Error fetching financial statistics:', error);
-      message.error('Không thể tải dữ liệu thống kê tài chính');
-    } finally {
-      setLoading(false);
-    }
-  }, [activeTab, filters, getApiParams]);
+  }, [filters, activeTab]);
 
   // Gọi API tương ứng dựa vào tab đang active
   useEffect(() => {
@@ -246,12 +172,6 @@ const Dashboard = () => {
       case 'appointments':
         fetchAppointmentStatistics();
         break;
-      case 'treatments':
-        fetchTreatmentStatistics();
-        break;
-      case 'finances':
-        fetchFinancialStatistics();
-        break;
       default:
         break;
     }
@@ -260,9 +180,7 @@ const Dashboard = () => {
     fetchOverviewStatistics, 
     fetchStaffStatistics, 
     fetchPatientStatistics, 
-    fetchAppointmentStatistics, 
-    fetchTreatmentStatistics, 
-    fetchFinancialStatistics
+    fetchAppointmentStatistics
   ]);
 
   // Xử lý thay đổi bộ lọc
@@ -278,74 +196,467 @@ const Dashboard = () => {
     setActiveTab(key);
   };
 
-  // Fallback cho dữ liệu thiếu từ API
-  const getStatisticsWithFallback = () => {
-    // Dữ liệu mặc định khi API chưa trả về đầy đủ
-    const defaultStats = {
-      staff: {
-        totalDoctors: 0,
-        totalLabTechnicians: 0,
-        activeStaff: 0,
-        doctorUtilization: 0,
-        labTechnicianUtilization: 0
-      },
-      patients: {
-        totalPatients: 0,
-        newPatients: 0,
-        returningPatients: 0,
-        activePatients: 0,
-        inactivePatients: 0,
-        growthRate: 0
-      },
-      appointments: {
-        totalAppointments: 0,
-        completedAppointments: 0,
-        cancelledAppointments: 0,
-        pendingAppointments: 0,
-        completionRate: 0,
-        cancellationRate: 0,
-        averageWaitTime: 0
-      },
-      treatments: {
-        ongoingTreatments: 0,
-        successfulTreatments: 0,
-        averageTreatmentDuration: 0,
-        successRate: 0,
-        adherenceRate: 0
-      },
-      finances: {
-        monthlyRevenue: 0,
-        averageCostPerPatient: 0,
-        revenueGrowth: 0,
-        costReduction: 0
-      }
-    };
-
-    // Merge dữ liệu từ API với dữ liệu mặc định
-    return {
-      staff: { ...defaultStats.staff, ...statistics.staff },
-      patients: { ...defaultStats.patients, ...statistics.patients },
-      appointments: { ...defaultStats.appointments, ...statistics.appointments },
-      treatments: { ...defaultStats.treatments, ...statistics.treatments },
-      finances: { ...defaultStats.finances, ...statistics.finances }
-    };
+  // Lấy dữ liệu thống kê cho tab hiện tại
+  const getStatisticsForCurrentTab = () => {
+    switch (activeTab) {
+      case 'overview':
+        return statistics.overview;
+      case 'staff':
+        return statistics.staff;
+      case 'patients':
+        return statistics.patients;
+      case 'appointments':
+        return statistics.appointments;
+      default:
+        return null;
+    }
   };
 
-  // Lấy dữ liệu thống kê với fallback
-  const stats = getStatisticsWithFallback();
+  // Hiển thị nội dung tab Tổng quan
+  const renderOverviewTab = () => {
+    const stats = statistics.overview || {
+      staff: {},
+      patients: {},
+      appointments: {}
+    };
+    
+    return (
+      <>
+        <Row gutter={[16, 16]}>
+          <Col xs={24} sm={12} md={8} lg={8}>
+            <KPICard 
+              title="Tổng số bệnh nhân" 
+              value={stats.patients?.totalPatients || 0}
+              type="info"
+              icon={<TeamOutlined />}
+            />
+          </Col>
+          <Col xs={24} sm={12} md={8} lg={8}>
+            <KPICard 
+              title="Bệnh nhân mới" 
+              value={stats.patients?.newPatients || 0}
+              type="info"
+              icon={<TeamOutlined />}
+            />
+          </Col>
+
+          <Col xs={24} sm={12} md={8} lg={8}>
+            <KPICard 
+              title="Nhân viên  y tế" 
+              value={(stats.staff?.totalDoctors || 0) + (stats.staff?.totalLabTechnicians || 0)}
+              type="warning"
+              icon={<UserOutlined />}
+            />
+          </Col>
+        </Row>
+        
+        <Row gutter={[16, 16]} style={{ marginTop: '16px' }}>
+
+          <Col xs={24} sm={12} md={8} lg={8}>
+            <KPICard 
+              title="Tổng số lịch hẹn" 
+              value={stats.appointments?.totalSchedules || 0}
+              type="success"
+              icon={<CalendarOutlined />}
+            />
+          </Col>
+          <Col xs={24} sm={12} md={8} lg={8}>
+            <KPICard 
+              title="Tỷ lệ hoàn thành" 
+              value={`${stats.appointments?.completionRate || 0}%`}
+              type="success"
+              icon={<CalendarOutlined />}
+            />
+          </Col>
+          <Col xs={24} sm={12} md={8} lg={8}>
+            <KPICard 
+              title="Tỷ lệ hủy hẹn" 
+              value={`${stats.appointments?.cancellationRate || 0}%`}
+              type="danger"
+              icon={<CalendarOutlined />}
+            />
+          </Col>
+        </Row>
+
+        <Row gutter={[16, 16]} style={{ marginTop: '24px' }}>
+          <Col xs={24}>
+            <Card title="Xu hướng lịch hẹn theo tháng">
+              <div className="chart-container">
+                {stats.appointments?.monthlyTrend ? (
+                  <MonthlyTrendChart data={stats.appointments.monthlyTrend} />
+                ) : (
+                  <div style={{ height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Empty description="Chưa có dữ liệu biểu đồ" />
+                  </div>
+                )}
+              </div>
+            </Card>
+          </Col>
+        </Row>
+      </>
+    );
+  };
+
+  // Hiển thị nội dung tab Nhân viên
+  const renderStaffTab = () => {
+    const stats = statistics.staff || { doctors: {}, labTechnicians: {} };
+    
+    // Tính tỷ lệ bác sĩ và kỹ thuật viên
+    const totalStaff = (stats.doctors?.total || 0) + (stats.labTechnicians?.total || 0);
+    const doctorRatio = totalStaff > 0 ? Math.round((stats.doctors?.total || 0) / totalStaff * 100) : 0;
+    const labTechRatio = totalStaff > 0 ? Math.round((stats.labTechnicians?.total || 0) / totalStaff * 100) : 0;
+    
+    // Dữ liệu cho biểu đồ phân bố nhân viên
+    const staffDistributionData = {
+      totalDoctors: stats.doctors?.total || 0,
+      totalLabTechnicians: stats.labTechnicians?.total || 0
+    };
+    
+    return (
+      <>
+        <Row gutter={[16, 16]}>
+          <Col xs={24} sm={12} md={8} lg={6}>
+            <KPICard 
+              title="Tổng số bác sĩ" 
+              value={stats.doctors?.total || 0}
+              type="info"
+              icon={<UserOutlined />}
+            />
+          </Col>
+          <Col xs={24} sm={12} md={8} lg={6}>
+            <KPICard 
+              title="Kỹ thuật viên" 
+              value={stats.labTechnicians?.total || 0}
+              type="info"
+              icon={<UserOutlined />}
+            />
+          </Col>
+          <Col xs={24} sm={12} md={8} lg={6}>
+            <KPICard 
+              title="Tỷ lệ bác sĩ" 
+              value={`${doctorRatio}%`}
+              type="success"
+              icon={<UserOutlined />}
+            />
+          </Col>
+          <Col xs={24} sm={12} md={8} lg={6}>
+            <KPICard 
+              title="Tỷ lệ kỹ thuật viên" 
+              value={`${labTechRatio}%`}
+              type="warning"
+              icon={<UserOutlined />}
+            />
+          </Col>
+        </Row>
+        
+        <Row gutter={[16, 16]} style={{ marginTop: '16px' }}>
+          <Col xs={24} md={12}>
+            <StaffDistributionChart data={staffDistributionData} />
+          </Col>
+          <Col xs={24} md={12}>
+            <StaffPerformanceChart data={stats.doctors?.schedulesPerDoctor || []} />
+          </Col>
+        </Row>
+        
+        <Row gutter={[16, 16]} style={{ marginTop: '24px' }}>
+          <Col xs={24} md={12}>
+            <Card title="Phân bố lịch hẹn theo bác sĩ">
+              <div className="chart-container" style={{ height: '300px' }}>
+                {stats.doctors?.schedulesPerDoctor && stats.doctors.schedulesPerDoctor.length > 0 ? (
+                  <div style={{ height: '100%', overflowY: 'auto', padding: '8px' }}>
+                    <Table 
+                      dataSource={stats.doctors.schedulesPerDoctor.map((doctor, index) => ({
+                        ...doctor,
+                        key: index,
+                        rank: index + 1,
+                      }))} 
+                      columns={[
+                        {
+                          title: 'STT',
+                          dataIndex: 'rank',
+                          key: 'rank',
+                          width: 80,
+                        },
+                        {
+                          title: 'Bác sĩ',
+                          dataIndex: 'name',
+                          key: 'name',
+                          ellipsis: true,
+                        },
+                        {
+                          title: 'Số lịch hẹn',
+                          dataIndex: 'totalSchedules',
+                          key: 'totalSchedules',
+                          sorter: (a, b) => a.totalSchedules - b.totalSchedules,
+                          defaultSortOrder: 'descend',
+                        },
+                        {
+                          title: 'Hoàn thành',
+                          dataIndex: 'completedSchedules',
+                          key: 'completedSchedules',
+                        },
+                        {
+                          title: 'Hiệu suất',
+                          dataIndex: 'performance',
+                          key: 'performance',
+                          render: (text) => `${text}%`,
+                        },
+                      ]}
+                      size="small"
+                      pagination={{ pageSize: 5 }}
+                    />
+                  </div>
+                ) : (
+                  <div style={{ height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Empty description="Chưa có dữ liệu bác sĩ" />
+                  </div>
+                )}
+              </div>
+            </Card>
+          </Col>
+          <Col xs={24} md={12}>
+            <StaffWorkloadChart data={stats.workloadDistribution} />
+          </Col>
+        </Row>
+      </>
+    );
+  };
+
+  // Hiển thị nội dung tab Bệnh nhân
+  const renderPatientsTab = () => {
+    const stats = statistics.patients || {};
+    
+    return (
+      <>
+        <Row gutter={[16, 16]}>
+          <Col xs={24} sm={12} md={8} lg={6}>
+            <KPICard 
+              title="Tổng số bệnh nhân" 
+              value={stats.totalPatients || 0}
+              type="info"
+              icon={<TeamOutlined />}
+            />
+          </Col>
+          <Col xs={24} sm={12} md={8} lg={6}>
+            <KPICard 
+              title="Bệnh nhân mới" 
+              value={stats.newPatients || 0}
+              type="success"
+              icon={<TeamOutlined />}
+            />
+          </Col>
+          <Col xs={24} sm={12} md={8} lg={6}>
+            <KPICard 
+              title="Bệnh nhân đã đặt lịch" 
+              value={stats.patientsWithAppointments || 0}
+              type="warning"
+              icon={<TeamOutlined />}
+            />
+          </Col>
+          <Col xs={24} sm={12} md={8} lg={6}>
+            <KPICard 
+              title="Bệnh nhân hoạt động" 
+              value={stats.activePatients || 0}
+              type="success"
+              icon={<TeamOutlined />}
+            />
+          </Col>
+        </Row>
+        
+        <Row gutter={[16, 16]} style={{ marginTop: '24px' }}>
+          <Col xs={24} md={8}>
+            <Card title="Phân bố bệnh nhân theo giới tính">
+              <div className="chart-container">
+                {stats.genderDistribution ? (
+                  <GenderDistributionChart data={stats.genderDistribution} />
+                ) : (
+                  <div style={{ height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Empty description="Chưa có dữ liệu giới tính" />
+                  </div>
+                )}
+              </div>
+            </Card>
+          </Col>
+          <Col xs={24} md={8}>
+            <Card title="Phân bố bệnh nhân theo độ tuổi">
+              <div className="chart-container">
+                {stats.ageGroups ? (
+                  <AgeDistributionChart data={stats.ageGroups} />
+                ) : (
+                  <div style={{ height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Empty description="Chưa có dữ liệu độ tuổi" />
+                  </div>
+                )}
+              </div>
+            </Card>
+          </Col>
+          <Col xs={24} md={8}>
+            <PatientAppointmentRatioChart 
+              totalPatients={stats.totalPatients || 0} 
+              patientsWithAppointments={stats.patientsWithAppointments || 0} 
+            />
+          </Col>
+        </Row>
+        
+        <Row gutter={[16, 16]} style={{ marginTop: '16px' }}>
+          <Col xs={24}>
+            <PatientRegistrationTrendChart data={stats.registrationTrend || []} />
+          </Col>
+        </Row>
+      </>
+    );
+  };
+
+  // Hiển thị nội dung tab Lịch hẹn
+  const renderAppointmentsTab = () => {
+    const stats = statistics.appointments || {};
+    
+    return (
+      <>
+        <Row gutter={[16, 16]}>
+          <Col xs={24} sm={12} md={8} lg={6}>
+            <KPICard 
+              title="Tổng số lịch hẹn" 
+              value={stats.totalSchedules || 0}
+              type="info"
+              icon={<CalendarOutlined />}
+            />
+          </Col>
+          <Col xs={24} sm={12} md={8} lg={6}>
+            <KPICard 
+              title="Hoàn thành" 
+              value={stats.completedSchedules || 0}
+              type="success"
+              icon={<CalendarOutlined />}
+            />
+          </Col>
+          <Col xs={24} sm={12} md={8} lg={6}>
+            <KPICard 
+              title="Đã hủy" 
+              value={stats.cancelledSchedules || 0}
+              type="danger"
+              icon={<CalendarOutlined />}
+            />
+          </Col>
+          <Col xs={24} sm={12} md={8} lg={6}>
+            <KPICard 
+              title="Đang chờ" 
+              value={stats.pendingSchedules || 0}
+              type="warning"
+              icon={<CalendarOutlined />}
+            />
+          </Col>
+        </Row>
+        
+        <Row gutter={[16, 16]} style={{ marginTop: '16px' }}>
+          <Col xs={24} sm={12} md={8} lg={6}>
+            <KPICard 
+              title="Tỷ lệ hoàn thành" 
+              value={`${stats.completionRate || 0}%`}
+              type="success"
+              icon={<CalendarOutlined />}
+            />
+          </Col>
+          <Col xs={24} sm={12} md={8} lg={6}>
+            <KPICard 
+              title="Tỷ lệ hủy" 
+              value={`${stats.cancellationRate || 0}%`}
+              type="danger"
+              icon={<CalendarOutlined />}
+            />
+          </Col>
+          <Col xs={24} sm={12} md={8} lg={6}>
+            <KPICard 
+              title="Lịch trống" 
+              value={stats.emptySchedules || 0}
+              type="info"
+              icon={<CalendarOutlined />}
+            />
+          </Col>
+        </Row>
+        
+        <Row gutter={[16, 16]} style={{ marginTop: '24px' }}>
+          <Col xs={24} sm={12}>
+            <Card title="Phân bố lịch hẹn theo trạng thái">
+              <div className="chart-container">
+                {stats.appointmentsByStatus ? (
+                  <AppointmentStatusChart data={stats.appointmentsByStatus} />
+                ) : (
+                  <div style={{ height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Empty description="Chưa có dữ liệu trạng thái" />
+                  </div>
+                )}
+              </div>
+            </Card>
+          </Col>
+          <Col xs={24} sm={12}>
+            <Card title="Lịch hẹn theo ngày trong tuần">
+              <div className="chart-container">
+                {stats.appointmentsByDayOfWeek ? (
+                  <DayOfWeekChart data={stats.appointmentsByDayOfWeek} />
+                ) : (
+                  <div style={{ height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Empty description="Chưa có dữ liệu ngày trong tuần" />
+                  </div>
+                )}
+              </div>
+            </Card>
+          </Col>
+        </Row>
+        
+        <Row gutter={[16, 16]} style={{ marginTop: '24px' }}>
+          <Col xs={24}>
+            <Card title="Xu hướng lịch hẹn theo tháng">
+              <div className="chart-container">
+                {stats.monthlyTrend ? (
+                  <MonthlyTrendChart data={stats.monthlyTrend} title="Xu hướng lịch hẹn theo tháng" />
+                ) : (
+                  <div style={{ height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Empty description="Chưa có dữ liệu xu hướng" />
+                  </div>
+                )}
+              </div>
+            </Card>
+          </Col>
+        </Row>
+      </>
+    );
+  };
+
+  // Render nội dung theo tab hiện tại
+  const renderTabContent = () => {
+    if (loading) {
+      return (
+        <div className="loading-container">
+          <Spin size="large" />
+        </div>
+      );
+    }
+
+    switch (activeTab) {
+      case 'overview':
+        return renderOverviewTab();
+      case 'staff':
+        return renderStaffTab();
+      case 'patients':
+        return renderPatientsTab();
+      case 'appointments':
+        return renderAppointmentsTab();
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="dashboard-container">
       <h1 className="dashboard-title">Thống kê tổng quan</h1>
       
-      {/* Bộ lọc */}
       <DashboardFilters 
         onFilterChange={handleFilterChange} 
         doctors={doctors}
         initialFilters={filters}
       />
       
-      {/* Tabs cho các nhóm thống kê */}
       <Tabs 
         defaultActiveKey="overview" 
         className="dashboard-tabs"
@@ -353,686 +664,19 @@ const Dashboard = () => {
         onChange={handleTabChange}
       >
         <TabPane tab="Tổng quan" key="overview">
-          {loading ? (
-            <div className="loading-container">
-              <Spin size="large" />
-            </div>
-          ) : (
-            <>
-              <Row gutter={[16, 16]}>
-                <Col xs={24} sm={12} md={8} lg={6}>
-                  <KPICard 
-                    title="Tổng số bệnh nhân" 
-                    value={stats.patients.totalPatients || 0}
-                    trend={stats.patients.growthRate}
-                    trendLabel="so với tháng trước"
-                    type="info"
-                    icon={<TeamOutlined />}
-                  />
-                </Col>
-                <Col xs={24} sm={12} md={8} lg={6}>
-                  <KPICard 
-                    title="Lịch hẹn tháng này" 
-                    value={stats.appointments.totalAppointments || 0}
-                    trend={stats.appointments.appointmentGrowth || 0}
-                    trendLabel="so với tháng trước"
-                    type="success"
-                    icon={<CalendarOutlined />}
-                  />
-                </Col>
-                <Col xs={24} sm={12} md={8} lg={6}>
-                  <KPICard 
-                    title="Tỷ lệ hoàn thành" 
-                    value={`${stats.appointments.completionRate || 0}%`}
-                    trend={stats.appointments.completionRateChange || 0}
-                    trendLabel="so với tháng trước"
-                    type="warning"
-                    icon={<MedicineBoxOutlined />}
-                  />
-                </Col>
-                <Col xs={24} sm={12} md={8} lg={6}>
-                  <KPICard 
-                    title="Điều trị" 
-                    value={stats.treatments.successfulTreatments || 0}
-                    trend={stats.treatments.successRateChange || 0}
-                    trendLabel="so với tháng trước"
-                    type="success"
-                    icon={<UserOutlined />}
-                  />
-                </Col>
-              </Row>
-              
-              <Row gutter={[16, 16]} style={{ marginTop: '16px' }}>
-                <Col xs={24} sm={12} md={8} lg={6}>
-                  <KPICard 
-                    title="Bệnh nhân mới" 
-                    value={stats.patients.newPatients || 0}
-                    trend={stats.patients.newPatientGrowth || 0}
-                    trendLabel="so với tháng trước"
-                    type="info"
-                    icon={<TeamOutlined />}
-                  />
-                </Col>
-                <Col xs={24} sm={12} md={8} lg={6}>
-                  <KPICard 
-                    title="Tỷ lệ hủy hẹn" 
-                    value={`${stats.appointments.cancellationRate || 0}%`}
-                    trend={stats.appointments.cancellationRateChange || 0}
-                    trendLabel="so với tháng trước"
-                    type="danger"
-                    icon={<CalendarOutlined />}
-                  />
-                </Col>
-                <Col xs={24} sm={12} md={8} lg={6}>
-                  <KPICard 
-                    title="Doanh thu tháng" 
-                    value={`${(stats.finances.monthlyRevenue || 0).toLocaleString()} đ`}
-                    trend={stats.finances.revenueGrowth || 0}
-                    trendLabel="so với tháng trước"
-                    type="success"
-                    icon={<DollarOutlined />}
-                  />
-                </Col>
-                <Col xs={24} sm={12} md={8} lg={6}>
-                  <KPICard 
-                    title="Chi phí trung bình" 
-                    value={`${(stats.finances.averageCostPerPatient || 0).toLocaleString()} đ`}
-                    trend={-(stats.finances.costReduction || 0)}
-                    trendLabel="so với tháng trước"
-                    type="info"
-                    icon={<DollarOutlined />}
-                  />
-                </Col>
-              </Row>
-              
-              {/* Biểu đồ sẽ được thêm ở đây */}
-              <div className="dashboard-charts">
-                {/* TODO: Thêm các biểu đồ */}
-                <Empty 
-                  description="Biểu đồ đang được phát triển" 
-                  style={{ marginTop: '40px' }}
-                />
-              </div>
-            </>
-          )}
+          {renderTabContent()}
         </TabPane>
         
-        <TabPane tab="Nhân sự" key="staff">
-          {loading ? (
-            <div className="loading-container">
-              <Spin size="large" />
-            </div>
-          ) : (
-            <>
-              <Row gutter={[16, 16]}>
-                <Col xs={24} sm={12} md={8} lg={6}>
-                  <KPICard 
-                    title="Tổng số bác sĩ" 
-                    value={stats.staff.totalDoctors || 0}
-                    type="info"
-                    icon={<UserOutlined />}
-                  />
-                </Col>
-                <Col xs={24} sm={12} md={8} lg={6}>
-                  <KPICard 
-                    title="Kỹ thuật viên xét nghiệm" 
-                    value={stats.staff.totalLabTechnicians || 0}
-                    type="success"
-                    icon={<MedicineBoxOutlined />}
-                  />
-                </Col>
-                <Col xs={24} sm={12} md={8} lg={6}>
-                  <KPICard 
-                    title="Hiệu suất bác sĩ" 
-                    value={`${stats.staff.doctorUtilization || 0}%`}
-                    type="warning"
-                    icon={<UserOutlined />}
-                  />
-                </Col>
-                <Col xs={24} sm={12} md={8} lg={6}>
-                  <KPICard 
-                    title="Nhân viên hoạt động" 
-                    value={stats.staff.activeStaff || 0}
-                    type="success"
-                    icon={<TeamOutlined />}
-                  />
-                </Col>
-              </Row>
-              
-              {/* Bảng chi tiết bác sĩ */}
-              {stats.staff.doctorDetails && stats.staff.doctorDetails.length > 0 ? (
-                <div className="data-table" style={{ marginTop: '24px' }}>
-                  <div className="table-header">
-                    <h3 className="table-title">Thống kê theo bác sĩ</h3>
-                  </div>
-                  <Table 
-                    dataSource={stats.staff.doctorDetails} 
-                    rowKey="id"
-                    pagination={{ pageSize: 5 }}
-                  >
-                    <Table.Column title="Bác sĩ" dataIndex="name" key="name" />
-                    <Table.Column 
-                      title="Số lịch hẹn" 
-                      dataIndex="scheduleCount" 
-                      key="scheduleCount"
-                      sorter={(a, b) => a.scheduleCount - b.scheduleCount}
-                    />
-                    <Table.Column 
-                      title="Hoàn thành" 
-                      dataIndex="completedSchedules" 
-                      key="completedSchedules" 
-                      sorter={(a, b) => a.completedSchedules - b.completedSchedules}
-                    />
-                    <Table.Column 
-                      title="Tỷ lệ hoàn thành" 
-                      key="completionRate" 
-                      render={(text, record) => (
-                        <span>{record.completionRate || 0}%</span>
-                      )}
-                      sorter={(a, b) => a.completionRate - b.completionRate}
-                    />
-                  </Table>
-                </div>
-              ) : (
-                <Empty 
-                  description="Không có dữ liệu bác sĩ" 
-                  style={{ marginTop: '40px' }}
-                />
-              )}
-              
-              {/* Thống kê nhân sự theo giới tính */}
-              {stats.staff.staffByGender && (
-                <Row gutter={[16, 16]} style={{ marginTop: '24px' }}>
-                  <Col xs={24} sm={12}>
-                    <Card title="Phân bố nhân sự theo giới tính">
-                      <div style={{ height: '200px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                        <Row gutter={16} style={{ width: '100%', textAlign: 'center' }}>
-                          <Col span={8}>
-                            <div className="stat-circle male">
-                              <h3>{stats.staff.staffByGender.male || 0}</h3>
-                              <p>Nam</p>
-                            </div>
-                          </Col>
-                          <Col span={8}>
-                            <div className="stat-circle female">
-                              <h3>{stats.staff.staffByGender.female || 0}</h3>
-                              <p>Nữ</p>
-                            </div>
-                          </Col>
-                          <Col span={8}>
-                            <div className="stat-circle other">
-                              <h3>{stats.staff.staffByGender.other || 0}</h3>
-                              <p>Khác</p>
-                            </div>
-                          </Col>
-                        </Row>
-                      </div>
-                    </Card>
-                  </Col>
-                  <Col xs={24} sm={12}>
-                    <Card title="Số lịch hẹn theo bác sĩ">
-                      <Empty description="Biểu đồ đang được phát triển" />
-                    </Card>
-                  </Col>
-                </Row>
-              )}
-            </>
-          )}
+        <TabPane tab="Nhân viên" key="staff">
+          {renderTabContent()}
         </TabPane>
         
         <TabPane tab="Bệnh nhân" key="patients">
-          {loading ? (
-            <div className="loading-container">
-              <Spin size="large" />
-            </div>
-          ) : (
-            <>
-              <Row gutter={[16, 16]}>
-                <Col xs={24} sm={12} md={8} lg={6}>
-                  <KPICard 
-                    title="Tổng số bệnh nhân" 
-                    value={stats.patients.totalPatients || 0}
-                    type="info"
-                    icon={<TeamOutlined />}
-                  />
-                </Col>
-                <Col xs={24} sm={12} md={8} lg={6}>
-                  <KPICard 
-                    title="Bệnh nhân mới" 
-                    value={stats.patients.newPatients || 0}
-                    trend={stats.patients.newPatientGrowth || 0}
-                    trendLabel="so với tháng trước"
-                    type="success"
-                    icon={<UserOutlined />}
-                  />
-                </Col>
-                <Col xs={24} sm={12} md={8} lg={6}>
-                  <KPICard 
-                    title="Bệnh nhân quay lại" 
-                    value={stats.patients.returningPatients || 0}
-                    type="warning"
-                    icon={<UserOutlined />}
-                  />
-                </Col>
-                <Col xs={24} sm={12} md={8} lg={6}>
-                  <KPICard 
-                    title="Bệnh nhân hoạt động" 
-                    value={stats.patients.activePatients || 0}
-                    type="success"
-                    icon={<TeamOutlined />}
-                  />
-                </Col>
-              </Row>
-              
-              {/* Thống kê bệnh nhân theo giới tính */}
-              <Row gutter={[16, 16]} style={{ marginTop: '24px' }}>
-                <Col xs={24} sm={12}>
-                  <Card title="Phân bố bệnh nhân theo giới tính">
-                    <div style={{ height: '200px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                      <Row gutter={16} style={{ width: '100%', textAlign: 'center' }}>
-                        <Col span={8}>
-                          <div className="stat-circle male">
-                            <h3>{stats.patients.patientsByGender?.male || 0}</h3>
-                            <p>Nam</p>
-                          </div>
-                        </Col>
-                        <Col span={8}>
-                          <div className="stat-circle female">
-                            <h3>{stats.patients.patientsByGender?.female || 0}</h3>
-                            <p>Nữ</p>
-                          </div>
-                        </Col>
-                        <Col span={8}>
-                          <div className="stat-circle other">
-                            <h3>{stats.patients.patientsByGender?.other || 0}</h3>
-                            <p>Khác</p>
-                          </div>
-                        </Col>
-                      </Row>
-                    </div>
-                  </Card>
-                </Col>
-                <Col xs={24} sm={12}>
-                  <Card title="Phân bố bệnh nhân theo trạng thái">
-                    <div style={{ height: '200px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                      <Row gutter={16} style={{ width: '100%', textAlign: 'center' }}>
-                        <Col span={12}>
-                          <div className="stat-box active">
-                            <h3>{stats.patients.patientsByStatus?.active || 0}</h3>
-                            <p>Đang hoạt động</p>
-                          </div>
-                        </Col>
-                        <Col span={12}>
-                          <div className="stat-box inactive">
-                            <h3>{stats.patients.patientsByStatus?.inactive || 0}</h3>
-                            <p>Không hoạt động</p>
-                          </div>
-                        </Col>
-                      </Row>
-                    </div>
-                  </Card>
-                </Col>
-              </Row>
-              
-              {/* Thống kê bệnh nhân theo lịch hẹn */}
-              <Row gutter={[16, 16]} style={{ marginTop: '24px' }}>
-                <Col xs={24}>
-                  <Card title="Thống kê bệnh nhân theo lịch hẹn">
-                    <Row gutter={16}>
-                      <Col xs={24} sm={12}>
-                        <div className="stat-item">
-                          <div className="stat-label">Bệnh nhân có lịch hẹn</div>
-                          <div className="stat-value">{stats.patients.patientAppointments?.withAppointments || 0}</div>
-                        </div>
-                      </Col>
-                      <Col xs={24} sm={12}>
-                        <div className="stat-item">
-                          <div className="stat-label">Bệnh nhân chưa có lịch hẹn</div>
-                          <div className="stat-value">{stats.patients.patientAppointments?.withoutAppointments || 0}</div>
-                        </div>
-                      </Col>
-                    </Row>
-                  </Card>
-                </Col>
-              </Row>
-              
-              {/* Biểu đồ tăng trưởng bệnh nhân */}
-              <Row gutter={[16, 16]} style={{ marginTop: '24px' }}>
-                <Col xs={24}>
-                  <Card title="Tăng trưởng bệnh nhân">
-                    <Empty description="Biểu đồ đang được phát triển" />
-                  </Card>
-                </Col>
-              </Row>
-            </>
-          )}
+          {renderTabContent()}
         </TabPane>
         
         <TabPane tab="Lịch hẹn" key="appointments">
-          {loading ? (
-            <div className="loading-container">
-              <Spin size="large" />
-            </div>
-          ) : (
-            <>
-              <Row gutter={[16, 16]}>
-                <Col xs={24} sm={12} md={8} lg={6}>
-                  <KPICard 
-                    title="Tổng số lịch hẹn" 
-                    value={stats.appointments.totalAppointments || 0}
-                    trend={stats.appointments.appointmentGrowth || 0}
-                    trendLabel="so với tháng trước"
-                    type="info"
-                    icon={<CalendarOutlined />}
-                  />
-                </Col>
-                <Col xs={24} sm={12} md={8} lg={6}>
-                  <KPICard 
-                    title="Hoàn thành" 
-                    value={stats.appointments.completedAppointments || 0}
-                    type="success"
-                    icon={<CalendarOutlined />}
-                  />
-                </Col>
-                <Col xs={24} sm={12} md={8} lg={6}>
-                  <KPICard 
-                    title="Đã hủy" 
-                    value={stats.appointments.cancelledAppointments || 0}
-                    type="danger"
-                    icon={<CalendarOutlined />}
-                  />
-                </Col>
-                <Col xs={24} sm={12} md={8} lg={6}>
-                  <KPICard 
-                    title="Đang chờ" 
-                    value={stats.appointments.pendingAppointments || 0}
-                    type="warning"
-                    icon={<CalendarOutlined />}
-                  />
-                </Col>
-              </Row>
-              
-              <Row gutter={[16, 16]} style={{ marginTop: '16px' }}>
-                <Col xs={24} sm={12} md={8} lg={6}>
-                  <KPICard 
-                    title="Tỷ lệ hoàn thành" 
-                    value={`${stats.appointments.completionRate || 0}%`}
-                    trend={stats.appointments.completionRateChange || 0}
-                    trendLabel="so với tháng trước"
-                    type="success"
-                    icon={<CalendarOutlined />}
-                  />
-                </Col>
-                <Col xs={24} sm={12} md={8} lg={6}>
-                  <KPICard 
-                    title="Tỷ lệ hủy" 
-                    value={`${stats.appointments.cancellationRate || 0}%`}
-                    trend={stats.appointments.cancellationRateChange || 0}
-                    trendLabel="so với tháng trước"
-                    type="danger"
-                    icon={<CalendarOutlined />}
-                  />
-                </Col>
-                <Col xs={24} sm={12} md={8} lg={6}>
-                  <KPICard 
-                    title="Thời gian chờ trung bình" 
-                    value={`${stats.appointments.averageWaitTime || 0} phút`}
-                    type="warning"
-                    icon={<CalendarOutlined />}
-                  />
-                </Col>
-                <Col xs={24} sm={12} md={8} lg={6}>
-                  <KPICard 
-                    title="Lịch trống" 
-                    value={stats.appointments.emptyAppointments || 0}
-                    type="info"
-                    icon={<CalendarOutlined />}
-                  />
-                </Col>
-              </Row>
-              
-              {/* Thống kê lịch hẹn theo trạng thái */}
-              <Row gutter={[16, 16]} style={{ marginTop: '24px' }}>
-                <Col xs={24} sm={12}>
-                  <Card title="Phân bố lịch hẹn theo trạng thái">
-                    <div className="status-distribution">
-                      <div className="status-bar">
-                        <div 
-                          className="status-segment completed" 
-                          style={{ 
-                            width: `${stats.appointments.totalAppointments ? 
-                              (stats.appointments.completedAppointments / stats.appointments.totalAppointments) * 100 : 0}%` 
-                          }}
-                        >
-                          {stats.appointments.completedAppointments || 0}
-                        </div>
-                        <div 
-                          className="status-segment pending" 
-                          style={{ 
-                            width: `${stats.appointments.totalAppointments ? 
-                              (stats.appointments.pendingAppointments / stats.appointments.totalAppointments) * 100 : 0}%` 
-                          }}
-                        >
-                          {stats.appointments.pendingAppointments || 0}
-                        </div>
-                        <div 
-                          className="status-segment cancelled" 
-                          style={{ 
-                            width: `${stats.appointments.totalAppointments ? 
-                              (stats.appointments.cancelledAppointments / stats.appointments.totalAppointments) * 100 : 0}%` 
-                          }}
-                        >
-                          {stats.appointments.cancelledAppointments || 0}
-                        </div>
-                      </div>
-                      <div className="status-legend">
-                        <div className="legend-item">
-                          <div className="legend-color completed"></div>
-                          <div className="legend-label">Hoàn thành</div>
-                        </div>
-                        <div className="legend-item">
-                          <div className="legend-color pending"></div>
-                          <div className="legend-label">Đang chờ</div>
-                        </div>
-                        <div className="legend-item">
-                          <div className="legend-color cancelled"></div>
-                          <div className="legend-label">Đã hủy</div>
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
-                </Col>
-                <Col xs={24} sm={12}>
-                  <Card title="Xu hướng lịch hẹn">
-                    <div className="trend-stats">
-                      <div className="trend-item">
-                        <div className="trend-label">Tháng hiện tại</div>
-                        <div className="trend-value">{stats.appointments.appointmentTrends?.currentMonth || 0}</div>
-                      </div>
-                      <div className="trend-item">
-                        <div className="trend-label">Tháng trước</div>
-                        <div className="trend-value">{stats.appointments.appointmentTrends?.lastMonth || 0}</div>
-                      </div>
-                      <div className="trend-item">
-                        <div className="trend-label">Tăng trưởng</div>
-                        <div className={`trend-value ${stats.appointments.appointmentTrends?.growth > 0 ? 'positive' : 'negative'}`}>
-                          {stats.appointments.appointmentTrends?.growth > 0 ? '+' : ''}
-                          {Math.round(stats.appointments.appointmentTrends?.growth || 0)}%
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
-                </Col>
-              </Row>
-              
-              {/* Thống kê lịch hẹn theo bác sĩ */}
-              {stats.appointments.appointmentsByDoctor && Object.keys(stats.appointments.appointmentsByDoctor).length > 0 ? (
-                <div className="data-table" style={{ marginTop: '24px' }}>
-                  <div className="table-header">
-                    <h3 className="table-title">Thống kê theo bác sĩ</h3>
-                  </div>
-                  <Table 
-                    dataSource={Object.entries(stats.appointments.appointmentsByDoctor).map(([id, data]) => ({
-                      id,
-                      name: data.name,
-                      total: data.total,
-                      completed: data.completed,
-                      cancelled: data.cancelled,
-                      pending: data.pending,
-                      completionRate: data.total > 0 ? Math.round((data.completed / data.total) * 100) : 0
-                    }))} 
-                    rowKey="id"
-                    pagination={{ pageSize: 5 }}
-                  >
-                    <Table.Column title="Bác sĩ" dataIndex="name" key="name" />
-                    <Table.Column 
-                      title="Tổng số" 
-                      dataIndex="total" 
-                      key="total"
-                      sorter={(a, b) => a.total - b.total}
-                    />
-                    <Table.Column 
-                      title="Hoàn thành" 
-                      dataIndex="completed" 
-                      key="completed" 
-                      sorter={(a, b) => a.completed - b.completed}
-                    />
-                    <Table.Column 
-                      title="Đã hủy" 
-                      dataIndex="cancelled" 
-                      key="cancelled" 
-                      sorter={(a, b) => a.cancelled - b.cancelled}
-                    />
-                    <Table.Column 
-                      title="Tỷ lệ hoàn thành" 
-                      key="completionRate" 
-                      render={(text, record) => (
-                        <span>{record.completionRate}%</span>
-                      )}
-                      sorter={(a, b) => a.completionRate - b.completionRate}
-                    />
-                  </Table>
-                </div>
-              ) : (
-                <Empty 
-                  description="Không có dữ liệu lịch hẹn theo bác sĩ" 
-                  style={{ marginTop: '24px' }}
-                />
-              )}
-            </>
-          )}
-        </TabPane>
-        
-        <TabPane tab="Điều trị" key="treatments">
-          {loading ? (
-            <div className="loading-container">
-              <Spin size="large" />
-            </div>
-          ) : (
-            <>
-              <Row gutter={[16, 16]}>
-                <Col xs={24} sm={12} md={8} lg={6}>
-                  <KPICard 
-                    title="Điều trị đang diễn ra" 
-                    value={stats.treatments.ongoingTreatments || 0}
-                    type="info"
-                    icon={<MedicineBoxOutlined />}
-                  />
-                </Col>
-                <Col xs={24} sm={12} md={8} lg={6}>
-                  <KPICard 
-                    title="Điều trị thành công" 
-                    value={stats.treatments.successfulTreatments || 0}
-                    type="success"
-                    icon={<MedicineBoxOutlined />}
-                  />
-                </Col>
-                <Col xs={24} sm={12} md={8} lg={6}>
-                  <KPICard 
-                    title="Tỷ lệ thành công" 
-                    value={`${stats.treatments.successRate || 0}%`}
-                    trend={stats.treatments.successRateChange || 0}
-                    trendLabel="so với tháng trước"
-                    type="warning"
-                    icon={<MedicineBoxOutlined />}
-                  />
-                </Col>
-                <Col xs={24} sm={12} md={8} lg={6}>
-                  <KPICard 
-                    title="Tỷ lệ tuân thủ" 
-                    value={`${stats.treatments.adherenceRate || 0}%`}
-                    type="success"
-                    icon={<MedicineBoxOutlined />}
-                  />
-                </Col>
-              </Row>
-              
-              <Row gutter={[16, 16]} style={{ marginTop: '24px' }}>
-                <Col xs={24}>
-                  <Card title="Hiệu quả điều trị theo thời gian">
-                    <Empty description="Biểu đồ đang được phát triển" />
-                  </Card>
-                </Col>
-              </Row>
-            </>
-          )}
-        </TabPane>
-        
-        <TabPane tab="Tài chính" key="finances">
-          {loading ? (
-            <div className="loading-container">
-              <Spin size="large" />
-            </div>
-          ) : (
-            <>
-              <Row gutter={[16, 16]}>
-                <Col xs={24} sm={12} md={8} lg={6}>
-                  <KPICard 
-                    title="Doanh thu tháng" 
-                    value={`${(stats.finances.monthlyRevenue || 0).toLocaleString()} đ`}
-                    trend={stats.finances.revenueGrowth || 0}
-                    trendLabel="so với tháng trước"
-                    type="success"
-                    icon={<DollarOutlined />}
-                  />
-                </Col>
-                <Col xs={24} sm={12} md={8} lg={6}>
-                  <KPICard 
-                    title="Chi phí trung bình" 
-                    value={`${(stats.finances.averageCostPerPatient || 0).toLocaleString()} đ`}
-                    trend={-(stats.finances.costReduction || 0)}
-                    trendLabel="so với tháng trước"
-                    type="info"
-                    icon={<DollarOutlined />}
-                  />
-                </Col>
-                <Col xs={24} sm={12} md={8} lg={6}>
-                  <KPICard 
-                    title="Tăng trưởng doanh thu" 
-                    value={`${stats.finances.revenueGrowth || 0}%`}
-                    type={stats.finances.revenueGrowth >= 0 ? "success" : "danger"}
-                    icon={<DollarOutlined />}
-                  />
-                </Col>
-                <Col xs={24} sm={12} md={8} lg={6}>
-                  <KPICard 
-                    title="Giảm chi phí" 
-                    value={`${stats.finances.costReduction || 0}%`}
-                    type="success"
-                    icon={<DollarOutlined />}
-                  />
-                </Col>
-              </Row>
-              
-              <Row gutter={[16, 16]} style={{ marginTop: '24px' }}>
-                <Col xs={24}>
-                  <Card title="Xu hướng doanh thu">
-                    <Empty description="Biểu đồ đang được phát triển" />
-                  </Card>
-                </Col>
-              </Row>
-            </>
-          )}
+          {renderTabContent()}
         </TabPane>
       </Tabs>
     </div>

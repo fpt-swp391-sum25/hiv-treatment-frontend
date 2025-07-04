@@ -226,14 +226,26 @@ const ManagerSchedule = () => {
     // Hàm chuẩn bị dữ liệu lịch để gửi đến API
     const prepareScheduleData = (schedule) => {
         // Chuyển đổi từ dữ liệu form sang định dạng API
+        console.log('Preparing schedule data for API:', schedule);
+        
+        // Xác định status dựa trên loại thao tác (tạo mới hoặc cập nhật)
+        let status;
+        if (schedule.original_status) {
+            // Nếu đang cập nhật, sử dụng trạng thái từ form hoặc giữ nguyên trạng thái gốc
+            status = schedule.status ? (StatusMapping[schedule.status] || schedule.status) : schedule.original_status;
+        } else {
+            // Nếu đang tạo mới, đặt trạng thái là "Trống"
+            status = 'Trống';
+        }
+        
         return {
-            type: null, // Manager tạo lịch trống với type=null
-            roomCode: schedule.roomCode || Math.floor(Math.random() * 5 + 1) * 100 + Math.floor(Math.random() * 10), // Sử dụng roomCode từ form hoặc tạo mã phòng ngẫu nhiên (100-599)
+            type: schedule.type !== undefined ? schedule.type : null,
+            roomCode: schedule.roomCode, // Sử dụng roomCode từ form
             date: schedule.date, // Giữ nguyên định dạng YYYY-MM-DD
             slot: schedule.slot, // Sử dụng slot từ form (định dạng HH:mm:ss)
             doctorId: parseInt(schedule.doctorId),
-            status: 'Trống', // Đặt trạng thái là "Trống" theo yêu cầu của BE
-            patient_id: null, // Thêm patient_id: null theo schema DB
+            status: status,
+            patient_id: schedule.patient_id !== undefined ? schedule.patient_id : null,
             shiftType: schedule.shiftType || null // Thêm thông tin ca làm việc (nếu có)
         };
     };
@@ -326,12 +338,15 @@ const ManagerSchedule = () => {
             const scheduleData = prepareScheduleData(updatedSchedule);
             
             // Gọi API để cập nhật lịch
-            console.log('Updating schedule:', updatedSchedule);
+            console.log('Updating schedule with room code:', updatedSchedule.roomCode);
+            console.log('Data prepared for API:', scheduleData);
+            
             const response = await updateScheduleAPI(updatedSchedule.id, scheduleData);
             console.log('Schedule update response:', response);
             
             if (response && response.data) {
                 console.log('Schedule updated successfully:', response.data);
+                console.log('Updated room code in response:', response.data.roomCode || response.data.room_code);
                 
                 // Nếu API thành công, cập nhật state với dữ liệu từ API
                 const formattedUpdatedSchedule = formatScheduleFromAPI(response.data);
@@ -342,6 +357,12 @@ const ManagerSchedule = () => {
                 );
                 
                 showToast('Cập nhật lịch thành công!', 'success');
+                
+                // Làm mới dữ liệu từ server sau khi cập nhật
+                setTimeout(() => {
+                    console.log('Refreshing schedule data from server after update');
+                    fetchSchedules();
+                }, 500);
             } else {
                 console.warn('API returned success but no data');
                 showToast('Không thể cập nhật lịch, vui lòng thử lại sau', 'warning');
