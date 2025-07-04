@@ -4,17 +4,21 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import bootstrap5Plugin from '@fullcalendar/bootstrap5';
+import listPlugin from '@fullcalendar/list'; // Thêm plugin hiển thị dạng danh sách
 import viLocale from '@fullcalendar/core/locales/vi';
 import moment from 'moment';
-import { BsChevronLeft, BsChevronRight } from 'react-icons/bs';
+import { BsChevronLeft, BsChevronRight, BsCalendarWeek, BsCalendarMonth, BsListUl } from 'react-icons/bs';
 import './Calendar.css';
 import './CustomButtons.css';
-import { ScheduleStatus } from '../../../types/schedule.types';
+import { ScheduleStatus, SlotTimes } from '../../../types/schedule.types';
 
 const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
+    // Thay đổi view mặc định thành dayGridMonth
     const [view, setView] = useState('dayGridMonth');
     const calendarRef = React.useRef(null);
     const [calendarKey, setCalendarKey] = useState(Date.now()); // Thêm key để force re-render
+    const [currentWeekDays, setCurrentWeekDays] = useState([]);
+    const [currentDate, setCurrentDate] = useState(new Date());
     
     // Đảm bảo events là một mảng và lọc bỏ các sự kiện không hợp lệ
     const validEvents = React.useMemo(() => {
@@ -32,6 +36,29 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
     useEffect(() => {
         console.log('Calendar received events:', validEvents);
     }, [validEvents]);
+    
+    // Cập nhật danh sách các ngày trong tuần hiện tại
+    useEffect(() => {
+        if (view === 'listWeek') {
+            const weekStart = moment(currentDate).startOf('week').add(1, 'days'); // Bắt đầu từ thứ 2
+            
+            const days = [];
+            for (let i = 0; i < 6; i++) { // Thứ 2 đến thứ 7
+                days.push(moment(weekStart).add(i, 'days').format('YYYY-MM-DD'));
+            }
+            
+            setCurrentWeekDays(days);
+            console.log('Current week days:', days);
+        }
+    }, [view, currentDate]);
+    
+    // Cập nhật currentDate khi calendar thay đổi
+    useEffect(() => {
+        if (calendarRef.current) {
+            const calendarApi = calendarRef.current.getApi();
+            setCurrentDate(calendarApi.getDate());
+        }
+    }, [calendarKey]);
     
     const handleDateSelect = (selectInfo) => {
         const selectedDate = selectInfo.start;
@@ -56,11 +83,21 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
     const getStatusColor = (status) => {
         switch (status) {
             case ScheduleStatus.AVAILABLE:
-                return '#28a745'; // success
-            case ScheduleStatus.ON_LEAVE:
-                return '#ffc107'; // warning
+                return '#28a745'; // success - xanh lá (lịch trống)
+            case 'cancelled':
+                return '#dc3545'; // danger - đỏ (đã hủy)
+            case 'active':
+                return '#17a2b8'; // info - xanh dương (đang hoạt động)
+            case 'booked':
+                return '#ffc107'; // warning - vàng (đang chờ)
+            case 'pending_payment':
+                return '#fd7e14'; // orange - cam (chờ thanh toán)
+            case 'confirmed':
+                return '#6f42c1'; // purple - tím (đã thanh toán)
+            case 'completed':
+                return '#20c997'; // teal - xanh ngọc (hoàn thành)
             default:
-                return '#6c757d'; // secondary
+                return '#6c757d'; // secondary - xám (khác)
         }
     };
 
@@ -72,17 +109,30 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
             // Debug: Ghi log từng sự kiện
             console.log('Processing event:', event);
             
-        return {
-            id: event.id,
+            // Tạo đối tượng date từ date và slot
+            const eventDate = event.date;
+            const eventTime = event.slot || '08:00:00';
+            
+            // Kết hợp ngày và giờ để tạo datetime đầy đủ
+            const startDateTime = `${eventDate}T${eventTime}`;
+            
+            // Tính thời gian kết thúc (30 phút sau giờ bắt đầu)
+            const startMoment = moment(startDateTime);
+            const endMoment = moment(startDateTime).add(30, 'minutes');
+            const endDateTime = endMoment.format('YYYY-MM-DDTHH:mm:ss');
+            
+            return {
+                id: event.id,
                 title: event.title || 'Không xác định',
-            start: event.date,
-            color: getStatusColor(event.status),
-            extendedProps: {
-                ...event
-            },
-            allDay: true
-        };
-    });
+                start: startDateTime,
+                end: endDateTime,
+                color: getStatusColor(event.status),
+                extendedProps: {
+                    ...event
+                },
+                allDay: false // Đặt allDay thành false để hiển thị đúng trong chế độ tuần
+            };
+        });
     }, [validEvents, hasEvents]);
 
     // Render content cho ngày quá khứ và Chủ nhật
@@ -99,7 +149,7 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
         // Nếu là Chủ nhật, thêm class để hiển thị khác
         if (date.getDay() === 0) {
             info.el.classList.add('fc-day-sunday');
-            info.el.classList.add('fc-day-disabled');
+            // Không thêm fc-day-disabled nữa để không hiển thị gạch ngang
         }
     };
 
@@ -116,24 +166,55 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
         // Lấy thông tin phòng nếu có
         const roomInfo = eventData.roomCode ? `P.${eventData.roomCode}` : '';
         
-        // Xác định thời gian làm việc
-        let workingTime = 'Cả ngày';
-        if (eventData.morning && !eventData.afternoon) {
-            workingTime = 'Buổi sáng';
-        } else if (!eventData.morning && eventData.afternoon) {
-            workingTime = 'Buổi chiều';
-        }
+        // Lấy thông tin khung giờ
+        const slotTime = eventData.slot ? eventData.slot.substring(0, 5) : '';
         
-        // Luôn sử dụng class status-available cho tất cả sự kiện
-        return (
-            <div className="custom-event-content status-available">
-                <div className="event-title">{eventData.doctorName || 'Không có tên'}</div>
-                <div className="event-status">
-                    Làm việc: {workingTime}
-                    {roomInfo && ` - ${roomInfo}`}
+        // Lấy màu sắc theo trạng thái
+        const statusColor = getStatusColor(eventData.status);
+        
+        // Kiểm tra loại view hiện tại
+        const viewType = eventInfo.view.type;
+        
+        // Hiển thị theo từng loại view
+        if (viewType === 'dayGridMonth') {
+            // Hiển thị cho chế độ xem tháng - cập nhật để giống với chế độ xem tuần
+            return (
+                <div className="week-day-event">
+                    <div className="week-event-time">
+                        {slotTime}
+                    </div>
+                    <div className="week-event-content">
+                        <div className="week-event-title">
+                            {eventData.doctorName || 'Không có tên'}
+                        </div>
+                        {roomInfo && (
+                            <div className="week-event-room">
+                                {roomInfo}
+                            </div>
+                        )}
+                    </div>
                 </div>
-            </div>
-        );
+            );
+        } else if (viewType === 'listWeek') {
+            // Hiển thị cho chế độ xem danh sách tuần
+            return (
+                <div className="list-event-content">
+                    <div className="list-event-title">{eventData.doctorName || 'Không có tên'}</div>
+                    <div className="list-event-info">
+                        {slotTime && <span className="list-event-time">{slotTime}</span>}
+                        {roomInfo && <span className="list-event-room">{roomInfo}</span>}
+                    </div>
+                </div>
+            );
+        } else {
+            // Hiển thị cho các chế độ xem khác (timeGridWeek)
+            return (
+                <div className="time-event-content">
+                    <div className="time-event-title">{eventData.doctorName || 'Không có tên'}</div>
+                    {roomInfo && <div className="time-event-room">{roomInfo}</div>}
+                </div>
+            );
+        }
     };
 
     // Hàm xóa tất cả sự kiện
@@ -191,34 +272,66 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
 
     // Xử lý chuyển đến ngày hôm nay
     const handleTodayClick = () => {
-        if (calendarRef.current) {
+        setCurrentDate(new Date());
+        
+        if (calendarRef.current && view === 'dayGridMonth') {
             const calendarApi = calendarRef.current.getApi();
             calendarApi.today();
         }
     };
 
-    // Xử lý chuyển tháng trước
+    // Xử lý chuyển tháng/tuần trước
     const handlePrevClick = () => {
-        if (calendarRef.current) {
+        // Tính toán ngày mới dựa trên view hiện tại
+        const newDate = moment(currentDate);
+        if (view === 'dayGridMonth') {
+            newDate.subtract(1, 'month');
+        } else {
+            newDate.subtract(1, 'week');
+        }
+        setCurrentDate(newDate.toDate());
+        
+        if (calendarRef.current && view === 'dayGridMonth') {
             const calendarApi = calendarRef.current.getApi();
             calendarApi.prev();
         }
+        
+        // Force re-render cho chế độ xem tuần
+        if (view === 'listWeek') {
+            forceRerender();
+        }
     };
 
-    // Xử lý chuyển tháng sau
+    // Xử lý chuyển tháng/tuần sau
     const handleNextClick = () => {
-        if (calendarRef.current) {
+        // Tính toán ngày mới dựa trên view hiện tại
+        const newDate = moment(currentDate);
+        if (view === 'dayGridMonth') {
+            newDate.add(1, 'month');
+        } else {
+            newDate.add(1, 'week');
+        }
+        setCurrentDate(newDate.toDate());
+        
+        if (calendarRef.current && view === 'dayGridMonth') {
             const calendarApi = calendarRef.current.getApi();
             calendarApi.next();
+        }
+        
+        // Force re-render cho chế độ xem tuần
+        if (view === 'listWeek') {
+            forceRerender();
         }
     };
 
     // Xử lý thay đổi view
     const handleViewChange = (newView) => {
-        if (calendarRef.current) {
-            const calendarApi = calendarRef.current.getApi();
-            calendarApi.changeView(newView);
-            setView(newView);
+        setView(newView);
+        
+        // Force re-render khi chuyển view
+        if (newView === 'dayGridMonth') {
+            // Đặt lại key để force re-render calendar
+            setCalendarKey(Date.now());
         }
     };
 
@@ -235,96 +348,220 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
 
     // Xử lý cập nhật sự kiện khi calendar được khởi tạo và khi events thay đổi
     useEffect(() => {
-        // Đảm bảo calendar đã được khởi tạo
-        if (!calendarRef.current) return;
-        
-        const calendarApi = calendarRef.current.getApi();
-        
-        // Xóa tất cả sự kiện hiện tại
-        calendarApi.removeAllEvents();
-        
-        // Thêm sự kiện mới nếu có
-        if (calendarEvents.length > 0) {
-            console.log('Adding events to calendar:', calendarEvents.length);
-            calendarApi.addEventSource(calendarEvents);
+        // Đảm bảo calendar đã được khởi tạo và đang ở chế độ xem tháng
+        if (calendarRef.current && view === 'dayGridMonth') {
+            const calendarApi = calendarRef.current.getApi();
+            
+            // Xóa tất cả sự kiện hiện tại
+            calendarApi.removeAllEvents();
+            
+            // Thêm sự kiện mới nếu có
+            if (calendarEvents.length > 0) {
+                console.log('Adding events to calendar:', calendarEvents.length);
+                calendarApi.addEventSource(calendarEvents);
+            }
         }
-    }, [calendarEvents]);
+    }, [calendarEvents, view, calendarKey]);
+
+    // Hiển thị danh sách các ngày trong tuần khi ở chế độ xem tuần
+    const renderWeekDaysList = () => {
+        if (view !== 'listWeek' || currentWeekDays.length === 0) return null;
+        
+        // Lọc sự kiện theo từng ngày trong tuần
+        const eventsByDay = {};
+        currentWeekDays.forEach(day => {
+            eventsByDay[day] = validEvents.filter(event => event.date === day);
+        });
+        
+        // Lấy tiêu đề cho tuần hiện tại
+        const weekStart = moment(currentWeekDays[0]).format('DD/MM/YYYY');
+        const weekEnd = moment(currentWeekDays[currentWeekDays.length - 1]).format('DD/MM/YYYY');
+        const weekTitle = `${weekStart} - ${weekEnd}`;
+        
+        // Chuyển đổi tên ngày sang tiếng Việt
+        const getVietnameseDayName = (date) => {
+            const dayNames = ["Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"];
+            return dayNames[moment(date).day()];
+        };
+        
+        return (
+            <div className="week-view-container">
+                <div className="week-title">{weekTitle}</div>
+                <div className="week-days-list">
+                    {currentWeekDays.map((day, index) => {
+                        const dayEvents = eventsByDay[day] || [];
+                        const dayName = getVietnameseDayName(day); // Tên thứ trong tuần bằng tiếng Việt
+                        const dayNumber = moment(day).format('DD/MM'); // Ngày/tháng
+                        const isToday = moment(day).isSame(moment(), 'day');
+                        
+                        return (
+                            <div 
+                                key={day} 
+                                className={`week-day-item ${isToday ? 'today' : ''} ${dayEvents.length === 0 ? 'no-events' : ''}`}
+                                onClick={() => onDateSelect(new Date(day))}
+                            >
+                                <div className="week-day-header">
+                                    <div className="week-day-name">{dayName}</div>
+                                    <div className="week-day-number">{dayNumber}</div>
+                                </div>
+                                
+                                <div className="week-day-events">
+                                    {dayEvents.length > 0 ? (
+                                        dayEvents.map(event => (
+                                            <div 
+                                                key={event.id} 
+                                                className="week-day-event"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    onEventSelect(event);
+                                                }}
+                                            >
+                                                <div className="week-event-time">
+                                                    {event.slot ? event.slot.substring(0, 5) : '08:00'}
+                                                </div>
+                                                <div className="week-event-content">
+                                                    <div className="week-event-title">
+                                                        {event.doctorName || 'Không có tên'}
+                                                    </div>
+                                                    {event.roomCode && (
+                                                        <div className="week-event-room">
+                                                            P.{event.roomCode}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="no-events-day">Không có lịch</div>
+                                    )}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+        );
+    };
+
+    // Hiển thị tiêu đề lịch dựa trên view hiện tại
+    const renderCalendarTitle = () => {
+        const getVietnameseMonthName = (month) => {
+            const monthNames = ["Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6", 
+                                "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"];
+            return monthNames[month];
+        };
+        
+        if (view === 'dayGridMonth' && calendarRef.current) {
+            return <h3>{calendarRef.current.getApi().view.title}</h3>;
+        } else if (view === 'listWeek' && currentWeekDays.length > 0) {
+            const weekStart = moment(currentWeekDays[0]);
+            const weekEnd = moment(currentWeekDays[currentWeekDays.length - 1]);
+            
+            // Định dạng ngày tháng theo tiếng Việt
+            const startDay = weekStart.format('DD');
+            const startMonth = getVietnameseMonthName(weekStart.month());
+            const endDay = weekEnd.format('DD');
+            const endMonth = getVietnameseMonthName(weekEnd.month());
+            const year = weekEnd.format('YYYY');
+            
+            // Nếu cùng tháng
+            if (weekStart.month() === weekEnd.month()) {
+                return <h3>{startDay} - {endDay} {endMonth}, {year}</h3>;
+            } else {
+                return <h3>{startDay} {startMonth} - {endDay} {endMonth}, {year}</h3>;
+            }
+        }
+        
+        // Mặc định nếu không có view nào phù hợp
+        const currentMonth = getVietnameseMonthName(moment(currentDate).month());
+        const currentYear = moment(currentDate).format('YYYY');
+        return <h3>{currentMonth}, {currentYear}</h3>;
+    };
 
     return (
         <div className="calendar-container">
-            <div className="calendar-controls mb-3 d-flex justify-content-between align-items-center">
-                <div className="d-flex align-items-center">
-                    <button className="calendar-nav-button" onClick={handlePrevClick}>
-                        <BsChevronLeft />
-                    </button>
-                    <button className="today-button" onClick={handleTodayClick}>
-                        Hôm nay
-                    </button>
-                    <button className="calendar-nav-button" onClick={handleNextClick}>
-                        <BsChevronRight />
-                    </button>
+            <div className="calendar-header">
+                <div className="calendar-nav">
+                    <button className="btn-calendar-nav" onClick={handlePrevClick}><BsChevronLeft /></button>
+                    <button className="btn-calendar-today" onClick={handleTodayClick}>Hôm nay</button>
+                    <button className="btn-calendar-nav" onClick={handleNextClick}><BsChevronRight /></button>
                 </div>
-                <div className="view-buttons">
+                <div className="calendar-title">
+                    {renderCalendarTitle()}
+                </div>
+                <div className="calendar-view-buttons">
                     <button 
-                        className={`view-button ${view === 'dayGridMonth' ? 'active' : ''}`} 
+                        className={`btn-calendar-view ${view === 'dayGridMonth' ? 'active' : ''}`} 
                         onClick={() => handleViewChange('dayGridMonth')}
+                        title="Xem theo tháng"
                     >
-                        Tháng
+                        <BsCalendarMonth className="view-icon" />
+                        <span className="view-text">Tháng</span>
                     </button>
                     <button 
-                        className={`view-button ${view === 'timeGridWeek' ? 'active' : ''}`} 
-                        onClick={() => handleViewChange('timeGridWeek')}
+                        className={`btn-calendar-view ${view === 'listWeek' ? 'active' : ''}`} 
+                        onClick={() => handleViewChange('listWeek')}
+                        title="Xem danh sách theo tuần"
                     >
-                        Tuần
-                    </button>
-                    <button 
-                        className={`view-button ${view === 'timeGridDay' ? 'active' : ''}`} 
-                        onClick={() => handleViewChange('timeGridDay')}
-                    >
-                        Ngày
+                        <BsListUl className="view-icon" />
+                        <span className="view-text">Tuần</span>
                     </button>
                 </div>
             </div>
-
-                <FullCalendar
-                key={calendarKey}
-                    ref={calendarRef}
-                    plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, bootstrap5Plugin]}
-                    initialView="dayGridMonth"
-                headerToolbar={false}
-                locale={viLocale}
-                    selectable={true}
-                    selectMirror={true}
-                    dayMaxEvents={true}
-                    weekends={true}
-                    select={handleDateSelect}
-                    eventClick={handleEventClick}
-                    eventContent={eventContent}
-                dayCellDidMount={dayCellDidMount}
-                    height="auto"
-                    themeSystem="bootstrap5"
-                firstDay={1}
-                allDaySlot={false}
-                slotMinTime="08:00:00"
-                slotMaxTime="17:00:00"
-                slotDuration="01:00:00"
-                expandRows={true}
-                contentHeight="auto"
-                aspectRatio={1.8}
-                eventTimeFormat={{
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: false
-                }}
-                dayHeaderFormat={{
-                    weekday: 'long'
-                }}
-                eventDisplay="block"
-                fixedWeekCount={false}
-                showNonCurrentDates={true}
-                handleWindowResize={true}
-                forceEventDuration={true}
-                />
+            
+            <div className="calendar-main">
+                {view === 'listWeek' ? (
+                    renderWeekDaysList()
+                ) : (
+                    <FullCalendar
+                        ref={calendarRef}
+                        key={calendarKey}
+                        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, bootstrap5Plugin, listPlugin]}
+                        initialView="dayGridMonth"
+                        headerToolbar={false}
+                        height="auto"
+                        events={calendarEvents}
+                        selectable={true}
+                        selectMirror={true}
+                        dayMaxEvents={true}
+                        weekends={true}
+                        locale={viLocale}
+                        select={handleDateSelect}
+                        eventClick={handleEventClick}
+                        eventContent={eventContent}
+                        dayCellDidMount={dayCellDidMount}
+                        allDaySlot={false}
+                        slotDuration={'00:30:00'}
+                        slotLabelInterval={'01:00'}
+                        slotLabelFormat={{
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: false
+                        }}
+                        firstDay={1}
+                        views={{
+                            dayGridMonth: {
+                                titleFormat: { year: 'numeric', month: 'long' }
+                            },
+                            listWeek: {
+                                titleFormat: { year: 'numeric', month: 'short', day: '2-digit' },
+                                listDayFormat: { weekday: 'long', month: 'short', day: '2-digit' },
+                                listDaySideFormat: { weekday: 'short' }
+                            }
+                        }}
+                        eventTimeFormat={{
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: false
+                        }}
+                        noEventsContent={() => (
+                            <div className="no-events-message">
+                                <p>Không có lịch làm việc nào trong khoảng thời gian này</p>
+                            </div>
+                        )}
+                    />
+                )}
+            </div>
         </div>
     );
 };

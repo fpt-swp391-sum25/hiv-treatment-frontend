@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Calendar from './Calendar';
 import DoctorFilter from './DoctorFilter';
-import StatusFilter from './StatusFilter';
 import ScheduleForm from './ScheduleForm';
 import ScheduleDetail from './ScheduleDetail';
 import { Row, Col, ToastContainer, Toast, Form, Spinner, Alert } from 'react-bootstrap';
@@ -9,7 +8,7 @@ import { BsCalendarPlus } from 'react-icons/bs';
 import moment from 'moment';
 import './CustomButtons.css';
 import './Schedule.css';
-import { ScheduleStatus } from '../../../types/schedule.types';
+import { ScheduleStatus, StatusMapping } from '../../../types/schedule.types';
 import { getAllSchedulesAPI, updateScheduleAPI, deleteScheduleAPI, createScheduleAPI } from '../../../services/api.service';
 
 const ManagerSchedule = () => {
@@ -17,7 +16,6 @@ const ManagerSchedule = () => {
     const [showDetail, setShowDetail] = useState(false);
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [selectedDoctor, setSelectedDoctor] = useState(null);
-    const [selectedStatus, setSelectedStatus] = useState(null);
     const [selectedSchedule, setSelectedSchedule] = useState(null);
     const [schedules, setSchedules] = useState([]);
     const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
@@ -147,109 +145,96 @@ const ManagerSchedule = () => {
 
     const handleScheduleCreated = async (newSchedule) => {
         try {
-            // Chuẩn bị dữ liệu để gửi đến API
-            let scheduleData;
+            console.log('Starting to create schedule with data:', newSchedule);
             
+            // Nếu đó là một mảng (nhiều lịch), xử lý từng lịch một
             if (Array.isArray(newSchedule)) {
-                // Nếu là mảng lịch (lặp lại hàng tuần)
-                const allScheduleSlots = [];
+                console.log('Creating multiple schedules:', newSchedule.length);
+                const createdSchedules = [];
                 
-                // Tạo các slot cho mỗi lịch trong mảng
+                // Xử lý tuần tự các lịch để tránh race condition
                 for (const schedule of newSchedule) {
-                    const scheduleSlots = prepareScheduleData(schedule);
-                    if (scheduleSlots) {
-                        allScheduleSlots.push(...scheduleSlots);
-                    }
-                }
-                
-                scheduleData = allScheduleSlots;
-            } else {
-                // Nếu là một lịch đơn
-                scheduleData = prepareScheduleData(newSchedule);
-                if (!scheduleData) {
-                    showToast('Không thể tạo lịch: Không có slot nào được chọn', 'warning');
-                    return;
-                }
-            }
-            
-            console.log('Prepared schedule data:', scheduleData);
-            
-            // Gửi request tạo lịch
-            const responses = [];
-            const createdSchedules = [];
-            
-            // Nếu có nhiều lịch, gửi từng request một
-            if (Array.isArray(scheduleData)) {
-                for (const schedule of scheduleData) {
+                    const scheduleData = prepareScheduleData(schedule);
+                    console.log('Prepared data for API call:', scheduleData);
+                    
                     try {
-                        const response = await createScheduleAPI(schedule);
-                        console.log('Schedule creation response:', response);
+                        const response = await createScheduleAPI(scheduleData);
+                        console.log('Create schedule API response:', response);
                         
                         if (response && response.data) {
-                            responses.push(response);
-                            
-                            // Tạo đối tượng lịch từ response để hiển thị trên UI
-                            const formattedSchedule = {
-                                id: response.data.id || `new-${Date.now()}`,
-                                title: `${schedule.doctorId} - ${schedule.slot}`,
-                                date: schedule.date,
-                                doctorId: schedule.doctorId,
-                                doctorName: 'Bác sĩ', // Sẽ cập nhật sau khi refresh
-                                status: 'Đang hoạt động',
-                                slot: schedule.slot
-                            };
-                            
+                            const formattedSchedule = formatScheduleFromAPI(response.data);
                             createdSchedules.push(formattedSchedule);
+                            console.log('Successfully created and formatted schedule:', formattedSchedule);
+                        } else {
+                            console.warn('API returned success but no data for schedule:', scheduleData);
                         }
-                    } catch (err) {
-                        console.error('Error creating schedule:', err);
-                        showToast(`Lỗi khi tạo lịch: ${err.message}`, 'danger');
+                    } catch (error) {
+                        console.error('Error creating individual schedule:', error);
+                        console.error('Failed schedule data:', scheduleData);
+                        if (error.response) {
+                            console.error('Error response:', error.response.status, error.response.data);
+                        }
                     }
                 }
                 
+                // Cập nhật state với tất cả lịch đã tạo thành công
                 if (createdSchedules.length > 0) {
                     setSchedules(prevSchedules => [...prevSchedules, ...createdSchedules]);
-                    showToast(`Đã tạo ${createdSchedules.length} lịch làm việc`, 'success');
-                    
-                    // Làm mới dữ liệu từ server
-                    fetchSchedules();
+                    showToast(`Đã tạo ${createdSchedules.length}/${newSchedule.length} lịch thành công!`, 'success');
                 } else {
-                    showToast('Không thể tạo lịch, vui lòng thử lại sau', 'warning');
+                    showToast('Không thể tạo lịch, vui lòng kiểm tra log để biết chi tiết', 'danger');
+                }
+            } else {
+                // Xử lý một lịch đơn
+                const scheduleData = prepareScheduleData(newSchedule);
+                console.log('Prepared data for API call (single schedule):', scheduleData);
+                
+                const response = await createScheduleAPI(scheduleData);
+                console.log('Create schedule API response (single):', response);
+                
+                if (response && response.data) {
+                    console.log('API returned data:', response.data);
+                    const formattedSchedule = formatScheduleFromAPI(response.data);
+                    console.log('Formatted schedule:', formattedSchedule);
+                    
+                    // Thêm lịch mới vào state
+                    setSchedules(prevSchedules => [...prevSchedules, formattedSchedule]);
+                    
+                    showToast('Tạo lịch thành công!', 'success');
+                } else {
+                    console.warn('API returned success but no data');
+                    showToast('API trả về thành công nhưng không có dữ liệu', 'warning');
                 }
             }
+            
+            // Làm mới dữ liệu sau khi tạo lịch
+            setTimeout(() => {
+                fetchSchedules();
+            }, 500);
+            
         } catch (error) {
             console.error('Error in handleScheduleCreated:', error);
-            showToast(`Lỗi: ${error.message}`, 'danger');
+            if (error.response) {
+                console.error('Error response:', error.response.status, error.response.data);
+                showToast(`Lỗi: ${error.response.status} - ${JSON.stringify(error.response.data)}`, 'danger');
+            } else {
+                showToast(`Lỗi: ${error.message}`, 'danger');
+            }
         }
     };
 
     // Hàm chuẩn bị dữ liệu lịch để gửi đến API
     const prepareScheduleData = (schedule) => {
         // Chuyển đổi từ dữ liệu form sang định dạng API
-        // Chuyển đổi morning/afternoon thành các slot cụ thể
-        let slots = [];
-        
-        if (schedule.morning) {
-            slots.push('08:00:00'); // Slot buổi sáng
-        }
-        
-        if (schedule.afternoon) {
-            slots.push('14:00:00'); // Slot buổi chiều
-        }
-        
-        // Nếu không có slot nào được chọn, trả về null
-        if (slots.length === 0) {
-            return null;
-        }
-        
-        // Tạo một mảng các lịch với các slot khác nhau
-        return slots.map(slot => ({
-            type: 'Khám', // Mặc định là khám
-            roomCode: Math.floor(Math.random() * 5 + 1) * 100 + Math.floor(Math.random() * 10), // Tạo mã phòng ngẫu nhiên (100-599)
+        return {
+            type: null, // Manager tạo lịch trống với type=null
+            roomCode: schedule.roomCode || Math.floor(Math.random() * 5 + 1) * 100 + Math.floor(Math.random() * 10), // Sử dụng roomCode từ form hoặc tạo mã phòng ngẫu nhiên (100-599)
             date: schedule.date, // Giữ nguyên định dạng YYYY-MM-DD
-            slot: slot,
-            doctorId: parseInt(schedule.doctorId)
-        }));
+            slot: schedule.slot, // Sử dụng slot từ form (định dạng HH:mm:ss)
+            doctorId: parseInt(schedule.doctorId),
+            status: 'Trống', // Đặt trạng thái là "Trống" theo yêu cầu của BE
+            patient_id: null // Thêm patient_id: null theo schema DB
+        };
     };
 
     // Hàm định dạng dữ liệu lịch từ API để hiển thị trên UI
@@ -265,7 +250,7 @@ const ManagerSchedule = () => {
             // Lấy thông tin từ đối tượng schedule
             const id = schedule.id || `temp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
             const date = schedule.date;
-            const slot = schedule.slot;
+            const slot = schedule.slot || '08:00:00'; // Mặc định là 8:00 nếu không có slot
             
             // Xử lý nhiều cách để lấy doctorId
             let doctorId = null;
@@ -289,35 +274,26 @@ const ManagerSchedule = () => {
                 doctorName = schedule.doctor.name;
             }
             
-            // Luôn đặt trạng thái là "Đang hoạt động"
-            const status = 'available';
-            const type = schedule.type || 'Khám';
-            const roomCode = schedule.roomCode || schedule.room_code || '100';
-            
-            // Xác định buổi dựa trên slot
-            let isMorning = false;
-            let isAfternoon = false;
-            
-            if (slot) {
-                const hourStr = slot.split(':')[0];
-                const hour = parseInt(hourStr);
-                
-                if (hour >= 8 && hour < 12) {
-                    isMorning = true;
-                } else if (hour >= 13 && hour < 18) {
-                    isAfternoon = true;
-                }
-            } else {
-                // Nếu không có slot, mặc định là cả ngày
-                isMorning = true;
-                isAfternoon = true;
+            // Chuyển đổi status từ BE sang FE
+            let status = 'available'; // default
+            if (schedule.status && StatusMapping[schedule.status]) {
+                status = StatusMapping[schedule.status];
+            } else if (schedule.status) {
+                status = schedule.status;
             }
             
-            console.log(`Formatted schedule ${id}: morning=${isMorning}, afternoon=${isAfternoon}`);
+            const type = schedule.type || null;
+            const roomCode = schedule.roomCode || schedule.room_code || '100';
+            
+            // Định dạng hiển thị khung giờ
+            const slotDisplay = slot ? slot.substring(0, 5) : '08:00';
+            
+            // Tạo title với thông tin đầy đủ hơn
+            const title = `${doctorName} - ${slotDisplay} - P.${roomCode}`;
             
             return {
                 id: id,
-                title: `${doctorName} - Làm việc`, // Luôn hiển thị "Làm việc"
+                title: title,
                 date: date,
                 doctorId: doctorId,
                 doctorName: doctorName,
@@ -325,8 +301,7 @@ const ManagerSchedule = () => {
                 type: type,
                 roomCode: roomCode,
                 slot: slot,
-                morning: isMorning,
-                afternoon: isAfternoon
+                original_status: schedule.status // Lưu trữ status nguyên bản từ BE
             };
         } catch (error) {
             console.error('Error formatting schedule:', error, schedule);
@@ -456,11 +431,6 @@ const ManagerSchedule = () => {
             match = match && schedule.doctorId?.toString() === selectedDoctor.toString();
         }
         
-        // Lọc theo trạng thái
-        if (selectedStatus) {
-            match = match && schedule.status === selectedStatus;
-        }
-        
         return match;
     }) : [];
 
@@ -526,6 +496,16 @@ const ManagerSchedule = () => {
         showToast('Đã làm mới dữ liệu', 'success');
     };
 
+    // Hàm chuyển đổi thứ sang tiếng Việt
+    const formatVietnameseDay = (date) => {
+        const weekdays = [
+            'Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 
+            'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'
+        ];
+        const dayOfWeek = moment(date).day(); // 0 = Chủ nhật, 1 = Thứ hai, ...
+        return weekdays[dayOfWeek];
+    };
+
     return (
         <div className="container-fluid py-4">
             <div className="schedule-header">
@@ -556,19 +536,13 @@ const ManagerSchedule = () => {
             )}
 
             <Row className="mb-4 filter-row">
-                <Col md={4} className="filter-col">
+                <Col md={3} className="filter-col">
                     <DoctorFilter 
                         onDoctorSelect={setSelectedDoctor} 
                         selectedDoctor={selectedDoctor} 
                     />
                 </Col>
-                <Col md={4} className="filter-col">
-                    <StatusFilter 
-                        onStatusSelect={setSelectedStatus} 
-                        selectedStatus={selectedStatus} 
-                    />
-                </Col>
-                <Col md={4} className="filter-col text-end">
+                <Col md={9} className="filter-col text-end">
                     <div className="button-container">
                         <button 
                             className="add-schedule-button"
@@ -577,20 +551,6 @@ const ManagerSchedule = () => {
                         >
                             <BsCalendarPlus className="me-2" />
                             Thêm lịch mới
-                        </button>
-                        <button 
-                            className="refresh-button ms-2"
-                            onClick={handleRefreshData}
-                            disabled={loading}
-                        >
-                            {loading ? (
-                                <>
-                                    <Spinner animation="border" size="sm" className="me-1" />
-                                    Đang tải...
-                                </>
-                            ) : (
-                                'Làm mới dữ liệu'
-                            )}
                         </button>
                     </div>
                 </Col>

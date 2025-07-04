@@ -1,12 +1,12 @@
 .schedule-detail-modal .modal-content {
     border-radius: 8px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     border: none;
 }
 
 .schedule-detail-modal .modal-header {
     background-color: #f8f9fa;
-    border-bottom: 1px solid #ebedf0;
+    border-bottom: 1px solid #eee;
     padding: 15px 20px;
 }
 
@@ -20,7 +20,7 @@
 }
 
 .schedule-detail-modal .modal-footer {
-    border-top: 1px solid #ebedf0;
+    border-top: 1px solid #eee;
     padding: 15px 20px;
 }
 
@@ -81,4 +81,35 @@
     color: #721c24;
     border-radius: 6px;
     padding: 12px 15px;
+}
+
+.schedule-info-section {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
+
+.update-section {
+    background-color: #ffffff;
+    border-radius: 8px;
+}
+
+.system-info {
+    color: #6c757d;
+    font-size: 0.85rem;
+}
+
+.schedule-detail-modal .badge {
+    font-size: 0.85rem;
+    padding: 5px 10px;
+    border-radius: 4px;
+}
+
+.schedule-detail-modal h5 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #495057;
+}
+
+.schedule-detail-modal .text-muted {
+    color: #6c757d !important;
 }

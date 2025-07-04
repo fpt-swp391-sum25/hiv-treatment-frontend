@@ -3,7 +3,29 @@
 }
 
 .dashboard-stats {
-    margin-bottom: 24px;
+    margin-bottom: 20px;
+}
+
+.dashboard-stats .ant-card {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.09);
+    border-radius: 8px;
+    transition: all 0.3s;
+}
+
+.dashboard-stats .ant-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+}
+
+.dashboard-stats .ant-statistic-title {
+    font-size: 16px;
+    color: rgba(0, 0, 0, 0.65);
+}
+
+.dashboard-stats .ant-statistic-content {
+    font-size: 24px;
+    font-weight: 600;
+    color: #1890ff;
 }
 
 .doctor-table {
