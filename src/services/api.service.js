@@ -424,14 +424,46 @@ const updateScheduleAPI = (scheduleId, scheduleData) => {
     console.log(`API endpoint: ${URL_BACKEND}`);
     console.log(`Room code being sent: ${formattedData.roomCode}`);
     
+    // Thêm thông tin debug
+    debugRequest(URL_BACKEND, 'PUT', formattedData);
+    
+    // Thử endpoint chính trước
     return axios.put(URL_BACKEND, formattedData)
         .then(response => {
             console.log('API response data:', response.data);
             return response;
         })
         .catch(error => {
-            console.error('API error:', error.response || error);
-            throw error;
+            console.error('API error with primary endpoint:', error.response || error);
+            
+            // Nếu endpoint chính thất bại, thử endpoint thay thế
+            console.log('Trying alternative endpoint...');
+            const ALT_URL_BACKEND = `/api/schedule/${scheduleId}`;
+            console.log(`Alternative API endpoint: ${ALT_URL_BACKEND}`);
+            
+            // Thêm thông tin debug cho endpoint thay thế
+            debugRequest(ALT_URL_BACKEND, 'PUT', formattedData);
+            
+            return axios.put(ALT_URL_BACKEND, formattedData)
+                .then(response => {
+                    console.log('Alternative API response data:', response.data);
+                    return response;
+                })
+                .catch(altError => {
+                    console.error('API error with alternative endpoint:', altError.response || altError);
+                    
+                    // Nếu cả hai endpoint đều thất bại, thử một cách tiếp cận khác
+                    console.log('Both endpoints failed, trying with PATCH method...');
+                    return axios.patch(URL_BACKEND, formattedData)
+                        .then(response => {
+                            console.log('PATCH method response data:', response.data);
+                            return response;
+                        })
+                        .catch(patchError => {
+                            console.error('All update attempts failed');
+                            throw error; // Ném lỗi ban đầu
+                        });
+                });
         });
 }
 
@@ -1006,34 +1038,49 @@ const fetchAppointmentStatisticsAPI = (filters = {}) => {
     });
 };
 
+// Thêm hàm kiểm tra kết nối đến backend
+const checkBackendConnection = () => {
+    const URL_BACKEND = '/api/health';
+    console.log('Checking backend connection...');
+    
+    return axios.get(URL_BACKEND)
+        .then(response => {
+            console.log('Backend connection successful:', response.data);
+            return { success: true, data: response.data };
+        })
+        .catch(error => {
+            console.error('Backend connection failed:', error);
+            return { success: false, error };
+        });
+};
+
+// Export tất cả các hàm API
 export {
     loginAPI,
     registerAPI,
     bookingAPI,
     cancelBookingAPI,
-    createAccountAPI,
-    fetchAccountByRoleAPI,
-    deleteAccountAPI,
-    updateAccountAPI,
-    fetchDoctorProfileAPI,
-    fetchScheduleAPI,
-    fetchAccountAPI,
-    fetchAllPatientScheduleAPI,
-    fetchAvailableSlotAPI,
     fetchAllScheduleAPI,
     fetchScheduleByDateAPI,
-    initiatePaymentAPI,
     registerScheduleAPI,
+    initiatePaymentAPI,
+    createAccountAPI,
     handlePaymentCallbackAPI,
+    fetchAllPatientScheduleAPI,
+    fetchAccountByRoleAPI,
+    updateAccountAPI,
+    deleteAccountAPI,
+    fetchDoctorProfileAPI,
+    fetchScheduleAPI,
+    fetchAvailableSlotAPI,
+    fetchAccountAPI,
     logoutAPI,
-    fetchUserInfoAPI,
     fetchAllDoctorsAPI,
     fetchDoctorByIdAPI,
     updateDoctorProfileAPI,
     fetchDoctorStatisticsAPI,
     fetchAllDocumentsAPI,
     fetchUsersAPI,
-    updateProfileAPI,
     fetchHealthRecordByScheduleIdAPI,
     createHealthRecordAPI,
     fetchTestResultByHealthRecordIdAPI,
@@ -1041,18 +1088,15 @@ export {
     deleteTestResultAPI,
     createTestResultAPI,
     updateTestResultAPI,
-
+    fetchUserInfoAPI,
+    updateProfileAPI,
     fetchScheduleByDoctorIdAPI,
     fetchRegimensByDoctorIdAPI,
     fetchAllRegimensAPI,
     createRegimenAPI,
     updateRegimenAPI,
     deleteRegimenAPI,
-
     updateUserAPI,
-
-
-    // Thêm các API mới
     createScheduleAPI,
     getAllSchedulesAPI,
     getSchedulesByDoctorAPI,
@@ -1067,9 +1111,9 @@ export {
     fetchDoctorProfileByDoctorIdAPI,
     createDoctorProfileAPI,
     checkAvailableSlotsAPI,
-    // Thêm các API thống kê mới
     fetchDashboardStatisticsAPI,
     fetchStaffStatisticsAPI,
     fetchPatientStatisticsAPI,
-    fetchAppointmentStatisticsAPI
+    fetchAppointmentStatisticsAPI,
+    checkBackendConnection
 }

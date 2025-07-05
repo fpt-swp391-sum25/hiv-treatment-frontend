@@ -280,9 +280,11 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             // Thông báo số lịch được tạo
             if (schedules.length > 0) {
                 console.log('Creating multiple schedules for shift:', schedules);
-                onScheduleCreated(schedules);
-                const shiftName = formData.shiftType === 'morning' ? 'sáng' : 'chiều';
-                onShowToast(`Đã tạo ${schedules.length} lịch cho ca ${shiftName} thành công!`, 'success');
+                setTimeout(() => {
+                    onScheduleCreated(schedules);
+                    const shiftName = formData.shiftType === 'morning' ? 'sáng' : 'chiều';
+                    onShowToast(`Đã tạo ${schedules.length} lịch cho ca ${shiftName} thành công!`, 'success');
+                }, 0);
             } else {
                 onShowToast('Không thể tạo lịch do trùng lặp với lịch hiện có', 'warning');
             }
@@ -302,68 +304,26 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             return;
         }
 
-        // Tạo lịch mới
-        if (formData.repeatWeekly && formData.repeatCount > 1) {
-            // Tạo nhiều lịch lặp lại theo tuần
-            const schedules = [];
-            
-            for (let i = 0; i < formData.repeatCount; i++) {
-                const newDate = moment(formData.date).add(i * 7, 'days').format('YYYY-MM-DD');
-                
-                // Kiểm tra xem ngày mới có trùng với lịch hiện có không
-                const hasConflict = existingSchedules.some(schedule => 
-                    schedule.date === newDate && 
-                    schedule.doctorId.toString() === formData.doctorId.toString() &&
-                    schedule.slot === formData.slot
-                );
-                
-                if (!hasConflict) {
-                    const selectedDoc = doctors.find(doc => doc.id.toString() === formData.doctorId.toString());
-                    const doctorName = selectedDoc ? selectedDoc.name : '';
-                    
-                    const newSchedule = {
-                        doctorId: formData.doctorId,
-                        doctorName: doctorName,
-                        date: newDate,
-                        status: StatusMapping[formData.status] || 'Trống',
-                        slot: formData.slot,
-                        roomCode: formData.roomCode,
-                        type: null,
-                        patient_id: null
-                    };
-                    
-                    schedules.push(newSchedule);
-                }
-            }
-            
-            // Thông báo số lịch được tạo
-            if (schedules.length > 0) {
-                console.log('Creating multiple schedules:', schedules);
-                onScheduleCreated(schedules);
-                    onShowToast(`Đã tạo ${schedules.length} lịch thành công!`, 'success');
-            } else {
-                onShowToast('Không thể tạo lịch do trùng lặp với lịch hiện có', 'warning');
-            }
-        } else {
-            // Tạo một lịch đơn
-            const selectedDoc = doctors.find(doc => doc.id.toString() === formData.doctorId.toString());
-            const doctorName = selectedDoc ? selectedDoc.name : '';
-            
-            const newSchedule = {
-                doctorId: formData.doctorId,
-                doctorName: doctorName,
-                date: formData.date,
-                status: StatusMapping[formData.status] || 'Trống',
-                slot: formData.slot,
-                roomCode: formData.roomCode,
-                type: null,
-                patient_id: null
-            };
-            
-            console.log('Creating single schedule:', newSchedule);
+        // Tạo một lịch đơn
+        const selectedDoc = doctors.find(doc => doc.id.toString() === formData.doctorId.toString());
+        const doctorName = selectedDoc ? selectedDoc.name : '';
+        
+        const newSchedule = {
+            doctorId: formData.doctorId,
+            doctorName: doctorName,
+            date: formData.date,
+            status: StatusMapping[formData.status] || 'Trống',
+            slot: formData.slot,
+            roomCode: formData.roomCode,
+            type: null,
+            patient_id: null
+        };
+        
+        console.log('Creating single schedule:', newSchedule);
+        setTimeout(() => {
             onScheduleCreated(newSchedule);
-            }
-        }
+        }, 0);
+    }
         
         onHide();
     };
@@ -435,7 +395,7 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                                                 </span>
                                             </div>
                                         )}
-                                    </Form.Group>
+                            </Form.Group>
                         </Col>
                     </Row>
                     <Row>
@@ -626,8 +586,8 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                             onClick={onHide}
                             className="btn-action"
                         >
-                            Hủy
-                        </Button>
+                        Hủy
+                    </Button>
                         <Button 
                             variant="outline-primary" 
                             onClick={handleSubmit}
@@ -642,7 +602,7 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                             ) : (
                                 'Tạo lịch'
                             )}
-                        </Button>
+                    </Button>
                     </div>
                 </div>
             </Modal.Footer>

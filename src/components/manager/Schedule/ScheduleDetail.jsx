@@ -85,6 +85,16 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
 
         setLoading(true);
         try {
+            // Kiểm tra và đảm bảo roomCode luôn có giá trị
+            if (!formData.roomCode) {
+                formData.roomCode = '101'; // Giá trị mặc định nếu không có
+            }
+            
+            // Debug: Kiểm tra dữ liệu trước khi gửi đi
+            console.log('Form data before update:', formData);
+            console.log('Room code before update:', formData.roomCode);
+            console.log('Schedule ID before update:', formData.id);
+            
             // Giữ nguyên trạng thái hiện tại
             const beStatus = formData.original_status || StatusMapping[formData.status] || formData.status;
             
@@ -105,10 +115,13 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
             
             console.log('ScheduleDetail: Updating schedule with room:', updatedSchedule.roomCode);
             
-            // Gọi hàm cập nhật từ component cha
-            onUpdate(updatedSchedule);
-            handleClose();
-            onShowToast('Cập nhật lịch thành công', 'success');
+            // Sử dụng setTimeout để tránh FlushSync error
+            setTimeout(() => {
+                // Gọi hàm cập nhật từ component cha
+                onUpdate(updatedSchedule);
+                handleClose();
+                onShowToast('Cập nhật lịch thành công', 'success');
+            }, 0);
         } catch (error) {
             console.error('Error updating schedule:', error);
             onShowToast('Có lỗi xảy ra khi cập nhật lịch', 'danger');
@@ -142,10 +155,13 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
             const response = await deleteScheduleAPI(schedule.id);
             console.log('Delete response:', response);
             
-            // Thông báo thành công và đóng modal
-            onShowToast('Đã xóa lịch thành công', 'success');
-            onDelete(schedule.id);
-            onHide();
+            // Sử dụng setTimeout để tránh FlushSync error
+            setTimeout(() => {
+                // Thông báo thành công và đóng modal
+                onShowToast('Đã xóa lịch thành công', 'success');
+                onDelete(schedule.id);
+                onHide();
+            }, 0);
         } catch (error) {
             console.error('Error deleting schedule:', error);
             onShowToast('Không thể xóa lịch, vui lòng thử lại sau', 'danger');
