@@ -399,73 +399,49 @@ const getSchedulesByStatusAPI = (status) => {
     return axios.get(URL_BACKEND);
 }
 
-const updateScheduleAPI = (scheduleId, scheduleData) => {
-    const URL_BACKEND = `/api/schedule/update/schedule-id/${scheduleId}`;
-    
-    // Import StatusMapping
-    const { StatusMapping } = require('../types/schedule.types');
-    
-    // Chuyển đổi status từ FE sang BE
-    let beStatus = scheduleData.status;
-    if (StatusMapping[scheduleData.status]) {
-        beStatus = StatusMapping[scheduleData.status];
+const updateScheduleAPI = async (scheduleId, scheduleData) => {
+    console.log('=== BẮT ĐẦU QUY TRÌNH CẬP NHẬT LỊCH ===');
+    console.log('1. Thông tin cập nhật:', { scheduleId, ...scheduleData });
+
+    try {
+        // 1. Xóa lịch cũ
+        console.log('2. Tiến hành xóa lịch cũ:', scheduleId);
+        await deleteScheduleAPI(scheduleId);
+        console.log('3. Đã xóa lịch cũ thành công');
+
+        // 2. Tạo lịch mới với thông tin đã cập nhật
+        const createData = {
+            date: scheduleData.date,
+            slot: scheduleData.slot,
+            roomCode: scheduleData.roomCode || '101',
+            status: scheduleData.status === 'available' ? 'Trống' : scheduleData.status,
+            doctorId: parseInt(scheduleData.doctorId),
+            type: null
+        };
+        
+        console.log('4. Tạo lịch mới với dữ liệu:', createData);
+        const createResponse = await createScheduleAPI(createData);
+        console.log('5. Tạo lịch mới thành công:', createResponse.data);
+
+        // 3. Refresh danh sách lịch
+        console.log('6. Lấy danh sách lịch mới nhất');
+        const updatedList = await getAllSchedulesAPI();
+        console.log('7. Hoàn tất cập nhật');
+
+        return updatedList;
+    } catch (error) {
+        console.error('=== LỖI TRONG QUÁ TRÌNH CẬP NHẬT ===');
+        if (error.response) {
+            console.error('Mã lỗi:', error.response.status);
+            console.error('Thông báo từ server:', error.response.data);
+        } else if (error.request) {
+            console.error('Không nhận được phản hồi từ server');
+        } else {
+            console.error('Lỗi:', error.message);
+        }
+        throw error;
     }
-    
-    // Đảm bảo scheduleData có định dạng đúng theo yêu cầu của BE
-    const formattedData = {
-        date: scheduleData.date,
-        slot: scheduleData.slot,
-        roomCode: scheduleData.roomCode,
-        status: beStatus,
-        doctorId: parseInt(scheduleData.doctorId)
-    };
-    
-    console.log(`Updating schedule ${scheduleId} with data:`, formattedData);
-    console.log(`API endpoint: ${URL_BACKEND}`);
-    console.log(`Room code being sent: ${formattedData.roomCode}`);
-    
-    // Thêm thông tin debug
-    debugRequest(URL_BACKEND, 'PUT', formattedData);
-    
-    // Thử endpoint chính trước
-    return axios.put(URL_BACKEND, formattedData)
-        .then(response => {
-            console.log('API response data:', response.data);
-            return response;
-        })
-        .catch(error => {
-            console.error('API error with primary endpoint:', error.response || error);
-            
-            // Nếu endpoint chính thất bại, thử endpoint thay thế
-            console.log('Trying alternative endpoint...');
-            const ALT_URL_BACKEND = `/api/schedule/${scheduleId}`;
-            console.log(`Alternative API endpoint: ${ALT_URL_BACKEND}`);
-            
-            // Thêm thông tin debug cho endpoint thay thế
-            debugRequest(ALT_URL_BACKEND, 'PUT', formattedData);
-            
-            return axios.put(ALT_URL_BACKEND, formattedData)
-                .then(response => {
-                    console.log('Alternative API response data:', response.data);
-                    return response;
-                })
-                .catch(altError => {
-                    console.error('API error with alternative endpoint:', altError.response || altError);
-                    
-                    // Nếu cả hai endpoint đều thất bại, thử một cách tiếp cận khác
-                    console.log('Both endpoints failed, trying with PATCH method...');
-                    return axios.patch(URL_BACKEND, formattedData)
-                        .then(response => {
-                            console.log('PATCH method response data:', response.data);
-                            return response;
-                        })
-                        .catch(patchError => {
-                            console.error('All update attempts failed');
-                            throw error; // Ném lỗi ban đầu
-                        });
-                });
-        });
-}
+};
 
 const deleteScheduleAPI = (scheduleId) => {
     const URL_BACKEND = `/api/schedule/${scheduleId}`;

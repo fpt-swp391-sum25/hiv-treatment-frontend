@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Modal, Button, Form, Alert, Row, Col, Spinner, Badge } from 'react-bootstrap';
 import { ScheduleStatus, SlotTimes, StatusMapping } from '../../../types/schedule.types';
 import moment from 'moment';
-import { deleteScheduleAPI } from '../../../services/api.service';
+import { deleteScheduleAPI, updateScheduleAPI } from '../../../services/api.service';
 import './ScheduleDetail.css';
 import { BsCalendarWeek, BsClock, BsDoorOpen, BsPerson, BsBriefcase } from 'react-icons/bs';
 
@@ -21,6 +21,9 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
     const [loading, setLoading] = useState(false);
     const [confirmDelete, setConfirmDelete] = useState(false);
     const [deleting, setDeleting] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [selectedSchedule, setSelectedSchedule] = useState(null);
+    const [schedules, setSchedules] = useState([]);
 
     // Sử dụng SlotTimes từ schedule.types.js
     const timeSlots = SlotTimes;
@@ -37,6 +40,15 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
     useEffect(() => {
         if (schedule) {
             console.log('ScheduleDetail: Received schedule data:', schedule);
+            
+            // Xác định shiftType từ trường type (theo phản hồi từ BE)
+            let shiftTypeValue = null;
+            if (schedule.type === 'morning' || schedule.type === 'afternoon') {
+                shiftTypeValue = schedule.type;
+            } else if (schedule.shiftType) {
+                shiftTypeValue = schedule.shiftType;
+            }
+            
             setFormData({
                 id: schedule.id,
                 doctorId: schedule.doctorId,
@@ -46,7 +58,8 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                 slot: schedule.slot || '08:00:00',
                 roomCode: schedule.roomCode || '',
                 original_status: schedule.original_status, // Lưu trạng thái gốc từ BE
-                shiftType: schedule.shiftType || null // Thêm thông tin ca làm việc
+                shiftType: shiftTypeValue, // Lấy từ type hoặc shiftType
+                type: schedule.type // Lưu trữ trường type gốc
             });
         }
         
@@ -78,6 +91,11 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
     const handleSubmit = async (e) => {
         e.preventDefault();
         
+        // DEBUG: Log dữ liệu form trước khi xử lý
+        console.log('=== BẮT ĐẦU CẬP NHẬT LỊCH ===');
+        console.log('1. Dữ liệu form:', formData);
+        console.log('2. ID lịch cần cập nhật:', formData.id);
+        
         if (!formData.slot && formData.status === "available") {
             onShowToast('Vui lòng chọn khung giờ làm việc', 'danger');
             return;
@@ -90,13 +108,14 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                 formData.roomCode = '101'; // Giá trị mặc định nếu không có
             }
             
-            // Debug: Kiểm tra dữ liệu trước khi gửi đi
-            console.log('Form data before update:', formData);
-            console.log('Room code before update:', formData.roomCode);
-            console.log('Schedule ID before update:', formData.id);
+            // DEBUG: Log thông tin quan trọng
+            console.log('3. Thông tin phòng:', formData.roomCode);
+            console.log('4. Ca làm việc:', formData.shiftType);
+            console.log('5. Trạng thái:', formData.status);
             
             // Giữ nguyên trạng thái hiện tại
             const beStatus = formData.original_status || StatusMapping[formData.status] || formData.status;
+            console.log('6. Trạng thái gửi lên server:', beStatus);
             
             // Cập nhật title dựa trên trạng thái
             let title = `${formData.doctorName} - ${formData.slot.substring(0, 5)} - P.${formData.roomCode}`;
@@ -110,20 +129,29 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
             const updatedSchedule = {
                 ...formData,
                 title: title,
-                original_status: beStatus // Lưu trữ status BE
+                original_status: beStatus,
+                type: formData.shiftType
             };
             
-            console.log('ScheduleDetail: Updating schedule with room:', updatedSchedule.roomCode);
+            // DEBUG: Log dữ liệu cuối cùng trước khi gửi
+            console.log('7. Dữ liệu cuối cùng sẽ gửi đi:', updatedSchedule);
             
             // Sử dụng setTimeout để tránh FlushSync error
             setTimeout(() => {
-                // Gọi hàm cập nhật từ component cha
-                onUpdate(updatedSchedule);
-                handleClose();
-                onShowToast('Cập nhật lịch thành công', 'success');
+                try {
+                    // DEBUG: Log thời điểm gọi hàm cập nhật
+                    console.log('8. Bắt đầu gọi hàm cập nhật');
+                    onUpdate(updatedSchedule);
+                    handleClose();
+                    onShowToast('Cập nhật lịch thành công', 'success');
+                    console.log('=== KẾT THÚC CẬP NHẬT LỊCH ===');
+                } catch (error) {
+                    console.error('9. Lỗi khi gọi hàm cập nhật:', error);
+                    onShowToast('Có lỗi xảy ra khi cập nhật lịch', 'danger');
+                }
             }, 0);
         } catch (error) {
-            console.error('Error updating schedule:', error);
+            console.error('10. Lỗi trong quá trình xử lý:', error);
             onShowToast('Có lỗi xảy ra khi cập nhật lịch', 'danger');
         } finally {
             setLoading(false);
@@ -200,6 +228,34 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
     const getShiftName = (shiftType) => {
         if (!shiftType) return null;
         return shiftType === 'morning' ? 'Ca sáng (08:00 - 11:30)' : 'Ca chiều (13:00 - 16:30)';
+    };
+
+    const handleUpdateSchedule = async () => {
+        try {
+            setIsLoading(true);
+            const updatedScheduleData = {
+                date: selectedSchedule.date,
+                slot: selectedSchedule.slot,
+                roomCode: selectedSchedule.roomCode,
+                status: selectedSchedule.status,
+                doctorId: selectedSchedule.doctorId,
+            };
+
+            console.log('Bắt đầu cập nhật lịch:', selectedSchedule.id);
+            const updatedSchedules = await updateScheduleAPI(selectedSchedule.id, updatedScheduleData);
+            
+            // Cập nhật state với danh sách lịch mới
+            if (updatedSchedules?.data) {
+                setSchedules(updatedSchedules.data);
+                message.success('Cập nhật lịch thành công!');
+                handleClose();
+            }
+        } catch (error) {
+            console.error('Lỗi khi cập nhật lịch:', error);
+            message.error('Không thể cập nhật lịch. Vui lòng thử lại!');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     if (!schedule) {

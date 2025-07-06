@@ -259,15 +259,19 @@ const ManagerSchedule = () => {
             status = 'Trống';
         }
         
+        // Sử dụng trường type để lưu thông tin ca làm việc (shiftType)
+        // Theo phản hồi từ BE, trường type có thể dùng để lưu shiftType
+        const typeValue = schedule.shiftType || schedule.type;
+        
         return {
-            type: schedule.type !== undefined ? schedule.type : null,
+            // Nếu đã có type từ trước, giữ nguyên nếu không có shiftType
+            type: typeValue,
             roomCode: schedule.roomCode, // Sử dụng roomCode từ form
             date: schedule.date, // Giữ nguyên định dạng YYYY-MM-DD
             slot: schedule.slot, // Sử dụng slot từ form (định dạng HH:mm:ss)
             doctorId: parseInt(schedule.doctorId),
             status: status,
-            patient_id: schedule.patient_id !== undefined ? schedule.patient_id : null,
-            shiftType: schedule.shiftType || null // Thêm thông tin ca làm việc (nếu có)
+            patient_id: schedule.patient_id !== undefined ? schedule.patient_id : null
         };
     };
 
@@ -316,11 +320,12 @@ const ManagerSchedule = () => {
                 status = schedule.status;
             }
             
+            // Lấy thông tin ca làm việc từ trường type
+            // Theo phản hồi từ BE, trường type có thể chứa thông tin ca làm việc
             const type = schedule.type || null;
-            const roomCode = schedule.roomCode || schedule.room_code || '100';
+            const shiftType = type === 'morning' || type === 'afternoon' ? type : null;
             
-            // Lấy thông tin ca làm việc (nếu có)
-            const shiftType = schedule.shiftType || null;
+            const roomCode = schedule.roomCode || schedule.room_code || '100';
             
             // Định dạng hiển thị khung giờ
             const slotDisplay = slot ? slot.substring(0, 5) : '08:00';
@@ -345,7 +350,7 @@ const ManagerSchedule = () => {
                 roomCode: roomCode,
                 slot: slot,
                 original_status: schedule.status, // Lưu trữ status nguyên bản từ BE
-                shiftType: shiftType // Thêm thông tin ca làm việc
+                shiftType: shiftType // Lưu thông tin ca làm việc từ trường type
             };
         } catch (error) {
             console.error('Error formatting schedule:', error, schedule);
@@ -355,39 +360,45 @@ const ManagerSchedule = () => {
 
     const handleScheduleUpdate = async (updatedSchedule) => {
         try {
-            // Kiểm tra kết nối trước khi cập nhật
+            console.log('=== TIẾN TRÌNH GỌI API CẬP NHẬT ===');
+            console.log('1. Dữ liệu nhận được:', updatedSchedule);
+            
+            // Kiểm tra kết nối
+            console.log('2. Kiểm tra kết nối đến server...');
             const connectionCheck = await checkBackendConnection();
+            console.log('3. Kết quả kiểm tra kết nối:', connectionCheck);
+
             if (!connectionCheck.success) {
-                console.error('Backend connection failed before update');
-                setTimeout(() => {
-                    showToast('Không thể kết nối đến server, vui lòng kiểm tra kết nối mạng', 'danger');
-                    
-                    // Vẫn cập nhật UI với dữ liệu đã nhập để không mất thông tin người dùng đã nhập
-                    setSchedules(prevSchedules => 
-                        prevSchedules.map(schedule => 
-                            schedule.id === updatedSchedule.id ? updatedSchedule : schedule
-                        )
-                    );
-                }, 0);
+                console.error('4. Lỗi kết nối:', connectionCheck.error);
+                showToast('Không thể kết nối đến server, vui lòng kiểm tra kết nối mạng', 'danger');
                 return;
             }
             
+            // Đảm bảo trường type được cập nhật với giá trị của shiftType
+            if (updatedSchedule.shiftType && !updatedSchedule.type) {
+                updatedSchedule.type = updatedSchedule.shiftType;
+            }
+            
+            console.log('5. Thông tin ca làm việc:', {
+                shiftType: updatedSchedule.shiftType,
+                type: updatedSchedule.type
+            });
+            
             // Chuẩn bị dữ liệu để gửi đến API
             const scheduleData = prepareScheduleData(updatedSchedule);
+            console.log('6. Dữ liệu đã chuẩn bị cho API:', scheduleData);
             
             // Gọi API để cập nhật lịch
-            console.log('Updating schedule with room code:', updatedSchedule.roomCode);
-            console.log('Data prepared for API:', scheduleData);
-            
+            console.log('7. Bắt đầu gọi API với ID:', updatedSchedule.id);
             const response = await updateScheduleAPI(updatedSchedule.id, scheduleData);
-            console.log('Schedule update response:', response);
+            console.log('8. Phản hồi từ API:', response);
             
             if (response && response.data) {
-                console.log('Schedule updated successfully:', response.data);
-                console.log('Updated room code in response:', response.data.roomCode || response.data.room_code);
+                console.log('9. Cập nhật thành công, dữ liệu trả về:', response.data);
                 
                 // Nếu API thành công, cập nhật state với dữ liệu từ API
                 const formattedUpdatedSchedule = formatScheduleFromAPI(response.data);
+                console.log('10. Dữ liệu sau khi format:', formattedUpdatedSchedule);
                 
                 // Sử dụng setTimeout để tránh FlushSync error
                 setTimeout(() => {
@@ -401,40 +412,26 @@ const ManagerSchedule = () => {
                     
                     // Làm mới dữ liệu từ server sau khi cập nhật
                     setTimeout(() => {
-                        console.log('Refreshing schedule data from server after update');
+                        console.log('11. Làm mới dữ liệu từ server');
                         fetchSchedules();
                     }, 500);
                 }, 0);
             } else {
-                console.warn('API returned success but no data');
-                
-                // Sử dụng setTimeout để tránh FlushSync error
-                setTimeout(() => {
-                    showToast('Không thể cập nhật lịch, vui lòng thử lại sau', 'warning');
-                    
-                    // Nếu API không trả về dữ liệu, vẫn cập nhật UI với dữ liệu đã nhập
-                    setSchedules(prevSchedules => 
-                        prevSchedules.map(schedule => 
-                            schedule.id === updatedSchedule.id ? updatedSchedule : schedule
-                        )
-                    );
-                }, 0);
+                console.warn('12. API trả về thành công nhưng không có dữ liệu');
+                showToast('Không thể cập nhật lịch, vui lòng thử lại sau', 'warning');
             }
         } catch (error) {
-            console.error('Error updating schedule:', error);
-            
-            // Sử dụng setTimeout để tránh FlushSync error
-            setTimeout(() => {
-                showToast('Không thể kết nối đến server, vui lòng thử lại sau', 'danger');
-                
-                // Nếu API gặp lỗi, vẫn cập nhật UI với dữ liệu đã nhập
-                setSchedules(prevSchedules => 
-                    prevSchedules.map(schedule => 
-                        schedule.id === updatedSchedule.id ? updatedSchedule : schedule
-                    )
-                );
-            }, 0);
+            console.error('13. Lỗi trong quá trình cập nhật:', error);
+            if (error.response) {
+                console.error('14. Chi tiết lỗi từ server:', {
+                    status: error.response.status,
+                    data: error.response.data,
+                    headers: error.response.headers
+                });
+            }
+            showToast('Không thể kết nối đến server, vui lòng thử lại sau', 'danger');
         }
+        console.log('=== KẾT THÚC TIẾN TRÌNH CẬP NHẬT ===');
     };
 
     const handleScheduleDelete = async (scheduleId) => {
