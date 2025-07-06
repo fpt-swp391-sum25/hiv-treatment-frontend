@@ -228,7 +228,11 @@ const Statistic = () => {
           <div className="stat-value">{stats.uniquePatients}</div>
         </div>
         <div className="stat-card">
-          <div className="stat-title">Bệnh nhân mới trong kỳ</div>
+          <div className="stat-title">
+            {activeFilter === 'month' && 'Tổng bệnh nhân mới trong tháng'}
+            {activeFilter === 'quarter' && 'Tổng bệnh nhân mới trong quý'}
+            {activeFilter === 'year' && 'Tổng bệnh nhân mới trong năm'}
+          </div>
           <div className="stat-value">{stats.newPatients}</div>
         </div>
       </div>
