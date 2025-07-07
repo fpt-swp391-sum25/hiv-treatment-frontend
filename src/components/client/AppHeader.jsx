@@ -125,7 +125,12 @@ const AppHeader = () => {
         status: '',
         role: ''
       })
-      message.success("Đăng xuất thành công")
+      notification.success({
+        message: 'Hệ thống',
+        showProgress: true,
+        pauseOnHover: true,
+        description: 'Đăng xuất thành công'
+      });
       navigate("/")
     }
   };
@@ -158,8 +163,9 @@ const AppHeader = () => {
             <Space align="center" size={8} className="user-actions">
               <Link to='/profile' style={{ margin: '10px' }}>
                 <Space style={{ cursor: 'pointer' }} align="center">
+                  <Text style={{ marginLeft: 4, marginRight: 4, color: "white" }}>{user.fullName}</Text>
                   <Avatar icon={<UserOutlined />} />
-                  <Text style={{ marginLeft: 4, marginRight: 4, color: "white" }}>{user.username}</Text>
+
                 </Space>
               </Link>
               <Button

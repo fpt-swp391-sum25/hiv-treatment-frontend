@@ -75,6 +75,7 @@ const PatientList = () => {
 
             const mergedData = scheduleList.map((item) => {
                 console.log("check schedule", scheduleList)
+                if (!item?.patient?.id) return null;
                 const matchedPatient = patientList.find(p => p.id === item.patient.id);
                 const matchedHealthRecord = healthRecords.find(hr => hr.scheduleId === item.id);
                 console.log(">>>>>>>>>>>> check matched patient", matchedPatient)
@@ -86,7 +87,7 @@ const PatientList = () => {
                     fullName: matchedPatient?.fullName || 'Chưa rõ tên',
                     treatmentStatus: matchedHealthRecord?.data?.treatmentStatus || 'Chưa cập nhật',
                 };
-            });
+            }).filter(item => item !== null);
 
             setData(mergedData);
         } catch (error) {
@@ -132,11 +133,15 @@ const PatientList = () => {
             render: (status) => {
                 switch (status) {
                     case 'Đang chờ khám':
-                        return <span style={{ color: 'orange' }}>{status}</span>;
+                        return <span style={{ color: '#faad14' }}>{status}</span>;
                     case 'Đã khám':
-                        return <span style={{ color: 'green' }}>{status}</span>;
+                        return <span style={{ color: '#52c41a' }}>{status}</span>;
+                    case 'Đã tư vấn':
+                        return <span style={{ color: '#237804' }}>{status}</span>;
+                    case 'Không đến':
+                        return <span style={{ color: '#f5222d' }}>{status}</span>;
                     default:
-                        return <span style={{ color: 'gray' }}>Chưa cập nhật</span>;
+                        return <span style={{ color: 'gray' }}>{status || 'Chưa cập nhật'}</span>;
                 }
             }
         },

@@ -45,6 +45,7 @@ import ViewOnlyPatientDetail from './components/doctor/ViewOnlyPatientDetail';
 import PatientList from './pages/doctor/PatientList';
 import RegimenList from './pages/doctor/RegimenList';
 import UpdateRegimenModal from './pages/doctor/RegimenList';
+import DoctorDocumentList from './pages/doctor/DoctorDocumentList';
 // Import for lab technician pages
 import LabTechnicianHomePage from './pages/lab-technician/LabTechnicianHomePage'
 
@@ -154,7 +155,14 @@ const router = createBrowserRouter([
         path: '/doctor/patient-list/:id',
         element: <ViewOnlyPatientDetail />,
         errorElement: <Errors />
-      }
+      },
+      {
+        path: 'documents',
+        element: (
+          <PrivateRoute children={<DoctorDocumentList />} requiredRole={['DOCTOR']} />
+        ),
+        errorElement: <Errors />,
+      },
     ],
   },
   {
@@ -343,7 +351,7 @@ const router = createBrowserRouter([
 ]);
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || '1001002031-7drnj2i99p8qo1fkjnkv9tmhbphcsfm7.apps.googleusercontent.com'}>
+  <GoogleOAuthProvider clientId={'115076786122-q76et2blbn1k1dmfpd6d5ss1t192ljj6.apps.googleusercontent.com'}>
     <AuthWrapper>
       <RouterProvider router={router} />
     </AuthWrapper>
