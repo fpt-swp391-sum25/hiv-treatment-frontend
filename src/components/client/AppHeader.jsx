@@ -142,6 +142,7 @@ const AppHeader = () => {
       <div className="header-content">
         <div className="app-logo" style={{
           width: 10 + 'vw',
+          height: 8 + 'vh',
           borderRadius: 50 + 'px', backgroundColor: '#fff'
         }}>
           <Link to="/">
