@@ -30,7 +30,7 @@ const items = [
       },
       {
         key: '5',
-        label: <NavLink to='/admin/lab-technician'>Nhân viên</NavLink>,
+        label: <NavLink to='/admin/lab-technician'>Kỹ thuật viên</NavLink>,
         path: '/admin/lab-technician'
       },
       {
@@ -76,6 +76,7 @@ const AdminSidebar = () => {
       <Menu
         mode="inline"
         selectedKeys={selectedKeys}
+        defaultOpenKeys={"2"}
         style={{ height: '100%', borderRight: 0 }}
         items={items}
       />

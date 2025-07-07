@@ -85,8 +85,8 @@ const AccountDoctors = () => {
             dataIndex: 'accountStatus',
             render: (_, { accountStatus }) => {
 
-                let color = accountStatus === 'ACTIVE' ? 'green' : 'volcano';
-                let text = accountStatus === 'ACTIVE' ? 'Đang hoạt động' : 'Bị khóa';
+                let color = accountStatus === 'Đang hoạt động' ? 'green' : 'volcano';
+                let text = accountStatus === 'Đang hoạt động' ? 'Đang hoạt động' : 'Bị khóa';
 
                 return (
                     <Tag color={color} key={accountStatus}>

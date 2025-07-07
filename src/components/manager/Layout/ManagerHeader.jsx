@@ -1,14 +1,17 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Layout, Avatar, Typography, Space, Button } from 'antd';
 import { UserOutlined, LogoutOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import appLogo from '../../../assets/appLogo.png';
 import './ManagerHeader.css';
+import { AuthContext } from '../../context/AuthContext';
+import { logoutAPI } from '../../../services/api.service';
 
 const { Header } = Layout;
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
-const ManagerHeader = ({ user }) => {
+const ManagerHeader = () => {
+  const { user, setUser } = useContext(AuthContext)
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -45,10 +48,10 @@ const ManagerHeader = ({ user }) => {
         level={4}
         className="header-title"
       >
-        Chào mừng Quản lí
       </Title>
 
       <div className="header-right">
+        <Text style={{ color: 'black', marginLeft: 4, marginRight: 4 }}>{user.fullName}</Text>
         <Avatar
           icon={<UserOutlined />}
           size={46}

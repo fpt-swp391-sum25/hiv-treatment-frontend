@@ -5,6 +5,7 @@ import moment from 'moment';
 import { useNavigate } from 'react-router-dom';
 import { bookingAPI, createHealthRecordAPI, fetchAllDoctorsAPI, fetchAllScheduleAPI, fetchAvailableSlotAPI, fetchDoctorProfileAPI, fetchScheduleByDateAPI, initiatePaymentAPI, registerScheduleAPI } from '../../services/api.service';
 import { AuthContext } from '../../components/context/AuthContext';
+import dayjs from 'dayjs';
 
 const { Link } = Typography;
 const { Option } = Select;
@@ -92,10 +93,11 @@ const Booking = () => {
 
     const loadSchedules = async () => {
         setLoading(true);
+        console.log(">>>check doctor id", doctorId)
         try {
             const response = doctorId
-                ? await fetchAllScheduleAPI(doctorId, date?.format('YYYY-MM-DD'))
-                : await fetchScheduleByDateAPI(date?.format('YYYY-MM-DD'));
+                ? await fetchAllScheduleAPI(doctorId, dayjs(date).format('YYYY-MM-DD'))
+                : await fetchScheduleByDateAPI(dayjs(date).format('YYYY-MM-DD'));
             if (response.data) {
                 setAvailableSchedules(response.data);
                 // Nhóm slot theo khung giờ
