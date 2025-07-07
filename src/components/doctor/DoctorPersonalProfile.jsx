@@ -9,6 +9,7 @@ import {
   message,
   Typography,
   Card,
+  Select,
 } from 'antd';
 import { SaveOutlined } from '@ant-design/icons';
 import { useOutletContext } from 'react-router-dom';
@@ -222,17 +223,45 @@ const DoctorPersonalProfile = () => {
 
           <Row gutter={16}>
             <Col span={12}>
+              <Form.Item label="Giới tính">
+                <Select
+                  value={editableUser.gender}
+                  onChange={value => setEditableUser(prev => ({ ...prev, gender: value }))}
+                  placeholder="Chọn giới tính"
+                >
+                  <Select.Option value="Nam">Nam</Select.Option>
+                  <Select.Option value="Nữ">Nữ</Select.Option>
+                  <Select.Option value="Khác">Khác</Select.Option>
+                </Select>
+              </Form.Item>
+            </Col>
+            <Col span={12}>
               <Form.Item label="Mật khẩu mới">
                 <Input.Password
                   value={editableUser.password}
                   onChange={(e) =>
                     setEditableUser((prev) => ({
                       ...prev,
-                      password: '',
-                      confirmPassword: '',
+                      password: e.target.value,
                     }))
                   }
                   placeholder="Chỉ nhập nếu muốn thay đổi"
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item label="Địa chỉ">
+                <Input
+                  value={editableUser.address}
+                  onChange={(e) =>
+                    setEditableUser((prev) => ({
+                      ...prev,
+                      address: e.target.value,
+                    }))
+                  }
                 />
               </Form.Item>
             </Col>
@@ -254,15 +283,17 @@ const DoctorPersonalProfile = () => {
 
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item label="Địa chỉ">
+              <Form.Item label="Năm bắt đầu làm việc">
                 <Input
-                  value={editableUser.address}
+                  type="number"
+                  value={doctorProfile.startYear}
                   onChange={(e) =>
-                    setEditableUser((prev) => ({
+                    setDoctorProfile((prev) => ({
                       ...prev,
-                      address: e.target.value,
+                      startYear: e.target.value,
                     }))
                   }
+                  readOnly
                 />
               </Form.Item>
             </Col>
@@ -276,6 +307,7 @@ const DoctorPersonalProfile = () => {
                       background: e.target.value,
                     }))
                   }
+                  readOnly
                 />
               </Form.Item>
             </Col>
@@ -292,6 +324,7 @@ const DoctorPersonalProfile = () => {
                       licenseNumber: e.target.value,
                     }))
                   }
+                  readOnly
                 />
               </Form.Item>
             </Col>
@@ -305,23 +338,7 @@ const DoctorPersonalProfile = () => {
                       qualifications: e.target.value,
                     }))
                   }
-                />
-              </Form.Item>
-            </Col>
-          </Row>
-
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item label="Năm bắt đầu làm việc">
-                <Input
-                  type="number"
-                  value={doctorProfile.startYear}
-                  onChange={(e) =>
-                    setDoctorProfile((prev) => ({
-                      ...prev,
-                      startYear: e.target.value,
-                    }))
-                  }
+                  readOnly
                 />
               </Form.Item>
             </Col>
