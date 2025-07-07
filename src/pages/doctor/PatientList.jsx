@@ -132,11 +132,15 @@ const PatientList = () => {
             render: (status) => {
                 switch (status) {
                     case 'Đang chờ khám':
-                        return <span style={{ color: 'orange' }}>{status}</span>;
+                        return <span style={{ color: '#faad14' }}>{status}</span>;
                     case 'Đã khám':
-                        return <span style={{ color: 'green' }}>{status}</span>;
+                        return <span style={{ color: '#52c41a' }}>{status}</span>;
+                    case 'Đã tư vấn':
+                        return <span style={{ color: '#237804' }}>{status}</span>;
+                    case 'Không đến':
+                        return <span style={{ color: '#f5222d' }}>{status}</span>;
                     default:
-                        return <span style={{ color: 'gray' }}>Chưa cập nhật</span>;
+                        return <span style={{ color: 'gray' }}>{status || 'Chưa cập nhật'}</span>;
                 }
             }
         },
