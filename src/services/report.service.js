@@ -8,6 +8,62 @@ import isBetween from 'dayjs/plugin/isBetween';
 dayjs.extend(quarterOfYear);
 dayjs.extend(isBetween);
 
+// Hàm helper để validate response data
+const validateResponse = (response) => {
+    if (!response?.data?.data) throw new Error('Invalid response format');
+    return response.data.data;
+};
+
+// Hàm helper để validate array
+const validateArray = (data) => {
+    if (!Array.isArray(data)) return [];
+    return data;
+};
+
+// Helper function để lấy mảng từ response
+const getArrayFromResponse = (response) => {
+    if (!response || !response.data) return [];
+    return Array.isArray(response.data) ? response.data : [];
+};
+
+// Helper function để lọc lịch hẹn theo khoảng thời gian
+const filterSchedulesByDateRange = (schedules, fromDate, toDate) => {
+    return schedules.filter(schedule => 
+        schedule?.date && 
+        dayjs(schedule.date).isValid() && 
+        dayjs(schedule.date).isBetween(fromDate, toDate, 'day', '[]')
+    );
+};
+
+// Helper function để tính toán thống kê lịch hẹn
+const calculateScheduleStats = (schedules) => {
+    return {
+        total: schedules.length,
+        completed: schedules.filter(s => s?.status === 'COMPLETED').length,
+        cancelled: schedules.filter(s => s?.status === 'CANCELLED').length,
+        pending: schedules.filter(s => s?.status === 'PENDING').length
+    };
+};
+
+// Helper function để tính toán hiệu suất bác sĩ
+const calculateDoctorPerformance = (doctor, schedules) => {
+    if (!doctor?.id) return null;
+
+    const doctorSchedules = schedules.filter(s => s?.doctorId === doctor.id);
+    const total = doctorSchedules.length;
+    const completed = doctorSchedules.filter(s => s?.status === 'COMPLETED').length;
+    const cancelled = doctorSchedules.filter(s => s?.status === 'CANCELLED').length;
+
+    return {
+        id: doctor.id,
+        name: doctor.fullName || 'Không có tên',
+        totalAppointments: total,
+        completedAppointments: completed,
+        cancelledAppointments: cancelled,
+        performance: total > 0 ? (completed / total * 100) : 0
+    };
+};
+
 // Staff Statistics
 export const getStaffData = async () => {
     try {
@@ -357,102 +413,146 @@ export const groupPaymentsByType = (payments) => {
 // Staff Report Services
 export const getStaffStatistics = async (fromDate, toDate) => {
     try {
-        // Lấy danh sách nhân viên theo role
-        const [doctors, staff] = await Promise.all([
-            axios.get('/api/user/DOCTOR'),
-            axios.get('/api/user/STAFF')
-        ]);
+        // Validate input
+        if (!fromDate || !toDate) {
+            throw new Error('Vui lòng chọn khoảng thời gian');
+        }
 
-        // Lấy lịch làm việc trong khoảng thời gian
-        const schedules = await axios.get('/api/schedule/list');
-        
-        // Lọc schedule theo khoảng thời gian
-        const filteredSchedules = schedules.data.filter(schedule => 
-            dayjs(schedule.date).isBetween(fromDate, toDate, 'day', '[]')
-        );
+        // Khởi tạo mảng chứa lỗi
+        const errors = [];
+
+        // 1. Lấy danh sách bác sĩ
+        let doctors = [];
+        try {
+            const doctorsResponse = await axios.get('/api/user/DOCTOR');
+            doctors = getArrayFromResponse(doctorsResponse);
+        } catch (error) {
+            console.error('Error fetching doctors:', error);
+            errors.push('Không thể tải danh sách bác sĩ');
+        }
+
+        // 2. Lấy danh sách nhân viên
+        let staff = [];
+        try {
+            const staffResponse = await axios.get('/api/user/STAFF');
+            staff = getArrayFromResponse(staffResponse);
+        } catch (error) {
+            console.error('Error fetching staff:', error);
+            errors.push('Không thể tải danh sách nhân viên');
+        }
+
+        // 3. Lấy danh sách lịch hẹn
+        let schedules = [];
+        try {
+            const schedulesResponse = await axios.get('/api/schedule/list');
+            const allSchedules = getArrayFromResponse(schedulesResponse);
+            schedules = filterSchedulesByDateRange(allSchedules, fromDate, toDate);
+        } catch (error) {
+            console.error('Error fetching schedules:', error);
+            errors.push('Không thể tải danh sách lịch hẹn');
+        }
+
+        // Nếu không có dữ liệu nào
+        if (doctors.length === 0 && staff.length === 0 && schedules.length === 0) {
+            throw new Error('Không thể tải dữ liệu. Vui lòng thử lại sau.');
+        }
+
+        // 4. Tính toán các thống kê
+        const staffCounts = {
+            doctors: doctors.length,
+            staff: staff.length,
+            total: doctors.length + staff.length
+        };
+
+        const scheduleStats = calculateScheduleStats(schedules);
+
+        const staffPerformance = doctors
+            .map(doctor => calculateDoctorPerformance(doctor, schedules))
+            .filter(Boolean)
+            .sort((a, b) => b.performance - a.performance);
 
         return {
-            staffCounts: {
-                doctors: doctors.data.length,
-                staff: staff.data.length
-            },
-            scheduleStats: calculateScheduleStats(filteredSchedules),
-            staffPerformance: calculateStaffPerformance(doctors.data, filteredSchedules)
+            staffCounts,
+            scheduleStats,
+            staffPerformance,
+            errors: errors.length > 0 ? errors : null
         };
+
     } catch (error) {
-        console.error('Error fetching staff statistics:', error);
+        console.error('Error in getStaffStatistics:', error);
+        if (error.response) {
+            // Xử lý lỗi HTTP
+            switch (error.response.status) {
+                case 401:
+                    throw new Error('Vui lòng đăng nhập lại');
+                case 403:
+                    throw new Error('Bạn không có quyền truy cập');
+                case 404:
+                    throw new Error('Không tìm thấy dữ liệu');
+                default:
+                    throw new Error('Có lỗi xảy ra, vui lòng thử lại');
+            }
+        }
         throw error;
     }
-};
-
-const calculateScheduleStats = (schedules) => {
-    return {
-        total: schedules.length,
-        completed: schedules.filter(s => s.status === 'COMPLETED').length,
-        cancelled: schedules.filter(s => s.status === 'CANCELLED').length,
-        pending: schedules.filter(s => s.status === 'PENDING').length
-    };
-};
-
-const calculateStaffPerformance = (doctors, schedules) => {
-    return doctors.map(doctor => {
-        const doctorSchedules = schedules.filter(s => s.doctorId === doctor.id);
-        return {
-            id: doctor.id,
-            name: doctor.fullName,
-            totalAppointments: doctorSchedules.length,
-            completedAppointments: doctorSchedules.filter(s => s.status === 'COMPLETED').length,
-            cancelledAppointments: doctorSchedules.filter(s => s.status === 'CANCELLED').length,
-            performance: calculatePerformanceScore(doctorSchedules)
-        };
-    });
-};
-
-const calculatePerformanceScore = (schedules) => {
-    if (schedules.length === 0) return 0;
-    const completed = schedules.filter(s => s.status === 'COMPLETED').length;
-    return (completed / schedules.length) * 100;
 };
 
 // Financial Report Services
 export const getFinancialStatistics = async (fromDate, toDate) => {
     try {
-        // Lấy danh sách payment đã hoàn thành
-        const payments = await axios.get('/api/payment/status/COMPLETED');
-        
-        // Lọc payment theo khoảng thời gian
-        const filteredPayments = payments.data.filter(payment => 
+        const paymentsResponse = await axios.get('/api/payment/status/COMPLETED');
+        const allPayments = validateArray(validateResponse(paymentsResponse));
+
+        const payments = allPayments.filter(payment => 
+            payment?.createdAt && // Kiểm tra createdAt tồn tại
+            dayjs(payment.createdAt).isValid() && // Kiểm tra createdAt hợp lệ
             dayjs(payment.createdAt).isBetween(fromDate, toDate, 'day', '[]')
         );
 
         return {
-            overview: calculateFinancialOverview(filteredPayments),
-            revenueByPeriod: calculateRevenueByPeriod(filteredPayments),
-            transactionDetails: formatTransactionDetails(filteredPayments)
+            overview: calculateFinancialOverview(payments),
+            revenueByPeriod: calculateRevenueByPeriod(payments),
+            transactionDetails: formatTransactionDetails(payments)
         };
     } catch (error) {
-        console.error('Error fetching financial statistics:', error);
-        throw error;
+        console.error('Error in getFinancialStatistics:', error);
+        return {
+            overview: { totalRevenue: 0, totalTransactions: 0, averageTransaction: 0 },
+            revenueByPeriod: [],
+            transactionDetails: []
+        };
     }
 };
 
 const calculateFinancialOverview = (payments) => {
+    if (!Array.isArray(payments)) return {
+        totalRevenue: 0,
+        totalTransactions: 0,
+        averageTransaction: 0
+    };
+
+    const totalRevenue = payments.reduce((sum, p) => sum + (p?.amount || 0), 0);
+    const totalTransactions = payments.length;
+
     return {
-        totalRevenue: payments.reduce((sum, p) => sum + p.amount, 0),
-        totalTransactions: payments.length,
-        averageTransaction: payments.length > 0 
-            ? payments.reduce((sum, p) => sum + p.amount, 0) / payments.length 
-            : 0
+        totalRevenue,
+        totalTransactions,
+        averageTransaction: totalTransactions > 0 ? totalRevenue / totalTransactions : 0
     };
 };
 
 export const calculateRevenueByPeriod = (payments, periodType = 'daily') => {
+    if (!Array.isArray(payments)) return [];
+
     const groupedData = {};
 
     payments.forEach(payment => {
-        const date = dayjs(payment.createdAt);
-        let period;
+        if (!payment?.createdAt || !payment?.amount) return;
 
+        const date = dayjs(payment.createdAt);
+        if (!date.isValid()) return;
+
+        let period;
         switch (periodType) {
             case 'daily':
                 period = date.format('YYYY-MM-DD');
@@ -491,20 +591,28 @@ export const calculateRevenueByPeriod = (payments, periodType = 'daily') => {
 };
 
 const formatTransactionDetails = (payments) => {
-    return payments.map(payment => ({
-        id: payment.id,
-        date: dayjs(payment.createdAt).format('DD/MM/YYYY HH:mm'),
-        amount: payment.amount,
-        patientId: payment.patientId,
-        description: payment.description,
-        status: payment.status
-    }));
+    if (!Array.isArray(payments)) return [];
+
+    return payments.map(payment => {
+        if (!payment) return null;
+
+        return {
+            id: payment.id || '',
+            date: payment.createdAt ? dayjs(payment.createdAt).format('DD/MM/YYYY HH:mm') : '',
+            amount: payment.amount || 0,
+            patientId: payment.patientId || '',
+            description: payment.description || '',
+            status: payment.status || ''
+        };
+    }).filter(Boolean); // Lọc bỏ các giá trị null
 };
 
-// Export helper functions for testing and reuse
+// Export helper functions for testing
 export const helpers = {
+    validateResponse,
+    validateArray,
     calculateScheduleStats,
-    calculateStaffPerformance,
+    calculateDoctorPerformance,
     calculateFinancialOverview,
     calculateRevenueByPeriod,
     formatTransactionDetails

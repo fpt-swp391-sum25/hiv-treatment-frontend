@@ -25,7 +25,7 @@
     "antd": "^5.25.3",
     "axios": "^1.9.0",
     "bootstrap": "^5.3.6",
-    "chart.js": "^4.4.9",
+    "chart.js": "^4.5.0",
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.13",
     "framer-motion": "^12.16.0",
