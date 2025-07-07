@@ -14,9 +14,9 @@ export const ScheduleStatus = {
     COMPLETED: 'COMPLETED',     // Đã hoàn thành
     NO_SHOW: 'NO_SHOW',         // Không đến khám
     
-    // Trạng thái làm việc của bác sĩ
-    AVAILABLE: 'available',     // Làm việc
-    UNAVAILABLE: 'UNAVAILABLE'  // Không làm việc
+    // Trạng thái làm việc của bác sĩ (do Manager quản lý)
+    AVAILABLE: 'available',     // Có thể đặt lịch
+    UNAVAILABLE: 'unavailable'  // Không thể đặt lịch (ví dụ: nghỉ)
 };
 
 // Mapping giữa Status FE và BE
