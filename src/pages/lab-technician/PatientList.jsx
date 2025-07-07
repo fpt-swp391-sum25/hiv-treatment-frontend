@@ -144,7 +144,9 @@ const LabTechnicianPatientList = () => {
                         style={{ width: '100%' }}
                     >
                         {slotOptions.map(slot => (
-                            <Option key={slot} value={slot}>{slot}</Option>
+                            <Option key={slot} value={slot}>
+                                {slot.slice(0,5)}
+                            </Option>
                         ))}
                     </Select>
                 </Col>
