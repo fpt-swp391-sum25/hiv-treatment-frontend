@@ -290,6 +290,7 @@ const deleteRegimenAPI = (id) => {
 }
 
 const updateUserAPI = (id, updateData) => {
+    console.log(">>>>>>>>>>>>>>" + updateData.avatar)
     const URL_BACKEND = `/api/user/${id}`;
     return axios.put(URL_BACKEND, updateData)
 }
