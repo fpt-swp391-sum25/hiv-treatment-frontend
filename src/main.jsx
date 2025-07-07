@@ -45,6 +45,7 @@ import ViewOnlyPatientDetail from './components/doctor/ViewOnlyPatientDetail';
 import PatientList from './pages/doctor/PatientList';
 import RegimenList from './pages/doctor/RegimenList';
 import UpdateRegimenModal from './pages/doctor/RegimenList';
+import DoctorDocumentList from './pages/doctor/DoctorDocumentList';
 // Import for lab technician pages
 import LabTechnicianHomePage from './pages/lab-technician/LabTechnicianHomePage'
 
@@ -154,7 +155,14 @@ const router = createBrowserRouter([
         path: '/doctor/patient-list/:id',
         element: <ViewOnlyPatientDetail />,
         errorElement: <Errors />
-      }
+      },
+      {
+        path: 'documents',
+        element: (
+          <PrivateRoute children={<DoctorDocumentList />} requiredRole={['DOCTOR']} />
+        ),
+        errorElement: <Errors />,
+      },
     ],
   },
   {

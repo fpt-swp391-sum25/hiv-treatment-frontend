@@ -6,7 +6,9 @@ import dayjs from "dayjs";
 import { AuthContext } from "../../components/context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import PatientAppointmentHistory from "./PatientAppointmentHistory";
-
+import viVN from 'antd/es/locale/vi_VN';
+import { ConfigProvider } from "antd";
+import 'dayjs/locale/vi';
 
 
 const { Content } = Layout;
@@ -163,66 +165,68 @@ const AppointmentList = () => {
 
     ];
 
-
+    dayjs.locale('vi');
 
     return (
-        <Layout>
-            <Content style={{ minHeight: "500px", padding: '15px' }}>
-                <div style={{ display: 'flex', justifyContent: 'center' }}>
-                    <Segmented
-                        options={['Lịch hẹn', 'Lịch sử khám']}
-                        value={activeSegment}
-                        onChange={setActiveSegment}
-                        style={{ marginBottom: '20px' }}
-                    />
-                </div>
-                {loading ? (
-                    <div style={{
-                        position: "fixed",
-                        top: "50%",
-                        left: "50%",
-                        transform: "translate(-50%, -50%)",
-                    }}>
-                        <Spin tip="Đang tải..." />
+        <ConfigProvider locale={viVN}>
+            <Layout>
+                <Content style={{ minHeight: "500px", padding: '15px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'center' }}>
+                        <Segmented
+                            options={['Lịch hẹn', 'Lịch sử khám']}
+                            value={activeSegment}
+                            onChange={setActiveSegment}
+                            style={{ marginBottom: '20px' }}
+                        />
                     </div>
+                    {loading ? (
+                        <div style={{
+                            position: "fixed",
+                            top: "50%",
+                            left: "50%",
+                            transform: "translate(-50%, -50%)",
+                        }}>
+                            <Spin tip="Đang tải..." />
+                        </div>
 
-                ) : (
-                    <Card>
+                    ) : (
+                        <Card>
 
-                        {activeSegment === 'Lịch hẹn' && (
-                            <Card title="Lịch hẹn"
-                                style={{ marginTop: '5vh', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-                                <div style={{ padding: '20px' }}>
-                                    <div style={{ marginBottom: '16px' }}>
-                                        <Text style={{ marginRight: '8px' }}>Lọc theo tháng:</Text>
-                                        <DatePicker.MonthPicker
-                                            format="MM/YYYY"
-                                            onChange={handleMonthFilterChange}
-                                            style={{ width: '150px' }}
-                                            allowClear
-                                            placeholder="Chọn tháng"
+                            {activeSegment === 'Lịch hẹn' && (
+                                <Card title="Lịch hẹn"
+                                    style={{ marginTop: '5vh', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+                                    <div style={{ padding: '20px' }}>
+                                        <div style={{ marginBottom: '16px' }}>
+                                            <Text style={{ marginRight: '8px' }}>Lọc theo tháng:</Text>
+                                            <DatePicker.MonthPicker
+                                                format="MM/YYYY"
+                                                onChange={handleMonthFilterChange}
+                                                style={{ width: '150px' }}
+                                                allowClear
+                                                placeholder="Chọn tháng"
+                                            />
+                                        </div>
+                                        <Table
+                                            columns={columns}
+                                            dataSource={filteredSchedules}
+                                            rowKey="id"
+                                            locale={{ emptyText: 'Chưa có lịch hẹn nào' }}
+                                            pagination={{ pageSize: 10 }}
                                         />
                                     </div>
-                                    <Table
-                                        columns={columns}
-                                        dataSource={filteredSchedules}
-                                        rowKey="id"
-                                        locale={{ emptyText: 'Chưa có lịch hẹn nào' }}
-                                        pagination={{ pageSize: 10 }}
-                                    />
-                                </div>
-                            </Card>
-                        )}
+                                </Card>
+                            )}
 
-                        {activeSegment === 'Lịch sử khám' && (
-                            <>
-                                <PatientAppointmentHistory />
-                            </>
-                        )}
-                    </Card>
-                )}
-            </Content>
-        </Layout>
+                            {activeSegment === 'Lịch sử khám' && (
+                                <>
+                                    <PatientAppointmentHistory />
+                                </>
+                            )}
+                        </Card>
+                    )}
+                </Content>
+            </Layout>
+        </ConfigProvider>
     )
 }
 
