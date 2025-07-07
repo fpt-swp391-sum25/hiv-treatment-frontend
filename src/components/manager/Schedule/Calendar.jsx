@@ -19,6 +19,7 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
     const [calendarKey, setCalendarKey] = useState(Date.now()); // Thêm key để force re-render
     const [currentWeekDays, setCurrentWeekDays] = useState([]);
     const [currentDate, setCurrentDate] = useState(new Date());
+    const [calendarTitle, setCalendarTitle] = useState('');
     
     // Đảm bảo events là một mảng và lọc bỏ các sự kiện không hợp lệ
     const validEvents = React.useMemo(() => {
@@ -59,6 +60,19 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
             setCurrentDate(calendarApi.getDate());
         }
     }, [calendarKey]);
+
+    // Cập nhật title khi calendar thay đổi
+    useEffect(() => {
+        if (calendarRef.current && view === 'dayGridMonth') {
+            // Sử dụng requestAnimationFrame thay vì setTimeout để tránh FlushSync error
+            requestAnimationFrame(() => {
+                if (calendarRef.current) {
+                    const title = calendarRef.current.getApi().view.title;
+                    setCalendarTitle(title);
+                }
+            });
+        }
+    }, [view, calendarKey, currentDate]);
     
     const handleDateSelect = (selectInfo) => {
         const selectedDate = selectInfo.start;
@@ -71,13 +85,27 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
             return;
         }
         
-        // Vẫn cho phép chọn ngày quá khứ, nhưng component cha sẽ xử lý logic cảnh báo
-        onDateSelect(selectedDate);
+        // Sử dụng requestAnimationFrame thay vì setTimeout để tránh FlushSync error
+        requestAnimationFrame(() => {
+            // Vẫn cho phép chọn ngày quá khứ, nhưng component cha sẽ xử lý logic cảnh báo
+            onDateSelect(selectedDate);
+        });
     };
 
     const handleEventClick = (clickInfo) => {
-        // Khi click vào sự kiện, truyền thông tin sự kiện lên component cha
-        onEventSelect(clickInfo.event.extendedProps);
+        // Sử dụng requestAnimationFrame thay vì setTimeout để tránh FlushSync error
+        requestAnimationFrame(() => {
+            // Khi click vào sự kiện, truyền thông tin sự kiện lên component cha
+            onEventSelect(clickInfo.event.extendedProps);
+        });
+    };
+
+    // Hàm xử lý khi click vào sự kiện trong chế độ xem tuần
+    const handleWeekEventClick = (event) => {
+        // Sử dụng setTimeout để tránh FlushSync error
+        setTimeout(() => {
+            onEventSelect(event);
+        }, 0);
     };
 
     const getStatusColor = (status) => {
@@ -141,16 +169,19 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         
-        if (date < today) {
-            // Thêm class cho ngày đã qua
-            info.el.classList.add('fc-day-past');
-        }
-        
-        // Nếu là Chủ nhật, thêm class để hiển thị khác
-        if (date.getDay() === 0) {
-            info.el.classList.add('fc-day-sunday');
-            // Không thêm fc-day-disabled nữa để không hiển thị gạch ngang
-        }
+        // Sử dụng requestAnimationFrame thay vì setTimeout để tránh FlushSync error
+        requestAnimationFrame(() => {
+            if (date < today) {
+                // Thêm class cho ngày đã qua
+                info.el.classList.add('fc-day-past');
+            }
+            
+            // Nếu là Chủ nhật, thêm class để hiển thị khác
+            if (date.getDay() === 0) {
+                info.el.classList.add('fc-day-sunday');
+                // Không thêm fc-day-disabled nữa để không hiển thị gạch ngang
+            }
+        });
     };
 
     // Tùy chỉnh hiển thị nội dung của sự kiện
@@ -228,37 +259,50 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
 
     // Xóa tất cả dữ liệu lưu trữ của FullCalendar
     const clearFullCalendarStorage = useCallback(() => {
-        // Xóa bất kỳ dữ liệu lịch nào có thể được lưu trong localStorage
-        try {
-            const localStorageKeys = Object.keys(localStorage);
-            localStorageKeys.forEach(key => {
-                if (key.includes('fullcalendar') || key.includes('fc-') || key.includes('calendar') || 
-                    key.includes('event') || key.includes('schedule')) {
-                    console.log('Removing from localStorage:', key);
-                    localStorage.removeItem(key);
-                }
-            });
-            
-            // Xóa bất kỳ dữ liệu nào được lưu trữ trong sessionStorage
-            const sessionStorageKeys = Object.keys(sessionStorage);
-            sessionStorageKeys.forEach(key => {
-                if (key.includes('fullcalendar') || key.includes('fc-') || key.includes('calendar') || 
-                    key.includes('event') || key.includes('schedule')) {
-                    console.log('Removing from sessionStorage:', key);
-                    sessionStorage.removeItem(key);
-                }
-            });
-            
-            // Xóa tất cả dữ liệu trong localStorage và sessionStorage
-            localStorage.removeItem('fc-event-sources');
-            localStorage.removeItem('fc-view-state');
-            sessionStorage.removeItem('fc-event-sources');
-            sessionStorage.removeItem('fc-view-state');
-            
-            console.log('All FullCalendar storage cleared');
-        } catch (error) {
-            console.error('Error clearing storage:', error);
-        }
+        // Sử dụng requestAnimationFrame thay vì setTimeout để tránh FlushSync error
+        requestAnimationFrame(() => {
+            try {
+                // Xóa bất kỳ dữ liệu lịch nào có thể được lưu trong localStorage
+                const clearLocalStorage = () => {
+                    const localStorageKeys = Object.keys(localStorage);
+                    localStorageKeys.forEach(key => {
+                        if (key.includes('fullcalendar') || key.includes('fc-') || key.includes('calendar') || 
+                            key.includes('event') || key.includes('schedule')) {
+                            console.log('Removing from localStorage:', key);
+                            localStorage.removeItem(key);
+                        }
+                    });
+                    
+                    // Xóa các key cụ thể
+                    localStorage.removeItem('fc-event-sources');
+                    localStorage.removeItem('fc-view-state');
+                };
+                
+                // Xóa bất kỳ dữ liệu nào được lưu trữ trong sessionStorage
+                const clearSessionStorage = () => {
+                    const sessionStorageKeys = Object.keys(sessionStorage);
+                    sessionStorageKeys.forEach(key => {
+                        if (key.includes('fullcalendar') || key.includes('fc-') || key.includes('calendar') || 
+                            key.includes('event') || key.includes('schedule')) {
+                            console.log('Removing from sessionStorage:', key);
+                            sessionStorage.removeItem(key);
+                        }
+                    });
+                    
+                    // Xóa các key cụ thể
+                    sessionStorage.removeItem('fc-event-sources');
+                    sessionStorage.removeItem('fc-view-state');
+                };
+                
+                // Thực hiện xóa
+                clearLocalStorage();
+                clearSessionStorage();
+                
+                console.log('All FullCalendar storage cleared');
+            } catch (error) {
+                console.error('Error clearing storage:', error);
+            }
+        });
     }, []);
 
     // Force re-render calendar - không phụ thuộc vào calendarKey để tránh re-render vô hạn
@@ -275,8 +319,13 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
         setCurrentDate(new Date());
         
         if (calendarRef.current && view === 'dayGridMonth') {
-            const calendarApi = calendarRef.current.getApi();
-            calendarApi.today();
+            // Sử dụng requestAnimationFrame thay vì setTimeout để tránh FlushSync error
+            requestAnimationFrame(() => {
+                if (calendarRef.current) {
+                    const calendarApi = calendarRef.current.getApi();
+                    calendarApi.today();
+                }
+            });
         }
     };
 
@@ -292,8 +341,13 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
         setCurrentDate(newDate.toDate());
         
         if (calendarRef.current && view === 'dayGridMonth') {
-            const calendarApi = calendarRef.current.getApi();
-            calendarApi.prev();
+            // Sử dụng requestAnimationFrame thay vì setTimeout để tránh FlushSync error
+            requestAnimationFrame(() => {
+                if (calendarRef.current) {
+                    const calendarApi = calendarRef.current.getApi();
+                    calendarApi.prev();
+                }
+            });
         }
         
         // Force re-render cho chế độ xem tuần
@@ -314,8 +368,13 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
         setCurrentDate(newDate.toDate());
         
         if (calendarRef.current && view === 'dayGridMonth') {
-            const calendarApi = calendarRef.current.getApi();
-            calendarApi.next();
+            // Sử dụng requestAnimationFrame thay vì setTimeout để tránh FlushSync error
+            requestAnimationFrame(() => {
+                if (calendarRef.current) {
+                    const calendarApi = calendarRef.current.getApi();
+                    calendarApi.next();
+                }
+            });
         }
         
         // Force re-render cho chế độ xem tuần
@@ -330,41 +389,40 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
         
         // Force re-render khi chuyển view
         if (newView === 'dayGridMonth') {
-            // Đặt lại key để force re-render calendar
-            setCalendarKey(Date.now());
+            // Sử dụng requestAnimationFrame thay vì setTimeout để tránh FlushSync error
+            requestAnimationFrame(() => {
+                // Đặt lại key để force re-render calendar
+                setCalendarKey(Date.now());
+            });
         }
     };
 
     // Xóa tất cả sự kiện khi component mount
     useEffect(() => {
         // Xóa storage khi component mount
-        clearFullCalendarStorage();
+        setTimeout(() => {
+            clearFullCalendarStorage();
+        }, 0);
         
         // Cleanup khi component unmount
         return () => {
-            clearFullCalendarStorage();
+            setTimeout(() => {
+                clearFullCalendarStorage();
+            }, 0);
         };
     }, [clearFullCalendarStorage]);
 
     // Xử lý cập nhật sự kiện khi calendar được khởi tạo và khi events thay đổi
     useEffect(() => {
-        // Đảm bảo calendar đã được khởi tạo và đang ở chế độ xem tháng
         if (calendarRef.current && view === 'dayGridMonth') {
-            const calendarApi = calendarRef.current.getApi();
-            
-            // Xóa tất cả sự kiện hiện tại
-            calendarApi.removeAllEvents();
-            
-            // Thêm sự kiện mới nếu có
-            if (calendarEvents.length > 0) {
-                console.log('Adding events to calendar:', calendarEvents.length);
-                calendarApi.addEventSource(calendarEvents);
-            }
+            // Thay vì xóa và thêm lại sự kiện, hãy để FullCalendar tự quản lý việc cập nhật
+            // Chỉ cần force re-render nếu cần
+            setCalendarKey(Date.now());
         }
-    }, [calendarEvents, view, calendarKey]);
+    }, [calendarEvents.length]);
 
-    // Hiển thị danh sách các ngày trong tuần khi ở chế độ xem tuần
-    const renderWeekDaysList = () => {
+    // Tách logic xử lý dữ liệu ra khỏi hàm render
+    const processWeekEvents = useCallback(() => {
         if (view !== 'listWeek' || currentWeekDays.length === 0) return null;
         
         // Lọc sự kiện theo từng ngày trong tuần
@@ -378,27 +436,49 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
         const weekEnd = moment(currentWeekDays[currentWeekDays.length - 1]).format('DD/MM/YYYY');
         const weekTitle = `${weekStart} - ${weekEnd}`;
         
+        return { eventsByDay, weekTitle };
+    }, [view, currentWeekDays, validEvents]);
+
+    // Tạo một component con để xử lý việc render danh sách tuần
+    const WeekDaysList = React.memo(({ currentWeekDays, eventsByDay, weekTitle, onDateSelect, onEventSelect }) => {
+        // Hàm xử lý khi click vào ngày trong chế độ xem tuần
+        const handleWeekDayClick = useCallback((date) => {
+            // Sử dụng requestAnimationFrame thay vì setTimeout để tránh FlushSync error
+            requestAnimationFrame(() => {
+                onDateSelect(date);
+            });
+        }, [onDateSelect]);
+
+        // Hàm xử lý khi click vào sự kiện trong chế độ xem tuần
+        const handleWeekEventClick = useCallback((event, e) => {
+            e.stopPropagation();
+            // Sử dụng requestAnimationFrame thay vì setTimeout để tránh FlushSync error
+            requestAnimationFrame(() => {
+                onEventSelect(event);
+            });
+        }, [onEventSelect]);
+
         // Chuyển đổi tên ngày sang tiếng Việt
-        const getVietnameseDayName = (date) => {
+        const getVietnameseDayName = useCallback((date) => {
             const dayNames = ["Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"];
             return dayNames[moment(date).day()];
-        };
-        
+        }, []);
+
         return (
             <div className="week-view-container">
                 <div className="week-title">{weekTitle}</div>
                 <div className="week-days-list">
                     {currentWeekDays.map((day, index) => {
                         const dayEvents = eventsByDay[day] || [];
-                        const dayName = getVietnameseDayName(day); // Tên thứ trong tuần bằng tiếng Việt
-                        const dayNumber = moment(day).format('DD/MM'); // Ngày/tháng
+                        const dayName = getVietnameseDayName(day);
+                        const dayNumber = moment(day).format('DD/MM');
                         const isToday = moment(day).isSame(moment(), 'day');
                         
                         return (
                             <div 
                                 key={day} 
                                 className={`week-day-item ${isToday ? 'today' : ''} ${dayEvents.length === 0 ? 'no-events' : ''}`}
-                                onClick={() => onDateSelect(new Date(day))}
+                                onClick={() => handleWeekDayClick(new Date(day))}
                             >
                                 <div className="week-day-header">
                                     <div className="week-day-name">{dayName}</div>
@@ -411,10 +491,7 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
                                             <div 
                                                 key={event.id} 
                                                 className="week-day-event"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    onEventSelect(event);
-                                                }}
+                                                onClick={(e) => handleWeekEventClick(event, e)}
                                             >
                                                 <div className="week-event-time">
                                                     {event.slot ? event.slot.substring(0, 5) : '08:00'}
@@ -441,6 +518,24 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
                 </div>
             </div>
         );
+    });
+
+    // Trong component Calendar, thay đổi cách xử lý renderWeekDaysList
+    const renderWeekDaysList = () => {
+        const processedData = processWeekEvents();
+        if (!processedData) return null;
+        
+        const { eventsByDay, weekTitle } = processedData;
+        
+        return (
+            <WeekDaysList 
+                currentWeekDays={currentWeekDays}
+                eventsByDay={eventsByDay}
+                weekTitle={weekTitle}
+                onDateSelect={onDateSelect}
+                onEventSelect={onEventSelect}
+            />
+        );
     };
 
     // Hiển thị tiêu đề lịch dựa trên view hiện tại
@@ -451,8 +546,8 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
             return monthNames[month];
         };
         
-        if (view === 'dayGridMonth' && calendarRef.current) {
-            return <h3>{calendarRef.current.getApi().view.title}</h3>;
+        if (view === 'dayGridMonth') {
+            return <h3>{calendarTitle}</h3>;
         } else if (view === 'listWeek' && currentWeekDays.length > 0) {
             const weekStart = moment(currentWeekDays[0]);
             const weekEnd = moment(currentWeekDays[currentWeekDays.length - 1]);

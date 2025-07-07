@@ -54,15 +54,26 @@ const PatientDetail = () => {
 
   const handleUpdateHealthRecord = async () => {
     try {
-      const response = await updateHealthRecordAPI(healthRecordData.id, healthRecordData);
+      // Gửi đủ các trường như backend yêu cầu
+      const updatePayload = {
+        id: healthRecordData.id,
+        hivStatus: healthRecordData.hivStatus,
+        bloodType: healthRecordData.bloodType,
+        weight: healthRecordData.weight,
+        height: healthRecordData.height,
+        treatmentStatus: healthRecordData.treatmentStatus,
+        scheduleId: healthRecordData.schedule?.id,
+        regimenId: healthRecordData.regimen?.id,
+      };
+      const response = await updateHealthRecordAPI(healthRecordData.id, updatePayload);
       if (response.data) {
-
         notification.success({
           message: 'Hệ thống',
           showProgress: true,
           pauseOnHover: true,
           description: 'Cập nhật thông tin sức khỏe thành công!'
         });
+        await loadData();
       }
     } catch (error) {
       console.error("Lỗi khi cập nhật:", error);
@@ -139,16 +150,6 @@ const PatientDetail = () => {
               </Form.Item>
             </Col> */}
             <Col span={12}>
-              <Form.Item label="Chiều cao">
-                <Input name="height" value={healthRecordData.height || ''} onChange={handleInputChange} />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item label="Cân nặng">
-                <Input name="weight" value={healthRecordData.weight || ''} onChange={handleInputChange} />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
               <Form.Item label="Nhóm máu">
                 <Input name="bloodType" value={healthRecordData.bloodType || ''} onChange={handleInputChange} />
               </Form.Item>
@@ -158,52 +159,12 @@ const PatientDetail = () => {
                 <Input name="hivStatus" value={healthRecordData.hivStatus || ''} onChange={handleInputChange} />
               </Form.Item>
             </Col>
-            <Col span={12}>
-              <Form.Item label="Trạng thái điều trị">
-                <Input name="treatmentStatus" value={healthRecordData.treatmentStatus || ''} onChange={handleInputChange} />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item label="Ghi chú">
-                <TextArea name="note" value={healthRecordData.note || ''} onChange={handleInputChange} />
-              </Form.Item>
-            </Col>
           </Row>
           <Button type="primary" onClick={handleUpdateHealthRecord}>Cập nhật hồ sơ bệnh nhân</Button>
         </Form>
       </Card>
 
       <Divider orientation="center" style={{ marginTop: 10 + 'vh' }}>Kết quả xét nghiệm</Divider>
-
-      <Button type="primary" onClick={() => setIsCreateTestResultModalOpen(true)}>Tạo mới</Button>
-
-      <Modal
-        title="Tạo kết quả xét nghiệm"
-        closable={{ 'aria-label': 'Custom Close Button' }}
-        open={isCreateTestResultModalOpen}
-        onOk={handleCreateTestResult}
-        onCancel={resetAndClose}
-        okText={"Tạo"}
-        cancelText={"Hủy"}
-      >
-        <Form layout="vertical">
-          <Form.Item label="Loại xét nghiệm">
-            <Input value={type} onChange={(event) => setType(event.target.value)} />
-          </Form.Item>
-          <Form.Item label="Ghi chú">
-            <Input value={note} onChange={(event) => setNote(event.target.value)} />
-          </Form.Item>
-          <Form.Item label="Thời gian dự kiến">
-            <DatePicker
-              format="HH:mm DD/MM/YYYY"
-              showTime
-              onChange={(value) => {
-                setExpectedResultTime(dayjs(value).format("YYYY-MM-DDTHH:mm:ss"))
-              }}
-            />
-          </Form.Item>
-        </Form>
-      </Modal>
 
       {testResultData.map((test) => (
         <Card key={test.id} style={{ marginTop: 16 }}>
@@ -262,14 +223,6 @@ const PatientDetail = () => {
                     setDataUpdate(test);
                   }}
                 />
-                <Popconfirm
-                  title="Xoá kết quả?"
-                  onConfirm={() => handleDeleteTestResult(test.id)}
-                  okText="Có"
-                  cancelText="Không"
-                >
-                  <DeleteOutlined style={{ color: 'red', cursor: 'pointer' }} />
-                </Popconfirm>
               </Space>
             </Col>
           </Row>

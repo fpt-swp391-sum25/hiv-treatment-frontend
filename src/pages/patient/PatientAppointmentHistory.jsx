@@ -29,6 +29,7 @@ import { getSchedulesByPatientAPI } from '../../services/api.service';
 import { healthRecordService } from '../../services/health-record.service';
 import { AuthContext } from '../../components/context/AuthContext';
 import { fetchTestResultByHealthRecordIdAPI } from '../../services/api.service';
+import dayjs from 'dayjs';
 
 const { Search } = Input;
 const { Option } = Select;
@@ -216,49 +217,6 @@ export default function PatientAppointmentHistory() {
           </div>
         }
       >
-        <Row gutter={24} style={{ marginBottom: 24 }}>
-          <Col span={6}>
-            <Card>
-              <Statistic
-                title="Tổng lượt khám"
-                value={records.length}
-                prefix={<MedicineBoxOutlined />}
-                valueStyle={{ color: '#1890ff' }}
-              />
-            </Card>
-          </Col>
-          <Col span={6}>
-            <Card>
-              <Statistic
-                title="Khám"
-                value={typeStats['Khám']}
-                prefix={<MedicineBoxOutlined />}
-                valueStyle={{ color: '#1890ff' }}
-              />
-            </Card>
-          </Col>
-          <Col span={6}>
-            <Card>
-              <Statistic
-                title="Tái khám"
-                value={typeStats['Tái khám']}
-                prefix={<MedicineBoxOutlined />}
-                valueStyle={{ color: '#52c41a' }}
-              />
-            </Card>
-          </Col>
-          <Col span={6}>
-            <Card>
-              <Statistic
-                title="Tư vấn"
-                value={typeStats['Tư vấn']}
-                prefix={<MessageOutlined />}
-                valueStyle={{ color: '#faad14' }}
-              />
-            </Card>
-          </Col>
-        </Row>
-
         <Table
           columns={columns}
           dataSource={filteredRecords}
@@ -319,9 +277,9 @@ export default function PatientAppointmentHistory() {
               <Descriptions bordered size="small" column={2}>
                 <Descriptions.Item label="Tên phác đồ">{healthRecord.regimen.regimenName}</Descriptions.Item>
                 <Descriptions.Item label="Thành phần">{healthRecord.regimen.components}</Descriptions.Item>
-                <Descriptions.Item label="Mô tả">{healthRecord.regimen.description}</Descriptions.Item>
                 <Descriptions.Item label="Chỉ định">{healthRecord.regimen.indications}</Descriptions.Item>
                 <Descriptions.Item label="Chống chỉ định">{healthRecord.regimen.contraindications}</Descriptions.Item>
+                <Descriptions.Item label="Mô tả">{healthRecord.regimen.description}</Descriptions.Item>
               </Descriptions>
             )}
             <Divider orientation="center">Kết quả xét nghiệm</Divider>
@@ -336,8 +294,8 @@ export default function PatientAppointmentHistory() {
                     <Col span={8}><b>Ghi chú:</b> {test.note}</Col>
                   </Row>
                   <Row>
-                    <Col span={12}><b>Thời gian dự kiến:</b> {test.expectedResultTime}</Col>
-                    <Col span={12}><b>Thời gian nhận kết quả:</b> {test.actualResultTime}</Col>
+                    <Col span={12}><b>Thời gian dự kiến:</b> {test.expectedResultTime ? dayjs(test.expectedResultTime).format('HH:mm DD-MM-YYYY') : ''}</Col>
+                    <Col span={12}><b>Thời gian nhận kết quả:</b> {test.actualResultTime ? dayjs(test.actualResultTime).format('HH:mm DD-MM-YYYY') : ''}</Col>
                   </Row>
                 </Card>
               ))

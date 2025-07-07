@@ -1,53 +1,172 @@
-import { useContext, useState } from 'react';
-import { Button } from 'react-bootstrap';
+import { useContext, useEffect, useState } from 'react';
+import { Button, Spinner } from 'react-bootstrap';
 import { Line, Pie } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Title, Tooltip, Legend } from 'chart.js';
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Title, Tooltip, Legend, BarElement } from 'chart.js';
+import dayjs from 'dayjs';
+import quarterOfYear from 'dayjs/plugin/quarterOfYear';
 import '../../styles/doctor/Statistics.css';
 import { AuthContext } from '../context/AuthContext';
+import { fetchScheduleByDoctorIdAPI } from '../../services/api.service';
+import { Bar } from 'react-chartjs-2';
 
 // Register ChartJS components
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Title, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Title, Tooltip, Legend, BarElement);
+
+dayjs.extend(quarterOfYear);
+
+const getStartEndOfPeriod = (filter) => {
+  const now = dayjs();
+  if (filter === 'month') {
+    return {
+      start: now.startOf('month'),
+      end: now.endOf('month'),
+    };
+  } else if (filter === 'quarter') {
+    return {
+      start: now.startOf('quarter'),
+      end: now.endOf('quarter'),
+    };
+  } else if (filter === 'year') {
+    return {
+      start: now.startOf('year'),
+      end: now.endOf('year'),
+    };
+  }
+  return { start: now.startOf('month'), end: now.endOf('month') };
+};
 
 const Statistic = () => {
   const [activeFilter, setActiveFilter] = useState('month');
-  const [statsData, setStatsData] = useState({
-    totalPatients: 150,
-    newPatients: 12,
-    consultations: 45
+  const [loading, setLoading] = useState(true);
+  const [schedules, setSchedules] = useState([]);
+  const [stats, setStats] = useState({
+    totalAppointments: 0,
+    uniquePatients: 0,
+    newPatients: 0,
+    chartLabels: [],
+    chartData: [],
+    typeLabels: [],
+    typeData: [],
   });
+  const { user } = useContext(AuthContext);
 
-  const { user } = useContext(AuthContext)
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!user?.id) return;
+      setLoading(true);
+      try {
+        const res = await fetchScheduleByDoctorIdAPI(user.id);
+        setSchedules(res.data || []);
+      } catch (e) {
+        setSchedules([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [user]);
 
-
-  // Mock data for charts
-  const getLineChartData = (filter) => {
-    let labels = [];
-    let data = [];
-
-    switch (filter) {
-      case 'month':
-        labels = ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4'];
-        data = [12, 19, 15, 8];
-        break;
-      case 'quarter':
-        labels = ['Tháng 1', 'Tháng 2', 'Tháng 3'];
-        data = [35, 42, 38];
-        break;
-      case 'year':
-        labels = ['Quý 1', 'Quý 2', 'Quý 3', 'Quý 4'];
-        data = [85, 95, 78, 92];
-        break;
-      default:
-        labels = ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4'];
-        data = [12, 19, 15, 8];
+  useEffect(() => {
+    // Xử lý thống kê khi đổi filter hoặc dữ liệu
+    if (!schedules.length) {
+      setStats({
+        totalAppointments: 0,
+        uniquePatients: 0,
+        newPatients: 0,
+        chartLabels: [],
+        chartData: [],
+        typeLabels: [],
+        typeData: [],
+      });
+      return;
     }
+    const { start, end } = getStartEndOfPeriod(activeFilter);
+    // Lọc lịch trong kỳ
+    const filtered = schedules.filter(sch => {
+      const d = dayjs(sch.date || sch.createdAt);
+      return d.isAfter(start.subtract(1, 'day')) && d.isBefore(end.add(1, 'day'));
+    });
+    // Log danh sách ngày của các lịch hẹn đã lọc
+    console.log(`=== Filter: ${activeFilter} ===`);
+    console.log('Start:', start.format('YYYY-MM-DD'), 'End:', end.format('YYYY-MM-DD'));
+    console.log('Filtered schedule dates:', filtered.map(sch => (sch.date || sch.createdAt)));
+    // Tổng số lịch hẹn
+    const totalAppointments = filtered.length;
+    // Tổng số bệnh nhân duy nhất
+    const patientIds = filtered
+      .map(sch => sch.patient && sch.patient.id)
+      .filter(Boolean);
+    const uniquePatients = new Set(patientIds).size;
+    // Bệnh nhân mới trong kỳ: bệnh nhân có lịch đầu tiên trong kỳ
+    const allPatientFirstSchedule = {};
+    schedules.forEach(sch => {
+      if (!sch.patient || !sch.patient.id) return;
+      const d = dayjs(sch.date || sch.createdAt);
+      const pid = sch.patient.id;
+      if (!allPatientFirstSchedule[pid] || d.isBefore(allPatientFirstSchedule[pid])) {
+        allPatientFirstSchedule[pid] = d;
+      }
+    });
+    const newPatients = Object.values(allPatientFirstSchedule).filter(d => d.isAfter(start.subtract(1, 'day')) && d.isBefore(end.add(1, 'day'))).length;
+    // Biểu đồ: group theo ngày trong kỳ
+    let chartLabels = [];
+    let chartData = [];
+    if (activeFilter === 'month') {
+      const daysInMonth = end.date();
+      chartLabels = Array.from({ length: daysInMonth }, (_, i) => `${i + 1}`);
+      chartData = Array(daysInMonth).fill(0);
+      filtered.forEach(sch => {
+        const d = dayjs(sch.date || sch.createdAt);
+        const day = d.date() - 1;
+        if (day >= 0 && day < daysInMonth) chartData[day]++;
+      });
+    } else if (activeFilter === 'quarter') {
+      // group theo tháng trong quý
+      const months = [start.month(), start.month() + 1, start.month() + 2];
+      chartLabels = months.map(m => `Tháng ${m + 1}`);
+      chartData = [0, 0, 0];
+      filtered.forEach(sch => {
+        const d = dayjs(sch.date || sch.createdAt);
+        const idx = months.indexOf(d.month());
+        if (idx !== -1) chartData[idx]++;
+      });
+    } else if (activeFilter === 'year') {
+      // group theo quý
+      chartLabels = ['Quý 1', 'Quý 2', 'Quý 3', 'Quý 4'];
+      chartData = [0, 0, 0, 0];
+      filtered.forEach(sch => {
+        const d = dayjs(sch.date || sch.createdAt);
+        const quarter = d.quarter() - 1;
+        if (quarter >= 0 && quarter < 4) chartData[quarter]++;
+      });
+    }
+    // Phân loại lịch hẹn theo loại (type)
+    const typeMap = {};
+    filtered.forEach(sch => {
+      const type = sch.type || 'Khác';
+      if (!typeMap[type]) typeMap[type] = 0;
+      typeMap[type]++;
+    });
+    const typeLabels = Object.keys(typeMap);
+    const typeData = Object.values(typeMap);
+    setStats({
+      totalAppointments,
+      uniquePatients,
+      newPatients,
+      chartLabels,
+      chartData,
+      typeLabels,
+      typeData,
+    });
+  }, [schedules, activeFilter]);
 
+  const getLineChartData = () => {
     return {
-      labels,
+      labels: stats.chartLabels,
       datasets: [
         {
-          label: 'Số lượng bệnh nhân',
-          data,
+          label: 'Số lượng lịch hẹn',
+          data: stats.chartData,
           borderColor: '#2c7bbf',
           backgroundColor: 'rgba(44, 123, 191, 0.2)',
           tension: 0.3,
@@ -57,43 +176,21 @@ const Statistic = () => {
     };
   };
 
-  const getPieChartData = (filter) => {
-    let data = [];
-
-    switch (filter) {
-      case 'month':
-        data = [65, 25, 10];
-        break;
-      case 'quarter':
-        data = [55, 30, 15];
-        break;
-      case 'year':
-        data = [50, 35, 15];
-        break;
-      default:
-        data = [65, 25, 10];
-    }
-
-    return {
-      labels: ['Đã khỏi', 'Đang điều trị', 'Mới'],
-      datasets: [
-        {
-          data,
-          backgroundColor: [
-            '#4caf50',
-            '#2c7bbf',
-            '#ff9800',
-          ],
-          borderColor: [
-            '#388e3c',
-            '#1565c0',
-            '#f57c00',
-          ],
-          borderWidth: 1,
-        },
-      ],
-    };
-  };
+  const getPieChartData = () => ({
+    labels: stats.typeLabels,
+    datasets: [
+      {
+        data: stats.typeData,
+        backgroundColor: [
+          '#4caf50', '#2c7bbf', '#ff9800', '#e91e63', '#9c27b0', '#607d8b', '#ffc107', '#795548'
+        ],
+        borderColor: [
+          '#388e3c', '#1565c0', '#f57c00', '#ad1457', '#6a1b9a', '#455a64', '#ffa000', '#4e342e'
+        ],
+        borderWidth: 1,
+      },
+    ],
+  });
 
   const lineOptions = {
     responsive: true,
@@ -103,7 +200,7 @@ const Statistic = () => {
       },
       title: {
         display: true,
-        text: 'Biểu đồ số lượng bệnh nhân',
+        text: 'Biểu đồ số lượng lịch hẹn',
       },
     },
   };
@@ -111,76 +208,42 @@ const Statistic = () => {
   const pieOptions = {
     responsive: true,
     plugins: {
-      legend: {
-        position: 'top',
-      },
-      title: {
-        display: true,
-        text: 'Phân loại bệnh nhân',
-      },
+      legend: { position: 'top' },
+      title: { display: true, text: 'Phân loại lịch hẹn theo loại' },
     },
   };
 
-  const handleFilterChange = (filter) => {
-    setActiveFilter(filter);
-
-    // Update stats data based on filter
-    switch (filter) {
-      case 'month':
-        setStatsData({
-          totalPatients: 150,
-          newPatients: 12,
-          consultations: 45
-        });
-        break;
-      case 'quarter':
-        setStatsData({
-          totalPatients: 450,
-          newPatients: 35,
-          consultations: 120
-        });
-        break;
-      case 'year':
-        setStatsData({
-          totalPatients: 1800,
-          newPatients: 150,
-          consultations: 520
-        });
-        break;
-      default:
-        setStatsData({
-          totalPatients: 150,
-          newPatients: 12,
-          consultations: 45
-        });
-    }
-  };
+  if (loading) return <div style={{textAlign:'center',marginTop:40}}><Spinner animation="border" /></div>;
 
   return (
     <div className="statistics-container">
       {/* Stats Cards */}
       <div className="stats-cards">
         <div className="stat-card">
+          <div className="stat-title">Tổng số lịch hẹn</div>
+          <div className="stat-value">{stats.totalAppointments}</div>
+        </div>
+        <div className="stat-card">
           <div className="stat-title">Tổng số bệnh nhân</div>
-          <div className="stat-value">{statsData.totalPatients}</div>
+          <div className="stat-value">{stats.uniquePatients}</div>
         </div>
         <div className="stat-card">
-          <div className="stat-title">Bệnh nhân mới trong kỳ</div>
-          <div className="stat-value">{statsData.newPatients}</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-title">Buổi tư vấn trong kỳ</div>
-          <div className="stat-value">{statsData.consultations}</div>
+          <div className="stat-title">
+            {activeFilter === 'month' && 'Tổng bệnh nhân mới trong tháng'}
+            {activeFilter === 'quarter' && 'Tổng bệnh nhân mới trong quý'}
+            {activeFilter === 'year' && 'Tổng bệnh nhân mới trong năm'}
+          </div>
+          <div className="stat-value">{stats.newPatients}</div>
         </div>
       </div>
 
       {/* Charts */}
       <div className="charts-container">
         <div className="line-chart-container">
-          <Line data={getLineChartData(activeFilter)} options={lineOptions} />
+          <Bar data={getLineChartData()} options={lineOptions} />
         </div>
         <div className="pie-chart-container">
-          <Pie data={getPieChartData(activeFilter)} options={pieOptions} />
+          <Pie data={getPieChartData()} options={pieOptions} />
         </div>
       </div>
 
@@ -188,21 +251,21 @@ const Statistic = () => {
       <div className="filter-container">
         <Button
           variant={activeFilter === 'month' ? 'primary' : 'outline-primary'}
-          onClick={() => handleFilterChange('month')}
+          onClick={() => setActiveFilter('month')}
           className="filter-btn"
         >
           Tháng
         </Button>
         <Button
           variant={activeFilter === 'quarter' ? 'primary' : 'outline-primary'}
-          onClick={() => handleFilterChange('quarter')}
+          onClick={() => setActiveFilter('quarter')}
           className="filter-btn"
         >
           Quý
         </Button>
         <Button
           variant={activeFilter === 'year' ? 'primary' : 'outline-primary'}
-          onClick={() => handleFilterChange('year')}
+          onClick={() => setActiveFilter('year')}
           className="filter-btn"
         >
           Năm
