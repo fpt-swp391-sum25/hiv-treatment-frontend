@@ -55,7 +55,7 @@ const fetchAllScheduleAPI = (doctorId, date) => {
     return axios.get(URL_BACKEND, {
         params: {
             doctorId,
-            date: date.format('YYYY-MM-DD'),
+            date: date,
             status: 'Trống',
         },
     })

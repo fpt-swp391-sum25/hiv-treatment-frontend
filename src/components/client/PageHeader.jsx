@@ -1,10 +1,11 @@
-import { Layout, Button, Avatar, Typography, message, theme } from "antd";
+import { Layout, Button, Avatar, Typography, message, theme, Popover, Tooltip } from "antd";
 import { UserOutlined, LogoutOutlined } from "@ant-design/icons";
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { logoutAPI } from "../../services/api.service";
 import { useNavigate } from "react-router-dom";
 import appLogo from '../../assets/appLogo.png'
+import '../manager/Layout/ManagerHeader.css'
 
 const { Header } = Layout
 const { Text } = Typography
@@ -44,13 +45,16 @@ const PageHeader = () => {
                     className="app-logo"
                 />
             </div>
-            <div>
-                <Text style={{ color: 'black', marginLeft: 4, marginRight: 4 }}>{user.username}</Text>
-                <Avatar icon={<UserOutlined />} />
+            <div className="header-right">
+                <Tooltip title={user.fullName}>
+                    <Text style={{ color: 'black', marginLeft: 4, marginRight: 4 }}>{user.fullName}</Text>
+                    <Avatar icon={<UserOutlined />} />
+                </Tooltip>
+
+                <Button type="primary" icon={<LogoutOutlined />} onClick={handleLogout} danger>
+                    Đăng xuất
+                </Button>
             </div>
-            <Button type="primary" icon={<LogoutOutlined />} onClick={handleLogout} danger>
-                Đăng xuất
-            </Button>
         </Header>
     )
 }
