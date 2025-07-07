@@ -263,6 +263,7 @@ const router = createBrowserRouter([
       }
     ]
   },
+   // Path for admin pages
   {
     path: '/manager',
     element: (

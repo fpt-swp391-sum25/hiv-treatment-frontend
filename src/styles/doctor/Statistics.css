@@ -74,14 +74,39 @@
 .filter-container {
   display: flex;
   justify-content: center;
-  gap: 15px;
+  align-items: center;
+  gap: 16px;
   margin-top: 20px;
+  flex-wrap: nowrap;
 }
 
 .filter-btn {
-  min-width: 100px;
-  padding: 8px 20px;
-  font-weight: 500;
+  display: inline-flex !important;
+  min-width: 120px;
+  padding: 10px 24px;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 1.5px solid #2c7bbf;
+  background: white;
+  color: #2c7bbf;
+  transition: all 0.2s;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  width: auto !important;
+  box-sizing: border-box;
+}
+
+.filter-btn.btn-primary {
+  background: linear-gradient(135deg, #2c7bbf 0%, #1e5aa8 100%);
+  color: white;
+  border: none;
+}
+
+.filter-btn:not(.btn-primary):hover {
+  background: #e6f0fa;
+  color: #1565c0;
+  border-color: #1565c0;
 }
 
 /* Responsive adjustments */
@@ -114,11 +139,11 @@
 
 @media (max-width: 576px) {
   .filter-container {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
   }
-  
   .filter-btn {
-    flex: 1;
-    min-width: 80px;
+    flex: unset;
+    min-width: 70px;
+    width: auto;
   }
 }

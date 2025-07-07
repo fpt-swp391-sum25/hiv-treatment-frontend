@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import { Card } from "antd";
-import { Line } from 'react-chartjs-2';
+import { Line, Bar } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, Tooltip, Legend } from 'chart.js';
 import { fetchScheduleAPI } from '../../services/api.service';
 import dayjs from "dayjs";
+
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, Tooltip, Legend);
 
 const ScheduleByDayChart = () => {
   const [chartData, setChartData] = useState({ labels: [], data: [] });
@@ -96,7 +99,7 @@ const ScheduleByDayChart = () => {
       }}
       bodyStyle={{ padding: 24 }}
     >
-      <Line data={data} options={options} />
+      <Bar data={data} options={options} />
     </Card>
   );
 };

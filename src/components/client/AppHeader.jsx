@@ -109,6 +109,8 @@ const AppHeader = () => {
     );
   };
 
+  // Thêm biến này để xác định key menu cần highlight
+  const selectedMenuKey = location.pathname === '/' ? activeSetion : getActiveMenu(topMenuItems);
 
 
   const handleLogout = async () => {
@@ -145,7 +147,7 @@ const AppHeader = () => {
         <div className="app-menu">
           <Menu
             mode="horizontal"
-            selectedKeys={[activeSetion]}
+            selectedKeys={[selectedMenuKey]}
             items={mapMenuItems(topMenuItems)}
             className="main-menu"
           />
