@@ -1,98 +1,288 @@
 .financial-report {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+    padding: 24px;
 }
 
-.loading-container {
+.w-100 {
+    width: 100%;
+}
+
+.justify-content-between {
+    justify-content: space-between;
+}
+
+.mb-4 {
+    margin-bottom: 16px;
+}
+
+.loading-spinner {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+}
+
+/* Chart styles */
+.chart-container {
+    margin-top: 24px;
+    background: #fff;
+    padding: 24px;
+    border-radius: 2px;
+}
+
+.pie-chart-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 400px;
+    height: 400px;
+}
+
+.trend-chart {
+    width: 100%;
+    height: 400px;
+    margin-top: 24px;
+}
+
+/* Table styles */
+.ant-table-thead > tr > th {
+    background: #f5f5f5;
+    font-weight: 600;
+}
+
+/* Card styles */
+.ant-card {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+/* Statistics styles */
+.ant-statistic-title {
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.45);
+}
+
+.ant-statistic-content {
+    font-size: 24px;
+    font-weight: 600;
+}
+
+/* Button styles */
+.ant-btn-icon-only {
+    width: 32px;
+    height: 32px;
+}
+
+/* Date range text */
+.ant-typography {
+    color: rgba(0, 0, 0, 0.45);
 }
 
 .report-header {
     margin-bottom: 24px;
+    background: #fff;
+    border-radius: 8px;
 }
 
+.report-header .ant-card-body {
+    padding: 24px;
+}
+
+/* Style cho RangePicker */
+.report-header .ant-picker {
+    border-radius: 6px;
+}
+
+.report-header .ant-picker:hover {
+    border-color: #1890ff;
+}
+
+.report-header .ant-picker-focused {
+    border-color: #1890ff;
+    box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+/* Style cho preset ranges */
+.ant-picker-ranges {
+    padding: 0 12px;
+}
+
+.ant-picker-preset > .ant-tag {
+    margin: 4px;
+    cursor: pointer;
+}
+
+.ant-picker-preset > .ant-tag:hover {
+    color: #1890ff;
+    border-color: #1890ff;
+}
+
+/* Style cho text hiển thị khoảng thời gian */
 .report-header .ant-typography {
-    margin-bottom: 0;
+    margin: 0;
 }
 
-.comparison-table {
-    margin-bottom: 24px;
+.report-header .ant-space {
+    width: 100%;
 }
 
-.comparison-table .ant-table-thead > tr > th {
-    background: #fafafa;
+/* Style cho các nút action */
+.report-header .ant-btn {
+    border-radius: 6px;
+}
+
+.report-header .ant-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Animation cho loading */
+.ant-spin {
+    transition: all 0.3s ease;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .financial-report {
+        padding: 16px;
+    }
+    
+    .chart-container {
+        padding: 16px;
+    }
+
+    .report-header .ant-picker {
+        width: 100% !important;
+    }
+}
+
+.report-header h1 {
+    margin: 0;
+    font-size: 24px;
     font-weight: 600;
 }
 
-.trend-chart {
-    margin-bottom: 24px;
+/* Statistics styles */
+.ant-statistic {
+    text-align: center;
 }
 
-.trend-chart .ant-card-head {
-    border-bottom: 1px solid #f0f0f0;
+/* Chart styles */
+.recharts-wrapper {
+    margin: 0 auto;
 }
 
-.transaction-summary {
-    margin-bottom: 24px;
+.recharts-default-tooltip {
+    background-color: rgba(255, 255, 255, 0.9) !important;
+    border: none !important;
+    border-radius: 4px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+    padding: 8px !important;
 }
 
-.transaction-summary .ant-table-thead > tr > th {
-    background: #fafafa;
-    font-weight: 600;
+/* Table styles */
+.ant-table-wrapper {
+    margin-top: 16px;
 }
 
-.ant-empty {
-    padding: 40px 0;
+.ant-table-cell {
+    white-space: nowrap;
 }
 
-.ant-empty-description {
-    color: rgba(0, 0, 0, 0.45);
+/* Status colors */
+.status-completed {
+    color: #52c41a;
+}
+
+.status-pending {
+    color: #faad14;
+}
+
+.status-failed {
+    color: #f5222d;
+}
+
+/* Loading state */
+.ant-spin-nested-loading {
+    min-height: 200px;
 }
 
 /* Print styles */
 @media print {
     .financial-report {
-        background: white;
-        padding: 20px;
+        padding: 0;
     }
 
-    .ant-card {
-        border: none;
-        box-shadow: none;
-    }
-
-    .ant-btn,
-    .ant-select {
+    .ant-picker-range {
         display: none;
     }
 
-    .ant-table {
+    .ant-card {
+        box-shadow: none;
         border: 1px solid #f0f0f0;
+        break-inside: avoid;
     }
 
-    .ant-table-thead > tr > th {
-        background: #fafafa !important;
-        -webkit-print-color-adjust: exact;
+    .ant-table-wrapper {
+        overflow: visible !important;
+    }
+
+    .ant-table {
+        font-size: 12px;
     }
 }
 
-/* Responsive styles */
+/* Trend Analysis styles */
+.trend-analysis-card {
+    margin: 16px 0;
+}
+
+.trend-analysis-card .ant-card-head {
+    border-bottom: 1px solid #f0f0f0;
+    padding: 16px 24px;
+}
+
+.trend-analysis-card .ant-card-head-title {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.trend-analysis-card .ant-radio-group {
+    margin-bottom: 0;
+}
+
+.trend-analysis-card .recharts-wrapper {
+    margin: 0 auto;
+    max-width: 100%;
+}
+
+.trend-analysis-card .ant-table-wrapper {
+    margin-top: 24px;
+}
+
+/* Responsive styles for trend analysis */
 @media (max-width: 768px) {
-    .report-header .ant-space {
+    .trend-analysis-card .recharts-wrapper {
+        width: 100% !important;
+        height: 300px !important;
+    }
+
+    .trend-analysis-card .ant-card-head {
         flex-direction: column;
-        align-items: stretch;
+        align-items: flex-start;
+        gap: 16px;
     }
 
-    .report-header .ant-space-item {
-        margin-right: 0 !important;
-        margin-bottom: 16px;
+    .trend-analysis-card .ant-card-extra {
+        margin-left: 0;
+        width: 100%;
     }
 
-    .ant-table {
-        overflow-x: auto;
+    .trend-analysis-card .ant-radio-group {
+        width: 100%;
+        display: flex;
+    }
+
+    .trend-analysis-card .ant-radio-button-wrapper {
+        flex: 1;
+        text-align: center;
     }
 } 
