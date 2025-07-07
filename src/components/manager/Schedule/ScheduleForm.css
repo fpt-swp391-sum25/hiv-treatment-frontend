@@ -1,20 +1,19 @@
 .schedule-form-modal .modal-content {
-    border-radius: 12px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    border-radius: 10px;
     border: none;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
 }
 
 .schedule-form-modal .modal-header {
-    background-color: #f8f9fa;
-    border-bottom: 1px solid #ebedf0;
-    padding: 15px 20px;
-    border-top-left-radius: 12px;
-    border-top-right-radius: 12px;
+    border-bottom: 1px solid #f0f0f0;
+    padding: 16px 20px;
 }
 
 .schedule-form-modal .modal-title {
-    color: #1a73e8;
     font-weight: 600;
+    font-size: 18px;
+    color: #333;
 }
 
 .schedule-form-modal .modal-body {
@@ -22,112 +21,245 @@
 }
 
 .schedule-form-modal .modal-footer {
-    border-top: 1px solid #ebedf0;
-    padding: 15px 20px;
+    border-top: 1px solid #f0f0f0;
+    padding: 12px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
+/* Button container styling for better alignment */
+.schedule-form-modal .button-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.schedule-form-modal .action-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+/* Button styling */
+.schedule-form-modal .btn-action {
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 6px;
+    min-width: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    height: 40px;
+    box-shadow: none;
+}
+
+.schedule-form-modal .btn-action:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Consistent button styling */
+.schedule-form-modal .btn-outline-primary {
+    color: #1a73e8;
+    border-color: #1a73e8;
+    background-color: transparent;
+}
+
+.schedule-form-modal .btn-outline-primary:hover:not(:disabled) {
+    background-color: #1a73e8;
+    color: white;
+}
+
+.schedule-form-modal .btn-outline-secondary {
+    color: #6c757d;
+    border-color: #6c757d;
+}
+
+.schedule-form-modal .btn-outline-secondary:hover:not(:disabled) {
+    background-color: #6c757d;
+    color: white;
+}
+
+/* Section styling */
+.schedule-section {
+    background-color: rgba(224, 248, 248, 0.25);
+    border-radius: 8px;
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.section-title {
+    background-color: rgba(224, 248, 248, 0.6);
+    padding: 10px 15px;
+    margin: 0;
+    font-weight: 600;
+    color: #333;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    font-size: 16px;
+}
+
+.section-content {
+    padding: 15px;
+}
+
+/* Form controls */
 .schedule-form-modal .form-control,
 .schedule-form-modal .form-select {
-    border-radius: 8px;
-    border: 1px solid #dfe1e5;
-    padding: 10px 15px;
-    font-size: 14px;
-    box-shadow: none;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    padding: 8px 12px;
     transition: all 0.3s;
 }
 
 .schedule-form-modal .form-control:focus,
 .schedule-form-modal .form-select:focus {
-    border-color: #4daddf;
-    box-shadow: 0 0 0 0.2rem rgba(77, 173, 223, 0.25);
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.15);
 }
 
 .schedule-form-modal .form-label {
-    font-weight: 600;
-    font-size: 14px;
+    font-weight: 500;
     margin-bottom: 8px;
     color: #333;
 }
 
-.schedule-form-modal .form-check-label {
-    font-weight: 500;
-    font-size: 14px;
-    color: #333;
-}
-
-.schedule-form-modal .btn-primary {
-    background-color: #1a73e8;
-    border-color: #1a73e8;
-    min-width: 120px;
-    font-weight: 500;
-}
-
-.schedule-form-modal .btn-primary:hover {
-    background-color: #0d62c9;
-    border-color: #0d62c9;
-}
-
-.schedule-form-modal .btn-secondary {
-    background-color: #6c757d;
-    border-color: #6c757d;
-    min-width: 120px;
-    font-weight: 500;
-}
-
-.schedule-form-modal .btn-secondary:hover {
-    background-color: #5c636a;
-    border-color: #565e64;
-}
-
-.schedule-form-modal .alert {
-    margin-bottom: 1rem;
-    padding: 0.75rem 1rem;
-    border-radius: 4px;
-}
-
-/* Styles for repetitive schedule feature */
-.schedule-form-modal .repeat-schedule-option {
-    margin-top: 15px;
-    padding: 12px;
-    background-color: #f8f9fa;
-    border-radius: 8px;
-    border: 1px solid #e9ecef;
-}
-
-.schedule-form-modal .repeat-info {
-    padding: 10px;
-    background-color: #e8f4fd;
-    border-radius: 6px;
-    margin-left: 25px;
-    border-left: 3px solid #1a73e8;
-}
-
-.schedule-form-modal .repeat-info p {
-    margin-bottom: 5px;
-    color: #333;
-}
-
-.schedule-form-modal .repeat-info p.small {
-    font-size: 12px;
-}
-
-.schedule-form-modal .text-muted {
+.schedule-form-modal .form-text {
+    font-size: 0.85rem;
     color: #6c757d;
 }
 
-/* Đảm bảo nút có kích thước đồng đều */
-.schedule-form-modal .modal-footer .btn {
-    height: 42px;
+/* Date display */
+.date-display {
+    margin-top: 8px;
+}
+
+.date-badge {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    padding: 4px 10px;
+    font-size: 0.85rem;
+    color: #495057;
+}
+
+/* Schedule type options */
+.schedule-type-options {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.schedule-option {
+    flex: 1;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.schedule-option.active {
+    border-color: #0d6efd;
+    background-color: rgba(13, 110, 253, 0.05);
+}
+
+.option-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.option-icon {
+    width: 32px;
+    height: 32px;
+    background-color: #e9ecef;
+    border-radius: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
+    color: #0d6efd;
+}
+
+.option-label {
+    font-weight: 500;
+    margin-bottom: 2px;
+}
+
+.option-desc {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin: 0;
+}
+
+/* Custom radio button */
+.custom-radio {
+    margin: 0;
+}
+
+.custom-radio .form-check-input {
+    margin-top: 8px;
+}
+
+/* Shift options */
+.shift-type-options {
+    display: flex;
+    gap: 15px;
+}
+
+.shift-option {
+    flex: 1;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 12px;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s;
+}
+
+.shift-option.active {
+    border-color: #0d6efd;
+    background-color: rgba(13, 110, 253, 0.05);
+}
+
+.shift-time {
+    margin: 10px 0 5px 25px;
+    color: #0d6efd;
+    font-weight: 500;
+}
+
+.shift-slots-info {
+    margin-left: 25px;
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+/* Repeat count */
+.repeat-count {
+    max-width: 100px;
+}
+
+/* Buttons */
+.schedule-form-modal .btn {
+    padding: 8px 20px;
     border-radius: 6px;
 }
 
-/* Đảm bảo footer thẳng hàng */
-.schedule-form-modal .modal-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    padding: 16px 20px;
+.schedule-form-modal .btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .schedule-type-options,
+    .shift-type-options {
+        flex-direction: column;
+    }
+    
+    .schedule-section {
+        margin-bottom: 15px;
+    }
 }

@@ -77,45 +77,6 @@ const AdminDashboard = () => {
     return (
         <div style={{ padding: 32 }}>
             <Row gutter={[24, 24]}>
-                <Col xs={24} sm={12} md={8} lg={6}>
-
-                    <Card title="Tổng số bác sĩ" className="admin-dashboard-card">
-                        <div className="dashboard-number">{counts.doctors}</div>
-                    </Card>
-                </Col>
-                <Col xs={24} sm={12} md={8} lg={6}>
-                    <Card title="Tổng số nhân viên" className="admin-dashboard-card">
-                        <div className="dashboard-number">{counts.labTechnicians}</div>
-                    </Card>
-                </Col>
-                <Col xs={24} sm={12} md={8} lg={6}>
-                    <Card title="Tổng số quản lý" className="admin-dashboard-card">
-                        <div className="dashboard-number">{counts.managers}</div>
-                    </Card>
-                </Col>
-                <Col xs={24} sm={12} md={8} lg={6}>
-                    <Card title="Tổng số bệnh nhân" className="admin-dashboard-card">
-                        <div className="dashboard-number">{counts.patients}</div>
-                    </Card>
-                </Col>
-                <Col xs={24} sm={12} md={8} lg={6}>
-                    <Card title="Bệnh nhân mới trong tháng" className="admin-dashboard-card">
-                        <div className="dashboard-number">{counts.newPatientsThisMonth}</div>
-                    </Card>
-                </Col>
-                <Col xs={24} sm={24} md={16} lg={12}>
-                    <Card title="Lịch hẹn theo trạng thái" className="admin-dashboard-card">
-                        <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
-                            {Object.entries(counts.schedulesByStatus).map(([status, count]) => (
-                                <li key={status} style={{ marginBottom: 4 }}>
-                                    <b>{status}:</b> {count}
-                                </li>
-                            ))}
-                        </ul>
-                    </Card>
-                </Col>
-            </Row>
-            <Row gutter={[24, 24]} style={{ marginTop: 32 }}>
                 <Col xs={24} md={12}>
                     <Card title="Phân loại nhân viên" className="admin-dashboard-card">
                         <Pie
@@ -145,37 +106,33 @@ const AdminDashboard = () => {
                     </Card>
                 </Col>
                 <Col xs={24} md={12}>
-                    <Card title="Phân loại lịch hẹn theo trạng thái" className="admin-dashboard-card">
-                        <Pie
-                            data={{
-                                labels: Object.keys(counts.schedulesByStatus),
-                                datasets: [
-                                    {
-                                        data: Object.values(counts.schedulesByStatus),
-                                        backgroundColor: [
-                                            '#4caf50', '#2c7bbf', '#ff9800', '#e91e63', '#9c27b0', '#607d8b', '#ffc107', '#795548'
-                                        ],
-                                        borderColor: [
-                                            '#388e3c', '#1565c0', '#f57c00', '#ad1457', '#6a1b9a', '#455a64', '#ffa000', '#4e342e'
-                                        ],
-                                        borderWidth: 1,
-                                    },
-                                ],
-                            }}
-                            options={{
-                                responsive: true,
-                                plugins: {
-                                    legend: { position: 'top' },
-                                    title: { display: true, text: 'Phân loại lịch hẹn' },
-                                },
-                            }}
-                        />
-                    </Card>
-                </Col>
-            </Row>
-            <Row gutter={[24, 24]} style={{ marginTop: 32 }}>
-                <Col xs={24}>
-                    <ScheduleByDayChart />
+                    <Row gutter={[16, 16]}>
+                        <Col span={24}>
+                            <Card title="Số bác sĩ" className="admin-dashboard-card">
+                                <div className="dashboard-number">{counts.doctors}</div>
+                            </Card>
+                        </Col>
+                        <Col span={24}>
+                            <Card title="Số kỹ thuật viên" className="admin-dashboard-card">
+                                <div className="dashboard-number">{counts.labTechnicians}</div>
+                            </Card>
+                        </Col>
+                        <Col span={24}>
+                            <Card title="Số quản lý" className="admin-dashboard-card">
+                                <div className="dashboard-number">{counts.managers}</div>
+                            </Card>
+                        </Col>
+                        <Col span={24}>
+                            <Card title="Số bệnh nhân" className="admin-dashboard-card">
+                                <div className="dashboard-number">{counts.patients}</div>
+                            </Card>
+                        </Col>
+                        <Col span={24}>
+                            <Card title="Bệnh nhân mới trong tháng" className="admin-dashboard-card">
+                                <div className="dashboard-number">{counts.newPatientsThisMonth}</div>
+                            </Card>
+                        </Col>
+                    </Row>
                 </Col>
             </Row>
         </div>

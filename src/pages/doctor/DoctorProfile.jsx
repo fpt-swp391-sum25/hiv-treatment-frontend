@@ -3,7 +3,7 @@ import { Card, Row, Col, Tabs, Skeleton, Avatar, Typography } from 'antd';
 import { MailOutlined, PhoneOutlined } from '@ant-design/icons';
 import DoctorPersonalProfile from '../../components/doctor/DoctorPersonalProfile';
 import DoctorStatistic from '../../components/doctor/DoctorStatistic';
-import doctorProfileImage from '../../assets/doctorProfile.png';
+import doctorProfileImage from '../../assets/doctor.png';
 import { useOutletContext } from 'react-router-dom';
 import { AuthContext } from '../../components/context/AuthContext';
 

@@ -134,7 +134,6 @@ const Booking = () => {
                 setGroupedSlots({});
             }
         } catch (error) {
-            console.log(">>>>>>>>>>ERROR", error)
             message.error('Không thể tải danh sách khung giờ');
         } finally {
             setLoading(false);

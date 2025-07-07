@@ -4,6 +4,7 @@ import { fetchUsersAPI, fetchScheduleAPI } from "../../services/api.service";
 import { useNavigate } from "react-router-dom";
 import { DatePicker } from "antd";
 import viVN from 'antd/es/date-picker/locale/vi_VN';
+import dayjs from 'dayjs';
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -40,7 +41,7 @@ const LabTechnicianPatientList = () => {
                     avatar: matchedPatient?.avatar || '',
                     fullName: matchedPatient?.fullName || 'Chưa rõ tên',
                 };
-            });
+            }).filter(item => item.patientCode !== 'N/A' && item.fullName !== 'Chưa rõ tên' && item.date && item.slot);
 
             setData(mergedData);
             setFilteredData(mergedData);
@@ -101,11 +102,13 @@ const LabTechnicianPatientList = () => {
             title: 'Ngày khám',
             dataIndex: 'date',
             key: 'date',
+            render: (date) => date ? dayjs(date).format('DD-MM-YYYY') : '',
         },
         {
             title: 'Ca khám',
             dataIndex: 'slot',
             key: 'slot',
+            render: (slot) => slot ? dayjs(slot, 'HH:mm:ss').format('HH:mm') : '',
         },
         {
             title: 'Action',
