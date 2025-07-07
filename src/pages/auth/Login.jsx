@@ -17,8 +17,8 @@ const Login = () => {
     const [error, setError] = useState('');
     const { user, setUser } = useContext(AuthContext)
     const [loading, setLoading] = useState(false);
-
     const navigate = useNavigate();
+
     useEffect(() => {
         const authError = localStorage.getItem('auth_error');
         if (authError) {
@@ -144,7 +144,21 @@ const Login = () => {
     });
 
     const redirectHomePage = () => {
-
+        if (user) {
+            if (user.role === "ADMIN") {
+                navigate('/admin')
+            } else if (user.role === "MANAGER") {
+                navigate('/manager')
+            } else if (user.role === 'LAB_TECHNICIAN') {
+                navigate('/lab-technician')
+            } else if (user.role === "DOCTOR") {
+                navigate('/doctor')
+            } else {
+                navigate('/')
+            }
+        } else {
+            navigate('/')
+        }
     }
 
 
