@@ -31,6 +31,8 @@ const ViewOnlyPatientDetail = () => {
   const [note, setNote] = useState("");
   const [expectedResultTime, setExpectedResultTime] = useState("");
   const [dataUpdate, setDataUpdate] = useState({});
+  const [newTestTypes, setNewTestTypes] = useState([]);
+  const [currentTestType, setCurrentTestType] = useState("");
 
   const { id } = useParams();
   const { Title } = Typography;
@@ -95,11 +97,11 @@ const ViewOnlyPatientDetail = () => {
     setIsIndiateRegimenModalOpen(false);
     setIsCreateTestResultModalOpen(false);
     setIsUpdateTestResultModalOpen(false);
-    setType("");
-    setNote("");
-    setExpectedResultTime("");
+    setCurrentTestType("");
+    setNewTestTypes([]);  
     setDataUpdate({});
-  }
+  };
+
 
   const handleUpdateTreatmentStatus = async (newStatus) => {
     try {
@@ -133,28 +135,35 @@ const ViewOnlyPatientDetail = () => {
     }
   };
 
-  const handleCreateTestResult = async () => {
+  const handleCreateTestResultsBatch = async () => {
     try {
-      const response = await createTestResultAPI(type, note, expectedResultTime, healthRecordData.id);
-      if (response.data) {
-        notification.success({
-          message: 'Hệ thống',
-          showProgress: true,
-          pauseOnHover: true,
-          description: 'Tạo kết quả xét nghiệm thành công!'
+      if (newTestTypes.length === 0) {
+        notification.warning({
+          message: 'Thông báo',
+          description: 'Vui lòng thêm ít nhất 1 loại xét nghiệm'
         });
+        return;
       }
+
+      for (const type of newTestTypes) {
+        await createTestResultAPI(type, "", "", healthRecordData.id);
+      }
+
+      notification.success({
+        message: 'Hệ thống',
+        description: 'Tạo kết quả xét nghiệm thành công!'
+      });
+
       resetAndClose();
       await loadData();
     } catch (error) {
       notification.error({
         message: 'Lỗi',
-        showProgress: true,
-        pauseOnHover: true,
         description: 'Không thể tạo kết quả xét nghiệm'
       });
     }
   };
+
 
   const handleDeleteTestResult = async (testResultId) => {
     try {
@@ -178,29 +187,6 @@ const ViewOnlyPatientDetail = () => {
     }
   };
 
-  const handleUpdateTestResult = async () => {
-    try {
-      const response = await updateTestResultAPI(dataUpdate.id, type, note, expectedResultTime);
-      if (response.data) {
-        notification.success({
-          message: 'Hệ thống',
-          showProgress: true,
-          pauseOnHover: true,
-          description: 'Cập nhật kết quả xét nghiệm thành công!'
-        });
-      }
-      resetAndClose();
-      await loadData();
-    } catch (error) {
-      notification.error({
-        message: 'Lỗi',
-        showProgress: true,
-        pauseOnHover: true,
-        description: 'Không thể cập nhật kết quả xét nghiệm'
-      });
-    }
-  };
-
   return (
     <div style={{ marginRight: 10 + 'vw', marginLeft: 10 + 'vw' }}>
       <Space direction="vertical" style={{ margin: '15px 0 0 0', width: "100%" }}>
@@ -208,7 +194,6 @@ const ViewOnlyPatientDetail = () => {
           type="primary"
           className="custom-yellow-btn"
           onClick={() => navigate(-1)}
-
         >
           Quay lại
         </Button>
@@ -252,8 +237,30 @@ const ViewOnlyPatientDetail = () => {
                   value={healthRecordData.treatmentStatus}
                   onChange={handleUpdateTreatmentStatus}
                 >
-                  <Select.Option value="Đang chờ khám">Đang chờ khám</Select.Option>
-                  <Select.Option value="Đã khám">Đã khám</Select.Option>
+                  <Select.Option 
+                    value="Đang chờ khám" 
+                    label={<span style={{ color: "#faad14" }}>Đang chờ khám</span>}
+                  >
+                    <span style={{ color: "#faad14" }}>Đang chờ khám</span>
+                  </Select.Option>
+                  <Select.Option 
+                    value="Đã khám"
+                    label={<span style={{ color: "#52c41a" }}>Đã khám</span>}
+                  >
+                    <span style={{ color: "#52c41a" }}>Đã khám</span>
+                  </Select.Option>
+                  <Select.Option 
+                    value="Đã tư vấn"
+                    label={<span style={{ color: "#237804" }}>Đã tư vấn</span>}
+                  >
+                    <span style={{ color: "#237804" }}>Đã tư vấn</span>
+                  </Select.Option>
+                  <Select.Option 
+                    value="Không đến"
+                    label={<span style={{ color: "#f5222d" }}>Không đến</span>}
+                  >
+                    <span style={{ color: "#f5222d" }}>Không đến</span>
+                  </Select.Option>
                 </Select>
               </Form.Item>
             </Col>
@@ -271,56 +278,58 @@ const ViewOnlyPatientDetail = () => {
       <Modal
         title="Tạo kết quả xét nghiệm"
         open={isCreateTestResultModalOpen}
-        onOk={handleCreateTestResult}
+        onOk={handleCreateTestResultsBatch}
         onCancel={resetAndClose}
         okText="Tạo"
         cancelText="Hủy"
       >
         <Form layout="vertical">
           <Form.Item label="Loại xét nghiệm">
-            <Input value={type} onChange={e => setType(e.target.value)} />
-          </Form.Item>
-          <Form.Item label="Ghi chú">
-            <Input value={note} onChange={e => setNote(e.target.value)} />
-          </Form.Item>
-          <Form.Item label="Thời gian dự kiến">
-            <DatePicker
-              format="HH:mm DD/MM/YYYY"
-              showTime
-              onChange={value => setExpectedResultTime(value ? value.format('YYYY-MM-DDTHH:mm:ss') : '')}
-              value={expectedResultTime ? dayjs(expectedResultTime) : null}
+            <Input
+              value={currentTestType}
+              onChange={e => setCurrentTestType(e.target.value)}
+              placeholder="Nhập loại xét nghiệm"
             />
+            <Button
+              type="dashed"
+              style={{ marginTop: 8 }}
+              icon={<PlusOutlined />}
+              onClick={() => {
+                if (currentTestType.trim()) {
+                  setNewTestTypes(prev => [...prev, currentTestType.trim()]);
+                  setCurrentTestType("");
+                }
+              }}
+            >
+              Thêm xét nghiệm
+            </Button>
+          </Form.Item>
+          <Form.Item label="Danh sách xét nghiệm sẽ tạo">
+            {newTestTypes.length === 0 ? (
+              <p><i>Chưa có xét nghiệm nào</i></p>
+            ) : (
+              <ul>
+                {newTestTypes.map((type, index) => (
+                  <li key={index}>
+                    {type}
+                    <Button
+                      type="link"
+                      danger
+                      size="small"
+                      onClick={() =>
+                        setNewTestTypes(newTestTypes.filter((_, i) => i !== index))
+                      }
+                    >
+                      Xóa
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            )}
           </Form.Item>
         </Form>
       </Modal>
-
-      {/* Modal cập nhật */}
-      <Modal
-        title="Cập nhật kết quả xét nghiệm"
-        open={isUpdateTestResultModalOpen}
-        onOk={handleUpdateTestResult}
-        onCancel={resetAndClose}
-        okText="Cập nhật"
-        cancelText="Hủy"
-      >
-        <Form layout="vertical">
-          <Form.Item label="Loại xét nghiệm">
-            <Input value={type} onChange={e => setType(e.target.value)} />
-          </Form.Item>
-          <Form.Item label="Ghi chú">
-            <Input value={note} onChange={e => setNote(e.target.value)} />
-          </Form.Item>
-          <Form.Item label="Thời gian dự kiến">
-            <DatePicker
-              format="HH:mm DD/MM/YYYY"
-              showTime
-              onChange={value => setExpectedResultTime(value ? value.format('YYYY-MM-DDTHH:mm:ss') : '')}
-              value={expectedResultTime ? dayjs(expectedResultTime) : null}
-            />
-          </Form.Item>
-        </Form>
-      </Modal>
-
+      
       {/* Danh sách kết quả xét nghiệm */}
       {testResultData.map((test) => (
         <Card key={test.id} style={{ marginTop: 16 }}>
@@ -362,16 +371,6 @@ const ViewOnlyPatientDetail = () => {
             </Col>
             <Col span={8} style={{ display: 'flex', alignItems: 'center' }}>
               <Space>
-                <EditOutlined
-                  style={{ color: 'orange', cursor: 'pointer' }}
-                  onClick={() => {
-                    setDataUpdate(test);
-                    setType(test.type);
-                    setNote(test.note);
-                    setExpectedResultTime(test.expectedResultTime);
-                    setIsUpdateTestResultModalOpen(true);
-                  }}
-                />
                 <Popconfirm
                   title="Xoá kết quả?"
                   onConfirm={() => handleDeleteTestResult(test.id)}
