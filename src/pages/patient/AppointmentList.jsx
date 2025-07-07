@@ -53,8 +53,8 @@ const AppointmentList = () => {
                     status: item.status || null,
                 }))
                 .sort((a, b) => {
-                    const dateA = dayjs(`${a.date} ${a.slot}`, 'YYYY-MM-DD HH:mm');
-                    const dateB = dayjs(`${b.date} ${b.slot}`, 'YYYY-MM-DD HH:mm');
+                    const dateA = dayjs(`${a.date} ${a.slot}`, 'MM-YYYY -DD HH:mm');
+                    const dateB = dayjs(`${b.date} ${b.slot}`, 'MM-YYYY -DD HH:mm');
                     return dateB - dateA; // Mới nhất lên trên
                 });
             setSchedule(sortedSchedules);
@@ -68,11 +68,11 @@ const AppointmentList = () => {
 
 
     const handleMonthFilterChange = (date) => {
-        setMonthFilter(date ? date.format('YYYY-MM') : null);
+        setMonthFilter(date ? date.format('MM-YYYY ') : null);
     };
 
     const filteredSchedules = monthFilter
-        ? schedule.filter(s => dayjs(s.date).format('YYYY-MM') === monthFilter)
+        ? schedule.filter(s => dayjs(s.date).format('MM-YYYY ') === monthFilter)
         : schedule;
 
 
@@ -114,12 +114,15 @@ const AppointmentList = () => {
             title: 'Ngày',
             dataIndex: 'date',
             key: 'date',
-            render: (date) => date,
+
+            render: (date) => date ? dayjs(date).format('DD-MM-YYYY') : '',
+
         },
         {
             title: 'Khung giờ',
             dataIndex: 'slot',
             key: 'slot',
+            render: (slot) => slot ? dayjs(slot, 'HH:mm:ss').format('HH:mm') : '',
         },
         {
             title: 'Loại lịch hẹn',
@@ -138,9 +141,9 @@ const AppointmentList = () => {
             key: 'action',
             render: (_, record) => (
                 <>
-                    {['Đã thanh toán', 'Đang chờ thanh toán', 'Đang hoạt động'].includes(record.status) ? (
+                    {['Đã thanh toán', 'Đang chờ thanh toán', 'Đang hoạt động'].includes(record.status) ? (
                         <Popconfirm
-                            title="Hủy lịch hẹn"
+                            title="Huỷ lịch hẹn"
                             description="Bạn có chắc muốn hủy lịch hẹn này?"
                             onConfirm={() => { handleCancelSchedule(record.id) }}
                             okText="Có"
@@ -152,7 +155,7 @@ const AppointmentList = () => {
                                 disabled={loading}
                                 danger
                             >
-                                Hủy
+                                Huỷ
                             </Button>
                         </Popconfirm>
                     ) : null}
