@@ -1,0 +1,98 @@
+.financial-report {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+}
+
+.report-header {
+    margin-bottom: 24px;
+}
+
+.report-header .ant-typography {
+    margin-bottom: 0;
+}
+
+.comparison-table {
+    margin-bottom: 24px;
+}
+
+.comparison-table .ant-table-thead > tr > th {
+    background: #fafafa;
+    font-weight: 600;
+}
+
+.trend-chart {
+    margin-bottom: 24px;
+}
+
+.trend-chart .ant-card-head {
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.transaction-summary {
+    margin-bottom: 24px;
+}
+
+.transaction-summary .ant-table-thead > tr > th {
+    background: #fafafa;
+    font-weight: 600;
+}
+
+.ant-empty {
+    padding: 40px 0;
+}
+
+.ant-empty-description {
+    color: rgba(0, 0, 0, 0.45);
+}
+
+/* Print styles */
+@media print {
+    .financial-report {
+        background: white;
+        padding: 20px;
+    }
+
+    .ant-card {
+        border: none;
+        box-shadow: none;
+    }
+
+    .ant-btn,
+    .ant-select {
+        display: none;
+    }
+
+    .ant-table {
+        border: 1px solid #f0f0f0;
+    }
+
+    .ant-table-thead > tr > th {
+        background: #fafafa !important;
+        -webkit-print-color-adjust: exact;
+    }
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .report-header .ant-space {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .report-header .ant-space-item {
+        margin-right: 0 !important;
+        margin-bottom: 16px;
+    }
+
+    .ant-table {
+        overflow-x: auto;
+    }
+} 

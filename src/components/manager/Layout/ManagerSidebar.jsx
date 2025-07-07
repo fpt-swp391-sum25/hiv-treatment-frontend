@@ -30,7 +30,7 @@ const ManagerSidebar = () => {
     {
       key: '/manager/lab-technicians',
       icon: <TeamOutlined />,
-      label: 'Nhân viên',
+      label: 'Kĩ thuật viên',
     },
     {
       key: '/manager/schedule',

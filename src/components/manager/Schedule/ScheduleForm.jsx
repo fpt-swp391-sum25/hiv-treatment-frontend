@@ -4,6 +4,7 @@ import { ScheduleStatus, SlotTimes, StatusMapping } from '../../../types/schedul
 import './ScheduleForm.css';
 import moment from 'moment';
 import { fetchAllDoctorsAPI } from '../../../services/api.service';
+import { BsPerson, BsCalendarCheck, BsDoorOpen, BsClock, BsLayersFill, BsArrowRepeat } from 'react-icons/bs';
 
 const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCreated, existingSchedules, onShowToast }) => {
     const [doctors, setDoctors] = useState([]);
@@ -17,11 +18,22 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         slot: '08:00:00',
         repeatWeekly: false,
         repeatCount: 1,
-        roomCode: '101'
+        roomCode: '101',
+        scheduleType: 'single',
+        shiftType: 'morning',
     });
     
     // Sử dụng SlotTimes từ schedule.types.js
     const timeSlots = SlotTimes;
+    
+    // Định nghĩa ca sáng và ca chiều
+    const morningShiftSlots = timeSlots.filter(slot => 
+        ['08:00:00', '08:30:00', '09:00:00', '09:30:00', '10:00:00', '10:30:00', '11:00:00'].includes(slot.value)
+    );
+    
+    const afternoonShiftSlots = timeSlots.filter(slot => 
+        ['13:00:00', '13:30:00', '14:00:00', '14:30:00', '15:00:00', '15:30:00', '16:00:00', '16:30:00'].includes(slot.value)
+    );
 
     useEffect(() => {
         if (show) {
@@ -107,7 +119,9 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             slot: '08:00:00',
             repeatWeekly: false,
             repeatCount: 1,
-            roomCode: '101'
+            roomCode: '101',
+            scheduleType: 'single',
+            shiftType: 'morning',
         });
     };
 
@@ -159,8 +173,8 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             return;
         }
         
-        if (!formData.slot) {
-            console.error('Missing slot');
+        if (formData.scheduleType === 'single' && !formData.slot) {
+            console.error('Missing slot for single schedule');
             console.groupEnd();
             onShowToast('Vui lòng chọn khung giờ làm việc', 'danger');
             return;
@@ -190,6 +204,92 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             return;
         }
 
+        console.log('Form validation successful');
+        console.groupEnd();
+
+        // Xử lý đặt lịch theo ca hoặc theo khung giờ đơn
+        if (formData.scheduleType === 'shift') {
+            // Đặt lịch theo ca (nhiều khung giờ)
+            const shiftSlots = formData.shiftType === 'morning' ? morningShiftSlots : afternoonShiftSlots;
+            const schedules = [];
+            
+            // Tạo lịch cho từng khung giờ trong ca
+            for (const slotObj of shiftSlots) {
+                // Kiểm tra trùng lịch
+                const hasConflict = existingSchedules.some(schedule => 
+                    schedule.date === formData.date && 
+                    schedule.doctorId.toString() === formData.doctorId.toString() &&
+                    schedule.slot === slotObj.value
+                );
+                
+                if (!hasConflict) {
+                    const selectedDoc = doctors.find(doc => doc.id.toString() === formData.doctorId.toString());
+                    const doctorName = selectedDoc ? selectedDoc.name : '';
+                    
+                    const newSchedule = {
+                        doctorId: formData.doctorId,
+                        doctorName: doctorName,
+                        date: formData.date,
+                        status: StatusMapping[formData.status] || 'Trống',
+                        slot: slotObj.value,
+                        roomCode: formData.roomCode,
+                        type: null,
+                        patient_id: null,
+                        shiftType: formData.shiftType
+                    };
+                    
+                    schedules.push(newSchedule);
+                }
+            }
+            
+            // Nếu có lịch tuần lặp lại
+            if (formData.repeatWeekly && formData.repeatCount > 1) {
+                for (let weekIndex = 1; weekIndex < formData.repeatCount; weekIndex++) {
+                    const newDate = moment(formData.date).add(weekIndex * 7, 'days').format('YYYY-MM-DD');
+                    
+                    // Tạo lịch cho từng khung giờ trong ca cho các tuần lặp lại
+                    for (const slotObj of shiftSlots) {
+                        const hasConflict = existingSchedules.some(schedule => 
+                            schedule.date === newDate && 
+                            schedule.doctorId.toString() === formData.doctorId.toString() &&
+                            schedule.slot === slotObj.value
+                        );
+                        
+                        if (!hasConflict) {
+                            const selectedDoc = doctors.find(doc => doc.id.toString() === formData.doctorId.toString());
+                            const doctorName = selectedDoc ? selectedDoc.name : '';
+                            
+                            const newSchedule = {
+                                doctorId: formData.doctorId,
+                                doctorName: doctorName,
+                                date: newDate,
+                                status: StatusMapping[formData.status] || 'Trống',
+                                slot: slotObj.value,
+                                roomCode: formData.roomCode,
+                                type: null,
+                                patient_id: null,
+                                shiftType: formData.shiftType
+                            };
+                            
+                            schedules.push(newSchedule);
+                        }
+                    }
+                }
+            }
+            
+            // Thông báo số lịch được tạo
+            if (schedules.length > 0) {
+                console.log('Creating multiple schedules for shift:', schedules);
+                setTimeout(() => {
+                    onScheduleCreated(schedules);
+                    const shiftName = formData.shiftType === 'morning' ? 'sáng' : 'chiều';
+                    onShowToast(`Đã tạo ${schedules.length} lịch cho ca ${shiftName} thành công!`, 'success');
+                }, 0);
+            } else {
+                onShowToast('Không thể tạo lịch do trùng lặp với lịch hiện có', 'warning');
+            }
+        } else {
+            // Đặt lịch theo khung giờ đơn (cách hiện tại)
         // Kiểm tra trùng lịch
         const conflictingSchedules = existingSchedules.filter(schedule => 
             schedule.date === formData.date && 
@@ -204,69 +304,26 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             return;
         }
 
-        console.log('Form validation successful');
-        console.groupEnd();
-
-        // Tạo lịch mới
-        if (formData.repeatWeekly && formData.repeatCount > 1) {
-            // Tạo nhiều lịch lặp lại theo tuần
-            const schedules = [];
-            
-            for (let i = 0; i < formData.repeatCount; i++) {
-                const newDate = moment(formData.date).add(i * 7, 'days').format('YYYY-MM-DD');
-                
-                // Kiểm tra xem ngày mới có trùng với lịch hiện có không
-                const hasConflict = existingSchedules.some(schedule => 
-                    schedule.date === newDate && 
-                    schedule.doctorId.toString() === formData.doctorId.toString() &&
-                    schedule.slot === formData.slot
-                );
-                
-                if (!hasConflict) {
-                    const selectedDoc = doctors.find(doc => doc.id.toString() === formData.doctorId.toString());
-                    const doctorName = selectedDoc ? selectedDoc.name : '';
-                    
-                    const newSchedule = {
-                        doctorId: formData.doctorId,
-                        doctorName: doctorName,
-                        date: newDate,
-                        status: StatusMapping[formData.status] || 'Trống',
-                        slot: formData.slot,
-                        roomCode: formData.roomCode,
-                        type: null,
-                        patient_id: null
-                    };
-                    
-                    schedules.push(newSchedule);
-                }
-            }
-            
-            // Thông báo số lịch được tạo
-            if (schedules.length > 0) {
-                console.log('Creating multiple schedules:', schedules);
-                onScheduleCreated(schedules);
-            } else {
-                onShowToast('Không thể tạo lịch do trùng lặp với lịch hiện có', 'warning');
-            }
-        } else {
-            // Tạo một lịch đơn
-            const selectedDoc = doctors.find(doc => doc.id.toString() === formData.doctorId.toString());
-            const doctorName = selectedDoc ? selectedDoc.name : '';
-            
-            const newSchedule = {
-                doctorId: formData.doctorId,
-                doctorName: doctorName,
-                date: formData.date,
-                status: StatusMapping[formData.status] || 'Trống',
-                slot: formData.slot,
-                roomCode: formData.roomCode,
-                type: null,
-                patient_id: null
-            };
-            
-            console.log('Creating single schedule:', newSchedule);
+        // Tạo một lịch đơn
+        const selectedDoc = doctors.find(doc => doc.id.toString() === formData.doctorId.toString());
+        const doctorName = selectedDoc ? selectedDoc.name : '';
+        
+        const newSchedule = {
+            doctorId: formData.doctorId,
+            doctorName: doctorName,
+            date: formData.date,
+            status: StatusMapping[formData.status] || 'Trống',
+            slot: formData.slot,
+            roomCode: formData.roomCode,
+            type: null,
+            patient_id: null
+        };
+        
+        console.log('Creating single schedule:', newSchedule);
+        setTimeout(() => {
             onScheduleCreated(newSchedule);
-        }
+        }, 0);
+    }
         
         onHide();
     };
@@ -274,16 +331,26 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
     return (
         <Modal show={show} onHide={onHide} centered size="lg" className="schedule-form-modal">
             <Modal.Header closeButton>
-                <Modal.Title>Tạo lịch làm việc mới</Modal.Title>
+                <Modal.Title className="d-flex align-items-center">
+                    <BsCalendarCheck className="me-2 text-primary" size={22} />
+                    Tạo lịch làm việc mới
+                </Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 {error && <Alert variant="danger">{error}</Alert>}
                 
                 <Form onSubmit={handleSubmit}>
+                    {/* Section: Thông tin cơ bản */}
+                    <div className="schedule-section mb-3">
+                        <h6 className="section-title">Thông tin cơ bản</h6>
+                        <div className="section-content">
                     <Row>
-                        <Col md={6}>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Bác sĩ</Form.Label>
+                                <Col md={6} className="mb-3">
+                                    <Form.Group>
+                                        <Form.Label className="d-flex align-items-center">
+                                            <BsPerson className="me-2 text-primary" />
+                                            Bác sĩ
+                                        </Form.Label>
                                 {loading ? (
                                     <div className="d-flex align-items-center">
                                         <Spinner animation="border" size="sm" className="me-2" />
@@ -307,10 +374,12 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                                 )}
                             </Form.Group>
                         </Col>
-                        <Col md={6}>
-                            <Form.Group as={Row} className="mb-3">
-                                <Form.Label column sm="4">Ngày khám</Form.Label>
-                                <Col sm="8">
+                                <Col md={6} className="mb-3">
+                                    <Form.Group>
+                                        <Form.Label className="d-flex align-items-center">
+                                            <BsCalendarCheck className="me-2 text-primary" />
+                                            Ngày khám
+                                        </Form.Label>
                                     <Form.Control
                                         type="date"
                                         name="date"
@@ -319,18 +388,23 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                                         min={moment().format('YYYY-MM-DD')}
                                         required
                                     />
-                                    <small className="form-text text-muted">
-                                        {formData.date && `Ngày ${moment(formData.date).format('DD/MM/YYYY')} (${formatVietnameseDay(formData.date)})`}
-                                    </small>
-                                </Col>
+                                        {formData.date && (
+                                            <div className="date-display">
+                                                <span className="date-badge">
+                                                    {moment(formData.date).format('DD/MM/YYYY')} ({formatVietnameseDay(formData.date)})
+                                                </span>
+                                            </div>
+                                        )}
                             </Form.Group>
                         </Col>
                     </Row>
-
                     <Row>
                         <Col md={6}>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Phòng khám</Form.Label>
+                                    <Form.Group>
+                                        <Form.Label className="d-flex align-items-center">
+                                            <BsDoorOpen className="me-2 text-primary" />
+                                            Phòng khám
+                                        </Form.Label>
                                 <Form.Select
                                     name="roomCode"
                                     value={formData.roomCode}
@@ -345,9 +419,69 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                                 </Form.Select>
                             </Form.Group>
                         </Col>
-                        <Col md={6}>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Khung giờ</Form.Label>
+                            </Row>
+                        </div>
+                    </div>
+                    
+                    {/* Section: Kiểu đặt lịch */}
+                    <div className="schedule-section mb-3">
+                        <h6 className="section-title">Kiểu đặt lịch</h6>
+                        <div className="section-content">
+                            <div className="schedule-type-options">
+                                <div className={`schedule-option ${formData.scheduleType === 'single' ? 'active' : ''}`}>
+                                    <Form.Check
+                                        type="radio"
+                                        id="schedule-type-single"
+                                        name="scheduleType"
+                                        value="single"
+                                        label={
+                                            <div className="option-content">
+                                                <div className="option-icon">
+                                                    <BsClock size={18} />
+                                                </div>
+                                                <div>
+                                                    <div className="option-label">Đặt lịch theo khung giờ</div>
+                                                    <div className="option-desc">Tạo lịch làm việc cho một khung giờ cụ thể</div>
+                                                </div>
+                                            </div>
+                                        }
+                                        checked={formData.scheduleType === 'single'}
+                                        onChange={handleChange}
+                                        className="custom-radio"
+                                    />
+                                </div>
+                                
+                                <div className={`schedule-option ${formData.scheduleType === 'shift' ? 'active' : ''}`}>
+                                    <Form.Check
+                                        type="radio"
+                                        id="schedule-type-shift"
+                                        name="scheduleType"
+                                        value="shift"
+                                        label={
+                                            <div className="option-content">
+                                                <div className="option-icon">
+                                                    <BsLayersFill size={18} />
+                                                </div>
+                                                <div>
+                                                    <div className="option-label">Đặt lịch theo ca làm việc</div>
+                                                    <div className="option-desc">Tự động tạo lịch cho tất cả khung giờ trong ca</div>
+                                                </div>
+                                            </div>
+                                        }
+                                        checked={formData.scheduleType === 'shift'}
+                                        onChange={handleChange}
+                                        className="custom-radio"
+                                    />
+                                </div>
+                            </div>
+                            
+                            {formData.scheduleType === 'single' ? (
+                                <div className="mt-3">
+                                    <Form.Group>
+                                        <Form.Label className="d-flex align-items-center">
+                                            <BsClock className="me-2 text-primary" />
+                                            Chọn khung giờ
+                                        </Form.Label>
                                 <Form.Select
                                     name="slot"
                                     value={formData.slot}
@@ -355,10 +489,7 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                                     required
                                 >
                                     {timeSlots.map(slot => (
-                                        <option 
-                                            key={slot.value} 
-                                            value={slot.value}
-                                        >
+                                                <option key={slot.value} value={slot.value}>
                                             {slot.label}
                                         </option>
                                     ))}
@@ -367,24 +498,68 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                                     Thiết lập thời gian làm việc cho bác sĩ
                                 </Form.Text>
                             </Form.Group>
-                        </Col>
-                    </Row>
-
-                    <Row className="mt-3">
-                        <Col md={6}>
-                            <Form.Group className="mb-3">
+                                </div>
+                            ) : (
+                                <div className="mt-3">
+                                    <Form.Label className="d-flex align-items-center mb-2">
+                                        <BsLayersFill className="me-2 text-primary" />
+                                        Chọn ca làm việc
+                                    </Form.Label>
+                                    <div className="shift-type-options">
+                                        <div className={`shift-option ${formData.shiftType === 'morning' ? 'active' : ''}`}>
+                                            <Form.Check
+                                                type="radio"
+                                                id="shift-type-morning"
+                                                name="shiftType"
+                                                value="morning"
+                                                label="Ca sáng"
+                                                checked={formData.shiftType === 'morning'}
+                                                onChange={handleChange}
+                                            />
+                                            <div className="shift-time">08:00 - 11:30</div>
+                                            <div className="shift-slots-info">7 khung giờ</div>
+                                        </div>
+                                        <div className={`shift-option ${formData.shiftType === 'afternoon' ? 'active' : ''}`}>
+                                            <Form.Check
+                                                type="radio"
+                                                id="shift-type-afternoon"
+                                                name="shiftType"
+                                                value="afternoon"
+                                                label="Ca chiều"
+                                                checked={formData.shiftType === 'afternoon'}
+                                                onChange={handleChange}
+                                            />
+                                            <div className="shift-time">13:00 - 16:30</div>
+                                            <div className="shift-slots-info">8 khung giờ</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                    
+                    {/* Section: Tùy chọn lặp lại */}
+                    <div className="schedule-section">
+                        <h6 className="section-title">Tùy chọn lặp lại</h6>
+                        <div className="section-content">
+                            <div className="d-flex align-items-center mb-2">
+                                <BsArrowRepeat className="me-2 text-primary" />
                                 <Form.Check 
                                     type="checkbox"
+                                    id="repeatWeekly"
                                     name="repeatWeekly"
-                                    label="Lặp lại hàng tuần"
+                                    label="Lặp lại lịch hàng tuần"
                                     checked={formData.repeatWeekly}
                                     onChange={handleChange}
                                 />
-                            </Form.Group>
-                        </Col>
-                        <Col md={6}>
+                            </div>
+                            <div className="form-text ms-4">
+                                Tự động tạo lịch cho các tuần tiếp theo với cùng ngày trong tuần
+                            </div>
+                            
                             {formData.repeatWeekly && (
-                                <Form.Group className="mb-3">
+                                <div className="repeat-options ms-4 mt-3">
+                                    <Form.Group>
                                     <Form.Label>Số tuần lặp lại</Form.Label>
                                     <Form.Control
                                         type="number"
@@ -393,21 +568,42 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                                         onChange={handleChange}
                                         min={1}
                                         max={12}
+                                            className="repeat-count"
                                     />
                                 </Form.Group>
+                                </div>
                             )}
-                        </Col>
-                    </Row>
+                        </div>
+                    </div>
                 </Form>
             </Modal.Body>
-            <Modal.Footer className="d-flex justify-content-end">
-                <div className="d-flex gap-2">
-                    <Button variant="secondary" onClick={onHide} className="px-4">
+            <Modal.Footer>
+                <div className="button-container">
+                    <div></div>
+                    <div className="action-buttons">
+                        <Button 
+                            variant="outline-secondary" 
+                            onClick={onHide}
+                            className="btn-action"
+                        >
                         Hủy
                     </Button>
-                    <Button variant="primary" onClick={handleSubmit} className="px-4">
-                        Tạo lịch
+                        <Button 
+                            variant="outline-primary" 
+                            onClick={handleSubmit}
+                            className="btn-action"
+                            disabled={loading}
+                        >
+                            {loading ? (
+                                <>
+                                    <Spinner animation="border" size="sm" className="me-1" />
+                                    Đang xử lý...
+                                </>
+                            ) : (
+                                'Tạo lịch'
+                            )}
                     </Button>
+                    </div>
                 </div>
             </Modal.Footer>
         </Modal>
