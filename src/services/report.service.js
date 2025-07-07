@@ -343,6 +343,22 @@ export const exportToExcel = async (data, fileName) => {
         }, {});
 
         worksheet['!cols'] = Object.values(maxWidth).map(width => ({ width }));
+        
+        // Định dạng header (đầu đề)
+        const range = XLSX.utils.decode_range(worksheet['!ref']);
+        const headerRow = range.s.r; // Dòng đầu tiên
+        
+        // Tạo style cho header
+        for (let col = range.s.c; col <= range.e.c; col++) {
+            const cellAddress = XLSX.utils.encode_cell({ r: headerRow, c: col });
+            if (!worksheet[cellAddress]) continue;
+            
+            worksheet[cellAddress].s = {
+                font: { bold: true, color: { rgb: "FFFFFF" } },
+                fill: { fgColor: { rgb: "4472C4" } },
+                alignment: { horizontal: "center", vertical: "center" }
+            };
+        }
 
         // Tạo tên file với timestamp
         const timestamp = dayjs().format('YYYYMMDD_HHmmss');
@@ -362,52 +378,111 @@ export const exportToExcel = async (data, fileName) => {
 };
 
 export const formatPaymentDataForExport = (payments) => {
+    if (!Array.isArray(payments) || payments.length === 0) {
+        return [];
+    }
+    
     return payments.map(payment => ({
-        'Mã giao dịch': payment.id,
-        'Thời gian': dayjs().format('DD/MM/YYYY HH:mm'),
-        'Phương thức': payment.account,
-        'Tên dịch vụ': payment.name,
-        'Mô tả': payment.description,
-        'Số tiền': payment.amount?.toLocaleString('vi-VN') + ' VNĐ',
-        'Trạng thái': payment.status
+        'Mã giao dịch': payment.id || 'N/A',
+        'Thời gian': payment.createdAt ? dayjs(payment.createdAt).format('DD/MM/YYYY HH:mm') : dayjs().format('DD/MM/YYYY HH:mm'),
+        'Mã bệnh nhân': payment.patientId || 'N/A',
+        'Phương thức': payment.account || 'Không xác định',
+        'Tên dịch vụ': payment.name || 'Không xác định',
+        'Mô tả': payment.description || '',
+        'Số tiền': typeof payment.amount === 'number' 
+            ? new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(payment.amount)
+            : '0 VNĐ',
+        'Trạng thái': payment.status || 'Không xác định'
     }));
 };
 
 export const formatStaffDataForExport = (staffData) => {
+    if (!staffData || !staffData.doctors || !staffData.labTechnicians || !staffData.managers) {
+        return [];
+    }
+    
+    const doctors = Array.isArray(staffData.doctors) ? staffData.doctors : [];
+    const labTechs = Array.isArray(staffData.labTechnicians) ? staffData.labTechnicians : [];
+    const managers = Array.isArray(staffData.managers) ? staffData.managers : [];
+    
     const allStaff = [
-        ...staffData.doctors.map(doc => ({ ...doc, role: 'Bác sĩ' })),
-        ...staffData.labTechnicians.map(tech => ({ ...tech, role: 'Kỹ thuật viên' })),
-        ...staffData.managers.map(mgr => ({ ...mgr, role: 'Quản lý' }))
+        ...doctors.map(doc => ({ ...doc, role: 'Bác sĩ' })),
+        ...labTechs.map(tech => ({ ...tech, role: 'Kỹ thuật viên' })),
+        ...managers.map(mgr => ({ ...mgr, role: 'Quản lý' }))
     ];
 
     return allStaff.map(staff => ({
-        'Họ và tên': staff.fullName,
-        'Vai trò': staff.role,
-        'Email': staff.email,
-        'Số điện thoại': staff.phoneNumber,
-        'Trạng thái': staff.status
+        'Họ và tên': staff.fullName || 'Không có tên',
+        'Vai trò': staff.role || 'Không xác định',
+        'Email': staff.email || 'Không có email',
+        'Số điện thoại': staff.phoneNumber || 'Không có SĐT',
+        'Số ca xử lý': staff.casesHandled || 0,
+        'Hiệu suất': staff.performance ? `${staff.performance}%` : 'N/A',
+        'Trạng thái': staff.status || 'Không xác định',
+        'ID': staff.id || 'N/A'
     }));
 };
 
-export const groupPaymentsByType = (payments) => {
-    const grouped = payments.reduce((acc, payment) => {
-        const type = payment.account;
-        if (!acc[type]) {
-            acc[type] = {
-                count: 0,
-                total: 0
-            };
-        }
-        acc[type].count += 1;
-        acc[type].total += Number(payment.amount) || 0;
-        return acc;
-    }, {});
+export const groupPaymentsByType = (payments, groupBy = 'account') => {
+    if (!Array.isArray(payments)) {
+        return {};
+    }
+    
+    if (groupBy === 'day' || groupBy === 'week' || groupBy === 'month') {
+        // Nhóm theo thời gian (ngày/tuần/tháng)
+        const grouped = {};
+        
+        payments.forEach(payment => {
+            if (!payment || !payment.createdAt) return;
+            
+            const date = dayjs(payment.createdAt);
+            if (!date.isValid()) return;
+            
+            let key = '';
+            
+            switch (groupBy) {
+                case 'day':
+                    key = date.format('YYYY-MM-DD');
+                    break;
+                case 'week':
+                    key = `${date.year()}-W${date.week()}`;
+                    break;
+                case 'month':
+                    key = date.format('YYYY-MM');
+                    break;
+                default:
+                    key = date.format('YYYY-MM-DD');
+            }
+            
+            if (!grouped[key]) {
+                grouped[key] = [];
+            }
+            
+            grouped[key].push(payment);
+        });
+        
+        return grouped;
+    } else {
+        // Nhóm theo loại giao dịch (mặc định)
+        const grouped = payments.reduce((acc, payment) => {
+            const type = payment.account || 'unknown';
+            if (!acc[type]) {
+                acc[type] = {
+                    count: 0,
+                    total: 0
+                };
+            }
+            acc[type].count += 1;
+            acc[type].total += Number(payment.amount) || 0;
+            return acc;
+        }, {});
 
-    return Object.entries(grouped).map(([type, data]) => ({
-        name: type,
-        count: data.count,
-        total: data.total
-    }));
+        return Object.entries(grouped).map(([type, data]) => ({
+            name: type,
+            count: data.count,
+            total: data.total
+        }));
+    }
 };
 
 // Staff Report Services
