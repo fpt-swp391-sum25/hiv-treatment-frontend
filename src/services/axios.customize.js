@@ -89,7 +89,7 @@ instance.interceptors.response.use(function (response) {
                 //     message: 'Hệ thống',
                 //     description: 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.'
                 // });
-                localStorage.setItem('auth_error', errorMessage);
+                localStorage.setItem('auth_error', 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
                 window.location.href = '/login';
             } else {
                 // Role-based access denial or other 403 error
