@@ -2,6 +2,7 @@
     display: flex;
     flex-direction: column;
     gap: 20px;
+    width: 100%;
 }
 
 .staff-report-header {
@@ -72,7 +73,8 @@
 
 .statistics-row .ant-card {
     height: 100%;
-    transition: all 0.3s ease;
+    border-radius: 8px;
+    transition: all 0.3s;
 }
 
 .statistics-row .ant-card:hover {
@@ -80,8 +82,23 @@
     transform: translateY(-2px);
 }
 
+.statistics-row .ant-statistic-title {
+    color: #8c8c8c;
+    font-size: 14px;
+}
+
+.statistics-row .ant-statistic-content {
+    color: #1a3353;
+}
+
+.statistics-row .ant-statistic-content-value {
+    font-size: 24px;
+    font-weight: 600;
+}
+
 .chart-card {
     margin-bottom: 24px;
+    border-radius: 8px;
 }
 
 .chart-card .ant-card-head {
@@ -90,13 +107,17 @@
 }
 
 .chart-card .ant-card-head-title {
+    color: #1a3353;
     font-size: 16px;
     font-weight: 600;
-    color: #1890ff;
+}
+
+.chart-card .ant-card-body {
+    padding: 24px;
 }
 
 .table-card {
-    margin-bottom: 24px;
+    border-radius: 8px;
 }
 
 .table-card .ant-card-head {
@@ -105,14 +126,24 @@
 }
 
 .table-card .ant-card-head-title {
+    color: #1a3353;
     font-size: 16px;
     font-weight: 600;
-    color: #1890ff;
+}
+
+.table-card .ant-table-thead > tr > th {
+    background: #fafafa;
+    color: #1a3353;
+    font-weight: 600;
+}
+
+.table-card .ant-table-tbody > tr > td {
+    color: #595959;
 }
 
 /* Responsive styles */
 @media (max-width: 768px) {
-    .statistics-row {
+    .statistics-row .ant-card {
         margin-bottom: 16px;
     }
 
@@ -121,7 +152,12 @@
         margin-bottom: 16px;
     }
 
-    .ant-card-head {
-        padding: 12px 16px;
+    .chart-card .ant-card-body,
+    .table-card .ant-card-body {
+        padding: 16px;
+    }
+
+    .table-card {
+        overflow-x: auto;
     }
 } 
