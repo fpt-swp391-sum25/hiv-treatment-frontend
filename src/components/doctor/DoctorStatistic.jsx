@@ -7,13 +7,7 @@ import quarterOfYear from 'dayjs/plugin/quarterOfYear';
 import '../../styles/doctor/Statistics.css';
 import { AuthContext } from '../context/AuthContext';
 import { fetchScheduleByDoctorIdAPI } from '../../services/api.service';
-<<<<<<< HEAD
-
 import { Select } from 'antd';
-
-=======
-import { Select } from 'antd';
->>>>>>> 20e532e3790aa580637924daffc70e14ead12c8a
 
 // Register ChartJS components
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Title, Tooltip, Legend, BarElement);
