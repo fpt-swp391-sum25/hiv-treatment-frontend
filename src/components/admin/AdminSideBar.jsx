@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import '../../styles/admin/AdminSideBar.css';
 import { Layout, Menu, theme } from 'antd';
-import { BarChartOutlined, TeamOutlined } from '@ant-design/icons';
+import { BarChartOutlined, TeamOutlined, SettingOutlined } from '@ant-design/icons';
 
 const { Sider } = Layout
 
@@ -40,6 +40,12 @@ const items = [
 
       },
     ],
+  },
+  {
+    key: '7',
+    label: <NavLink to='/admin/system-config'>Cài đặt hệ thống</NavLink>,
+    icon: < SettingOutlined/>,
+    path: '/admin'
   },
 
 ];

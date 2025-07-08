@@ -22,8 +22,8 @@ const { Option } = Select;
 
 const LabTechnicianProfile = () => {
   const { user, setUser } = useContext(AuthContext);
-  const [avatarUrl, setAvatarUrl] = useState(null);
-  const fileInputRef = React.useRef(null);
+  const [avatarUrl, setAvatarUrl] = useState('');
+  const fileInputRef = React.useRef('');
 
   const [loading, setLoading] = useState(false);
 
@@ -36,7 +36,7 @@ const LabTechnicianProfile = () => {
     dateOfBirth: '',
     password: '',
     confirmPassword: '',
-    avatar: null,   
+    avatar: '',   
   });
 
   useEffect(() => {
@@ -47,9 +47,9 @@ const LabTechnicianProfile = () => {
         phoneNumber: user.phoneNumber || '',
         address: user.address || '',
         gender: user.gender || '',
-        dateOfBirth: user.dateOfBirth || null,
+        dateOfBirth: user.dateOfBirth || '',
       });
-      setAvatarUrl(user.avatar || null); 
+      setAvatarUrl(user.avatar || ''); 
     }
     console.log(user.avatar);
   }, [user]);
@@ -67,7 +67,7 @@ const LabTechnicianProfile = () => {
         ...editableUser,
         dateOfBirth: editableUser.dateOfBirth
           ? dayjs(editableUser.dateOfBirth).format('YYYY-MM-DD')
-          : null,
+          : '',
       };
 
       const res = await updateUserAPI(user.id, payload);
@@ -114,21 +114,40 @@ const LabTechnicianProfile = () => {
       <Card style={{ marginBottom: 24 }}>
         <Row gutter={24} align="middle">
           <Col xs={24} sm={6} style={{ textAlign: 'center' }}>
-            <Avatar
-              src={avatarUrl}
-              icon={!avatarUrl && <UserOutlined />}
-              size={120}
-              style={{ border: '2px solid #1890ff', cursor: 'pointer' }}
-              onClick={() => fileInputRef.current.click()}
-            />
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              style={{ display: 'none' }}
-              onChange={handleAvatarChange}
-            />
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <Avatar
+                src={avatarUrl && avatarUrl.trim() !== '' ? avatarUrl : undefined}
+                icon={!avatarUrl || avatarUrl.trim() === '' ? <UserOutlined /> : null}
+                size={120}
+                style={{ border: '2px solid #1890ff', cursor: 'pointer' }}
+                onClick={() => fileInputRef.current.click()}
+              />
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                style={{ display: 'none' }}
+                onChange={handleAvatarChange}
+              />
+              {avatarUrl && (
+                <Button
+                  danger
+                  type="link"
+                  style={{ marginTop: 8 }}
+                  onClick={() => {
+                    setAvatarUrl('');
+                    setEditableUser((prev) => ({
+                      ...prev,
+                      avatar: '',
+                    }));
+                  }}
+                >
+                  Xóa ảnh
+                </Button>
+              )}
+            </div>
           </Col>
+
           <Col xs={24} sm={18}>
             <Title level={3}>{user?.fullName || user?.username || 'Lab Technician'}</Title>
             <div style={{ marginTop: 12 }}>
@@ -199,12 +218,12 @@ const LabTechnicianProfile = () => {
               value={
                 editableUser.dateOfBirth
                   ? dayjs(editableUser.dateOfBirth)
-                  : null
+                  : ''
               }
               format="YYYY-MM-DD"
               onChange={(date) =>
                 setEditableUser((prev) => ({ ...prev,
-                  dateOfBirth: date ? date.toISOString() : null,
+                  dateOfBirth: date ? date.toISOString() : '',
                 }))
               }
             />

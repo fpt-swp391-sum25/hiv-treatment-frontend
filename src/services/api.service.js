@@ -1037,6 +1037,20 @@ const checkBackendConnection = () => {
         });
 };
 
+const fetchSystemConfigurationsAPI = () => {
+    const URL_BACKEND = '/api/system-configuration'
+    return axios.get(URL_BACKEND)
+};
+
+const updateSystemConfigurationAPI = (id, dataUpdate) =>
+  axios.put(`/api/system-configuration/${id}`, dataUpdate);
+
+const createSystemConfigurationAPI = (createData) =>
+  axios.post("/api/system-configurations", createData);
+
+const deleteSystemConfigurationAPI  = (id) =>
+  axios.delete(`/api/system-configuration/${id}`);
+
 // Export tất cả các hàm API
 export {
     loginAPI,
@@ -1099,5 +1113,9 @@ export {
     fetchStaffStatisticsAPI,
     fetchPatientStatisticsAPI,
     fetchAppointmentStatisticsAPI,
-    checkBackendConnection
+    checkBackendConnection,
+    fetchSystemConfigurationsAPI,
+    updateSystemConfigurationAPI,
+    createSystemConfigurationAPI,
+    deleteSystemConfigurationAPI
 }

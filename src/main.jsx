@@ -28,6 +28,7 @@ import AccountManagers from './pages/admin/AccountManagers';
 import AccountDoctors from './pages/admin/AccountDoctors';
 import AccountLabTechnicians from './pages/admin/AccountLabTechnicians';
 import AccountPatients from './pages/admin/AccountPatients';
+import AdminSystemConfig from './pages/admin/AdminSystemConfig'
 
 // Import for manager pages
 import ManagerPage from './pages/manager/ManagerPage';
@@ -268,10 +269,17 @@ const router = createBrowserRouter([
         path: '/admin/users',
         element: (<PrivateRoute children={<AccountPatients />} requiredRole={['ADMIN']} />),
         errorElement: <Errors />,
+      },
+      {
+        path: '/admin/system-config',
+        element: (
+          <PrivateRoute children={<AdminSystemConfig />} requiredRole={['ADMIN']} />
+        ),
+        errorElement: <Errors />,
       }
     ]
   },
-   // Path for admin pages
+   // Path for manager pages
   {
     path: '/manager',
     element: (
@@ -308,7 +316,8 @@ const router = createBrowserRouter([
           <PrivateRoute children={<LabTechnicianManagement />} requiredRole={['MANAGER']} />
         ),
         errorElement: <Errors />,
-      }, {
+      }, 
+      {
         path: 'reports',
         element: (
           <PrivateRoute children={<Reports />} requiredRole={['MANAGER']} />
