@@ -46,6 +46,7 @@ const FinancialReport = ({ dateRange, onError, onDateRangeChange }) => {
         paymentType: 'ALL',
         paymentMethod: 'ALL',
         amountRange: 'ALL',
+        status: 'ALL',
         searchText: '',
         dateFilter: null
     });
@@ -316,6 +317,11 @@ const FinancialReport = ({ dateRange, onError, onDateRangeChange }) => {
             }
         }
         
+        // Lọc theo trạng thái
+        if (filters.status && filters.status !== 'ALL') {
+            if (payment.status !== filters.status) return false;
+        }
+        
         // Lọc theo từ khóa tìm kiếm
         if (filters.searchText) {
             const searchLower = filters.searchText.toLowerCase();
@@ -356,6 +362,7 @@ const FinancialReport = ({ dateRange, onError, onDateRangeChange }) => {
             paymentType: 'ALL',
             paymentMethod: 'ALL',
             amountRange: 'ALL',
+            status: 'ALL',
             searchText: '',
             dateFilter: null
         });

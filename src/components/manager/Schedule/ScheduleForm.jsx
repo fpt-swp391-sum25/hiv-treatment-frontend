@@ -10,6 +10,7 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
     const [doctors, setDoctors] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [showConfirmation, setShowConfirmation] = useState(false);
     const [formData, setFormData] = useState({
         doctorId: '',
         doctorName: '',
@@ -173,32 +174,31 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         return weekdays[dayOfWeek];
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        
-        console.group('Schedule Form Submission');
+    // Validation function
+    const validateForm = () => {
+        console.group('Schedule Form Validation');
         console.log('Form data:', formData);
-        
+
         if (!formData.doctorId) {
             console.error('Missing doctorId');
             console.groupEnd();
             onShowToast('Vui lòng chọn bác sĩ', 'danger');
-            return;
+            return false;
         }
-        
+
         if (formData.scheduleType === 'single' && !formData.slot) {
             console.error('Missing slot for single schedule');
             console.groupEnd();
             onShowToast('Vui lòng chọn khung giờ làm việc', 'danger');
-            return;
+            return false;
         }
-        
+
         // Kiểm tra ngày
         if (!formData.date) {
             console.error('Missing date');
             console.groupEnd();
             onShowToast('Vui lòng chọn ngày', 'danger');
-            return;
+            return false;
         }
 
         // Kiểm tra ngày có phải là quá khứ không
@@ -206,7 +206,7 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             console.error('Date is in the past', formData.date);
             console.groupEnd();
             onShowToast('Không thể đặt lịch cho ngày đã qua!', 'danger');
-            return;
+            return false;
         }
 
         // Kiểm tra ngày có phải Chủ nhật không
@@ -214,7 +214,7 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             console.error('Cannot schedule on Sunday', formData.date);
             console.groupEnd();
             onShowToast('Không thể đặt lịch vào Chủ nhật!', 'danger');
-            return;
+            return false;
         }
 
         // Kiểm tra số phòng
@@ -222,11 +222,18 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             console.error('Missing room code');
             console.groupEnd();
             onShowToast('Vui lòng nhập số phòng', 'danger');
-            return;
+            return false;
         }
 
         console.log('Form validation successful');
         console.groupEnd();
+        return true;
+    };
+
+    // Function to actually create the schedule
+    const createSchedule = () => {
+        console.group('Schedule Creation');
+        console.log('Creating schedule with form data:', formData);
 
         // Xử lý đặt lịch theo ca hoặc theo khung giờ đơn
         if (formData.scheduleType === 'shift') {
@@ -343,14 +350,44 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         console.log('Creating single schedule:', newSchedule);
         setTimeout(() => {
             onScheduleCreated(newSchedule);
+            onShowToast('Tạo lịch thành công!', 'success');
         }, 0);
-    }
-        
+        }
+
+        console.groupEnd();
         onHide();
     };
 
+    // Handle form submission - now shows confirmation dialog
+    const handleSubmit = (e) => {
+        e.preventDefault();
+
+        // Validate form first
+        if (validateForm()) {
+            // Show confirmation dialog
+            setShowConfirmation(true);
+        }
+    };
+
+    // Handle confirmation
+    const handleConfirmCreate = () => {
+        setShowConfirmation(false);
+        createSchedule();
+    };
+
+    const handleCancelCreate = () => {
+        setShowConfirmation(false);
+    };
+
     return (
-        <Modal show={show} onHide={onHide} centered size="lg" className="schedule-form-modal">
+        <>
+        <Modal
+            show={show}
+            onHide={onHide}
+            centered
+            size="lg"
+            className={`schedule-form-modal ${showConfirmation ? 'blurred' : ''}`}
+        >
             <Modal.Header closeButton>
                 <Modal.Title className="d-flex align-items-center">
                     <BsCalendarCheck className="me-2 text-primary" size={22} />
@@ -431,12 +468,8 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                                     name="roomCode"
                                     value={formData.roomCode}
                                     onChange={handleChange}
-                                    placeholder="Nhập số phòng (VD: 101)"
                                     required
                                 />
-                                <Form.Text className="text-muted">
-                                    Nhập số phòng khám (VD: 101, 102, 201...)
-                                </Form.Text>
                             </Form.Group>
                         </Col>
                             </Row>
@@ -627,6 +660,85 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                 </div>
             </Modal.Footer>
         </Modal>
+
+        {/* Confirmation Modal */}
+        <Modal
+            show={showConfirmation}
+            onHide={handleCancelCreate}
+            centered
+            size="md"
+            className="confirmation-modal"
+            backdrop="static"
+            keyboard={false}
+            enforceFocus={true}
+        >
+            <Modal.Header closeButton className="confirmation-header">
+                <Modal.Title className="d-flex align-items-center">
+                    <BsCalendarCheck className="me-2 text-warning" size={24} />
+                    Xác nhận tạo lịch
+                </Modal.Title>
+            </Modal.Header>
+            <Modal.Body className="confirmation-body">
+                <div className="confirmation-content">
+                    <p className="confirmation-question mb-4">
+                        Bạn có chắc chắn muốn tạo lịch này không?
+                    </p>
+                    <div className="schedule-summary-grid">
+                        <div className="summary-row">
+                            <div className="summary-item">
+                                <span className="summary-label">Bác sĩ:</span>
+                                <span className="summary-value">{formData.doctorName || 'Chưa chọn'}</span>
+                            </div>
+                            <div className="summary-item">
+                                <span className="summary-label">Ngày:</span>
+                                <span className="summary-value">
+                                    {moment(formData.date).format('DD/MM/YYYY')} ({formatVietnameseDay(formData.date)})
+                                </span>
+                            </div>
+                        </div>
+                        <div className="summary-row">
+                            <div className="summary-item">
+                                <span className="summary-label">Phòng:</span>
+                                <span className="summary-value">{formData.roomCode}</span>
+                            </div>
+                            <div className="summary-item">
+                                <span className="summary-label">
+                                    {formData.scheduleType === 'single' ? 'Khung giờ:' : 'Ca làm việc:'}
+                                </span>
+                                <span className="summary-value">
+                                    {formData.scheduleType === 'single'
+                                        ? timeSlots.find(slot => slot.value === formData.slot)?.label
+                                        : formData.shiftType === 'morning' ? 'Ca sáng (08:00-11:00)' : 'Ca chiều (13:00-16:00)'
+                                    }
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </Modal.Body>
+            <Modal.Footer className="confirmation-footer">
+                <div className="confirmation-buttons">
+                    <Button
+                        variant="outline-secondary"
+                        onClick={handleCancelCreate}
+                        className="btn-action btn-cancel"
+                        aria-label="Hủy tạo lịch"
+                    >
+                        Không
+                    </Button>
+                    <Button
+                        variant="outline-primary"
+                        onClick={handleConfirmCreate}
+                        className="btn-action btn-confirm"
+                        aria-label="Xác nhận tạo lịch"
+                        autoFocus
+                    >
+                        Có
+                    </Button>
+                </div>
+            </Modal.Footer>
+        </Modal>
+        </>
     );
 };
 

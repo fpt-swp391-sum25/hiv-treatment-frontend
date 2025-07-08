@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Card, Table, Spin, Statistic, Select, Input, Space, Button, Tooltip, Switch, Radio } from 'antd';
-import { UserOutlined, TeamOutlined, CheckCircleOutlined, FilterOutlined, SearchOutlined, ReloadOutlined, BarChartOutlined } from '@ant-design/icons';
+import { Row, Col, Card, Table, Spin, Statistic, Select, Input, Space, Button, Tooltip, Switch, Radio, Typography, Divider, DatePicker, Tag } from 'antd';
+import { UserOutlined, TeamOutlined, CheckCircleOutlined, FilterOutlined, SearchOutlined, ReloadOutlined, BarChartOutlined, FileExcelOutlined, PrinterOutlined } from '@ant-design/icons';
 import { ResponsiveContainer, Tooltip as RechartsTooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid, LabelList, Cell } from 'recharts';
-import { getStaffData } from '../../../../services/report.service';
+import { getStaffData, formatStaffDataForExport, exportToExcel } from '../../../../services/report.service';
 import { STAFF_ROLES } from '../../../../types/report.types';
 import './StaffReport.css';
+import dayjs from 'dayjs';
 
 const { Option } = Select;
 const { Search } = Input;
+const { Title, Text } = Typography;
+const { RangePicker } = DatePicker;
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28'];
 const PERFORMANCE_COLORS = {
@@ -16,7 +19,7 @@ const PERFORMANCE_COLORS = {
     low: '#f5222d'    // red
 };
 
-const StaffReport = ({ dateRange, onError }) => {
+const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
     const [loading, setLoading] = useState(true);
     const [staffData, setStaffData] = useState({
         doctors: [],
@@ -36,6 +39,7 @@ const StaffReport = ({ dateRange, onError }) => {
     // State cho biểu đồ
     const [chartType, setChartType] = useState('performance');
     const [showTopPerformers, setShowTopPerformers] = useState(true);
+    const [selectedDatePreset, setSelectedDatePreset] = useState('all');
 
     useEffect(() => {
         fetchStaffData();
@@ -64,6 +68,74 @@ const StaffReport = ({ dateRange, onError }) => {
         totalLabTechs: staffData.labTechnicians.length,
         totalManagers: staffData.managers.length,
         totalStaff: staffData.doctors.length + staffData.labTechnicians.length + staffData.managers.length
+    };
+
+    // Xử lý thay đổi khoảng thời gian
+    const handleDateRangeChange = (dates) => {
+        // Gọi hàm callback để cập nhật dateRange ở component cha
+        if (typeof onDateRangeChange === 'function') {
+            onDateRangeChange(dates);
+        }
+    };
+    
+    // Xử lý thay đổi preset khoảng thời gian
+    const handleDatePresetChange = (value) => {
+        setSelectedDatePreset(value);
+        
+        let start, end;
+        const today = dayjs();
+        
+        switch (value) {
+            case 'today':
+                start = today.startOf('day');
+                end = today.endOf('day');
+                break;
+            case 'yesterday':
+                start = today.subtract(1, 'day').startOf('day');
+                end = today.subtract(1, 'day').endOf('day');
+                break;
+            case 'thisWeek':
+                start = today.startOf('week');
+                end = today.endOf('week');
+                break;
+            case 'lastWeek':
+                start = today.subtract(1, 'week').startOf('week');
+                end = today.subtract(1, 'week').endOf('week');
+                break;
+            case 'thisMonth':
+                start = today.startOf('month');
+                end = today.endOf('month');
+                break;
+            case 'lastMonth':
+                start = today.subtract(1, 'month').startOf('month');
+                end = today.subtract(1, 'month').endOf('month');
+                break;
+            case 'thisQuarter':
+                start = today.startOf('quarter');
+                end = today.endOf('quarter');
+                break;
+            case 'lastQuarter':
+                start = today.subtract(1, 'quarter').startOf('quarter');
+                end = today.subtract(1, 'quarter').endOf('quarter');
+                break;
+            case 'thisYear':
+                start = today.startOf('year');
+                end = today.endOf('year');
+                break;
+            case 'lastYear':
+                start = today.subtract(1, 'year').startOf('year');
+                end = today.subtract(1, 'year').endOf('year');
+                break;
+            default:
+                // 'all' - không áp dụng bộ lọc ngày
+                start = null;
+                end = null;
+        }
+        
+        // Gọi hàm callback để cập nhật dateRange ở component cha
+        if (typeof onDateRangeChange === 'function' && start && end) {
+            onDateRangeChange([start, end]);
+        }
     };
 
     // Dữ liệu cho biểu đồ phân bố nhân sự
@@ -267,6 +339,37 @@ const StaffReport = ({ dateRange, onError }) => {
             performanceRange: 'ALL'
         });
     };
+
+    // Xuất Excel
+    const handleExportExcel = () => {
+        const staffList = [
+            ...staffData.doctors.map(doc => ({ ...doc, role: 'Bác sĩ' })),
+            ...staffData.labTechnicians.map(tech => ({ ...tech, role: 'Kỹ thuật viên' })),
+            ...staffData.managers.map(mgr => ({ ...mgr, role: 'Quản lý' }))
+        ];
+        
+        if (staffList.length === 0) {
+            onError?.(new Error('Không có dữ liệu để xuất báo cáo'));
+            return;
+        }
+        
+        const formattedData = staffList.map(staff => ({
+            'Họ tên': staff.fullName || '',
+            'Vai trò': staff.role || '',
+            'Email': staff.email || '',
+            'Số điện thoại': staff.phoneNumber || '',
+            'Trạng thái': staff.status || '',
+            'Số ca xử lý': staff.casesHandled || 0,
+            'Hiệu suất': staff.performance ? `${staff.performance}%` : 'N/A'
+        }));
+        
+        exportToExcel(formattedData, 'BaoCaoNhanSu');
+    };
+    
+    // In báo cáo
+    const handlePrint = () => {
+        window.print();
+    };
     
     // Component biểu đồ hiệu suất nhân viên
     const StaffPerformanceChart = () => {
@@ -359,48 +462,187 @@ const StaffReport = ({ dateRange, onError }) => {
 
     return (
         <Spin spinning={loading}>
-        <div className="staff-report">
-            {/* Thống kê tổng quan */}
-            <Row gutter={[16, 16]} className="statistics-row">
+            <div className="staff-report">
+                {/* Tiêu đề và công cụ báo cáo */}
+                <Row gutter={[16, 16]} className="report-header">
+                    <Col span={16}>
+                        <Title level={2}>Báo cáo nhân sự</Title>
+                        <Text type="secondary">
+                            Kỳ báo cáo: {dateRange && dateRange.length === 2 
+                                ? `${dateRange[0].format('DD/MM/YYYY')} - ${dateRange[1].format('DD/MM/YYYY')}`
+                                : 'Tất cả thời gian'}
+                        </Text>
+                    </Col>
+                    <Col span={8} style={{ textAlign: 'right' }}>
+                        <Space>
+                            <Button 
+                                icon={<FileExcelOutlined />}
+                                onClick={handleExportExcel}
+                            >
+                                Xuất Excel
+                            </Button>
+                            <Button 
+                                icon={<PrinterOutlined />}
+                                onClick={handlePrint}
+                            >
+                                In báo cáo
+                            </Button>
+                            <Button
+                                icon={<FilterOutlined />}
+                                onClick={() => setShowFilters(!showFilters)}
+                                type={showFilters ? "primary" : "default"}
+                            >
+                                Bộ lọc
+                            </Button>
+                        </Space>
+                    </Col>
+                </Row>
+
+                {/* Bộ lọc */}
+                {showFilters && (
+                    <Card className="filters-container">
+                        <Row gutter={[16, 16]}>
+                            <Col span={24}>
+                                <Space direction="vertical" style={{ width: '100%' }}>
+                                    <Typography.Text strong>Khoảng thời gian</Typography.Text>
+                                    <Space>
+                                        <RangePicker
+                                            value={dateRange}
+                                            onChange={handleDateRangeChange}
+                                            format="DD/MM/YYYY"
+                                            placeholder={['Từ ngày', 'Đến ngày']}
+                                            allowClear
+                                        />
+                                        <Select
+                                            value={selectedDatePreset} 
+                                            onChange={handleDatePresetChange}
+                                            style={{ width: 150 }}
+                                        >
+                                            <Option value="all">Tất cả thời gian</Option>
+                                            <Option value="today">Hôm nay</Option>
+                                            <Option value="yesterday">Hôm qua</Option>
+                                            <Option value="thisWeek">Tuần này</Option>
+                                            <Option value="lastWeek">Tuần trước</Option>
+                                            <Option value="thisMonth">Tháng này</Option>
+                                            <Option value="lastMonth">Tháng trước</Option>
+                                            <Option value="thisQuarter">Quý này</Option>
+                                            <Option value="lastQuarter">Quý trước</Option>
+                                            <Option value="thisYear">Năm nay</Option>
+                                            <Option value="lastYear">Năm trước</Option>
+                                        </Select>
+                                    </Space>
+                                </Space>
+                            </Col>
+                            <Col span={24}>
+                                <Divider style={{ margin: '12px 0' }} />
+                            </Col>
+                            <Col xs={24} sm={12} md={8} lg={6}>
+                                <Typography.Text strong>Vai trò</Typography.Text>
+                                <Select
+                                    value={filters.role}
+                                    onChange={value => handleFilterChange('role', value)}
+                                    style={{ width: '100%', marginTop: 8 }}
+                                >
+                                    <Option value="ALL">Tất cả vai trò</Option>
+                                    <Option value={STAFF_ROLES.DOCTOR}>Bác sĩ</Option>
+                                    <Option value={STAFF_ROLES.LAB_TECHNICIAN}>Kỹ thuật viên</Option>
+                                    <Option value={STAFF_ROLES.MANAGER}>Quản lý</Option>
+                                </Select>
+                            </Col>
+                            <Col xs={24} sm={12} md={8} lg={6}>
+                                <Typography.Text strong>Trạng thái</Typography.Text>
+                                <Select
+                                    value={filters.status}
+                                    onChange={value => handleFilterChange('status', value)}
+                                    style={{ width: '100%', marginTop: 8 }}
+                                >
+                                    <Option value="ALL">Tất cả trạng thái</Option>
+                                    <Option value="ACTIVE">Đang hoạt động</Option>
+                                    <Option value="INACTIVE">Không hoạt động</Option>
+                                </Select>
+                            </Col>
+                            <Col xs={24} sm={12} md={8} lg={6}>
+                                <Typography.Text strong>Hiệu suất</Typography.Text>
+                                <Select
+                                    value={filters.performanceRange}
+                                    onChange={value => handleFilterChange('performanceRange', value)}
+                                    style={{ width: '100%', marginTop: 8 }}
+                                >
+                                    <Option value="ALL">Tất cả hiệu suất</Option>
+                                    <Option value="LOW">Thấp (&lt;50%)</Option>
+                                    <Option value="MEDIUM">Trung bình (50-80%)</Option>
+                                    <Option value="HIGH">Cao (≥80%)</Option>
+                                </Select>
+                            </Col>
+                            <Col xs={24} sm={12} md={8} lg={6}>
+                                <Typography.Text strong>Tìm kiếm</Typography.Text>
+                                <Search
+                                    placeholder="Tìm kiếm nhân viên"
+                                    value={filters.searchText}
+                                    onChange={e => handleFilterChange('searchText', e.target.value)}
+                                    style={{ width: '100%', marginTop: 8 }}
+                                    allowClear
+                                />
+                            </Col>
+                            <Col span={24} style={{ textAlign: 'right', marginTop: 8 }}>
+                                <Space>
+                                    <Button icon={<ReloadOutlined />} onClick={resetFilters}>
+                                        Đặt lại bộ lọc
+                                    </Button>
+                                    <Button 
+                                        type="primary" 
+                                        icon={<FilterOutlined />} 
+                                        onClick={() => setShowFilters(false)}
+                                    >
+                                        Áp dụng
+                                    </Button>
+                                </Space>
+                            </Col>
+                        </Row>
+                    </Card>
+                )}
+
+                {/* Thống kê tổng quan */}
+                <Row gutter={[16, 16]} className="statistics-row">
                     <Col xs={24} sm={12} md={6}>
                         <Card>
                             <Statistic
-                                title="Tổng nhân viên"
+                                title="Tổng số nhân viên"
                                 value={statistics.totalStaff}
                                 prefix={<TeamOutlined />}
                             />
                         </Card>
                     </Col>
                     <Col xs={24} sm={12} md={6}>
-                    <Card>
-                        <Statistic
+                        <Card>
+                            <Statistic
                                 title="Bác sĩ"
                                 value={statistics.totalDoctors}
-                            prefix={<UserOutlined />}
-                        />
-                    </Card>
-                </Col>
+                                prefix={<UserOutlined style={{ color: '#1890ff' }} />}
+                            />
+                        </Card>
+                    </Col>
                     <Col xs={24} sm={12} md={6}>
-                    <Card>
-                        <Statistic
+                        <Card>
+                            <Statistic
                                 title="Kỹ thuật viên"
                                 value={statistics.totalLabTechs}
-                                prefix={<UserOutlined />}
-                        />
-                    </Card>
-                </Col>
+                                prefix={<UserOutlined style={{ color: '#52c41a' }} />}
+                            />
+                        </Card>
+                    </Col>
                     <Col xs={24} sm={12} md={6}>
-                    <Card>
-                        <Statistic
+                        <Card>
+                            <Statistic
                                 title="Quản lý"
                                 value={statistics.totalManagers}
-                                prefix={<UserOutlined />}
-                        />
-                    </Card>
-                </Col>
-            </Row>
+                                prefix={<UserOutlined style={{ color: '#722ed1' }} />}
+                            />
+                        </Card>
+                    </Col>
+                </Row>
 
-            {/* Biểu đồ phân bố nhân sự */}
+                {/* Biểu đồ phân bố nhân sự */}
                 <Card title="Phân bố nhân sự" className="chart-card">
                     <ResponsiveContainer width="100%" height={400}>
                         <BarChart
@@ -471,88 +713,28 @@ const StaffReport = ({ dateRange, onError }) => {
                     {chartType === 'performance' ? <StaffPerformanceChart /> : <CasesHandledChart />}
                 </Card>
 
-                {/* Bảng danh sách nhân viên với bộ lọc */}
+                {/* Bảng danh sách nhân viên */}
                 <Card 
-                    title="Danh sách nhân viên" 
-                    className="table-card"
-                    extra={
+                    title={
                         <Space>
-                            <Tooltip title="Hiển thị/Ẩn bộ lọc">
-                                <Button 
-                                    icon={<FilterOutlined />} 
-                                    onClick={() => setShowFilters(!showFilters)}
-                                    type={showFilters ? "primary" : "default"}
-                                >
-                                    Bộ lọc
-                                </Button>
-                            </Tooltip>
-                            <Search
-                                placeholder="Tìm kiếm nhân viên"
-                                allowClear
-                                value={filters.searchText}
-                                onChange={e => handleFilterChange('searchText', e.target.value)}
-                                style={{ width: 200 }}
-                            />
+                            <span>Danh sách nhân viên</span>
+                            <Tag color="blue">{filteredStaffList.length} nhân viên</Tag>
                         </Space>
-                    }
+                    } 
+                    className="table-card"
                 >
-                    {showFilters && (
-                        <div className="filters-container" style={{ marginBottom: 16 }}>
-                            <Space wrap>
-                                <Select
-                                    value={filters.role}
-                                    onChange={value => handleFilterChange('role', value)}
-                                    style={{ width: 150 }}
-                                >
-                                    <Option value="ALL">Tất cả vai trò</Option>
-                                    <Option value={STAFF_ROLES.DOCTOR}>Bác sĩ</Option>
-                                    <Option value={STAFF_ROLES.LAB_TECHNICIAN}>Kỹ thuật viên</Option>
-                                    <Option value={STAFF_ROLES.MANAGER}>Quản lý</Option>
-                                </Select>
-                                
-                                <Select
-                                    value={filters.status}
-                                    onChange={value => handleFilterChange('status', value)}
-                                    style={{ width: 150 }}
-                                >
-                                    <Option value="ALL">Tất cả trạng thái</Option>
-                                    <Option value="ACTIVE">Đang hoạt động</Option>
-                                    <Option value="INACTIVE">Không hoạt động</Option>
-                                </Select>
-                                
-                                <Select
-                                    value={filters.performanceRange}
-                                    onChange={value => handleFilterChange('performanceRange', value)}
-                                    style={{ width: 150 }}
-                                >
-                                    <Option value="ALL">Tất cả hiệu suất</Option>
-                                    <Option value="LOW">Thấp (&lt;50%)</Option>
-                                    <Option value="MEDIUM">Trung bình (50-79%)</Option>
-                                    <Option value="HIGH">Cao (≥80%)</Option>
-                                </Select>
-                                
-                                <Button 
-                                    icon={<ReloadOutlined />} 
-                                    onClick={resetFilters}
-                                >
-                                    Đặt lại
-                                </Button>
-                            </Space>
-                        </div>
-                    )}
-                    
-                <Table
-                    columns={columns}
+                    <Table
+                        columns={columns}
                         dataSource={filteredStaffList}
-                    rowKey="id"
+                        rowKey="id"
                         pagination={{
                             pageSize: 10,
                             showSizeChanger: true,
                             showTotal: (total) => `Tổng số ${total} nhân viên`
                         }}
-                />
-            </Card>
-        </div>
+                    />
+                </Card>
+            </div>
         </Spin>
     );
 };
