@@ -9,7 +9,7 @@ const PrivateRoute = ({ children, requiredRole }) => {
 
 
     if (!user.id && !localStorage.getItem('access_token')) {
-        message.error('Vui lòng đăng nhập');
+        // localStorage.setItem('auth_error', 'Vui lòng đăng nhập');
         return <Navigate to="/login" replace />;
     }
 

@@ -8,7 +8,8 @@ export const AuthContext = createContext({
     fullName: '',
     role: '',
     id: '',
-    phoneNumber: ''
+    phoneNumber: '',
+    avatar: null
 })
 
 export const AuthWrapper = (props) => {

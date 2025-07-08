@@ -63,7 +63,7 @@ const UpdateTestResultModal = (props) => {
 
             <div style={{ display: 'flex', gap: '15px', flexDirection: 'column' }}>
                 <span>Loại xét nghiệm</span>
-                <Input value={type} onChange={(event) => { setType(event.target.value) }} />
+                <Input readOnly value={type} onChange={(event) => { setType(event.target.value) }} />
                 <span>Kết quả</span>
                 <Input value={result} onChange={(event) => { setResult(event.target.value) }} />
                 <span>Đơn vị</span>

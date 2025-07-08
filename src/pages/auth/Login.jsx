@@ -4,7 +4,7 @@ import { Form, Input, Button, Alert, Segmented, Typography, Divider, notificatio
 import { useGoogleLogin } from '@react-oauth/google';
 import { GoogleOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { loginAPI } from '../../services/api.service';
+import { googleLoginAPI, loginAPI } from '../../services/api.service';
 import { useForm } from 'antd/es/form/Form';
 import { AuthContext } from '../../components/context/AuthContext';
 
@@ -15,10 +15,10 @@ const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const { authUser, setAuthUser, setUser } = useContext(AuthContext)
+    const { user, setUser } = useContext(AuthContext)
     const [loading, setLoading] = useState(false);
-
     const navigate = useNavigate();
+
     useEffect(() => {
         const authError = localStorage.getItem('auth_error');
         if (authError) {
@@ -26,7 +26,7 @@ const Login = () => {
                 message: 'Hệ thống',
                 showProgress: true,
                 pauseOnHover: true,
-                description: 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.'
+                description: authError
             });
             localStorage.removeItem('auth_error');
         }
@@ -68,7 +68,7 @@ const Login = () => {
                     message: "Đăng nhập thành công",
                     showProgress: true,
                     pauseOnHover: true,
-                    description: `Xin chào, ${response.data.name || username}!`
+                    description: `Xin chào, ${response.data.fullName || username}!`
                 });
             } else {
                 notification.error({
@@ -101,116 +101,121 @@ const Login = () => {
         }
     };
 
-    const login = useGoogleLogin({
-        onSuccess: codeResponse => console.log(codeResponse),
+    const handleGoogleLogin = useGoogleLogin({
         flow: 'auth-code',
+        scope: 'profile email',
+        onSuccess: async (codeResponse) => {
+            try {
+                setLoading(true);
+                const response = await googleLoginAPI({ code: codeResponse.code });
+
+                if (response.data?.token) {
+                    localStorage.setItem('access_token', response.data.token);
+                    setUser(response.data);
+
+                    notification.success({
+                        message: "Đăng nhập thành công",
+                        description: `Xin chào, ${response.data.name || 'người dùng'}!`,
+                        duration: 3
+                    });
+                    navigate("/");
+                } else {
+                    throw new Error(response.message || "Không nhận được token từ server");
+                }
+            } catch (error) {
+                const errorMessage = error?.response?.data?.message || 'Đăng nhập bằng Google thất bại!';
+                setError(errorMessage);
+                notification.error({
+                    message: 'Lỗi đăng nhập',
+                    description: errorMessage,
+                    duration: 3
+                });
+            } finally {
+                setLoading(false);
+            }
+        },
+        onError: () => {
+            setError('Không thể xác thực với Google');
+            notification.error({
+                message: 'Lỗi đăng nhập',
+                description: 'Không thể xác thực với Google'
+            });
+        }
     });
 
-    const [userType, setUserType] = useState('Bệnh nhân')
+    const redirectHomePage = () => {
+        if (user) {
+            if (user.role === "ADMIN") {
+                navigate('/admin')
+            } else if (user.role === "MANAGER") {
+                navigate('/manager')
+            } else if (user.role === 'LAB_TECHNICIAN') {
+                navigate('/lab-technician')
+            } else if (user.role === "DOCTOR") {
+                navigate('/doctor')
+            } else {
+                navigate('/')
+            }
+        } else {
+            navigate('/')
+        }
+    }
 
 
     return (
         <div style={{ maxWidth: 500, margin: '40px auto', padding: 24, boxShadow: '0 4px 12px rgba(0,0,0,0.15)', borderRadius: 8 }}>
-            <Link href="/"><ArrowLeftOutlined /> Về trang chủ</Link>
+            <Link onClick={redirectHomePage}><ArrowLeftOutlined /> Về trang chủ</Link>
             <h2 style={{ textAlign: 'center', marginBottom: 24 }}>Đăng nhập</h2>
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
-                <Segmented
-                    value={userType}
-                    style={{ marginBottom: 8 }}
-                    onChange={setUserType}
-                    options={['Bệnh nhân', 'Nhân viên']}
-                />
-            </div>
             {error && <Alert message={error} type="error" style={{ marginBottom: 16 }} />}
-
-
-            {userType === 'Bệnh nhân' ? (
-                <Form
-                    name="loginForm"
-                    onFinish={handleLogin}
-                    layout="vertical"
+            <Form
+                name="loginForm"
+                onFinish={handleLogin}
+                layout="vertical"
+            >
+                <Form.Item
+                    label="Tên đăng nhập"
+                    name="username"
+                    id="username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    rules={[{ required: true, message: 'Hãy nhập tên đăng nhập của bạn' }]}
                 >
-                    <Form.Item
-                        label="Tên đăng nhập"
-                        name="username"
-                        id="username"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        rules={[{ required: true, message: 'Hãy nhập tên đăng nhập của bạn' }]}
-                    >
-                        <Input placeholder="Tên đăng nhập" />
-                    </Form.Item>
+                    <Input placeholder="Tên đăng nhập" />
+                </Form.Item>
 
-                    <Form.Item
-                        label="Mật khẩu"
-                        id="password"
-                        name="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        rules={[{ required: true, message: 'Hãy nhập mật khẩu của bạn' }]}
-                    >
-                        <Input.Password placeholder="Mật khẩu" onKeyDown={(event) => {
-                            if (event.key === 'Enter') form.submit()
-                        }} />
-                    </Form.Item>
-
-                    <Form.Item>
-                        <Button type="primary" htmlType="submit" block loading={loading}>
-                            Đăng nhập
-                        </Button>
-                    </Form.Item>
-
-                    <div style={{ textAlign: 'center' }}>
-                        <Divider style={{ borderColor: 'black' }} >
-                            <Text style={{ fontSize: '15px' }}>Chưa có tài khoản? </Text>
-                            <Link href="/register" style={{ fontSize: '15px' }}>Đăng kí ngay</Link>
-                        </Divider>
-                    </div>
-                    <div style={{ textAlign: 'center', paddingBottom: '15px' }}>
-                        <Text style={{ fontSize: '13px', color: 'gray' }}>Hoặc</Text>
-                    </div>
-
-                    <div style={{ textAlign: 'center' }}>
-                        <Button onClick={() => login()}><GoogleOutlined />Đăng nhập với Google</Button>
-                    </div>
-                </Form>
-            ) : (
-                <Form
-                    name="loginForm"
-                    onFinish={handleLogin}
-                    layout="vertical"
+                <Form.Item
+                    label="Mật khẩu"
+                    id="password"
+                    name="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    rules={[{ required: true, message: 'Hãy nhập mật khẩu của bạn' }]}
                 >
-                    <Form.Item
-                        label="Tên đăng nhập"
-                        name="username"
-                        id="username"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        rules={[{ required: true, message: 'Hãy nhập tên đăng nhập của bạn' }]}
-                    >
-                        <Input placeholder="Tên đăng nhập" />
-                    </Form.Item>
+                    <Input.Password placeholder="Mật khẩu" onKeyDown={(event) => {
+                        if (event.key === 'Enter') form.submit()
+                    }} />
+                </Form.Item>
 
-                    <Form.Item
-                        label="Mật khẩu"
-                        id="password"
-                        name="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        rules={[{ required: true, message: 'Hãy nhập mật khẩu của bạn' }]}
-                    >
-                        <Input.Password placeholder="Mật khẩu" onKeyDown={(event) => {
-                            if (event.key === 'Enter') form.submit()
-                        }} />
-                    </Form.Item>
+                <Form.Item>
+                    <Button type="primary" htmlType="submit" block loading={loading}>
+                        Đăng nhập
+                    </Button>
+                </Form.Item>
 
-                    <Form.Item>
-                        <Button type="primary" htmlType="submit" block loading={loading}>
-                            Đăng nhập
-                        </Button>
-                    </Form.Item>
-                </Form>
-            )}
+                <div style={{ textAlign: 'center' }}>
+                    <Divider style={{ borderColor: 'black' }} >
+                        <Text style={{ fontSize: '15px' }}>Chưa có tài khoản? </Text>
+                        <Link href="/register" style={{ fontSize: '15px' }}>Đăng kí ngay</Link>
+                    </Divider>
+                </div>
+                <div style={{ textAlign: 'center', paddingBottom: '15px' }}>
+                    <Text style={{ fontSize: '13px', color: 'gray' }}>Hoặc</Text>
+                </div>
+
+                <div style={{ textAlign: 'center' }}>
+                    <Button onClick={handleGoogleLogin} loading={loading}><GoogleOutlined />Đăng nhập với Google</Button>
+                </div>
+            </Form>
         </div >
     );
 };

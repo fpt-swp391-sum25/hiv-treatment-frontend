@@ -1,9 +1,11 @@
-import { Layout, Button, Avatar, Typography, message, theme } from "antd";
+import { Layout, Button, Avatar, Typography, message, theme, Popover, Tooltip } from "antd";
 import { UserOutlined, LogoutOutlined } from "@ant-design/icons";
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { logoutAPI } from "../../services/api.service";
 import { useNavigate } from "react-router-dom";
+import appLogo from '../../assets/appLogo.png'
+import '../manager/Layout/ManagerHeader.css'
 
 const { Header } = Layout
 const { Text } = Typography
@@ -26,7 +28,7 @@ const PageHeader = () => {
                 status: '',
                 role: ''
             })
-            message.success("Đăng xuất thành công")
+            localStorage.setItem('auth_error', 'Đăng xuất thành công');
             navigate("/login")
         }
     };
@@ -37,12 +39,22 @@ const PageHeader = () => {
     return (
         <Header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: colorBgContainer, }}>
             <div>
-                <Avatar icon={<UserOutlined />} />
-                <Text style={{ color: 'black', marginLeft: 4, marginRight: 4 }}>{user.username}</Text>
+                <img
+                    src={appLogo}
+                    alt="Logo"
+                    className="app-logo"
+                />
             </div>
-            <Button type="primary" icon={<LogoutOutlined />} onClick={handleLogout} danger>
-                Đăng xuất
-            </Button>
+            <div className="header-right">
+                <Tooltip title={user.fullName}>
+                    <Text style={{ color: 'black', marginLeft: 4, marginRight: 4 }}>{user.fullName}</Text>
+                    <Avatar icon={<UserOutlined />} />
+                </Tooltip>
+
+                <Button type="primary" icon={<LogoutOutlined />} onClick={handleLogout} danger>
+                    Đăng xuất
+                </Button>
+            </div>
         </Header>
     )
 }

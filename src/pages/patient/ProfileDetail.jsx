@@ -136,12 +136,7 @@ const ProfileDetail = () => {
                                                 />
                                             </div>
                                         </Col>
-                                        <Col span={12}>
-                                            <div style={{ marginBottom: '16px' }}>
-                                                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>Trạng thái tài khoản</label>
-                                                <span>{user.status === 'ACTIVE' ? 'Hoạt động' : 'N/A'}</span>
-                                            </div>
-                                        </Col>
+
                                         <Col span={12}>
                                             <div style={{ marginBottom: '16px' }}>
                                                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>Ngày tạo tài khoản</label>
@@ -149,12 +144,7 @@ const ProfileDetail = () => {
                                             </div>
                                         </Col>
 
-                                        <Col span={12}>
-                                            <div style={{ marginBottom: '16px' }}>
-                                                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>Trạng thái xác minh</label>
-                                                <span>{user.verified ? 'Đã xác minh' : 'Chưa xác minh'}</span>
-                                            </div>
-                                        </Col>
+
                                         <Col span={12}>
                                             <div style={{ marginBottom: '16px' }}>
                                                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>Mã bệnh nhân</label>

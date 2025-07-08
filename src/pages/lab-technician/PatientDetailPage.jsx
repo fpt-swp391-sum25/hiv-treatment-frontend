@@ -7,9 +7,8 @@ import {
   deleteTestResultAPI,
   createTestResultAPI
 } from "../../services/api.service.js";
-import {
-  Typography, Space, notification, Popconfirm,
-  Button, Input, Modal, DatePicker, Card, Form, Row, Col, Divider
+import { Typography, Space, notification, Popconfirm,
+  Button, Input, Modal, DatePicker, Card, Form, Row, Col, Divider, Select
 } from 'antd';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import UpdateTestResultModal from '../../components/lab-technician/UpdateTestResultModal.jsx';
@@ -136,19 +135,7 @@ const PatientDetail = () => {
 
       <Card title="Thông tin sức khỏe" style={{ marginTop: 5 + 'vh' }}>
         <Form layout="vertical">
-          {/* <h2>{healthRecordData.schedule.patient.fullName}</h2> */}
           <Row gutter={16}>
-
-            {/* <Col span={12}>
-              <Form.Item label="Mã phòng khám">
-                <Input name="roomCode" value={healthRecordData.roomCode || ''} onChange={handleInputChange} />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item label="Số bảo hiểm y tế">
-                <Input name="insuranceNumber" value={healthRecordData.insuranceNumber || ''} readOnly />
-              </Form.Item>
-            </Col> */}
             <Col span={12}>
               <Form.Item label="Nhóm máu">
                 <Input name="bloodType" value={healthRecordData.bloodType || ''} onChange={handleInputChange} />
@@ -156,7 +143,17 @@ const PatientDetail = () => {
             </Col>
             <Col span={12}>
               <Form.Item label="Trạng thái HIV">
-                <Input name="hivStatus" value={healthRecordData.hivStatus || ''} onChange={handleInputChange} />
+                <Select
+                  value={healthRecordData.hivStatus || ''}
+                  onChange={(value) =>
+                    setHealthRecordData((prev) => ({ ...prev, hivStatus: value }))
+                  }
+                  placeholder="Chọn trạng thái"
+                >
+                  <Select.Option value="Dương tính">Dương tính</Select.Option>
+                  <Select.Option value="Âm tính">Âm tính</Select.Option>
+                  <Select.Option value="Chưa xác định">Chưa xác định</Select.Option>
+                </Select>
               </Form.Item>
             </Col>
           </Row>

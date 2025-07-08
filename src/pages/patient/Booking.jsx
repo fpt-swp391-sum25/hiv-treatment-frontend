@@ -1,11 +1,11 @@
 import { useContext, useEffect, useState } from 'react';
 import { Form, Input, Select, DatePicker, Button, Typography, Col, Row, Layout, theme, message, Descriptions } from 'antd';
-import { ArrowLeftOutlined, SoundTwoTone } from '@ant-design/icons';
+import { ArrowLeftOutlined } from '@ant-design/icons';
 import moment from 'moment';
 import { useNavigate } from 'react-router-dom';
 import { bookingAPI, createHealthRecordAPI, fetchAllDoctorsAPI, fetchAllScheduleAPI, fetchAvailableSlotAPI, fetchDoctorProfileAPI, fetchScheduleByDateAPI, initiatePaymentAPI, registerScheduleAPI } from '../../services/api.service';
 import { AuthContext } from '../../components/context/AuthContext';
-
+import dayjs from 'dayjs';
 
 const { Link } = Typography;
 const { Option } = Select;
@@ -14,22 +14,21 @@ const dateFormat = 'DD-MM-YYYY';
 
 const Booking = () => {
     const [form] = Form.useForm();
-    const { user } = useContext(AuthContext)
-    const [availableTimes, setAvailableTimes] = useState(generateTimeSlots());
-    const [doctors, setDoctors] = useState([])
-    const [availableSlots, setAvailableSlots] = useState([])
-    const [scheduleId, setScheduleId] = useState()
+    const { user } = useContext(AuthContext);
+    const [doctors, setDoctors] = useState([]);
     const [availableSchedules, setAvailableSchedules] = useState([]);
-    const [selectedAmount, setSelectedAmount] = useState();
+    const [groupedSlots, setGroupedSlots] = useState({});
     const [selectedSchedule, setSelectedSchedule] = useState(null);
+    const [selectedAmount, setSelectedAmount] = useState(null);
+    const [loading, setLoading] = useState(false);
 
-    const doctorId = Form.useWatch('doctor', form)
-    const date = Form.useWatch('date', form)
+    const doctorId = Form.useWatch('doctor', form);
+    const date = Form.useWatch('date', form);
     const slot = Form.useWatch('slot', form);
     const type = Form.useWatch('type', form);
 
     const typeMapping = {
-        APPOINTMENT: 'Đặt khám',
+        APPOINTMENT: 'Khám',
         FOLLOW_UP: 'Tái khám',
         CONSULTATION: 'Tư vấn',
     };
@@ -37,26 +36,30 @@ const Booking = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        loadDoctors()
-    }, [])
+        loadDoctors();
+    }, []);
 
     useEffect(() => {
-        loadAvailableSlots()
-        loadSchedule()
-    }, [doctorId])
+        if (date) {
+            loadSchedules();
+        } else {
+            setAvailableSchedules([]);
+            setGroupedSlots({});
+            form.setFieldsValue({ slot: undefined });
+        }
+    }, [doctorId, date]);
 
     useEffect(() => {
         if (slot) {
-            const schedule = availableSchedules.find(s => s.slot === slot);
+            const schedule = availableSchedules.find(s => s.slot === slot && (!doctorId || s.doctorId === doctorId));
             setSelectedSchedule(schedule);
         } else {
             setSelectedSchedule(null);
         }
-        // Gán amount dựa trên type từ form
         if (type) {
             let amount;
             switch (type) {
-                case 'Đặt khám':
+                case 'Khám':
                     amount = 200000;
                     break;
                 case 'Tái khám':
@@ -72,119 +75,127 @@ const Booking = () => {
         } else {
             setSelectedAmount(null);
         }
-    }, [slot, type, availableSchedules]);
+    }, [slot, type, availableSchedules, doctorId]);
 
-    const handleDateChange = async (date) => {
-        if (!date) {
-            setAvailableSchedules([]);
-            form.setFieldsValue({ slot: undefined });
-            return;
+    const loadDoctors = async () => {
+        setLoading(true);
+        try {
+            const response = await fetchAllDoctorsAPI();
+            if (response.data) {
+                setDoctors(response.data);
+            }
+        } catch (error) {
+            message.error('Không thể tải danh sách bác sĩ');
+        } finally {
+            setLoading(false);
         }
-        const response = await fetchScheduleByDateAPI(date.format("YYYY-MM-DD"))
-        if (response.data) {
-            setAvailableSchedules(response.data)
-        }
-    }
+    };
 
+    const loadSchedules = async () => {
+        setLoading(true);
+        console.log(">>>check doctor id", doctorId)
+        try {
+            const response = doctorId
+                ? await fetchAllScheduleAPI(doctorId, dayjs(date).format('YYYY-MM-DD'))
+                : await fetchScheduleByDateAPI(dayjs(date).format('YYYY-MM-DD'));
+            if (response.data) {
+                setAvailableSchedules(response.data);
+                // Nhóm slot theo khung giờ
+                const grouped = response.data.reduce((acc, schedule) => {
+                    const key = schedule.slot;
+                    if (!acc[key]) {
+                        acc[key] = {
+                            slot: schedule.slot,
+                            startTime: schedule.slot.split('-')[0], // Lấy startTime từ slot
+                            doctors: [],
+                        };
+                    }
+                    acc[key].doctors.push({
+                        id: schedule.id,
+                        doctorId: schedule.doctorId,
+                        doctorName: schedule.doctorName,
+                    });
+                    return acc;
+                }, {});
+                // Sắp xếp slot theo startTime
+                const sortedSlots = Object.keys(grouped)
+                    .sort((a, b) => {
+                        const timeA = moment(grouped[a].startTime, 'HH:mm');
+                        const timeB = moment(grouped[b].startTime, 'HH:mm');
+                        return timeA.diff(timeB);
+                    })
+                    .reduce((acc, key) => {
+                        acc[key] = grouped[key];
+                        return acc;
+                    }, {});
+                setGroupedSlots(sortedSlots);
+            } else {
+                setAvailableSchedules([]);
+                setGroupedSlots({});
+            }
+        } catch (error) {
+            message.error('Không thể tải danh sách khung giờ');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const onFinish = async (values) => {
         try {
             const selectedSchedules = availableSchedules.filter(schedule => schedule.slot === values.slot);
-            console.log("selected schedule", selectedSchedules)
             if (selectedSchedules.length === 0) {
                 throw new Error('Lịch hẹn không hợp lệ');
             }
 
-
-            if (values.doctorId) {
-                const selectedSchedule = selectedSchedules.find(schedule => schedule.doctorId === values.doctorId);
-                console.log("check selected schedule", selectedSchedule)
-                if (!selectedSchedule) {
-                    throw new Error('Bác sĩ không có lịch hẹn cho slot này');
+            let schedule;
+            if (values.doctor) {
+                schedule = selectedSchedules.find(schedule => schedule.doctorId === values.doctor);
+                if (!schedule) {
+                    throw new Error('Bác sĩ không có lịch hẹn cho khung giờ này');
                 }
-                setScheduleId(selectedSchedule.id)
             } else {
-                setScheduleId(selectedSchedules[0].id)
+                schedule = selectedSchedules[0];
             }
-
-            const schedule = selectedSchedules.find(s => s.slot === values.slot);
-            if (!schedule) {
-                throw new Error('Lịch không khả dụng');
-            }
-
 
             const registerResponse = await registerScheduleAPI({
                 scheduleId: schedule.id,
                 patientId: user.id,
-                type: type
+                type: values.type,
             });
 
-            const createHealthRecordResponse = await createHealthRecordAPI(schedule.id)
-
+            const createHealthRecordResponse = await createHealthRecordAPI(schedule.id);
 
             const paymentResponse = await initiatePaymentAPI({
                 scheduleId: schedule.id,
                 amount: selectedAmount,
             });
             window.location.href = paymentResponse.data;
-            // console.log("Check payment", paymentResponse.data)
-            // console.log("schedule id", schedule.id)
         } catch (error) {
-            message.error(error.message);
+            message.error(error.message || 'Đặt lịch thất bại');
         }
     };
-
-    const loadDoctors = async () => {
-        const response = await fetchAllDoctorsAPI()
-        console.log(response.data)
-        if (response.data) {
-            setDoctors(response.data)
-        }
-
-
-    }
-
-    const loadAvailableSlots = async () => {
-        const response = await fetchAvailableSlotAPI(doctorId, date.format('YYYY-MM-DD'))
-        if (response.data) {
-            setAvailableSlots(response.data)
-        } else {
-            setAvailableSlots([])
-        }
-    }
-
-    const loadSchedule = async () => {
-        const response = await fetchAllScheduleAPI(doctorId, date)
-        if (response.data) {
-            setAvailableSchedules(response.data);
-        }
-    }
-
 
     const disabledDate = (current) => {
         const isBeforeToday = current && current < moment().startOf('day');
-
         const isSunday = current && current.day() === 0;
-
         return isBeforeToday || isSunday;
     };
+
+    const normalizeString = (str) => {
+        return str
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '') // Loại bỏ dấu tiếng Việt
+            .replace(/\s+/g, ' ') // Chuẩn hóa dấu cách
+            .trim();
+    };
+
     const {
         token: { colorBgContainer, borderRadiusLG },
     } = theme.useToken();
-    function generateTimeSlots() {
-        const times = [];
-        const startHour = 8;
-        const endHour = 17;
-        for (let hour = startHour; hour < endHour; hour++) {
-            times.push(moment(`${hour}:00`, 'HH:mm'));
-            times.push(moment(`${hour}:30`, 'HH:mm'));
-        }
-        return times;
-    }
 
     return (
         <Layout>
-
             <Content style={{ padding: '15px' }}>
                 <div style={{
                     background: colorBgContainer,
@@ -193,56 +204,70 @@ const Booking = () => {
                 }}>
                     <Row justify="center">
                         <Col span={16} style={{ background: 'white', borderRadius: '10px', margin: '20px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
-                            <Link href="/"><ArrowLeftOutlined style={{ margin: '15px' }} /> Về trang chủ</Link>
+                            <Link href="/"><ArrowLeftOutlined style={{ margin: '15px' }} /> Về trang chủ</Link>
                             <div style={{ maxWidth: 900, margin: '0 auto' }}>
-
                                 <h1>Đặt lịch khám</h1>
                                 <p>Vui lòng điền thông tin dưới đây để đặt lịch khám với bác sĩ chuyên khoa HIV</p>
                                 <Form form={form} layout="vertical" onFinish={onFinish}>
-
-
-
                                     <Form.Item name="type" label="Loại dịch vụ" rules={[{ required: true, message: 'Vui lòng chọn loại dịch vụ' }]}>
                                         <Select placeholder="Chọn loại dịch vụ">
-                                            <Select.Option value="Đặt khám">Đặt khám</Select.Option>
+                                            <Select.Option value="Khám">Khám</Select.Option>
                                             <Select.Option value="Tái khám">Tái khám</Select.Option>
                                             <Select.Option value="Tư vấn">Tư vấn</Select.Option>
                                         </Select>
                                     </Form.Item>
-
                                     <Form.Item
                                         name="doctor"
                                         label="Bác sĩ"
                                     >
-                                        <Select placeholder="Chọn bác sĩ" allowClear filterOption={(input, option) =>
-                                            option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                                        }>
-                                            {doctors.map(doctor => (
-                                                <Option key={doctor.id} value={doctor.id}>
-                                                    {doctor.fullName}
-                                                </Option>
-                                            ))}
-                                            {/* <Option value="doctor1">Bác sĩ 1</Option>
-                                            <Option value="doctor2">Bác sĩ 2</Option> */}
+                                        <Select
+                                            showSearch
+                                            placeholder="Chọn bác sĩ (tùy chọn)"
+                                            allowClear
+                                            filterOption={(input, option) => {
+                                                const searchText = normalizeString(input);
+                                                const fullName = normalizeString(option.children);
+                                                return fullName.includes(searchText);
+                                            }}
+                                        >
+                                            {
+                                                doctors.map(doctor => (
+                                                    <Select.Option key={doctor.id} value={doctor.id}>
+                                                        {doctor.fullName}
+                                                    </Select.Option>
+                                                ))
+                                            }
                                         </Select>
                                     </Form.Item>
-                                    <Row gutter={8} >
+                                    <Row gutter={8}>
                                         <Col span={12}>
                                             <Form.Item
                                                 name="date"
                                                 label="Ngày khám"
                                                 rules={[{ required: true, message: 'Vui lòng chọn ngày khám' }]}
-
                                             >
-
-                                                <DatePicker disabledDate={disabledDate} format={dateFormat} style={{ width: '100%' }} onChange={handleDateChange} />
+                                                <DatePicker
+                                                    disabledDate={disabledDate}
+                                                    format={dateFormat}
+                                                    style={{ width: '100%' }}
+                                                    onChange={() => form.setFieldsValue({ slot: undefined })}
+                                                />
                                             </Form.Item>
                                         </Col>
                                         <Col span={12}>
-                                            <Form.Item name="slot" label="Khung giờ" rules={[{ required: true }]}>
-                                                <Select placeholder="Chọn khung giờ" disabled={!availableSchedules.length}>
-                                                    {availableSchedules.map(schedule => (
-                                                        <Select.Option key={schedule.id} value={schedule.slot}>{schedule.slot}</Select.Option>
+                                            <Form.Item
+                                                name="slot"
+                                                label="Khung giờ"
+                                                rules={[{ required: true, message: 'Vui lòng chọn khung giờ' }]}
+                                            >
+                                                <Select
+                                                    placeholder="Chọn khung giờ"
+                                                    disabled={!date || !Object.keys(groupedSlots).length}
+                                                >
+                                                    {Object.keys(groupedSlots).map(slot => (
+                                                        <Select.Option key={slot} value={slot}>
+                                                            {slot}
+                                                        </Select.Option>
                                                     ))}
                                                 </Select>
                                             </Form.Item>
@@ -251,16 +276,16 @@ const Booking = () => {
                                     {selectedSchedule && (
                                         <Descriptions bordered>
                                             <Descriptions.Item label="Loại lịch hẹn">{type}</Descriptions.Item>
+                                            {/* <Descriptions.Item label="Bác sĩ">{selectedSchedule.doctorName}</Descriptions.Item> */}
                                             <Descriptions.Item label="Giá tiền">{selectedAmount ? selectedAmount.toLocaleString('vi-VN') : '0'} VND</Descriptions.Item>
                                         </Descriptions>
                                     )}
                                     <Form.Item style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                                        <Button type="primary" htmlType="submit">
+                                        <Button type="primary" htmlType="submit" loading={loading}>
                                             Xác nhận đặt lịch
                                         </Button>
                                     </Form.Item>
                                 </Form>
-
                             </div>
                         </Col>
                         <Col span={4} style={{ margin: '20px' }}>
@@ -279,13 +304,9 @@ const Booking = () => {
                             </div>
                         </Col>
                     </Row>
-
                 </div>
-
             </Content>
-
-        </Layout>
-
+        </Layout >
     );
 };
 

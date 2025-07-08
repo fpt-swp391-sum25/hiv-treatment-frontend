@@ -75,6 +75,7 @@ const PatientList = () => {
 
             const mergedData = scheduleList.map((item) => {
                 console.log("check schedule", scheduleList)
+                if (!item?.patient?.id) return null;
                 const matchedPatient = patientList.find(p => p.id === item.patient.id);
                 const matchedHealthRecord = healthRecords.find(hr => hr.scheduleId === item.id);
                 console.log(">>>>>>>>>>>> check matched patient", matchedPatient)
@@ -86,7 +87,7 @@ const PatientList = () => {
                     fullName: matchedPatient?.fullName || 'Chưa rõ tên',
                     treatmentStatus: matchedHealthRecord?.data?.treatmentStatus || 'Chưa cập nhật',
                 };
-            });
+            }).filter(item => item !== null);
 
             setData(mergedData);
         } catch (error) {
