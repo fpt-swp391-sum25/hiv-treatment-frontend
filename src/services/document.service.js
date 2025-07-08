@@ -43,7 +43,7 @@ export const searchDocuments = async (searchString) => {
 
 /**
  * Tạo mới ảnh cho document
- * @param {Object} data - { url, documentId }
+ * @param {Object} data - { image, documentId }
  * @returns {Promise}
  */
 export const createDocumentImage = async (data) => {
@@ -62,7 +62,7 @@ export const getDocumentImageById = async (id) => {
 /**
  * Cập nhật ảnh theo id
  * @param {number} id
- * @param {Object} data
+ * @param {Object} data - { image, documentId }
  * @returns {Promise}
  */
 export const updateDocumentImage = async (id, data) => {

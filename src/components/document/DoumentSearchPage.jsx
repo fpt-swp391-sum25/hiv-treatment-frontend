@@ -100,7 +100,7 @@ const ResourceSearchPage = () => {
               <div className="document-card" key={doc.id}>
                 <div style={{ textAlign: 'center', marginBottom: 8 }}>
                   {imgs.length > 0 ? (
-                    <img src={imgs[0].url} alt="doc" style={{ maxWidth: 80, maxHeight: 80, borderRadius: 6, objectFit: 'cover' }} />
+                    <img src={imgs[0].image} alt="doc" style={{ maxWidth: 80, maxHeight: 80, borderRadius: 6, objectFit: 'cover' }} />
                   ) : (
                     <FileImageOutlined style={{ fontSize: 48, color: '#ccc' }} />
                   )}
@@ -144,8 +144,8 @@ const ResourceSearchPage = () => {
               {(documentImages[selectedDoc.id] && documentImages[selectedDoc.id].length > 0) ? (
                 documentImages[selectedDoc.id].map(img => (
                   <img
-                    key={img.id || img.url}
-                    src={img.url}
+                    key={img.id || img.image}
+                    src={img.image}
                     alt="doc-img"
                     style={{ maxHeight: 120, borderRadius: 6, objectFit: 'cover', boxShadow: '0 2px 8px #0001' }}
                   />

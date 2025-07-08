@@ -264,13 +264,14 @@ const fetchAllRegimensAPI = () => {
 }
 
 const createRegimenAPI = (components, regimenName,
-    description, indications, contraindications) => {
+    description, indications, contraindications, doctorId) => {
     const createData = {
         components,
         regimenName,
         description,
         indications,
-        contraindications
+        contraindications,
+        doctorId
     }
     const URL_BACKEND = '/api/regimen';
     return axios.post(URL_BACKEND, createData)
