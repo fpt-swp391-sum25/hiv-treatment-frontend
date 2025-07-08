@@ -36,21 +36,14 @@ export const StatusMapping = {
     'Hoàn thành': 'completed'
 };
 
-// Time slots for schedule - 15 slots chính xác từ BE
+// Time slots for schedule - Chỉ giữ lại các khung giờ chẵn
 export const SlotTimes = [
     { value: '08:00:00', label: '08:00' },
-    { value: '08:30:00', label: '08:30' },
     { value: '09:00:00', label: '09:00' },
-    { value: '09:30:00', label: '09:30' },
     { value: '10:00:00', label: '10:00' },
-    { value: '10:30:00', label: '10:30' },
     { value: '11:00:00', label: '11:00' },
     { value: '13:00:00', label: '13:00' },
-    { value: '13:30:00', label: '13:30' },
     { value: '14:00:00', label: '14:00' },
-    { value: '14:30:00', label: '14:30' },
     { value: '15:00:00', label: '15:00' },
-    { value: '15:30:00', label: '15:30' },
-    { value: '16:00:00', label: '16:00' },
-    { value: '16:30:00', label: '16:30' }
+    { value: '16:00:00', label: '16:00' }
 ];
