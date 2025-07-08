@@ -11,6 +11,12 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [showConfirmation, setShowConfirmation] = useState(false);
+
+    // States for searchable doctor dropdown
+    const [doctorSearchTerm, setDoctorSearchTerm] = useState('');
+    const [showDoctorDropdown, setShowDoctorDropdown] = useState(false);
+    const [filteredDoctors, setFilteredDoctors] = useState([]);
+    const [selectedDoctorIndex, setSelectedDoctorIndex] = useState(-1);
     const [formData, setFormData] = useState({
         doctorId: '',
         doctorName: '',
@@ -42,6 +48,11 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             resetForm();
         }
     }, [show, selectedDate, selectedDoctor]);
+
+    // Update filtered doctors when doctors list changes
+    useEffect(() => {
+        setFilteredDoctors(doctors);
+    }, [doctors]);
 
     const fetchDoctors = async () => {
         setLoading(true);
@@ -85,7 +96,8 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                 
                 console.log('ScheduleForm: Formatted doctors:', formattedDoctors);
                 setDoctors(formattedDoctors);
-                
+                setFilteredDoctors(formattedDoctors); // Initialize filtered doctors
+
                 // Nếu có selectedDoctor, tự động chọn bác sĩ đó
                 if (selectedDoctor) {
                     const doctor = formattedDoctors.find(d => d.id.toString() === selectedDoctor.toString());
@@ -95,6 +107,7 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                             doctorId: doctor.id,
                             doctorName: doctor.name
                         }));
+                        setDoctorSearchTerm(doctor.name); // Set search term to selected doctor name
                     }
                 }
             } else {
@@ -124,6 +137,107 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             scheduleType: 'single',
             shiftType: 'morning',
         });
+
+        // Reset search states
+        setDoctorSearchTerm('');
+        setShowDoctorDropdown(false);
+        setFilteredDoctors(doctors);
+    };
+
+    // Filter doctors based on search term
+    const filterDoctors = (searchTerm) => {
+        if (!searchTerm.trim()) {
+            setFilteredDoctors(doctors);
+        } else {
+            const filtered = doctors.filter(doctor =>
+                doctor.name.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            setFilteredDoctors(filtered);
+        }
+    };
+
+    // Handle doctor search input change
+    const handleDoctorSearchChange = (e) => {
+        const searchTerm = e.target.value;
+        setDoctorSearchTerm(searchTerm);
+        filterDoctors(searchTerm);
+        setShowDoctorDropdown(true);
+        setSelectedDoctorIndex(-1); // Reset keyboard selection
+
+        // Clear selection if search term doesn't match any doctor exactly or is empty
+        const exactMatch = doctors.find(doctor =>
+            doctor.name.toLowerCase() === searchTerm.toLowerCase()
+        );
+        if (!exactMatch || !searchTerm.trim()) {
+            setFormData(prev => ({
+                ...prev,
+                doctorId: '',
+                doctorName: ''
+            }));
+        }
+    };
+
+    // Handle doctor selection from dropdown
+    const handleDoctorSelect = (doctor) => {
+        setFormData(prev => ({
+            ...prev,
+            doctorId: doctor.id,
+            doctorName: doctor.name
+        }));
+        setDoctorSearchTerm(doctor.name);
+        setShowDoctorDropdown(false);
+    };
+
+    // Handle input focus
+    const handleDoctorInputFocus = () => {
+        setShowDoctorDropdown(true);
+        // If no search term, show all doctors
+        if (!doctorSearchTerm.trim()) {
+            setFilteredDoctors(doctors);
+        } else {
+            filterDoctors(doctorSearchTerm);
+        }
+    };
+
+    // Handle input blur (with delay to allow for clicks)
+    const handleDoctorInputBlur = () => {
+        setTimeout(() => {
+            setShowDoctorDropdown(false);
+            setSelectedDoctorIndex(-1);
+        }, 200);
+    };
+
+    // Handle keyboard navigation
+    const handleDoctorKeyDown = (e) => {
+        if (!showDoctorDropdown) return;
+
+        switch (e.key) {
+            case 'ArrowDown':
+                e.preventDefault();
+                setSelectedDoctorIndex(prev =>
+                    prev < filteredDoctors.length - 1 ? prev + 1 : 0
+                );
+                break;
+            case 'ArrowUp':
+                e.preventDefault();
+                setSelectedDoctorIndex(prev =>
+                    prev > 0 ? prev - 1 : filteredDoctors.length - 1
+                );
+                break;
+            case 'Enter':
+                e.preventDefault();
+                if (selectedDoctorIndex >= 0 && filteredDoctors[selectedDoctorIndex]) {
+                    handleDoctorSelect(filteredDoctors[selectedDoctorIndex]);
+                }
+                break;
+            case 'Escape':
+                setShowDoctorDropdown(false);
+                setSelectedDoctorIndex(-1);
+                break;
+            default:
+                setSelectedDoctorIndex(-1);
+                break;
+        }
     };
 
     const handleChange = (e) => {
@@ -182,7 +296,7 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         if (!formData.doctorId) {
             console.error('Missing doctorId');
             console.groupEnd();
-            onShowToast('Vui lòng chọn bác sĩ', 'danger');
+            onShowToast('Vui lòng chọn bác sĩ từ danh sách', 'danger');
             return false;
         }
 
@@ -415,20 +529,59 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                                         <span>Đang tải danh sách bác sĩ...</span>
                                     </div>
                                 ) : (
-                                    <Form.Select
-                                        name="doctorId"
-                                        value={formData.doctorId}
-                                        onChange={handleChange}
-                                        disabled={loading || doctors.length === 0}
-                                        required
-                                    >
-                                        <option value="">Chọn bác sĩ</option>
-                                        {doctors.map(doctor => (
-                                            <option key={doctor.id} value={doctor.id}>
-                                                {doctor.name}
-                                            </option>
-                                        ))}
-                                    </Form.Select>
+                                    <div className="searchable-dropdown-container">
+                                        <Form.Control
+                                            type="text"
+                                            placeholder="Tìm kiếm hoặc chọn bác sĩ..."
+                                            value={doctorSearchTerm}
+                                            onChange={handleDoctorSearchChange}
+                                            onFocus={handleDoctorInputFocus}
+                                            onBlur={handleDoctorInputBlur}
+                                            onKeyDown={handleDoctorKeyDown}
+                                            disabled={loading || doctors.length === 0}
+                                            className="doctor-search-input"
+                                            autoComplete="off"
+                                            role="combobox"
+                                            aria-expanded={showDoctorDropdown}
+                                            aria-haspopup="listbox"
+                                            aria-autocomplete="list"
+                                            aria-label="Tìm kiếm và chọn bác sĩ"
+                                        />
+                                        {showDoctorDropdown && filteredDoctors.length > 0 && (
+                                            <div
+                                                className="dropdown-menu show doctor-dropdown-menu"
+                                                role="listbox"
+                                                aria-label="Danh sách bác sĩ"
+                                            >
+                                                {filteredDoctors.map((doctor, index) => (
+                                                    <button
+                                                        key={doctor.id}
+                                                        type="button"
+                                                        className={`dropdown-item ${
+                                                            formData.doctorId === doctor.id ? 'active' : ''
+                                                        } ${
+                                                            selectedDoctorIndex === index ? 'highlighted' : ''
+                                                        }`}
+                                                        onClick={() => handleDoctorSelect(doctor)}
+                                                        role="option"
+                                                        aria-selected={formData.doctorId === doctor.id}
+                                                        tabIndex={-1}
+                                                    >
+                                                        <div className="doctor-option">
+                                                            <div className="doctor-name">{doctor.name}</div>
+                                                        </div>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+                                        {showDoctorDropdown && filteredDoctors.length === 0 && doctorSearchTerm && (
+                                            <div className="dropdown-menu show doctor-dropdown-menu">
+                                                <div className="dropdown-item-text text-muted">
+                                                    Không tìm thấy bác sĩ nào
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
                                 )}
                             </Form.Group>
                         </Col>
