@@ -362,7 +362,21 @@
 .calendar-nav {
   display: flex;
   align-items: center;
-  gap: 8px;
+}
+
+.btn-group-nav {
+  display: flex;
+  align-items: center;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid #dee2e6;
+  transition: all 0.2s ease;
+}
+
+.btn-group-nav:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  border-color: #007bff;
 }
 
 .calendar-title h3 {
@@ -372,40 +386,100 @@
   color: #333;
 }
 
-/* Nút điều hướng */
-.btn-calendar-nav {
-  background-color: #f8f9fa;
-  border: 1px solid #dee2e6;
-  border-radius: 4px;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn-calendar-nav:hover {
-  background-color: #e9ecef;
-}
-
-.btn-calendar-today {
-  background-color: #f8f9fa;
-  border: 1px solid #dee2e6;
-  border-radius: 4px;
-  height: 32px;
-  padding: 0 15px;
+/* Button Group Items */
+.btn-group-item {
+  background-color: #ffffff;
+  border: none;
+  border-right: 1px solid #dee2e6;
+  padding: 10px 16px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   font-size: 14px;
+  font-weight: 500;
+  color: #495057;
   transition: all 0.2s ease;
+  min-height: 40px;
 }
 
-.btn-calendar-today:hover {
+.btn-group-item:last-child {
+  border-right: none;
+}
+
+.btn-group-item:hover {
+  background-color: #f8f9fa;
+  color: #007bff;
+}
+
+.btn-group-item:active {
   background-color: #e9ecef;
+}
+
+/* Specific styling for each button */
+.btn-group-item.btn-prev,
+.btn-group-item.btn-next {
+  width: 40px;
+  padding: 10px 8px;
+  font-size: 16px;
+}
+
+.btn-group-item.btn-today {
+  padding: 10px 20px;
+  font-weight: 600;
+  min-width: 80px;
+  white-space: nowrap;
+  writing-mode: horizontal-tb;
+  text-orientation: mixed;
+}
+
+.btn-group-item.btn-today:hover {
+  background-color: #007bff;
+  color: #ffffff;
+}
+
+/* Responsive Design for Button Group */
+@media (max-width: 768px) {
+  .btn-group-item {
+    padding: 12px 18px;
+    font-size: 15px;
+    min-height: 44px;
+  }
+
+  .btn-group-item.btn-prev,
+  .btn-group-item.btn-next {
+    width: 44px;
+    padding: 12px 10px;
+    font-size: 18px;
+  }
+
+  .btn-group-item.btn-today {
+    padding: 12px 24px;
+    min-width: 90px;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .btn-group-item {
+    padding: 10px 12px;
+    font-size: 14px;
+    min-height: 40px;
+  }
+
+  .btn-group-item.btn-prev,
+  .btn-group-item.btn-next {
+    width: 40px;
+    padding: 10px 8px;
+    font-size: 16px;
+  }
+
+  .btn-group-item.btn-today {
+    padding: 10px 16px;
+    min-width: 70px;
+    font-size: 13px;
+    white-space: nowrap;
+  }
 }
 
 /* Nút chuyển đổi view */

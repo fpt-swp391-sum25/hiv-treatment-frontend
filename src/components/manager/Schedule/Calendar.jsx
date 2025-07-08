@@ -577,9 +577,17 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
         <div className="calendar-container">
             <div className="calendar-header">
                 <div className="calendar-nav">
-                    <button className="btn-calendar-nav" onClick={handlePrevClick}><BsChevronLeft /></button>
-                    <button className="btn-calendar-today" onClick={handleTodayClick}>Hôm nay</button>
-                    <button className="btn-calendar-nav" onClick={handleNextClick}><BsChevronRight /></button>
+                    <div className="btn-group-nav">
+                        <button className="btn-group-item btn-prev" onClick={handlePrevClick} title="Tháng trước">
+                            <BsChevronLeft />
+                        </button>
+                        <button className="btn-group-item btn-today" onClick={handleTodayClick}>
+                            Hôm nay
+                        </button>
+                        <button className="btn-group-item btn-next" onClick={handleNextClick} title="Tháng sau">
+                            <BsChevronRight />
+                        </button>
+                    </div>
                 </div>
                 <div className="calendar-title">
                     {renderCalendarTitle()}
