@@ -6,19 +6,14 @@ import {
   Button,
   Spin,
   Space,
-  Popconfirm,
   notification,
 } from "antd";
 import {
-  PlusOutlined,
   SaveOutlined,
-  DeleteOutlined,
 } from "@ant-design/icons";
 import {
   fetchSystemConfigurationsAPI,
   updateSystemConfigurationAPI,
-  createSystemConfigurationAPI,
-  deleteSystemConfigurationAPI,
 } from "../../services/api.service";
 
 import "../../styles/admin/AdminDashboard.css";
@@ -55,70 +50,14 @@ const AdminSystemConfig = () => {
     );
   };
 
-  const handleNameChange = (id, name) => {
-    setConfigs((prev) =>
-      prev.map((c) =>
-        c.id === id ? { ...c, name } : c
-      )
-    );
-  };
-
-  const handleAdd = () => {
-    const newConfig = {
-      id: `new-${Date.now()}`, 
-      name: "",
-      value: "",
-      isNew: true,
-    };
-    setConfigs((prev) => [...prev, newConfig]);
-  };
-
-  const handleDelete = async (record) => {
-    if (record.isNew) {
-      setConfigs((prev) =>
-        prev.filter((c) => c.id !== record.id)
-      );
-      return;
-    }
-    try {
-      await deleteSystemConfigurationAPI(record.id);
-      notification.success({
-        message: "Xóa thành công",
-        description: `Cấu hình "${record.name}" đã bị xóa.`,
-      });
-      loadConfigs();
-    } catch (error) {
-      notification.error({
-        message: "Lỗi xóa",
-        description: "Không thể xóa cấu hình.",
-      });
-    }
-  };
-
   const handleSaveAll = async () => {
     setSaving(true);
     try {
       for (const config of configs) {
-        console.log(">>>>> Config đang lưu:", config);
-
-        if (config.isNew) {
-          if (!config.name) {
-            notification.warning({
-              message: "Thiếu tên cấu hình",
-              description: "Tên cấu hình không được để trống.",
-            });
-            continue;
-          }
-          await createSystemConfigurationAPI({
-            name: config.name,
-            value: config.value,
-          });
-        } else {
-          await updateSystemConfigurationAPI(config.id, {
-            name: config.name,
-            value: config.value,
-            });
-        }
+        await updateSystemConfigurationAPI(config.id, {
+          name: config.name,
+          value: config.value,
+        });
       }
       notification.success({
         message: "Lưu thành công",
@@ -140,47 +79,21 @@ const AdminSystemConfig = () => {
       title: "Tên cấu hình",
       dataIndex: "name",
       key: "name",
-      render: (text, record) => (
-        <Input
-          value={record.name}
-          onChange={(e) =>
-            handleNameChange(record.id, e.target.value)
-          }
-          placeholder="Nhập tên"
-        />
-      ),
+      render: (text) => <span>{text}</span>,
     },
     {
       title: "Giá trị",
       dataIndex: "value",
       key: "value",
       render: (text, record) => (
-        <Input
+        <Input.TextArea
           value={record.value}
           onChange={(e) =>
             handleValueChange(record.id, e.target.value)
           }
           placeholder="Nhập giá trị"
+          autoSize={{ minRows: 1, maxRows: 6 }}
         />
-      ),
-    },
-    {
-      title: "",
-      key: "action",
-      render: (_, record) => (
-        <Popconfirm
-          title="Bạn chắc chắn muốn xóa?"
-          onConfirm={() => handleDelete(record)}
-          okText="Xóa"
-          cancelText="Hủy"
-        >
-          <Button
-            icon={<DeleteOutlined />}
-            danger
-          >
-            Xóa
-          </Button>
-        </Popconfirm>
       ),
     },
   ];
@@ -198,25 +111,16 @@ const AdminSystemConfig = () => {
     <div style={{ padding: 32 }}>
       <Card
         title="Cấu hình hệ thống"
-        className="admin-dashboard-card"
+        className="admin-system-config-card"
         extra={
-          <Space>
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={handleAdd}
-            >
-              Thêm cấu hình
-            </Button>
-            <Button
-              type="primary"
-              icon={<SaveOutlined />}
-              loading={saving}
-              onClick={handleSaveAll}
-            >
-              Lưu tất cả
-            </Button>
-          </Space>
+          <Button
+            type="primary"
+            icon={<SaveOutlined />}
+            loading={saving}
+            onClick={handleSaveAll}
+          >
+            Lưu tất cả
+          </Button>
         }
       >
         <Table

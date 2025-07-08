@@ -20,7 +20,8 @@ import {
   Spin,
   List,
 } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, PictureOutlined } from '@ant-design/icons';
+import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, PictureOutlined, UploadOutlined } from '@ant-design/icons';
+import { EyeOutlined } from '@ant-design/icons';
 import { AuthContext } from '../../components/context/AuthContext';
 import dayjs from 'dayjs';
 
@@ -34,11 +35,14 @@ const DoctorDocumentList = () => {
   const [modalLoading, setModalLoading] = useState(false);
   const { user } = useContext(AuthContext);
   // State cho hình ảnh
-  const [imageUrls, setImageUrls] = useState([]); // {id, url} hoặc chỉ url nếu chưa lưu
-  const [newImageUrl, setNewImageUrl] = useState('');
+  const [imageList, setImageList] = useState([]); // {id, image} hoặc chỉ image nếu chưa lưu
+  const [newImage, setNewImage] = useState('');
   const searchRef = useRef();
   const debounceTimeout = useRef();
   const [allDocuments, setAllDocuments] = useState([]); // lưu toàn bộ documents để filter
+  const fileInputRef = useRef();
+  const [previewImage, setPreviewImage] = useState(null);
+  const handlePreview = (imgSrc) => setPreviewImage(imgSrc);
 
   const fetchDocuments = async () => {
     setLoading(true);
@@ -75,7 +79,7 @@ const DoctorDocumentList = () => {
   const openCreateModal = () => {
     form.resetFields();
     setEditId(null);
-    setImageUrls([]);
+    setImageList([]);
     setModalOpen(true);
   };
 
@@ -86,9 +90,9 @@ const DoctorDocumentList = () => {
     // Load ảnh hiện tại
     try {
       const res = await getDocumentImagesByDocumentId(doc.id);
-      setImageUrls(res.data.map(img => ({ id: img.id, url: img.url })));
+      setImageList(res.data.map(img => ({ id: img.id, image: img.image })));
     } catch {
-      setImageUrls([]);
+      setImageList([]);
     }
   };
 
@@ -104,28 +108,62 @@ const DoctorDocumentList = () => {
     setLoading(false);
   };
 
-  // Xử lý thêm url ảnh vào danh sách tạm
-  const handleAddImageUrl = () => {
-    if (newImageUrl.trim() && !imageUrls.some(img => img.url === newImageUrl.trim())) {
-      setImageUrls([...imageUrls, { url: newImageUrl.trim() }]);
-      setNewImageUrl('');
+  // Thêm ảnh từ file
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = reader.result;
+      if (!imageList.some(img => img.image === base64)) {
+        setImageList([...imageList, { image: base64 }]);
+      } else {
+        message.warning('Ảnh này đã tồn tại trong danh sách!');
+      }
+    };
+    reader.readAsDataURL(file);
+    // Reset input để chọn lại cùng file nếu muốn
+    e.target.value = '';
+  };
+
+  // Thêm ảnh từ clipboard (paste)
+  const handlePaste = (e) => {
+    const items = e.clipboardData && e.clipboardData.items;
+    if (!items) return;
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.type.indexOf('image') !== -1) {
+        const file = item.getAsFile();
+        const reader = new FileReader();
+        reader.onload = () => {
+          const base64 = reader.result;
+          if (!imageList.some(img => img.image === base64)) {
+            setImageList(prev => [...prev, { image: base64 }]);
+            message.success('Đã dán ảnh từ clipboard!');
+          } else {
+            message.warning('Ảnh này đã tồn tại trong danh sách!');
+          }
+        };
+        reader.readAsDataURL(file);
+        break; // chỉ lấy ảnh đầu tiên
+      }
     }
   };
 
   // Xử lý xóa url ảnh khỏi danh sách tạm (nếu là ảnh đã lưu thì xóa ở backend luôn)
-  const handleRemoveImageUrl = async (img) => {
+  const handleRemoveImage = async (img) => {
     if (img.id) {
       // Ảnh đã lưu, xóa ở backend
       try {
         await deleteDocumentImage(img.id);
-        setImageUrls(imageUrls.filter(i => i.url !== img.url));
+        setImageList(imageList.filter(i => i.image !== img.image));
         message.success('Đã xóa ảnh');
       } catch {
         message.error('Lỗi khi xóa ảnh');
       }
     } else {
       // Ảnh mới thêm, chỉ xóa ở frontend
-      setImageUrls(imageUrls.filter(i => i.url !== img.url));
+      setImageList(imageList.filter(i => i.image !== img.image));
     }
   };
 
@@ -149,10 +187,10 @@ const DoctorDocumentList = () => {
           documentId = latest?.id;
         }
       }
-      // Xử lý ảnh: thêm mới các url chưa có id
-      for (const img of imageUrls) {
+      // Xử lý ảnh: thêm mới các ảnh chưa có id
+      for (const img of imageList) {
         if (!img.id && documentId) {
-          await createDocumentImage({ url: img.url, documentId });
+          await createDocumentImage({ image: img.image, documentId });
         }
       }
       setModalOpen(false);
@@ -275,33 +313,60 @@ const DoctorDocumentList = () => {
           </Form.Item>
         </Form>
         {/* Quản lý hình ảnh */}
-        <div style={{ marginTop: 16 }}>
+        <div
+          style={{ marginTop: 16 }}
+          tabIndex={0}
+          onPaste={handlePaste}
+        >
           <div style={{ fontWeight: 500, marginBottom: 8 }}><PictureOutlined /> Ảnh tài liệu</div>
-          <Input.Group compact>
-            <Input
-              style={{ width: 'calc(100% - 90px)' }}
-              placeholder="Nhập url ảnh..."
-              value={newImageUrl}
-              onChange={e => setNewImageUrl(e.target.value)}
-              onPressEnter={handleAddImageUrl}
-            />
-            <Button type="primary" onClick={handleAddImageUrl}>Thêm ảnh</Button>
-          </Input.Group>
+          <div style={{ color: '#888', fontSize: 13, marginBottom: 8 }}>
+            Bạn có thể <b>dán ảnh (Ctrl+V)</b> hoặc chọn file ảnh từ máy tính.
+          </div>
+          <Button icon={<UploadOutlined />} onClick={() => fileInputRef.current.click()}>
+            Chọn file ảnh
+          </Button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            style={{ display: 'none' }}
+            onChange={handleFileChange}
+          />
           <List
-            dataSource={imageUrls}
+            dataSource={imageList}
             renderItem={img => (
               <List.Item
                 actions={[
-                  <Button danger size="small" onClick={() => handleRemoveImageUrl(img)}>Xóa</Button>
+                  <Button
+                    icon={<EyeOutlined />}
+                    size="small"
+                    onClick={() => handlePreview(img.image)}
+                  >
+                    Xem
+                  </Button>,
+                  <Button danger size="small" onClick={() => handleRemoveImage(img)}>Xóa</Button>
                 ]}
               >
-                <img src={img.url} alt="document" style={{ maxHeight: 40, marginRight: 8 }} />
-                <span>{img.url}</span>
+                <img
+                  src={img.image}
+                  alt="document"
+                  style={{ maxHeight: 40, marginRight: 8, cursor: 'pointer', border: '1px solid #eee', borderRadius: 4 }}
+                  onClick={() => handlePreview(img.image)}
+                />
               </List.Item>
             )}
             locale={{ emptyText: 'Chưa có ảnh nào' }}
             style={{ marginTop: 8 }}
           />
+          <Modal
+            open={!!previewImage}
+            footer={null}
+            onCancel={() => setPreviewImage(null)}
+            width={500}
+            centered
+          >
+            <img src={previewImage} alt="preview" style={{ width: '100%', borderRadius: 8 }} />
+          </Modal>
         </div>
       </Modal>
     </div>

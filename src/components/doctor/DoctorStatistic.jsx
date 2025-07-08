@@ -1,13 +1,12 @@
 import { useContext, useEffect, useState } from 'react';
 import { Button, Spinner } from 'react-bootstrap';
-import { Line, Pie } from 'react-chartjs-2';
+import { Line, Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Title, Tooltip, Legend, BarElement } from 'chart.js';
 import dayjs from 'dayjs';
 import quarterOfYear from 'dayjs/plugin/quarterOfYear';
 import '../../styles/doctor/Statistics.css';
 import { AuthContext } from '../context/AuthContext';
 import { fetchScheduleByDoctorIdAPI } from '../../services/api.service';
-import { Bar } from 'react-chartjs-2';
 import { Select } from 'antd';
 
 // Register ChartJS components
@@ -301,7 +300,7 @@ const Statistic = () => {
           <Bar data={getLineChartData()} options={lineOptions} />
         </div>
         <div className="pie-chart-container">
-          <Pie data={getPieChartData()} options={pieOptions} />
+          <Bar data={getPieChartData()} options={pieOptions} />
         </div>
       </div>
     </div>

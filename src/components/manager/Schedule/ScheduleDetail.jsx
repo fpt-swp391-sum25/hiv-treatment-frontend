@@ -30,11 +30,11 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
     
     // Định nghĩa ca sáng và ca chiều
     const morningShiftSlots = timeSlots.filter(slot => 
-        ['08:00:00', '08:30:00', '09:00:00', '09:30:00', '10:00:00', '10:30:00', '11:00:00'].includes(slot.value)
+        ['08:00:00', '09:00:00', '10:00:00', '11:00:00'].includes(slot.value)
     );
     
     const afternoonShiftSlots = timeSlots.filter(slot => 
-        ['13:00:00', '13:30:00', '14:00:00', '14:30:00', '15:00:00', '15:30:00', '16:00:00', '16:30:00'].includes(slot.value)
+        ['13:00:00', '14:00:00', '15:00:00', '16:00:00'].includes(slot.value)
     );
 
     useEffect(() => {
@@ -82,10 +82,48 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
         console.log(`Field changed: ${name}, new value: ${value}`);
-        setFormData({
+        
+        // Xử lý đặc biệt cho trường roomCode
+        let updatedValue = type === 'checkbox' ? checked : value;
+        if (name === 'roomCode') {
+            // Chỉ cho phép nhập số
+            updatedValue = value.replace(/[^0-9]/g, '');
+            
+            // Giới hạn độ dài
+            if (updatedValue.length > 3) {
+                updatedValue = updatedValue.slice(0, 3);
+            }
+        }
+        
+        // Tạo bản sao của formData để cập nhật
+        const updatedFormData = {
             ...formData,
-            [name]: type === 'checkbox' ? checked : value
-        });
+            [name]: updatedValue
+        };
+        
+        // Nếu thay đổi ca làm việc, cập nhật slot giờ tương ứng
+        if (name === 'shiftType') {
+            if (value === 'morning') {
+                // Chọn slot đầu tiên của ca sáng
+                updatedFormData.slot = '08:00:00';
+            } else if (value === 'afternoon') {
+                // Chọn slot đầu tiên của ca chiều
+                updatedFormData.slot = '13:00:00';
+            }
+        }
+        
+        // Nếu thay đổi slot giờ, tự động cập nhật ca làm việc tương ứng
+        if (name === 'slot') {
+            if (morningShiftSlots.some(slot => slot.value === value)) {
+                updatedFormData.shiftType = 'morning';
+            } else if (afternoonShiftSlots.some(slot => slot.value === value)) {
+                updatedFormData.shiftType = 'afternoon';
+            } else {
+                updatedFormData.shiftType = '';
+            }
+        }
+        
+        setFormData(updatedFormData);
     };
 
     const handleSubmit = async (e) => {
@@ -98,6 +136,12 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
         
         if (!formData.slot && formData.status === "available") {
             onShowToast('Vui lòng chọn khung giờ làm việc', 'danger');
+            return;
+        }
+        
+        // Kiểm tra số phòng
+        if (!formData.roomCode || formData.roomCode.trim() === '') {
+            onShowToast('Vui lòng nhập số phòng', 'danger');
             return;
         }
 
@@ -227,7 +271,7 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
     // Lấy tên ca làm việc
     const getShiftName = (shiftType) => {
         if (!shiftType) return null;
-        return shiftType === 'morning' ? 'Ca sáng (08:00 - 11:30)' : 'Ca chiều (13:00 - 16:30)';
+        return shiftType === 'morning' ? 'Ca sáng (08:00 - 11:00)' : 'Ca chiều (13:00 - 16:00)';
     };
 
     const handleUpdateSchedule = async () => {
@@ -304,7 +348,6 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                                     <div>
                                         <div className="text-muted small">Ngày</div>
                                         <div className="schedule-date-value">
-                                            <i className="bi bi-calendar-event text-primary me-2"></i>
                                             <strong>{formatDate(formData.date)}</strong> 
                                             <span className="ms-2 text-muted small">
                                                 ({formatVietnameseDay(formData.date)})
@@ -322,48 +365,30 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                                 </Col>
                             </Row>
                             
-                            {/* Hiển thị thông tin ca làm việc nếu có */}
-                            {formData.shiftType && (
-                                <Row className="mt-3">
-                                    <Col md={12} className="d-flex align-items-center">
-                                        <BsBriefcase className="text-primary me-2" size={20} />
-                                        <div>
-                                            <div className="text-muted small">Ca làm việc</div>
+                            {/* Hiển thị thông tin ca làm việc */}
+                            <Row className="mt-3">
+                                <Col md={12} className="d-flex align-items-center">
+                                    <BsBriefcase className="text-primary me-2" size={20} />
+                                    <div>
+                                        <div className="text-muted small">Ca làm việc</div>
+                                        {formData.shiftType ? (
                                             <Badge 
                                                 bg={formData.shiftType === 'morning' ? 'info' : 'warning'}
                                                 className="p-2"
                                             >
                                                 {getShiftName(formData.shiftType)}
                                             </Badge>
-                                        </div>
-                                    </Col>
-                                </Row>
-                            )}
+                                        ) : (
+                                            <span className="text-muted">Không thuộc ca nào</span>
+                                        )}
+                                    </div>
+                                </Col>
+                            </Row>
                         </div>
                         
                         {/* Thông tin cập nhật */}
                         <div className="update-section mb-3 p-3 border rounded">
                             <h5 className="mb-3">Cập nhật thông tin</h5>
-
-                            {formData.status === "available" && (
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Khung giờ</Form.Label>
-                                    <Form.Select
-                                        name="slot"
-                                        value={formData.slot}
-                                        onChange={handleChange}
-                                    >
-                                        {timeSlots.map(slot => (
-                                            <option key={slot.value} value={slot.value}>
-                                                {slot.label}
-                                            </option>
-                                        ))}
-                                    </Form.Select>
-                                    <Form.Text className="text-muted">
-                                        Thiết lập thời gian làm việc cho bác sĩ
-                                    </Form.Text>
-                                </Form.Group>
-                            )}
                             
                             {/* Thông tin ca làm việc */}
                             <Form.Group className="mb-3">
@@ -374,11 +399,30 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                                     onChange={handleChange}
                                 >
                                     <option value="">Không thuộc ca nào</option>
-                                    <option value="morning">Ca sáng (08:00 - 11:30)</option>
-                                    <option value="afternoon">Ca chiều (13:00 - 16:30)</option>
+                                    <option value="morning">Ca sáng (08:00 - 11:00)</option>
+                                    <option value="afternoon">Ca chiều (13:00 - 16:00)</option>
                                 </Form.Select>
                                 <Form.Text className="text-muted">
                                     Đánh dấu lịch này thuộc ca làm việc nào
+                                </Form.Text>
+                            </Form.Group>
+                            
+                            {/* Khung giờ cụ thể */}
+                            <Form.Group className="mb-3">
+                                <Form.Label>Khung giờ cụ thể</Form.Label>
+                                <Form.Select
+                                    name="slot"
+                                    value={formData.slot}
+                                    onChange={handleChange}
+                                >
+                                    {timeSlots.map(slot => (
+                                        <option key={slot.value} value={slot.value}>
+                                            {slot.label}
+                                        </option>
+                                    ))}
+                                </Form.Select>
+                                <Form.Text className="text-muted">
+                                    Thiết lập thời gian làm việc cụ thể cho bác sĩ
                                 </Form.Text>
                             </Form.Group>
                             
@@ -387,20 +431,17 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                                 <Form.Label>Phòng làm việc</Form.Label>
                                 <div className="d-flex align-items-center">
                                     <BsDoorOpen className="text-success me-2" size={20} />
-                                    <Form.Select
+                                    <Form.Control
+                                        type="text"
                                         name="roomCode"
                                         value={formData.roomCode}
                                         onChange={handleChange}
-                                    >
-                                        <option value="101">Phòng 101</option>
-                                        <option value="102">Phòng 102</option>
-                                        <option value="103">Phòng 103</option>
-                                        <option value="201">Phòng 201</option>
-                                        <option value="202">Phòng 202</option>
-                                    </Form.Select>
+                                        placeholder="Nhập số phòng (VD: 101)"
+                                        required
+                                    />
                                 </div>
                                 <Form.Text className="text-muted">
-                                    Cập nhật phòng làm việc cho bác sĩ
+                                    Nhập số phòng làm việc cho bác sĩ (VD: 101, 102, 201...)
                                 </Form.Text>
                             </Form.Group>
                         </div>
