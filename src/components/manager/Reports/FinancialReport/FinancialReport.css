@@ -2,17 +2,29 @@
     display: flex;
     flex-direction: column;
     gap: 20px;
+    width: 100%;
+    padding: 20px;
 }
 
 .loading-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    width: 100%;
     min-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.loading-content {
+    padding: 30px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.8);
+    min-width: 300px;
 }
 
 .report-header {
     margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #f0f0f0;
 }
 
 .report-header .ant-typography {
@@ -56,27 +68,43 @@
 /* Print styles */
 @media print {
     .financial-report {
-        background: white;
-        padding: 20px;
+        padding: 0;
     }
-
+    
     .ant-card {
         border: none;
         box-shadow: none;
     }
-
+    
+    .ant-card-head {
+        border-bottom: 1px solid #000;
+    }
+    
+    .filters-container,
     .ant-btn,
-    .ant-select {
-        display: none;
+    .ant-select,
+    .ant-input-search {
+        display: none !important;
     }
-
-    .ant-table {
-        border: 1px solid #f0f0f0;
+    
+    .chart-card,
+    .table-card {
+        box-shadow: none;
+        margin-bottom: 16px;
+        page-break-inside: avoid;
     }
-
+    
+    .ant-card-head {
+        padding: 8px 16px;
+    }
+    
+    .ant-card-body {
+        padding: 12px 16px;
+    }
+    
     .ant-table-thead > tr > th {
-        background: #fafafa !important;
-        -webkit-print-color-adjust: exact;
+        background-color: #f0f0f0 !important;
+        color: #000000 !important;
     }
 }
 
@@ -95,4 +123,200 @@
     .ant-table {
         overflow-x: auto;
     }
+
+    .statistics-row .ant-card {
+        margin-bottom: 16px;
+    }
+
+    .chart-card,
+    .table-card {
+        margin-bottom: 16px;
+    }
+
+    .financial-report {
+        padding: 0 8px;
+    }
+
+    .statistics-row {
+        margin-bottom: 16px;
+    }
+
+    .statistics-row .ant-statistic-title {
+        font-size: 14px;
+    }
+
+    .statistics-row .ant-statistic-content {
+        font-size: 20px;
+    }
+}
+
+.statistics-row {
+    margin-bottom: 24px;
+}
+
+.statistics-row .ant-card {
+    height: 100%;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s;
+}
+
+.statistics-row .ant-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.statistics-row .ant-statistic-title {
+    font-size: 16px;
+    color: rgba(0, 0, 0, 0.85);
+    margin-bottom: 8px;
+}
+
+.statistics-row .ant-statistic-content {
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.chart-card {
+    margin-bottom: 24px;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.chart-card .ant-card-head {
+    border-bottom: 1px solid #f0f0f0;
+    padding: 0 16px;
+}
+
+.chart-card .ant-card-head-title {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.chart-card .ant-card-body {
+    padding: 24px;
+}
+
+.transactions-table {
+    margin-top: 24px;
+}
+
+.transactions-table .ant-table-thead > tr > th {
+    background: #fafafa;
+    color: #1a3353;
+    font-weight: 600;
+}
+
+.transactions-table .ant-table-tbody > tr > td {
+    color: #595959;
+}
+
+.table-card {
+    margin-bottom: 24px;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.table-card .ant-card-head {
+    border-bottom: 1px solid #f0f0f0;
+    padding: 16px 24px;
+}
+
+.table-card .ant-card-head-title {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.table-card .ant-table-thead > tr > th {
+    background: #fafafa;
+    font-weight: 600;
+}
+
+.table-card .ant-table-tbody > tr:hover > td {
+    background: #f5f5f5;
+}
+
+.filters-container {
+    margin-bottom: 24px;
+    padding: 16px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    border: 1px solid #f0f0f0;
+}
+
+/* Styles for comparison feature */
+.comparison-section {
+    margin-top: 16px;
+    padding: 16px;
+    background-color: #f6ffed;
+    border: 1px solid #b7eb8f;
+    border-radius: 8px;
+}
+
+.comparison-title {
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+/* Styles for trend analysis */
+.trend-analysis-card {
+    background-color: #fff;
+}
+
+.trend-analysis-card .ant-statistic-title {
+    font-size: 14px;
+}
+
+/* Custom tooltip styles */
+.recharts-tooltip-wrapper .recharts-default-tooltip {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    border: 1px solid #e8e8e8 !important;
+    border-radius: 4px !important;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1) !important;
+    padding: 10px !important;
+}
+
+.recharts-tooltip-label {
+    font-weight: 500 !important;
+    margin-bottom: 5px !important;
+}
+
+/* New styles for enhanced trend chart */
+.trend-card {
+    background: #f9f9f9;
+    border-radius: 8px;
+    text-align: center;
+    margin-bottom: 16px;
+}
+
+.trend-card .ant-statistic-title {
+    font-weight: 600;
+    font-size: 16px;
+    margin-bottom: 8px;
+}
+
+.trend-card .ant-statistic-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Style for small stat cards */
+.ant-card.ant-card-small {
+    border-radius: 8px;
+    transition: all 0.3s;
+}
+
+.ant-card.ant-card-small:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.ant-card.ant-card-small .ant-statistic-title {
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.65);
+}
+
+.ant-card.ant-card-small .ant-statistic-content {
+    font-size: 18px;
+    font-weight: 600;
 } 

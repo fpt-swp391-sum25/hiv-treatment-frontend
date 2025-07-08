@@ -28,11 +28,11 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
     
     // Định nghĩa ca sáng và ca chiều
     const morningShiftSlots = timeSlots.filter(slot => 
-        ['08:00:00', '08:30:00', '09:00:00', '09:30:00', '10:00:00', '10:30:00', '11:00:00'].includes(slot.value)
+        ['08:00:00', '09:00:00', '10:00:00', '11:00:00'].includes(slot.value)
     );
     
     const afternoonShiftSlots = timeSlots.filter(slot => 
-        ['13:00:00', '13:30:00', '14:00:00', '14:30:00', '15:00:00', '15:30:00', '16:00:00', '16:30:00'].includes(slot.value)
+        ['13:00:00', '14:00:00', '15:00:00', '16:00:00'].includes(slot.value)
     );
 
     useEffect(() => {
@@ -129,9 +129,22 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         const { name, value, type, checked } = e.target;
         
         // Cập nhật formData
+        let updatedValue = type === 'checkbox' ? checked : value;
+        
+        // Xử lý đặc biệt cho trường roomCode
+        if (name === 'roomCode') {
+            // Chỉ cho phép nhập số
+            updatedValue = value.replace(/[^0-9]/g, '');
+            
+            // Giới hạn độ dài
+            if (updatedValue.length > 3) {
+                updatedValue = updatedValue.slice(0, 3);
+            }
+        }
+        
         const updatedFormData = {
             ...formData,
-            [name]: type === 'checkbox' ? checked : value
+            [name]: updatedValue
         };
         
         setFormData(updatedFormData);
@@ -201,6 +214,14 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             console.error('Cannot schedule on Sunday', formData.date);
             console.groupEnd();
             onShowToast('Không thể đặt lịch vào Chủ nhật!', 'danger');
+            return;
+        }
+
+        // Kiểm tra số phòng
+        if (!formData.roomCode || formData.roomCode.trim() === '') {
+            console.error('Missing room code');
+            console.groupEnd();
+            onShowToast('Vui lòng nhập số phòng', 'danger');
             return;
         }
 
@@ -405,18 +426,17 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                                             <BsDoorOpen className="me-2 text-primary" />
                                             Phòng khám
                                         </Form.Label>
-                                <Form.Select
+                                <Form.Control
+                                    type="text"
                                     name="roomCode"
                                     value={formData.roomCode}
                                     onChange={handleChange}
+                                    placeholder="Nhập số phòng (VD: 101)"
                                     required
-                                >
-                                    <option value="101">Phòng 101</option>
-                                    <option value="102">Phòng 102</option>
-                                    <option value="103">Phòng 103</option>
-                                    <option value="201">Phòng 201</option>
-                                    <option value="202">Phòng 202</option>
-                                </Form.Select>
+                                />
+                                <Form.Text className="text-muted">
+                                    Nhập số phòng khám (VD: 101, 102, 201...)
+                                </Form.Text>
                             </Form.Group>
                         </Col>
                             </Row>
@@ -516,8 +536,8 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                                                 checked={formData.shiftType === 'morning'}
                                                 onChange={handleChange}
                                             />
-                                            <div className="shift-time">08:00 - 11:30</div>
-                                            <div className="shift-slots-info">7 khung giờ</div>
+                                            <div className="shift-time">08:00 - 11:00</div>
+                                            <div className="shift-slots-info">4 khung giờ</div>
                                         </div>
                                         <div className={`shift-option ${formData.shiftType === 'afternoon' ? 'active' : ''}`}>
                                             <Form.Check
@@ -529,8 +549,8 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                                                 checked={formData.shiftType === 'afternoon'}
                                                 onChange={handleChange}
                                             />
-                                            <div className="shift-time">13:00 - 16:30</div>
-                                            <div className="shift-slots-info">8 khung giờ</div>
+                                            <div className="shift-time">13:00 - 16:00</div>
+                                            <div className="shift-slots-info">4 khung giờ</div>
                                         </div>
                                     </div>
                                 </div>
