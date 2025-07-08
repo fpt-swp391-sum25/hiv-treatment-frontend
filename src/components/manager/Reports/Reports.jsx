@@ -169,42 +169,6 @@ const Reports = () => {
     return (
         <Spin spinning={loading}>
             <div className="reports-container">
-                <Card className="reports-header">
-                    <Space direction="horizontal" size="middle" className="header-content">
-                        <div className="header-left">
-                            <h2>Báo cáo thống kê</h2>
-                            <RangePicker
-                                value={dateRange}
-                                onChange={handleDateRangeChange}
-                                format="DD/MM/YYYY"
-                                allowClear={false}
-                                disabledDate={(current) => {
-                                    return current && current > dayjs().endOf('day');
-                                }}
-                            />
-                        </div>
-                        <div className="header-right">
-                            <Space>
-                                <Button
-                                    type="primary"
-                                    icon={<FileExcelOutlined />}
-                                    onClick={() => handleExport('excel')}
-                                    loading={loading}
-                                >
-                                    Xuất Excel
-                                </Button>
-                                <Button
-                                    icon={<PrinterOutlined />}
-                                    onClick={() => handleExport('pdf')}
-                                    loading={loading}
-                                >
-                                    Xuất PDF
-                                </Button>
-                            </Space>
-                        </div>
-                    </Space>
-                </Card>
-                
                 {error && (
                     <Alert
                         message="Lỗi"

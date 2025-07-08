@@ -10,6 +10,13 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
     const [doctors, setDoctors] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [showConfirmation, setShowConfirmation] = useState(false);
+
+    // States for searchable doctor dropdown
+    const [doctorSearchTerm, setDoctorSearchTerm] = useState('');
+    const [showDoctorDropdown, setShowDoctorDropdown] = useState(false);
+    const [filteredDoctors, setFilteredDoctors] = useState([]);
+    const [selectedDoctorIndex, setSelectedDoctorIndex] = useState(-1);
     const [formData, setFormData] = useState({
         doctorId: '',
         doctorName: '',
@@ -41,6 +48,11 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             resetForm();
         }
     }, [show, selectedDate, selectedDoctor]);
+
+    // Update filtered doctors when doctors list changes
+    useEffect(() => {
+        setFilteredDoctors(doctors);
+    }, [doctors]);
 
     const fetchDoctors = async () => {
         setLoading(true);
@@ -84,7 +96,8 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                 
                 console.log('ScheduleForm: Formatted doctors:', formattedDoctors);
                 setDoctors(formattedDoctors);
-                
+                setFilteredDoctors(formattedDoctors); // Initialize filtered doctors
+
                 // Nếu có selectedDoctor, tự động chọn bác sĩ đó
                 if (selectedDoctor) {
                     const doctor = formattedDoctors.find(d => d.id.toString() === selectedDoctor.toString());
@@ -94,6 +107,7 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                             doctorId: doctor.id,
                             doctorName: doctor.name
                         }));
+                        setDoctorSearchTerm(doctor.name); // Set search term to selected doctor name
                     }
                 }
             } else {
@@ -123,6 +137,107 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             scheduleType: 'single',
             shiftType: 'morning',
         });
+
+        // Reset search states
+        setDoctorSearchTerm('');
+        setShowDoctorDropdown(false);
+        setFilteredDoctors(doctors);
+    };
+
+    // Filter doctors based on search term
+    const filterDoctors = (searchTerm) => {
+        if (!searchTerm.trim()) {
+            setFilteredDoctors(doctors);
+        } else {
+            const filtered = doctors.filter(doctor =>
+                doctor.name.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            setFilteredDoctors(filtered);
+        }
+    };
+
+    // Handle doctor search input change
+    const handleDoctorSearchChange = (e) => {
+        const searchTerm = e.target.value;
+        setDoctorSearchTerm(searchTerm);
+        filterDoctors(searchTerm);
+        setShowDoctorDropdown(true);
+        setSelectedDoctorIndex(-1); // Reset keyboard selection
+
+        // Clear selection if search term doesn't match any doctor exactly or is empty
+        const exactMatch = doctors.find(doctor =>
+            doctor.name.toLowerCase() === searchTerm.toLowerCase()
+        );
+        if (!exactMatch || !searchTerm.trim()) {
+            setFormData(prev => ({
+                ...prev,
+                doctorId: '',
+                doctorName: ''
+            }));
+        }
+    };
+
+    // Handle doctor selection from dropdown
+    const handleDoctorSelect = (doctor) => {
+        setFormData(prev => ({
+            ...prev,
+            doctorId: doctor.id,
+            doctorName: doctor.name
+        }));
+        setDoctorSearchTerm(doctor.name);
+        setShowDoctorDropdown(false);
+    };
+
+    // Handle input focus
+    const handleDoctorInputFocus = () => {
+        setShowDoctorDropdown(true);
+        // If no search term, show all doctors
+        if (!doctorSearchTerm.trim()) {
+            setFilteredDoctors(doctors);
+        } else {
+            filterDoctors(doctorSearchTerm);
+        }
+    };
+
+    // Handle input blur (with delay to allow for clicks)
+    const handleDoctorInputBlur = () => {
+        setTimeout(() => {
+            setShowDoctorDropdown(false);
+            setSelectedDoctorIndex(-1);
+        }, 200);
+    };
+
+    // Handle keyboard navigation
+    const handleDoctorKeyDown = (e) => {
+        if (!showDoctorDropdown) return;
+
+        switch (e.key) {
+            case 'ArrowDown':
+                e.preventDefault();
+                setSelectedDoctorIndex(prev =>
+                    prev < filteredDoctors.length - 1 ? prev + 1 : 0
+                );
+                break;
+            case 'ArrowUp':
+                e.preventDefault();
+                setSelectedDoctorIndex(prev =>
+                    prev > 0 ? prev - 1 : filteredDoctors.length - 1
+                );
+                break;
+            case 'Enter':
+                e.preventDefault();
+                if (selectedDoctorIndex >= 0 && filteredDoctors[selectedDoctorIndex]) {
+                    handleDoctorSelect(filteredDoctors[selectedDoctorIndex]);
+                }
+                break;
+            case 'Escape':
+                setShowDoctorDropdown(false);
+                setSelectedDoctorIndex(-1);
+                break;
+            default:
+                setSelectedDoctorIndex(-1);
+                break;
+        }
     };
 
     const handleChange = (e) => {
@@ -173,32 +288,31 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         return weekdays[dayOfWeek];
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        
-        console.group('Schedule Form Submission');
+    // Validation function
+    const validateForm = () => {
+        console.group('Schedule Form Validation');
         console.log('Form data:', formData);
-        
+
         if (!formData.doctorId) {
             console.error('Missing doctorId');
             console.groupEnd();
-            onShowToast('Vui lòng chọn bác sĩ', 'danger');
-            return;
+            onShowToast('Vui lòng chọn bác sĩ từ danh sách', 'danger');
+            return false;
         }
-        
+
         if (formData.scheduleType === 'single' && !formData.slot) {
             console.error('Missing slot for single schedule');
             console.groupEnd();
             onShowToast('Vui lòng chọn khung giờ làm việc', 'danger');
-            return;
+            return false;
         }
-        
+
         // Kiểm tra ngày
         if (!formData.date) {
             console.error('Missing date');
             console.groupEnd();
             onShowToast('Vui lòng chọn ngày', 'danger');
-            return;
+            return false;
         }
 
         // Kiểm tra ngày có phải là quá khứ không
@@ -206,7 +320,7 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             console.error('Date is in the past', formData.date);
             console.groupEnd();
             onShowToast('Không thể đặt lịch cho ngày đã qua!', 'danger');
-            return;
+            return false;
         }
 
         // Kiểm tra ngày có phải Chủ nhật không
@@ -214,7 +328,7 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             console.error('Cannot schedule on Sunday', formData.date);
             console.groupEnd();
             onShowToast('Không thể đặt lịch vào Chủ nhật!', 'danger');
-            return;
+            return false;
         }
 
         // Kiểm tra số phòng
@@ -222,11 +336,18 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             console.error('Missing room code');
             console.groupEnd();
             onShowToast('Vui lòng nhập số phòng', 'danger');
-            return;
+            return false;
         }
 
         console.log('Form validation successful');
         console.groupEnd();
+        return true;
+    };
+
+    // Function to actually create the schedule
+    const createSchedule = () => {
+        console.group('Schedule Creation');
+        console.log('Creating schedule with form data:', formData);
 
         // Xử lý đặt lịch theo ca hoặc theo khung giờ đơn
         if (formData.scheduleType === 'shift') {
@@ -343,14 +464,44 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         console.log('Creating single schedule:', newSchedule);
         setTimeout(() => {
             onScheduleCreated(newSchedule);
+            onShowToast('Tạo lịch thành công!', 'success');
         }, 0);
-    }
-        
+        }
+
+        console.groupEnd();
         onHide();
     };
 
+    // Handle form submission - now shows confirmation dialog
+    const handleSubmit = (e) => {
+        e.preventDefault();
+
+        // Validate form first
+        if (validateForm()) {
+            // Show confirmation dialog
+            setShowConfirmation(true);
+        }
+    };
+
+    // Handle confirmation
+    const handleConfirmCreate = () => {
+        setShowConfirmation(false);
+        createSchedule();
+    };
+
+    const handleCancelCreate = () => {
+        setShowConfirmation(false);
+    };
+
     return (
-        <Modal show={show} onHide={onHide} centered size="lg" className="schedule-form-modal">
+        <>
+        <Modal
+            show={show}
+            onHide={onHide}
+            centered
+            size="lg"
+            className={`schedule-form-modal ${showConfirmation ? 'blurred' : ''}`}
+        >
             <Modal.Header closeButton>
                 <Modal.Title className="d-flex align-items-center">
                     <BsCalendarCheck className="me-2 text-primary" size={22} />
@@ -378,20 +529,59 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                                         <span>Đang tải danh sách bác sĩ...</span>
                                     </div>
                                 ) : (
-                                    <Form.Select
-                                        name="doctorId"
-                                        value={formData.doctorId}
-                                        onChange={handleChange}
-                                        disabled={loading || doctors.length === 0}
-                                        required
-                                    >
-                                        <option value="">Chọn bác sĩ</option>
-                                        {doctors.map(doctor => (
-                                            <option key={doctor.id} value={doctor.id}>
-                                                {doctor.name}
-                                            </option>
-                                        ))}
-                                    </Form.Select>
+                                    <div className="searchable-dropdown-container">
+                                        <Form.Control
+                                            type="text"
+                                            placeholder="Tìm kiếm hoặc chọn bác sĩ..."
+                                            value={doctorSearchTerm}
+                                            onChange={handleDoctorSearchChange}
+                                            onFocus={handleDoctorInputFocus}
+                                            onBlur={handleDoctorInputBlur}
+                                            onKeyDown={handleDoctorKeyDown}
+                                            disabled={loading || doctors.length === 0}
+                                            className="doctor-search-input"
+                                            autoComplete="off"
+                                            role="combobox"
+                                            aria-expanded={showDoctorDropdown}
+                                            aria-haspopup="listbox"
+                                            aria-autocomplete="list"
+                                            aria-label="Tìm kiếm và chọn bác sĩ"
+                                        />
+                                        {showDoctorDropdown && filteredDoctors.length > 0 && (
+                                            <div
+                                                className="dropdown-menu show doctor-dropdown-menu"
+                                                role="listbox"
+                                                aria-label="Danh sách bác sĩ"
+                                            >
+                                                {filteredDoctors.map((doctor, index) => (
+                                                    <button
+                                                        key={doctor.id}
+                                                        type="button"
+                                                        className={`dropdown-item ${
+                                                            formData.doctorId === doctor.id ? 'active' : ''
+                                                        } ${
+                                                            selectedDoctorIndex === index ? 'highlighted' : ''
+                                                        }`}
+                                                        onClick={() => handleDoctorSelect(doctor)}
+                                                        role="option"
+                                                        aria-selected={formData.doctorId === doctor.id}
+                                                        tabIndex={-1}
+                                                    >
+                                                        <div className="doctor-option">
+                                                            <div className="doctor-name">{doctor.name}</div>
+                                                        </div>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+                                        {showDoctorDropdown && filteredDoctors.length === 0 && doctorSearchTerm && (
+                                            <div className="dropdown-menu show doctor-dropdown-menu">
+                                                <div className="dropdown-item-text text-muted">
+                                                    Không tìm thấy bác sĩ nào
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
                                 )}
                             </Form.Group>
                         </Col>
@@ -431,12 +621,8 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                                     name="roomCode"
                                     value={formData.roomCode}
                                     onChange={handleChange}
-                                    placeholder="Nhập số phòng (VD: 101)"
                                     required
                                 />
-                                <Form.Text className="text-muted">
-                                    Nhập số phòng khám (VD: 101, 102, 201...)
-                                </Form.Text>
                             </Form.Group>
                         </Col>
                             </Row>
@@ -627,6 +813,85 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                 </div>
             </Modal.Footer>
         </Modal>
+
+        {/* Confirmation Modal */}
+        <Modal
+            show={showConfirmation}
+            onHide={handleCancelCreate}
+            centered
+            size="md"
+            className="confirmation-modal"
+            backdrop="static"
+            keyboard={false}
+            enforceFocus={true}
+        >
+            <Modal.Header closeButton className="confirmation-header">
+                <Modal.Title className="d-flex align-items-center">
+                    <BsCalendarCheck className="me-2 text-warning" size={24} />
+                    Xác nhận tạo lịch
+                </Modal.Title>
+            </Modal.Header>
+            <Modal.Body className="confirmation-body">
+                <div className="confirmation-content">
+                    <p className="confirmation-question mb-4">
+                        Bạn có chắc chắn muốn tạo lịch này không?
+                    </p>
+                    <div className="schedule-summary-grid">
+                        <div className="summary-row">
+                            <div className="summary-item">
+                                <span className="summary-label">Bác sĩ:</span>
+                                <span className="summary-value">{formData.doctorName || 'Chưa chọn'}</span>
+                            </div>
+                            <div className="summary-item">
+                                <span className="summary-label">Ngày:</span>
+                                <span className="summary-value">
+                                    {moment(formData.date).format('DD/MM/YYYY')} ({formatVietnameseDay(formData.date)})
+                                </span>
+                            </div>
+                        </div>
+                        <div className="summary-row">
+                            <div className="summary-item">
+                                <span className="summary-label">Phòng:</span>
+                                <span className="summary-value">{formData.roomCode}</span>
+                            </div>
+                            <div className="summary-item">
+                                <span className="summary-label">
+                                    {formData.scheduleType === 'single' ? 'Khung giờ:' : 'Ca làm việc:'}
+                                </span>
+                                <span className="summary-value">
+                                    {formData.scheduleType === 'single'
+                                        ? timeSlots.find(slot => slot.value === formData.slot)?.label
+                                        : formData.shiftType === 'morning' ? 'Ca sáng (08:00-11:00)' : 'Ca chiều (13:00-16:00)'
+                                    }
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </Modal.Body>
+            <Modal.Footer className="confirmation-footer">
+                <div className="confirmation-buttons">
+                    <Button
+                        variant="outline-secondary"
+                        onClick={handleCancelCreate}
+                        className="btn-action btn-cancel"
+                        aria-label="Hủy tạo lịch"
+                    >
+                        Không
+                    </Button>
+                    <Button
+                        variant="outline-primary"
+                        onClick={handleConfirmCreate}
+                        className="btn-action btn-confirm"
+                        aria-label="Xác nhận tạo lịch"
+                        autoFocus
+                    >
+                        Có
+                    </Button>
+                </div>
+            </Modal.Footer>
+        </Modal>
+        </>
     );
 };
 
