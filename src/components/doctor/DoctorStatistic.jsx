@@ -7,6 +7,7 @@ import quarterOfYear from 'dayjs/plugin/quarterOfYear';
 import '../../styles/doctor/Statistics.css';
 import { AuthContext } from '../context/AuthContext';
 import { fetchScheduleByDoctorIdAPI } from '../../services/api.service';
+import { Select } from 'antd';
 
 // Register ChartJS components
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Title, Tooltip, Legend, BarElement);
@@ -36,6 +37,8 @@ const getStartEndOfPeriod = (filter) => {
 
 const Statistic = () => {
   const [activeFilter, setActiveFilter] = useState('month');
+  const [selectedMonth, setSelectedMonth] = useState(dayjs().month() + 1); // 1-12
+  const [selectedQuarter, setSelectedQuarter] = useState(dayjs().quarter()); // 1-4
   const [loading, setLoading] = useState(true);
   const [schedules, setSchedules] = useState([]);
   const [stats, setStats] = useState({
@@ -79,7 +82,19 @@ const Statistic = () => {
       });
       return;
     }
-    const { start, end } = getStartEndOfPeriod(activeFilter);
+    let start, end;
+    if (activeFilter === 'month') {
+      const year = dayjs().year();
+      start = dayjs(`${year}-${selectedMonth}-01`).startOf('month');
+      end = dayjs(`${year}-${selectedMonth}-01`).endOf('month');
+    } else if (activeFilter === 'quarter') {
+      const year = dayjs().year();
+      start = dayjs().year(year).quarter(selectedQuarter).startOf('quarter');
+      end = dayjs().year(year).quarter(selectedQuarter).endOf('quarter');
+    } else if (activeFilter === 'year') {
+      start = dayjs().startOf('year');
+      end = dayjs().endOf('year');
+    }
     // Lọc lịch trong kỳ
     const filtered = schedules.filter(sch => {
       const d = dayjs(sch.date || sch.createdAt);
@@ -157,7 +172,7 @@ const Statistic = () => {
       typeLabels,
       typeData,
     });
-  }, [schedules, activeFilter]);
+  }, [schedules, activeFilter, selectedMonth, selectedQuarter]);
 
   const getLineChartData = () => {
     return {
@@ -215,7 +230,50 @@ const Statistic = () => {
   if (loading) return <div style={{textAlign:'center',marginTop:40}}><Spinner animation="border" /></div>;
 
   return (
-    <div className="statistics-container">
+    <div className="statistic-section">
+      {/* Filter Buttons - Đặt lên trên cùng */}
+      <div className="statistic-filter-group" style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
+        <Button
+          variant={activeFilter === 'month' ? 'primary' : 'outline-primary'}
+          onClick={() => setActiveFilter('month')}
+        >
+          Tháng
+        </Button>
+        <Button
+          variant={activeFilter === 'quarter' ? 'primary' : 'outline-primary'}
+          onClick={() => setActiveFilter('quarter')}
+        >
+          Quý
+        </Button>
+        <Button
+          variant={activeFilter === 'year' ? 'primary' : 'outline-primary'}
+          onClick={() => setActiveFilter('year')}
+        >
+          Năm
+        </Button>
+        {activeFilter === 'month' && (
+          <Select
+            style={{ width: 100 }}
+            value={selectedMonth}
+            onChange={setSelectedMonth}
+          >
+            {[...Array(12)].map((_, i) => (
+              <Select.Option key={i + 1} value={i + 1}>{`Tháng ${i + 1}`}</Select.Option>
+            ))}
+          </Select>
+        )}
+        {activeFilter === 'quarter' && (
+          <Select
+            style={{ width: 100 }}
+            value={selectedQuarter}
+            onChange={setSelectedQuarter}
+          >
+            {[1, 2, 3, 4].map(q => (
+              <Select.Option key={q} value={q}>{`Quý ${q}`}</Select.Option>
+            ))}
+          </Select>
+        )}
+      </div>
       {/* Stats Cards */}
       <div className="stats-cards">
         <div className="stat-card">
@@ -244,31 +302,6 @@ const Statistic = () => {
         <div className="pie-chart-container">
           <Bar data={getPieChartData()} options={pieOptions} />
         </div>
-      </div>
-
-      {/* Filter Buttons */}
-      <div className="filter-container">
-        <Button
-          variant={activeFilter === 'month' ? 'primary' : 'outline-primary'}
-          onClick={() => setActiveFilter('month')}
-          className="filter-btn"
-        >
-          Tháng
-        </Button>
-        <Button
-          variant={activeFilter === 'quarter' ? 'primary' : 'outline-primary'}
-          onClick={() => setActiveFilter('quarter')}
-          className="filter-btn"
-        >
-          Quý
-        </Button>
-        <Button
-          variant={activeFilter === 'year' ? 'primary' : 'outline-primary'}
-          onClick={() => setActiveFilter('year')}
-          className="filter-btn"
-        >
-          Năm
-        </Button>
       </div>
     </div>
   );
