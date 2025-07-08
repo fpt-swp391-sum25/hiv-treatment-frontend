@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Spin, message, Modal } from 'antd';
 import { fetchAllDocumentsAPI } from '../../services/api.service';
+import { getDocumentImagesByDocumentId } from '../../services/document.service';
+import { FileImageOutlined } from '@ant-design/icons';
 import '../../styles/home-section/DocumentList.css';
 
 const Document = () => {
@@ -11,6 +13,7 @@ const Document = () => {
   const [loading, setLoading] = useState(true);
   const [selectedDoc, setSelectedDoc] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [documentImages, setDocumentImages] = useState({}); // { [documentId]: [array of images] }
 
   useEffect(() => {
     const fetchDocuments = async () => {
@@ -19,6 +22,19 @@ const Document = () => {
         const response = await fetchAllDocumentsAPI();
         if (response && response.data) {
           setDocuments(response.data);
+          // Lấy ảnh cho từng document
+          const imagesMap = {};
+          await Promise.all(
+            response.data.map(async (doc) => {
+              try {
+                const imgRes = await getDocumentImagesByDocumentId(doc.id);
+                imagesMap[doc.id] = imgRes.data;
+              } catch {
+                imagesMap[doc.id] = [];
+              }
+            })
+          );
+          setDocumentImages(imagesMap);
         }
       } catch (error) {
         console.error('Lỗi khi tải danh sách tài liệu:', error);
@@ -69,28 +85,38 @@ const Document = () => {
       ) : documents.length > 0 ? (
         <>
           <div className="document-grid">
-            {visibleDocuments.map((doc) => (
-              <div className="document-card" key={doc.id}>
-                <h3 className="doc-title">
-                  {doc.title.length > 60 ? doc.title.slice(0, 60) + '...' : doc.title}
-                </h3>
-                <p className="document-author">
-                  👨‍⚕️ {doc.author || 'Chưa có tác giả'}
-                </p>
-                <p className="document-snippet">
-                  {doc.content?.length > 70 ? doc.content.slice(0, 70) + '...' : doc.content}
-                </p>
-                <p className="document-date">
-                  📅 {new Date(doc.createdAt || doc.created_at).toLocaleDateString('vi-VN')}
-                </p>
-                <button
-                  className="btn-read"
-                  onClick={() => showModal(doc)}
-                >
-                  📖 Đọc bài viết
-                </button>
-              </div>
-            ))}
+            {visibleDocuments.map((doc) => {
+              const imgs = documentImages[doc.id] || [];
+              return (
+                <div className="document-card" key={doc.id}>
+                  <div style={{ textAlign: 'center', marginBottom: 8 }}>
+                    {imgs.length > 0 ? (
+                      <img src={imgs[0].url} alt="doc" style={{ maxWidth: 80, maxHeight: 80, borderRadius: 6, objectFit: 'cover' }} />
+                    ) : (
+                      <FileImageOutlined style={{ fontSize: 48, color: '#ccc' }} />
+                    )}
+                  </div>
+                  <h3 className="doc-title">
+                    {doc.title.length > 60 ? doc.title.slice(0, 60) + '...' : doc.title}
+                  </h3>
+                  <p className="document-author">
+                    👨‍⚕️ {doc.doctor?.fullName || 'Chưa có tác giả'}
+                  </p>
+                  <p className="document-snippet">
+                    {doc.content?.length > 70 ? doc.content.slice(0, 70) + '...' : doc.content}
+                  </p>
+                  <p className="document-date">
+                    📅 {new Date(doc.createdAt || doc.created_at).toLocaleDateString('vi-VN')}
+                  </p>
+                  <button
+                    className="btn-read"
+                    onClick={() => showModal(doc)}
+                  >
+                    📖 Đọc bài viết
+                  </button>
+                </div>
+              );
+            })}
           </div>
 
           {documents.length > 4 && !showAll && (
@@ -120,8 +146,21 @@ const Document = () => {
       >
         {selectedDoc && (
           <div className="modal-content">
+            {/* Hiển thị hình ảnh của document nếu có */}
+            <div style={{ marginBottom: 16, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+              {(documentImages[selectedDoc.id] && documentImages[selectedDoc.id].length > 0) ? (
+                documentImages[selectedDoc.id].map(img => (
+                  <img
+                    key={img.id || img.url}
+                    src={img.url}
+                    alt="doc-img"
+                    style={{ maxHeight: 120, borderRadius: 6, objectFit: 'cover', boxShadow: '0 2px 8px #0001' }}
+                  />
+                ))
+              ) : null}
+            </div>
             <p className="document-author">
-              👨‍⚕️ {selectedDoc.author || 'Chưa có tác giả'}
+              👨‍⚕️ {selectedDoc.doctor?.fullName || 'Chưa có tác giả'}
             </p>
             <p className="document-date">
               📅 {new Date(selectedDoc.createdAt || selectedDoc.created_at).toLocaleDateString('vi-VN')}
