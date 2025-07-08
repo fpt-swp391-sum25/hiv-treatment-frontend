@@ -1,10 +1,11 @@
-import { useContext, useEffect, useState } from "react"
+import React, { useContext, useEffect, useState } from "react"
 
 import { cancelBookingAPI, fetchAllPatientScheduleAPI, fetchHealthRecordByScheduleIdAPI, fetchUserInfoAPI, updateProfileAPI } from "../../services/api.service"
-import { Layout, message, Spin, Table, Button, Popconfirm, Segmented, Card, Descriptions, Form, Input, Row, Col, Select, DatePicker, notification, Typography, Modal } from "antd"
+import { Layout, message, Spin, Table, Button, Popconfirm, Segmented, Card, Descriptions, Form, Input, Row, Col, Select, DatePicker, notification, Typography, Modal, Avatar } from "antd"
 import dayjs from "dayjs";
 import { AuthContext } from "../../components/context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { UserOutlined } from "@ant-design/icons";
 
 
 
@@ -14,7 +15,11 @@ const { Text } = Typography
 const ProfileDetail = () => {
 
     const { user, setUser } = useContext(AuthContext)
+    const [avatarUrl, setAvatarUrl] = useState(user.avatar);
+    const fileInputRef = React.useRef('');
     const [loading, setLoading] = useState(false);
+
+
 
     const handlePatientInputChange = (field, value) => {
         try {
@@ -32,6 +37,7 @@ const ProfileDetail = () => {
     };
 
     const handleUpdateProfile = async () => {
+        // user = { ...user, avatarUrl }
         const response = await updateProfileAPI(user)
         if (response.data) {
             notification.success({
@@ -43,6 +49,21 @@ const ProfileDetail = () => {
         }
     }
 
+    const handleAvatarChange = (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const base64String = e.target.result;
+
+            setAvatarUrl(base64String);
+            setUser((prev) => ({
+                ...prev, avatar: base64String
+            }))
+        };
+        reader.readAsDataURL(file);
+    };
 
 
     return (
@@ -70,6 +91,43 @@ const ProfileDetail = () => {
                             {user && Object.keys(user).length > 0 ? (
                                 <div style={{ padding: '20px' }}>
                                     <Row gutter={16}>
+                                        <Col xs={24} sm={6} style={{ textAlign: 'center' }}>
+                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                                <Avatar
+                                                    src={user.avatar !== '' ? user.avatar : null}
+                                                    icon={user.avatar === '' ? <UserOutlined /> : null}
+                                                    size={120}
+                                                    style={{ border: '2px solid #1890ff', cursor: 'pointer' }}
+                                                    onClick={() => fileInputRef.current.click()}
+                                                />
+                                                <input
+                                                    ref={fileInputRef}
+                                                    type="file"
+                                                    accept="image/*"
+                                                    style={{ display: 'none' }}
+                                                    onChange={handleAvatarChange}
+                                                />
+                                                {avatarUrl && (
+                                                    <Button
+                                                        danger
+                                                        type="link"
+                                                        style={{ marginTop: 8 }}
+                                                        onClick={() => {
+                                                            setAvatarUrl('');
+                                                            setUser((prev) => ({
+                                                                ...prev, avatar: '',
+                                                            }))
+                                                        }}
+                                                    >
+                                                        Xóa ảnh
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        </Col>
+                                    </Row>
+                                    <Row gutter={16}>
+
+
                                         <Col span={12}>
                                             <div style={{ marginBottom: '16px' }}>
                                                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>Họ và tên</label>
@@ -156,7 +214,7 @@ const ProfileDetail = () => {
                                                 <Popconfirm
                                                     title="Cập nhật"
                                                     description="Bạn có chắc muốn cập nhật thông tin?"
-                                                    onConfirm={() => { handleUpdateProfile() }}
+                                                    onConfirm={handleUpdateProfile}
                                                     okText="Có"
                                                     cancelText="Không"
                                                     placement="left"

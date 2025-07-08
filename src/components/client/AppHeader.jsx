@@ -161,7 +161,10 @@ const AppHeader = () => {
                 <Space style={{ cursor: 'pointer' }} align="center">
                   <Tooltip title={user.fullName}>
                     <Text style={{ marginLeft: 4, marginRight: 4, color: "white" }}>{user.fullName} </Text>
-                    <Avatar icon={<UserOutlined />} />
+                    <Avatar
+                      src={user.avatar !== '' ? user.avatar : null}
+                      icon={user.avatar === '' ? <UserOutlined /> : null}
+                    />
                     <span style={{ color: 'white' }}> <SettingOutlined /></span>
                   </Tooltip>
                 </Space>

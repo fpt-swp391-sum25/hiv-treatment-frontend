@@ -24,6 +24,7 @@ const AdminDashboard = () => {
         managers: 0,
         patients: 0,
         newPatientsThisMonth: 0,
+        totalUser: 0,
         schedulesByStatus: {},
     });
     const [loading, setLoading] = useState(true);
@@ -60,6 +61,10 @@ const AdminDashboard = () => {
                     patients: patients.data?.length || 0,
                     newPatientsThisMonth,
                     schedulesByStatus,
+                    totalUser: doctors.data?.length
+                    + labTechs.data?.length + managers.data?.length
+                    + patients.data?.length || 0
+
                 });
             } catch (error) {
                 // Có thể thêm thông báo lỗi ở đây
@@ -78,7 +83,11 @@ const AdminDashboard = () => {
         <div style={{ padding: 32 }}>
             <Row gutter={[24, 24]}>
                 <Col xs={24} md={12}>
-                    <Card title="Phân loại nhân viên" className="admin-dashboard-card">
+                    <Card title="Tổng số người dùng hệ thống" className="admin-dashboard-card">
+                        <div className="dashboard-number">{counts.totalUser}</div>
+                    </Card>
+                    
+                    <Card title="Phân loại nhân viên" className="pie-chart-dashboard-card">
                         <Pie
                             data={{
                                 labels: ['Bác sĩ', 'Kỹ thuật viên', 'Quản lý'],
@@ -125,11 +134,6 @@ const AdminDashboard = () => {
                         <Col span={24}>
                             <Card title="Số bệnh nhân" className="admin-dashboard-card">
                                 <div className="dashboard-number">{counts.patients}</div>
-                            </Card>
-                        </Col>
-                        <Col span={24}>
-                            <Card title="Bệnh nhân mới trong tháng" className="admin-dashboard-card">
-                                <div className="dashboard-number">{counts.newPatientsThisMonth}</div>
                             </Card>
                         </Col>
                     </Row>

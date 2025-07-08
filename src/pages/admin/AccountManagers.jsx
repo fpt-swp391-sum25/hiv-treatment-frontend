@@ -103,7 +103,7 @@ const AccountManagers = () => {
             },
         },
         {
-            title: 'Action',
+            title: '',
             key: 'action',
             render: (_, record) => (
                 <Space size="large">

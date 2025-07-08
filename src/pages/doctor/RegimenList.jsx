@@ -40,7 +40,7 @@ const RegimenList = () => {
 
   const handleCreateRegimen = async (components, regimenName, description, indications, contraindications) => {
     const response = await createRegimenAPI(components, regimenName,
-      description, indications, contraindications)
+      description, indications, contraindications, user.id)
 
     if (response.data) {
       notification.success({
@@ -62,25 +62,34 @@ const RegimenList = () => {
   }
 
   const handleDeleteRegimen = async (id) => {
-    const response = await deleteRegimenAPI(id)
-    if (response.data) {
-      notification.success({
-        message: 'Hệ thống',
-        showProgress: true,
-        pauseOnHover: true,
-        description: 'Xóa phác đồ thành công'
-      })
-    }
-    else {
+    try {
+      const response = await deleteRegimenAPI(id);
+
+      if (response.status === 200) {
+        notification.success({
+          message: 'Hệ thống',
+          description: 'Xóa phác đồ thành công',
+        });
+        await loadRegimens();
+      } else if (response.status === 409) {
+        notification.warning({
+          message: 'Không thể xóa phác đồ',
+          description: response.message || 'Phác đồ đang được sử dụng',
+        });
+      } else {
+        notification.error({
+          message: 'Lỗi khi xóa phác đồ',
+          description: response.message || 'Đã xảy ra lỗi không xác định',
+        });
+      }
+    } catch (error) {
       notification.error({
-        message: 'Hệ thống',
-        showProgress: true,
-        pauseOnHover: true,
-        description: 'Lỗi khi xóa phác đồ'
-      })
+        message: 'Lỗi khi xóa phác đồ',
+        description: error?.response?.data?.message || 'Lỗi kết nối tới máy chủ',
+      });
     }
-    await loadRegimens()
   };
+
 
   const resetAndClose = () => {
     setReginmenName('')
@@ -156,7 +165,7 @@ const RegimenList = () => {
           regimenName,
           description,
           indications,
-          contraindications
+          contraindications,
         )}
         onCancel={resetAndClose}
         okText={'Tạo'}
@@ -186,6 +195,7 @@ const RegimenList = () => {
         dataUpdate={dataUpdate}
         setDataUpdate={setDataUpdate}
         loadRegimens={loadRegimens}
+        user={user}
       />
     </div>
   )

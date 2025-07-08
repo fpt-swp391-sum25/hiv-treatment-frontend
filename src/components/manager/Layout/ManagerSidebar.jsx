@@ -5,7 +5,8 @@ import {
   UserOutlined, 
   TeamOutlined, 
   CalendarOutlined, 
-  FileOutlined
+  FileOutlined,
+  SolutionOutlined
 } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './ManagerSidebar.css';
@@ -41,6 +42,11 @@ const ManagerSidebar = () => {
       key: '/manager/reports',
       icon: <FileOutlined />,
       label: 'Báo cáo',
+    },
+    {
+      key: '/manager/default-regimen',
+      icon: <SolutionOutlined />,
+      label: 'Phác đồ mặc định',
     },
   ];
 

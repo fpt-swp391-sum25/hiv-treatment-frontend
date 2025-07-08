@@ -153,8 +153,6 @@ const DoctorFilter = ({ selectedDoctor, onDoctorSelect }) => {
 
   return (
     <div className="filter-container">
-      <Form.Label>Bác sĩ:</Form.Label>
-      
       {/* Ô tìm kiếm và dropdown tích hợp */}
       <div className="doctor-search-dropdown" ref={dropdownRef}>
         <InputGroup>
