@@ -1,5 +1,5 @@
-import { Layout, Menu, Avatar, Dropdown, Typography, Button, Space, message } from 'antd';
-import { UserOutlined, DownOutlined, LogoutOutlined, CalendarOutlined, FileSearchOutlined, HistoryOutlined, } from '@ant-design/icons';
+import { Layout, Menu, Avatar, Dropdown, Typography, Button, Space, message, Tooltip } from 'antd';
+import { UserOutlined, DownOutlined, LogoutOutlined, CalendarOutlined, FileSearchOutlined, HistoryOutlined, EditOutlined, SettingOutlined, } from '@ant-design/icons';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 
@@ -8,7 +8,6 @@ import '../../styles/client/AppHeader.css';
 import { useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { logoutAPI } from '../../services/api.service';
-import '../../styles/global.css'
 
 const { Header } = Layout;
 const { Text } = Typography;
@@ -140,18 +139,15 @@ const AppHeader = () => {
   return (
     <Header className="app-header">
       <div className="header-content">
-        <div className="app-logo" style={{
-          width: 10 + 'vw',
-          height: 8 + 'vh',
-          borderRadius: 50 + 'px', backgroundColor: '#fff'
-        }}>
+        <div className="app-logo">
           <Link to="/">
             <img src={appLogo} alt="logo" />
           </Link>
         </div>
 
-        <div className="app-menu">
+        <div className="app-menu" >
           <Menu
+
             mode="horizontal"
             selectedKeys={[selectedMenuKey]}
             items={mapMenuItems(topMenuItems)}
@@ -163,9 +159,11 @@ const AppHeader = () => {
             <Space align="center" size={8} className="user-actions">
               <Link to='/profile' style={{ margin: '10px' }}>
                 <Space style={{ cursor: 'pointer' }} align="center">
-                  <Text style={{ marginLeft: 4, marginRight: 4, color: "white" }}>{user.fullName}</Text>
-                  <Avatar icon={<UserOutlined />} />
-
+                  <Tooltip title={user.fullName}>
+                    <Text style={{ marginLeft: 4, marginRight: 4, color: "white" }}>{user.fullName} </Text>
+                    <Avatar icon={<UserOutlined />} />
+                    <span style={{ color: 'white' }}> <SettingOutlined /></span>
+                  </Tooltip>
                 </Space>
               </Link>
               <Button
@@ -180,7 +178,7 @@ const AppHeader = () => {
           ) : (
             <Space size="middle" className="auth-buttons">
               <Link to="/login">
-                <Button type="primary">Đăng nhập</Button>
+                <Button  >Đăng nhập</Button>
               </Link>
               <Link to="/register">
                 <Button>Đăng kí</Button>

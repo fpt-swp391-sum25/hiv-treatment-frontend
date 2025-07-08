@@ -45,8 +45,8 @@ const PageHeader = () => {
                     className="app-logo"
                 />
             </div>
-            <div className="header-right">
-                <Tooltip title={user.fullName}>
+            <div className="header-right" style={{ cursor: 'pointer' }}>
+                <Tooltip title={user.fullName} >
                     <Text style={{ color: 'black', marginLeft: 4, marginRight: 4 }}>{user.fullName}</Text>
                     <Avatar icon={<UserOutlined />} />
                 </Tooltip>

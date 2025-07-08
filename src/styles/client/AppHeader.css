@@ -1,3 +1,8 @@
+a {
+  color: white;
+  text-decoration: none;
+}
+
 /* Header tổng */
 .app-header {
   position: sticky;
@@ -7,7 +12,7 @@
   padding: 0 24px !important;
   min-height: 50px;
   height: auto;
-  background: #2056df;
+  background: #089BAB;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -29,14 +34,19 @@
   margin-left: 80px;
 }
 
+.app-logo {
+  display: flex;
+  align-items: center;
+  width: auto;
+  height: auto;
+}
+
 .app-logo img {
-  width: 135px;
-  height: 50px;
-  object-fit: cover;
+  width: 300px;
+  height: 90px;
+  object-fit: contain;
   display: block;
-  margin: auto;
-  margin-top: 10px;
-  transform: scale(1.05);
+  margin-top: 5px;
 }
 
 /* Menu trên */
@@ -45,7 +55,7 @@
   justify-content: center;
   border-bottom: none;
   margin: 0;
-  background: #2056df;
+  background: #089BAB;
   min-width: 600px;
 }
 
@@ -55,17 +65,18 @@
   justify-content: center;
   border-bottom: none;
   margin: 0;
-  background: #2056df;
+  background: #089BAB;
   min-width: 600px;
 }
 
 /* Cài đặt item menu */
 .main-menu .ant-menu-item,
 .sub-menu .ant-menu-item {
-  padding: 0 16px;
+  padding: 0 30px !important;
   margin: 0 4px !important;
   color: #fff;
-  background: #2056df;
+  background: #089BAB;
+  border-radius: 50px !important;
 }
 
 .main-menu .ant-menu-item .anticon,
@@ -75,7 +86,10 @@
 
 /* Button đăng nhập / đăng ký */
 .auth-buttons .ant-btn {
-  border-radius: 4px;
+  border-radius: 50px;
+  background: white;
+  color: #089BAB;
+  border: none;
 }
 
 /* Xóa border dưới mặc định của menu ngang */
@@ -86,19 +100,22 @@
 .ant-menu-horizontal>.ant-menu-item::after,
 .ant-menu-horizontal>.ant-menu-submenu::after {
   display: none !important;
+
 }
 
 /* Hover và selected */
 .main-menu .ant-menu-item-selected,
 .sub-menu .ant-menu-item-selected {
-  background-color: #1c48c8 !important;
-  color: #fff !important;
+  background: white !important;
+  border-radius: 50px !important;
+  color: #089BAB !important;
 }
 
 .main-menu .ant-menu-item:hover,
 .sub-menu .ant-menu-item:hover {
-  background-color: #1c48c8 !important;
-  color: #fff !important;
+  background: white !important;
+  border-radius: 50px !important;
+  color: #089BAB !important;
 }
 
 /* Phần đăng nhập/đăng ký */
@@ -120,7 +137,7 @@
 
 .user-actions .ant-avatar {
   background-color: #fff;
-  color: #2056df;
+  color: #089BAB;
 }
 
 .user-actions .ant-btn {

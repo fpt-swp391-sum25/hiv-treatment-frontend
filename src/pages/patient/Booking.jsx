@@ -1,3 +1,4 @@
+
 import { useContext, useEffect, useState } from 'react';
 import { Form, Input, Select, DatePicker, Button, Typography, Col, Row, Layout, theme, message, Descriptions } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
@@ -204,7 +205,7 @@ const Booking = () => {
                 }}>
                     <Row justify="center">
                         <Col span={16} style={{ background: 'white', borderRadius: '10px', margin: '20px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
-                            <Link href="/"><ArrowLeftOutlined style={{ margin: '15px' }} /> Về trang chủ</Link>
+                            <Link href="/" className='link' ><ArrowLeftOutlined style={{ margin: '15px' }} /> Về trang chủ</Link>
                             <div style={{ maxWidth: 900, margin: '0 auto' }}>
                                 <h1>Đặt lịch khám</h1>
                                 <p>Vui lòng điền thông tin dưới đây để đặt lịch khám với bác sĩ chuyên khoa HIV</p>
@@ -281,7 +282,7 @@ const Booking = () => {
                                         </Descriptions>
                                     )}
                                     <Form.Item style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                                        <Button type="primary" htmlType="submit" loading={loading}>
+                                        <Button type="primary" htmlType="submit" loading={loading} className='btn-custom'>
                                             Xác nhận đặt lịch
                                         </Button>
                                     </Form.Item>
