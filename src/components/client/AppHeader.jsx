@@ -1,24 +1,52 @@
-
-import { Layout, Menu, Avatar, Dropdown, Typography, Button, Space, message, Tooltip, Popconfirm } from 'antd';
-import { UserOutlined, DownOutlined, LogoutOutlined, CalendarOutlined, FileSearchOutlined, HistoryOutlined, EditOutlined, SettingOutlined, } from '@ant-design/icons';
+import {
+  Layout,
+  Menu,
+  Avatar,
+  Dropdown,
+  Typography,
+  Button,
+  Space,
+  message,
+  Tooltip,
+  Popconfirm,
+  Badge,
+  List,
+  Popover,
+  Spin
+} from 'antd';
+import {
+  UserOutlined,
+  LogoutOutlined,
+  SettingOutlined,
+  BellOutlined
+} from '@ant-design/icons';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 
 import appLogo from '../../assets/appLogo.png';
 import '../../styles/client/AppHeader.css';
-import { useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { logoutAPI } from '../../services/api.service';
+import {
+  getNotificationsByUserId,
+  updateNotification
+} from '../../services/notification.service';
 
 const { Header } = Layout;
 const { Text } = Typography;
 
 const AppHeader = () => {
   const location = useLocation();
-  const [activeSetion, setActiveSection] = useState('home');
-  const { user, setUser } = useContext(AuthContext)
+  const navigate = useNavigate();
+  const { user, setUser } = useContext(AuthContext);
 
-  // Thêm event listener để theo dõi scroll
+  const [activeSection, setActiveSection] = useState('home');
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [popoverOpen, setPopoverOpen] = useState(false);
+
+  const unreadCount = notifications.filter(n => !n.read).length;
+
   useEffect(() => {
     const handleScroll = () => {
       const sections = [
@@ -26,7 +54,8 @@ const AppHeader = () => {
         { id: 'why-services-section', key: 'services' },
         { id: 'doctor-section', key: 'doctors' },
         { id: 'document-section', key: 'resources' }
-      ]; const scrollPosition = window.scrollY + 200;// Tăng offset để thấy tiêu đề rõ hơn
+      ];
+      const scrollPosition = window.scrollY + 200;
 
       for (const section of sections) {
         const element = document.getElementById(section.id);
@@ -44,10 +73,37 @@ const AppHeader = () => {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []); const scrollToSection = (sectionId) => {
+  }, []);
+
+  useEffect(() => {
+    if (user?.id) {
+      loadNotifications();
+    }
+  }, [user?.id]);
+
+  const loadNotifications = async () => {
+    setLoading(true);
+    try {
+      const res = await getNotificationsByUserId(user.id);
+      setNotifications(res.data || []);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleNotificationClick = async (notification) => {
+    if (!notification.read) {
+      await updateNotification(notification.id, { ...notification, isRead: true });
+      setNotifications(prev =>
+        prev.map(n => n.id === notification.id ? { ...n, read: true } : n)
+      );
+    }
+  };
+
+  const scrollToSection = (sectionId) => {
     const section = document.getElementById(sectionId);
     if (section) {
-      const headerOffset = 120; // Điều chỉnh offset để thấy tiêu đề
+      const headerOffset = 120;
       const elementPosition = section.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
 
@@ -67,18 +123,13 @@ const AppHeader = () => {
     { key: 'appointments', label: 'Lịch hẹn', path: '/appointment' },
   ];
 
-  const navigate = useNavigate();
-
   const handleMenuClick = (scrollTo) => {
-    // Nếu đang không ở trang chủ, chuyển về trang chủ trước
     if (location.pathname !== '/') {
       navigate('/');
-      // Đợi một chút để đảm bảo DOM đã load xong
       setTimeout(() => {
         scrollToSection(scrollTo);
       }, 100);
     } else {
-      // Nếu đã ở trang chủ thì chỉ cần scroll
       scrollToSection(scrollTo);
     }
   };
@@ -86,19 +137,15 @@ const AppHeader = () => {
   const mapMenuItems = (items) =>
     items.map((item) => ({
       key: item.key,
-      icon: item.icon || null,
       label: item.scrollTo ? (
-        <a onClick={() => handleMenuClick(item.scrollTo)} style={{ cursor: 'pointer' }}>
-          {item.label}
-        </a>
+        <a onClick={() => handleMenuClick(item.scrollTo)}>{item.label}</a>
       ) : (
-        <Link to={item.path} onClick={() => {
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }}>{item.label}</Link>
-      ),
+        <Link to={item.path} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+          {item.label}
+        </Link>
+      )
     }));
 
-  // Lấy key menu đang được chọn
   const getActiveMenu = (items) => {
     return (
       items.find(
@@ -109,33 +156,17 @@ const AppHeader = () => {
     );
   };
 
-  // Thêm biến này để xác định key menu cần highlight
-  const selectedMenuKey = location.pathname === '/' ? activeSetion : getActiveMenu(topMenuItems);
-
+  const selectedMenuKey = location.pathname === '/' ? activeSection : getActiveMenu(topMenuItems);
 
   const handleLogout = async () => {
-    const response = await logoutAPI()
+    const response = await logoutAPI();
     if (response.data) {
-      localStorage.removeItem("access_token")
-      setUser({
-        id: '',
-        username: '',
-        email: '',
-        fullName: '',
-        status: '',
-        role: ''
-      })
-      notification.success({
-        message: 'Hệ thống',
-        showProgress: true,
-        pauseOnHover: true,
-        description: 'Đăng xuất thành công'
-      });
-      navigate("/")
+      localStorage.removeItem('access_token');
+      setUser({ id: '', username: '', email: '', fullName: '', status: '', role: '' });
+      message.success('Đăng xuất thành công');
+      navigate('/');
     }
   };
-
-
 
   return (
     <Header className="app-header">
@@ -146,45 +177,76 @@ const AppHeader = () => {
           </Link>
         </div>
 
-        <div className="app-menu" >
-          <Menu
+        <Menu
+          mode="horizontal"
+          selectedKeys={[selectedMenuKey]}
+          items={mapMenuItems(topMenuItems)}
+          className="main-menu"
+        />
 
-            mode="horizontal"
-            selectedKeys={[selectedMenuKey]}
-            items={mapMenuItems(topMenuItems)}
-            className="main-menu"
-          />
-        </div>
         <div className="auth-section">
           {user.username ? (
             <Space align="center" size={8} className="user-actions">
-              <Link to='/profile' style={{ margin: '10px' }}>
-                <Space style={{ cursor: 'pointer' }} align="center">
-                  <Tooltip title={user.fullName}>
-                    <Text style={{ marginLeft: 4, marginRight: 4, color: "white" }}>{user.fullName} </Text>
-                    <Avatar
-                      src={user.avatar !== '' ? user.avatar : null}
-                      icon={user.avatar === '' ? <UserOutlined /> : null}
+              <Popover
+                content={
+                  <Spin spinning={loading}>
+                    <List
+                      dataSource={[...notifications].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))}
+                      locale={{ emptyText: 'Không có thông báo' }}
+                      renderItem={(item) => (
+                        <List.Item
+                          style={{
+                            background: item.read ? '#fff' : '#e6f7ff',
+                            fontWeight: item.read ? 'normal' : 'bold',
+                            cursor: 'pointer'
+                          }}
+                          onClick={() => handleNotificationClick(item)}
+                        >
+                          <div>
+                            <span>{item.title}</span>
+                            <div style={{ fontSize: 12, color: '#888' }}>{item.message}</div>
+                            <div style={{ fontSize: 10, color: '#aaa' }}>{item.createdAt}</div>
+                          </div>
+                        </List.Item>
+                      )}
+                      style={{ width: 300, maxHeight: 400, overflow: 'auto' }}
                     />
-                    <span style={{ color: 'white' }}> <SettingOutlined /></span>
-                  </Tooltip>
-                </Space>
+                  </Spin>
+                }
+                trigger="click"
+                open={popoverOpen}
+                onOpenChange={(open) => {
+                  setPopoverOpen(open);
+                  if (open) loadNotifications();
+                }}
+                placement="bottomRight"
+              >
+                <Badge count={unreadCount}>
+                  <BellOutlined style={{ fontSize: 22, color: 'white', cursor: 'pointer' }} />
+                </Badge>
+              </Popover>
+
+              <Link to='/profile'>
+                <Tooltip title={user.fullName}>
+                  <Text style={{ color: 'white' }}>{user.fullName}</Text>
+                  <Avatar
+                    src={user.avatar || null}
+                    icon={!user.avatar ? <UserOutlined /> : null}
+                    style={{ margin: '0 8px' }}
+                  />
+                  <SettingOutlined style={{ color: 'white' }} />
+                </Tooltip>
               </Link>
 
               <Popconfirm
-                title="Đăng xuất"
-                description="Bạn có chắc muốn đăng xuất?"
+                title="Đăng xuất"
+                description="Bạn có chắc chắn muốn đăng xuất?"
                 onConfirm={handleLogout}
-                okText="Có"
+                okText="Có"
                 cancelText="Không"
-                placement="left">
-
-
-                <Button
-                  type="primary"
-                  icon={<LogoutOutlined />}
-                  danger
-                >
+                placement="left"
+              >
+                <Button type="primary" icon={<LogoutOutlined />} danger>
                   Đăng xuất
                 </Button>
               </Popconfirm>
@@ -192,10 +254,10 @@ const AppHeader = () => {
           ) : (
             <Space size="middle" className="auth-buttons">
               <Link to="/login">
-                <Button  >Đăng nhập</Button>
+                <Button>Đăng nhập</Button>
               </Link>
               <Link to="/register">
-                <Button>Đăng kí</Button>
+                <Button>Đăng ký</Button>
               </Link>
             </Space>
           )}
