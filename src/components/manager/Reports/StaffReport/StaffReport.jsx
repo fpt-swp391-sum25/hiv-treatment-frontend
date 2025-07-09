@@ -387,6 +387,8 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
     const handlePrint = () => {
         window.print();
     };
+
+
     
     // Component biểu đồ hiệu suất nhân viên
     const StaffPerformanceChart = () => {
@@ -789,13 +791,14 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
                 </Card>
 
                 {/* Bảng danh sách nhân viên */}
-                <Card 
+                {/* Bảng danh sách nhân viên */}
+                <Card
                     title={
                         <Space>
                             <span>Danh sách nhân viên</span>
                             <Tag color="blue">{filteredStaffList.length} nhân viên</Tag>
                         </Space>
-                    } 
+                    }
                     className="table-card"
                 >
                     <Table
