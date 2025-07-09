@@ -31,12 +31,10 @@ const Login = () => {
             });
             localStorage.removeItem('auth_error');
         }
+        if (user && (user.role === 'ADMIN' || user.role === 'MANAGER' || user.role === 'LAB_TECHNICIAN' || user.role === 'DOCTOR')) {
+            redirectHomePage();
+        }
     }, []);
-
-
-
-
-
 
     const handleLogin = async () => {
         setLoading(true);
@@ -50,25 +48,19 @@ const Login = () => {
                 localStorage.setItem('access_token', response.data.token);
                 setUser(response.data);
 
-                // Kiểm tra xem có URL redirect không
-                const redirectPath = localStorage.getItem('redirect_after_login');
-                if (redirectPath) {
-                    localStorage.removeItem('redirect_after_login');
-                    navigate(redirectPath);
+                // Điều hướng theo role
+                if (response.data.role === 'ADMIN') {
+                    navigate('/admin');
+                } else if (response.data.role === 'LAB_TECHNICIAN') {
+                    navigate('/lab-technician');
+                } else if (response.data.role === 'DOCTOR') {
+                    navigate('/doctor');
+                } else if (response.data.role === 'MANAGER') {
+                    navigate('/manager');
                 } else {
-                    // Điều hướng theo role
-                    if (response.data.role === 'ADMIN') {
-                        navigate('/admin');
-                    } else if (response.data.role === 'LAB_TECHNICIAN') {
-                        navigate('/lab-technician');
-                    } else if (response.data.role === 'DOCTOR') {
-                        navigate('/doctor');
-                    } else if (response.data.role === 'MANAGER') {
-                        navigate('/manager');
-                    } else {
-                        navigate('/');
-                    }
+                    navigate('/');
                 }
+
 
                 notification.success({
                     message: "Đăng nhập thành công",
@@ -77,13 +69,7 @@ const Login = () => {
                     description: `Xin chào, ${response.data.fullName || username}!`
                 });
             } else {
-                notification.error({
-                    message: "Lỗi đăng nhập",
-                    showProgress: true,
-                    pauseOnHover: true,
-                    description: response.message || "Không nhận được token từ server"
-                });
-                setError('Không nhận được token đăng nhập. Vui lòng thử lại.');
+                setError('Thông tin đăng nhập không hợp lệ.');
             }
         } catch (error) {
             console.error('Login error:', error);
@@ -121,7 +107,9 @@ const Login = () => {
 
                     notification.success({
                         message: "Đăng nhập thành công",
-                        description: `Xin chào, ${response.data.name || 'người dùng'}!`,
+                        showProgress: true,
+                        pauseOnHover: true,
+                        description: `Xin chào, ${response.data.fullName || 'người dùng'}!`,
                         duration: 3
                     });
                     navigate("/");
