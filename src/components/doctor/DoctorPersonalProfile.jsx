@@ -215,48 +215,7 @@ const DoctorPersonalProfile = () => {
         }
       >
         <Form layout="vertical">
-          <Row gutter={16} style={{ marginBottom: 24 }}>
-            <Col span={24} style={{ textAlign: 'center', position: 'relative' }}>
-              <Tooltip title="Bấm vào để đổi ảnh đại diện">
-                <div
-                  style={{ display: 'inline-block', position: 'relative' }}
-                  onMouseEnter={() => setHover(true)}
-                  onMouseLeave={() => setHover(false)}
-                >
-                  <Avatar
-                    src={avatarUrl}
-                    icon={!avatarUrl && <UserOutlined />}
-                    size={120}
-                    style={{ border: '2px solid #1890ff', cursor: 'pointer', transition: 'box-shadow 0.2s' }}
-                    onClick={() => fileInputRef.current.click()}
-                  />
-                  {hover && (
-                    <CameraOutlined
-                      style={{
-                        position: 'absolute',
-                        bottom: 8,
-                        right: 8,
-                        fontSize: 28,
-                        color: '#1890ff',
-                        background: '#fff',
-                        borderRadius: '50%',
-                        boxShadow: '0 2px 8px #0002',
-                        padding: 4,
-                        pointerEvents: 'none',
-                      }}
-                    />
-                  )}
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    style={{ display: 'none' }}
-                    onChange={handleAvatarChange}
-                  />
-                </div>
-              </Tooltip>
-            </Col>
-          </Row>
+          {/* Đã xóa avatar khỏi form, chỉ giữ lại các trường thông tin cá nhân */}
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item label="Email">
