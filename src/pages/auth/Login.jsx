@@ -3,7 +3,7 @@ import '@ant-design/v5-patch-for-react-19';
 import { Form, Input, Button, Alert, Segmented, Typography, Divider, notification } from 'antd';
 import { useGoogleLogin } from '@react-oauth/google';
 import { GoogleOutlined, ArrowLeftOutlined } from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { googleLoginAPI, loginAPI } from '../../services/api.service';
 import { useForm } from 'antd/es/form/Form';
 import { AuthContext } from '../../components/context/AuthContext';
@@ -18,6 +18,7 @@ const Login = () => {
     const { user, setUser } = useContext(AuthContext)
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    const location = useLocation()
 
     useEffect(() => {
         const authError = localStorage.getItem('auth_error');
@@ -30,7 +31,15 @@ const Login = () => {
             });
             localStorage.removeItem('auth_error');
         }
+        if (user && (user.role === 'ADMIN' || user.role === 'MANAGER' || user.role === 'LAB_TECHNICIAN' || user.role === 'DOCTOR')) {
+            redirectHomePage();
+        }
     }, []);
+
+
+
+
+
 
     const handleLogin = async () => {
         setLoading(true);
@@ -44,25 +53,19 @@ const Login = () => {
                 localStorage.setItem('access_token', response.data.token);
                 setUser(response.data);
 
-                // Kiểm tra xem có URL redirect không
-                const redirectPath = localStorage.getItem('redirect_after_login');
-                if (redirectPath) {
-                    localStorage.removeItem('redirect_after_login');
-                    navigate(redirectPath);
+                // Điều hướng theo role
+                if (response.data.role === 'ADMIN') {
+                    navigate('/admin');
+                } else if (response.data.role === 'LAB_TECHNICIAN') {
+                    navigate('/lab-technician');
+                } else if (response.data.role === 'DOCTOR') {
+                    navigate('/doctor');
+                } else if (response.data.role === 'MANAGER') {
+                    navigate('/manager');
                 } else {
-                    // Điều hướng theo role
-                    if (response.data.role === 'ADMIN') {
-                        navigate('/admin');
-                    } else if (response.data.role === 'LAB_TECHNICIAN') {
-                        navigate('/lab-technician');
-                    } else if (response.data.role === 'DOCTOR') {
-                        navigate('/doctor');
-                    } else if (response.data.role === 'MANAGER') {
-                        navigate('/manager');
-                    } else {
-                        navigate('/');
-                    }
+                    navigate('/');
                 }
+
 
                 notification.success({
                     message: "Đăng nhập thành công",
@@ -71,13 +74,7 @@ const Login = () => {
                     description: `Xin chào, ${response.data.fullName || username}!`
                 });
             } else {
-                notification.error({
-                    message: "Lỗi đăng nhập",
-                    showProgress: true,
-                    pauseOnHover: true,
-                    description: response.message || "Không nhận được token từ server"
-                });
-                setError('Không nhận được token đăng nhập. Vui lòng thử lại.');
+                setError('Thông tin đăng nhập không hợp lệ.');
             }
         } catch (error) {
             console.error('Login error:', error);
@@ -115,7 +112,9 @@ const Login = () => {
 
                     notification.success({
                         message: "Đăng nhập thành công",
-                        description: `Xin chào, ${response.data.name || 'người dùng'}!`,
+                        showProgress: true,
+                        pauseOnHover: true,
+                        description: `Xin chào, ${response.data.fullName || 'người dùng'}!`,
                         duration: 3
                     });
                     navigate("/");

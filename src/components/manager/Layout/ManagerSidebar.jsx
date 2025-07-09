@@ -1,12 +1,13 @@
 import React from 'react';
 import { Layout, Menu } from 'antd';
-import { 
-  BarChartOutlined, 
-  UserOutlined, 
-  TeamOutlined, 
-  CalendarOutlined, 
+import {
+  BarChartOutlined,
+  UserOutlined,
+  TeamOutlined,
+  CalendarOutlined,
   FileOutlined,
-  SolutionOutlined
+  SolutionOutlined,
+  IdcardOutlined
 } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './ManagerSidebar.css';
@@ -18,6 +19,11 @@ const ManagerSidebar = () => {
   const location = useLocation();
   
   const menuItems = [
+        {
+      key: '/manager/profile',
+      icon: <IdcardOutlined />,
+      label: 'Hồ sơ cá nhân',
+    },
     {
       key: '/manager/dashboard',
       icon: <BarChartOutlined />,
@@ -48,6 +54,7 @@ const ManagerSidebar = () => {
       icon: <SolutionOutlined />,
       label: 'Phác đồ mặc định',
     },
+
   ];
 
   // Custom styles cho menu items

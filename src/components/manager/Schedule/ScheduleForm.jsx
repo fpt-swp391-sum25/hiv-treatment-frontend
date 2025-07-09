@@ -207,6 +207,44 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         }, 200);
     };
 
+    // Handle clear doctor selection
+    const handleClearDoctorSelection = () => {
+        setDoctorSearchTerm('');
+        setFormData(prev => ({
+            ...prev,
+            doctorId: '',
+            doctorName: ''
+        }));
+        setShowDoctorDropdown(false);
+        setSelectedDoctorIndex(-1);
+        setFilteredDoctors(doctors);
+    };
+
+    // Handle date field click to open date picker
+    const handleDateFieldClick = () => {
+        const dateInput = document.querySelector('input[name="date"]');
+        if (dateInput) {
+            dateInput.focus();
+            dateInput.showPicker?.(); // Modern browsers support showPicker()
+        }
+    };
+
+    // Handle schedule type option click
+    const handleScheduleTypeClick = (type) => {
+        setFormData(prev => ({
+            ...prev,
+            scheduleType: type
+        }));
+    };
+
+    // Handle shift type option click
+    const handleShiftTypeClick = (type) => {
+        setFormData(prev => ({
+            ...prev,
+            shiftType: type
+        }));
+    };
+
     // Handle keyboard navigation
     const handleDoctorKeyDown = (e) => {
         if (!showDoctorDropdown) return;
@@ -530,23 +568,36 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                                     </div>
                                 ) : (
                                     <div className="searchable-dropdown-container">
-                                        <Form.Control
-                                            type="text"
-                                            placeholder="Tìm kiếm hoặc chọn bác sĩ..."
-                                            value={doctorSearchTerm}
-                                            onChange={handleDoctorSearchChange}
-                                            onFocus={handleDoctorInputFocus}
-                                            onBlur={handleDoctorInputBlur}
-                                            onKeyDown={handleDoctorKeyDown}
-                                            disabled={loading || doctors.length === 0}
-                                            className="doctor-search-input"
-                                            autoComplete="off"
-                                            role="combobox"
-                                            aria-expanded={showDoctorDropdown}
-                                            aria-haspopup="listbox"
-                                            aria-autocomplete="list"
-                                            aria-label="Tìm kiếm và chọn bác sĩ"
-                                        />
+                                        <div className="input-with-clear-container">
+                                            <Form.Control
+                                                type="text"
+                                                placeholder="Tìm kiếm hoặc chọn bác sĩ..."
+                                                value={doctorSearchTerm}
+                                                onChange={handleDoctorSearchChange}
+                                                onFocus={handleDoctorInputFocus}
+                                                onBlur={handleDoctorInputBlur}
+                                                onKeyDown={handleDoctorKeyDown}
+                                                disabled={loading || doctors.length === 0}
+                                                className="doctor-search-input"
+                                                autoComplete="off"
+                                                role="combobox"
+                                                aria-expanded={showDoctorDropdown}
+                                                aria-haspopup="listbox"
+                                                aria-autocomplete="list"
+                                                aria-label="Tìm kiếm và chọn bác sĩ"
+                                            />
+                                            {doctorSearchTerm && (
+                                                <button
+                                                    type="button"
+                                                    className="clear-selection-btn"
+                                                    onClick={handleClearDoctorSelection}
+                                                    aria-label="Xóa lựa chọn bác sĩ"
+                                                    title="Xóa lựa chọn"
+                                                >
+                                                    ×
+                                                </button>
+                                            )}
+                                        </div>
                                         {showDoctorDropdown && filteredDoctors.length > 0 && (
                                             <div
                                                 className="dropdown-menu show doctor-dropdown-menu"
@@ -591,14 +642,22 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                                             <BsCalendarCheck className="me-2 text-primary" />
                                             Ngày khám
                                         </Form.Label>
-                                    <Form.Control
-                                        type="date"
-                                        name="date"
-                                        value={formData.date}
-                                        onChange={handleChange}
-                                        min={moment().format('YYYY-MM-DD')}
-                                        required
-                                    />
+                                        <div className="date-input-container" onClick={handleDateFieldClick}>
+                                            <Form.Control
+                                                type="date"
+                                                name="date"
+                                                value={formData.date}
+                                                onChange={handleChange}
+                                                min={moment().format('YYYY-MM-DD')}
+                                                required
+                                                className="clickable-date-input"
+                                            />
+                                            <BsCalendarCheck
+                                                className="custom-calendar-icon"
+                                                onClick={handleDateFieldClick}
+                                                title="Chọn ngày"
+                                            />
+                                        </div>
                                         {formData.date && (
                                             <div className="date-display">
                                                 <span className="date-badge">
@@ -634,7 +693,10 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                         <h6 className="section-title">Kiểu đặt lịch</h6>
                         <div className="section-content">
                             <div className="schedule-type-options">
-                                <div className={`schedule-option ${formData.scheduleType === 'single' ? 'active' : ''}`}>
+                                <div
+                                    className={`schedule-option clickable-option ${formData.scheduleType === 'single' ? 'active' : ''}`}
+                                    onClick={() => handleScheduleTypeClick('single')}
+                                >
                                     <Form.Check
                                         type="radio"
                                         id="schedule-type-single"
@@ -656,8 +718,11 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                                         className="custom-radio"
                                     />
                                 </div>
-                                
-                                <div className={`schedule-option ${formData.scheduleType === 'shift' ? 'active' : ''}`}>
+
+                                <div
+                                    className={`schedule-option clickable-option ${formData.scheduleType === 'shift' ? 'active' : ''}`}
+                                    onClick={() => handleScheduleTypeClick('shift')}
+                                >
                                     <Form.Check
                                         type="radio"
                                         id="schedule-type-shift"
@@ -712,7 +777,10 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                                         Chọn ca làm việc
                                     </Form.Label>
                                     <div className="shift-type-options">
-                                        <div className={`shift-option ${formData.shiftType === 'morning' ? 'active' : ''}`}>
+                                        <div
+                                            className={`shift-option clickable-option ${formData.shiftType === 'morning' ? 'active' : ''}`}
+                                            onClick={() => handleShiftTypeClick('morning')}
+                                        >
                                             <Form.Check
                                                 type="radio"
                                                 id="shift-type-morning"
@@ -725,7 +793,10 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                                             <div className="shift-time">08:00 - 11:00</div>
                                             <div className="shift-slots-info">4 khung giờ</div>
                                         </div>
-                                        <div className={`shift-option ${formData.shiftType === 'afternoon' ? 'active' : ''}`}>
+                                        <div
+                                            className={`shift-option clickable-option ${formData.shiftType === 'afternoon' ? 'active' : ''}`}
+                                            onClick={() => handleShiftTypeClick('afternoon')}
+                                        >
                                             <Form.Check
                                                 type="radio"
                                                 id="shift-type-afternoon"
