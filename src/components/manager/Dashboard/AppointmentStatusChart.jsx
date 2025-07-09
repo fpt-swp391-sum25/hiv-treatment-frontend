@@ -10,35 +10,31 @@ ChartJS.register(ArcElement, Tooltip, Legend);
  */
 const AppointmentStatusChart = ({ data }) => {
   // Mặc định hoặc xử lý dữ liệu không hợp lệ
-  const appointmentData = data || { 
-    completed: 0, 
-    pending: 0, 
-    cancelled: 0,
-    empty: 0
+  const appointmentData = data || {
+    completed: 0,
+    pending: 0,
+    cancelled: 0
   };
-  
-  // Cấu hình dữ liệu cho biểu đồ
+
+  // Cấu hình dữ liệu cho biểu đồ (không bao gồm "Trống")
   const chartData = {
-    labels: ['Đã hoàn thành', 'Đang chờ', 'Đã hủy', 'Còn trống'],
+    labels: ['Hoàn thành', 'Đang hoạt động', 'Đã hủy'],
     datasets: [
       {
         data: [
-          appointmentData.completed || 0, 
-          appointmentData.pending || 0,
-          appointmentData.cancelled || 0,
-          appointmentData.empty || 0
+          appointmentData.completed || 0,    // Hoàn thành
+          appointmentData.active || 0,       // Đang hoạt động (thay vì pending)
+          appointmentData.cancelled || 0     // Đã hủy
         ],
         backgroundColor: [
-          'rgba(82, 196, 26, 0.8)',  // xanh lá - hoàn thành
-          'rgba(250, 173, 20, 0.8)',  // vàng cam - đang chờ
-          'rgba(245, 34, 45, 0.8)',   // đỏ - đã hủy
-          'rgba(200, 200, 200, 0.8)'  // xám - còn trống
+          'rgba(82, 196, 26, 0.8)',   // xanh lá - hoàn thành
+          'rgba(250, 173, 20, 0.8)',  // vàng cam - đang hoạt động
+          'rgba(245, 34, 45, 0.8)'    // đỏ - đã hủy
         ],
         borderColor: [
           'rgba(82, 196, 26, 1)',
           'rgba(250, 173, 20, 1)',
-          'rgba(245, 34, 45, 1)',
-          'rgba(200, 200, 200, 1)'
+          'rgba(245, 34, 45, 1)'
         ],
         borderWidth: 1,
       },
