@@ -41,23 +41,29 @@ const AppointmentList = () => {
     }
 
     const loadAllSchedule = async () => {
-        setLoading(true)
+        setLoading(true);
         try {
             if (!user?.id) {
                 throw new Error('Không tìm thấy thông tin bệnh nhân');
             }
             const response = await fetchAllPatientScheduleAPI(user.id);
+            const today = dayjs().startOf('day');
             const sortedSchedules = response.data
                 .map(item => ({
                     ...item,
                     doctorName: item.doctor?.fullName || 'Không xác định',
                     type: item.type || null,
                     status: item.status || null,
+                    date: dayjs(item.date, 'YYYY-MM-DD').format('DD/MM/YYYY'),
                 }))
+                .filter(item => {
+                    const scheduleDate = dayjs(`${item.date} ${item.slot}`, 'DD/MM/YYYY HH:mm');
+                    return scheduleDate.isSame(today, 'day') || scheduleDate.isAfter(today);
+                })
                 .sort((a, b) => {
-                    const dateA = dayjs(`${a.date} ${a.slot}`, 'MM-YYYY -DD HH:mm');
-                    const dateB = dayjs(`${b.date} ${b.slot}`, 'MM-YYYY -DD HH:mm');
-                    return dateB - dateA; // Mới nhất lên trên
+                    const dateA = dayjs(`${a.date} ${a.slot}`, 'DD/MM/YYYY HH:mm');
+                    const dateB = dayjs(`${b.date} ${b.slot}`, 'DD/MM/YYYY HH:mm');
+                    return dateB - dateA;
                 });
             setSchedule(sortedSchedules);
         } catch (error) {
@@ -65,7 +71,7 @@ const AppointmentList = () => {
         } finally {
             setLoading(false);
         }
-    }
+    };
 
 
 

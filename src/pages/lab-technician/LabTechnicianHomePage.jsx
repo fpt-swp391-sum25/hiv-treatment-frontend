@@ -7,7 +7,7 @@ import { useContext, useEffect } from "react";
 import { fetchAccountAPI, fetchUserInfoAPI } from "../../services/api.service";
 
 const { Content } = Layout;
-    
+
 const LabTechnicianHomePage = () => {
     const { setUser, isAppLoading, setIsAppLoading } = useContext(AuthContext)
     useEffect(() => {

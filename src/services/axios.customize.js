@@ -91,12 +91,11 @@ instance.interceptors.response.use(function (response) {
                 // });
                 localStorage.setItem('auth_error', 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
                 window.location.href = '/login';
-            } else {
-                // Role-based access denial or other 403 error
-                console.error('Access denied:', errorMessage);
-                alert('Bạn không có quyền truy cập trang này.');
-                window.location.href = '/login';
             }
+            // else {
+            //     localStorage.setItem('auth_error', 'Thông tin đăng nhập không hợp lệ')
+            //     window.location.href = '/login';
+            // }
         }
 
         if (error.response.data) return error.response.data;
