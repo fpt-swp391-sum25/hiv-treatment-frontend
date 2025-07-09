@@ -23,12 +23,23 @@ const Login = () => {
     useEffect(() => {
         const authError = localStorage.getItem('auth_error');
         if (authError) {
-            notification.error({
-                message: 'Hệ thống',
-                showProgress: true,
-                pauseOnHover: true,
-                description: authError
-            });
+            if (authError.includes('thành công')) {
+                notification.success({
+                    message: 'Hệ thống',
+                    showProgress: true,
+                    pauseOnHover: true,
+                    description: authError
+                });
+            } else {
+                notification.error({
+                    message: 'Hệ thống',
+                    showProgress: true,
+                    pauseOnHover: true,
+                    description: authError
+                });
+            }
+
+
             localStorage.removeItem('auth_error');
         }
         if (user && (user.role === 'ADMIN' || user.role === 'MANAGER' || user.role === 'LAB_TECHNICIAN' || user.role === 'DOCTOR')) {
@@ -132,6 +143,8 @@ const Login = () => {
             setError('Không thể xác thực với Google');
             notification.error({
                 message: 'Lỗi đăng nhập',
+                showProgress: true,
+                pauseOnHover: true,
                 description: 'Không thể xác thực với Google'
             });
         }
