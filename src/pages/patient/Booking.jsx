@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { bookingAPI, createHealthRecordAPI, fetchAllDoctorsAPI, fetchAllScheduleAPI, fetchAvailableSlotAPI, fetchDoctorProfileAPI, fetchScheduleByDateAPI, initiatePaymentAPI, registerScheduleAPI } from '../../services/api.service';
 import { AuthContext } from '../../components/context/AuthContext';
 import dayjs from 'dayjs';
+import { fetchServicePrices } from '../../services/systemConfiguration.service';
 
 const { Link } = Typography;
 const { Option } = Select;
@@ -22,6 +23,7 @@ const Booking = () => {
     const [selectedSchedule, setSelectedSchedule] = useState(null);
     const [selectedAmount, setSelectedAmount] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [servicePrices, setServicePrices] = useState({});
 
     const doctorId = Form.useWatch('doctor', form);
     const date = Form.useWatch('date', form);
@@ -38,6 +40,7 @@ const Booking = () => {
 
     useEffect(() => {
         loadDoctors();
+        loadSystemPrices();
     }, []);
 
     useEffect(() => {
@@ -58,25 +61,15 @@ const Booking = () => {
             setSelectedSchedule(null);
         }
         if (type) {
-            let amount;
-            switch (type) {
-                case 'Khám':
-                    amount = 200000;
-                    break;
-                case 'Tái khám':
-                    amount = 150000;
-                    break;
-                case 'Tư vấn':
-                    amount = 100000;
-                    break;
-                default:
-                    amount = 0;
-            }
+            let amount = 0;
+            if (type === 'Khám') amount = Number(servicePrices['Giá tiền đặt lịch khám']) || 0;
+            if (type === 'Tái khám') amount = Number(servicePrices['Giá tiền đặt lịch tái khám']) || 0;
+            if (type === 'Tư vấn') amount = Number(servicePrices['Giá tiền đặt lịch tư vấn']) || 0;
             setSelectedAmount(amount);
         } else {
             setSelectedAmount(null);
         }
-    }, [slot, type, availableSchedules, doctorId]);
+    }, [slot, type, availableSchedules, doctorId, servicePrices]);
 
     const loadDoctors = async () => {
         setLoading(true);
@@ -138,6 +131,15 @@ const Booking = () => {
             message.error('Không thể tải danh sách khung giờ');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const loadSystemPrices = async () => {
+        try {
+            const prices = await fetchServicePrices();
+            setServicePrices(prices);
+        } catch (error) {
+            message.error('Không thể tải giá dịch vụ');
         }
     };
 
