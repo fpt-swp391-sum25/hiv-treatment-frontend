@@ -19,16 +19,21 @@ const PageHeader = () => {
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(false);
     const [popoverOpen, setPopoverOpen] = useState(false);
-    const unreadCount = notifications.filter(n => !n.read).length;
-      useEffect(() => {
-        loadNotifications()
-      }, [])
+    const unreadCount = notifications.filter(n => !n.isRead).length;
+    useEffect(() => {
+        if (user?.id) {
+          loadNotifications();
+        }
+      }, [user?.id]);
     const loadNotifications = async () => {
         if (!user?.id) return;
         setLoading(true);
         try {
             const res = await getNotificationsByUserId(user.id);
-            setNotifications(res.data || []);
+            setNotifications((res.data || []).map(n => ({
+            ...n,
+            isRead: n.read  // Chuyển `read` → `isRead` để dùng thống nhất
+            })));
         } finally {
             setLoading(false);
         }
@@ -112,8 +117,8 @@ const PageHeader = () => {
                             renderItem={item => (
                               <List.Item
                                 style={{
-                                  background: item.read ? "#fff" : "#e6f7ff",
-                                  fontWeight: item.read ? "normal" : "bold",
+                                  background: item.isRead ? "#fff" : "#e6f7ff",
+                                  fontWeight: item.isRead ? "normal" : "bold",
                                   cursor: "pointer"
                                 }}
                                 onClick={() => handleNotificationClick(item)}
