@@ -34,9 +34,13 @@ const DoctorManagement = () => {
             // Kiểm tra dữ liệu trả về
             if (Array.isArray(response)) {
                 // Trường hợp API trả về trực tiếp mảng bác sĩ
+                console.log('Doctors data (array):', response);
+                response.forEach(doctor => console.log('Doctor gender:', doctor.gender));
                 setDoctors(response);
             } else if (response && Array.isArray(response.data)) {
                 // Trường hợp API trả về object có thuộc tính data là mảng
+                console.log('Doctors data (object.data):', response.data);
+                response.data.forEach(doctor => console.log('Doctor gender:', doctor.gender));
                 setDoctors(response.data);
             } else {
                 console.warn('Unexpected response format:', response);
