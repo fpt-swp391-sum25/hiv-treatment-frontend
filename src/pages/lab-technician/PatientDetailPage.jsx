@@ -13,6 +13,7 @@ import { Typography, Space, notification, Popconfirm,
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import UpdateTestResultModal from '../../components/lab-technician/UpdateTestResultModal.jsx';
 import dayjs from 'dayjs';
+import { createNotification } from "../../services/notification.service";
 
 const PatientDetail = () => {
   const [type, setType] = useState("");
@@ -72,6 +73,32 @@ const PatientDetail = () => {
           pauseOnHover: true,
           description: 'Cập nhật thông tin sức khỏe thành công!'
         });
+        // Thêm log để kiểm tra dữ liệu healthRecordData
+        console.log("DEBUG | healthRecordData:", healthRecordData);
+        // Tạo notification cho bác sĩ nếu trạng thái HIV hợp lệ
+        if (
+          healthRecordData.hivStatus === "Dương tính" ||
+          healthRecordData.hivStatus === "Âm tính"
+        ) {
+          const doctorId = healthRecordData.schedule?.doctor?.id;
+          const patientName = healthRecordData.schedule?.patient?.fullName;
+          console.log("DEBUG | doctorId:", doctorId, "patientName:", patientName);
+          if (doctorId && patientName) {
+            try {
+              await createNotification({
+                title: "thông báo kết quả",
+                message: `đã có kết quả xét nghiệm của bệnh nhân ${patientName}`,
+                createdAt: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
+                userId: doctorId,
+              });
+              console.log("Notification sent!");
+            } catch (err) {
+              console.error("Notification error:", err);
+            }
+          } else {
+            console.warn("Không tìm thấy doctorId hoặc patientName để gửi notification");
+          }
+        }
         await loadData();
       }
     } catch (error) {
