@@ -281,7 +281,7 @@ const router = createBrowserRouter([
       }
     ]
   },
-  // Path for manager pages
+   // Path for manager pages
   {
     path: '/manager',
     element: (
@@ -318,7 +318,7 @@ const router = createBrowserRouter([
           <PrivateRoute children={<LabTechnicianManagement />} requiredRole={['MANAGER']} />
         ),
         errorElement: <Errors />,
-      },
+      }, 
       {
         path: 'reports',
         element: (
@@ -374,7 +374,7 @@ const router = createBrowserRouter([
 ]);
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <GoogleOAuthProvider clientId={'352858603517-ntvardeqch50ati93mpfjgl2aqqaf8qp.apps.googleusercontent.com'}>
+  <GoogleOAuthProvider clientId={'115076786122-q76et2blbn1k1dmfpd6d5ss1t192ljj6.apps.googleusercontent.com'}>
     <AuthWrapper>
       <RouterProvider router={router} />
     </AuthWrapper>
