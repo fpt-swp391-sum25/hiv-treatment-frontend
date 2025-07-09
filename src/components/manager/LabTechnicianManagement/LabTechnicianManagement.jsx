@@ -43,20 +43,25 @@ const LabTechnicianManagement = () => {
             }
             
             // Map dữ liệu theo cấu trúc chính xác từ BE
-            const mappedData = processedData.map(tech => ({
-                id: tech.id,
-                fullName: tech.fullName || '',
-                email: tech.email || '',
-                phone: tech.phoneNumber || '',
-                status: tech.accountStatus || 'ACTIVE',
-                gender: tech.gender || 'MALE',
-                address: tech.address || '',
-                avatarUrl: tech.avatar || '',
-                dateOfBirth: tech.dateOfBirth || '',
-                username: tech.username || '',
-                createdAt: tech.createdAt || '',
-                isVerified: tech.isVerified || false
-            }));
+            const mappedData = processedData.map(tech => {
+                console.log('Original tech gender:', tech.gender); // Debug gender
+                return {
+                    id: tech.id,
+                    fullName: tech.fullName || '',
+                    email: tech.email || '',
+                    phone: tech.phoneNumber || '',
+                    status: tech.accountStatus || 'ACTIVE',
+                    gender: tech.gender || '',  // ✅ Không hardcode, giữ nguyên giá trị từ BE
+                    address: tech.address || '',
+                    avatarUrl: tech.avatar || '',
+                    dateOfBirth: tech.dateOfBirth || '',
+                    username: tech.username || '',
+                    createdAt: tech.createdAt || '',
+                    isVerified: tech.isVerified || false
+                };
+            });
+
+            console.log('Mapped lab technicians data:', mappedData);
             
             setLabTechnicians(mappedData);
         } catch (error) {

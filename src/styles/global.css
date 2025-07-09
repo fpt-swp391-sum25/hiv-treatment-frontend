@@ -1,3 +1,16 @@
-a {
+.link {
+    color: #00bed3 !important;
     text-decoration: none;
+}
+
+.link:hover {
+    color: #00e5ff !important;
+}
+
+.btn-custom {
+    background: #089BAB !important;
+}
+
+.btn-custom:hover {
+    background: #00bed3 !important;
 }
