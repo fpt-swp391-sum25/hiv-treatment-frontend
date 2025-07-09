@@ -1,12 +1,26 @@
-import { 
-  getAllSchedulesAPI, 
-  fetchUsersByRoleAPI, 
+import {
+  getAllSchedulesAPI,
+  fetchUsersByRoleAPI,
+  fetchUsersByRoleAndStatusAPI,
+  fetchUsersByRoleAndVerificationAPI,
+  getSchedulesWithFiltersAPI,
   fetchAllDoctorsAPI,
   getSchedulesByDateAPI,
+  getSchedulesByStatusAPI,
+  getSchedulesByTypeAPI,
   fetchAllRegimensAPI,
   fetchHealthRecordByScheduleIdAPI
 } from './api.service';
 import moment from 'moment';
+import {
+  SCHEDULE_STATUS,
+  ACCOUNT_STATUS,
+  isScheduleCompleted,
+  isScheduleCancelled,
+  isScheduleBooked,
+  isScheduleActive,
+  isAccountActive
+} from '../constants/status.constants';
 
 // Hàm xử lý thống kê tổng quan
 export const getDashboardStatistics = async (filters = {}) => {
@@ -75,22 +89,81 @@ export const getPatientStatistics = async (filters = {}) => {
   }
 };
 
+// Hàm fetch tất cả schedules từ nhiều endpoints
+const fetchAllSchedulesFromMultipleEndpoints = async () => {
+  try {
+    console.log('🔍 [MULTI-ENDPOINT] Trying multiple schedule endpoints...');
+
+    // Thử endpoint chính trước
+    try {
+      const mainResponse = await getAllSchedulesAPI();
+      if (mainResponse.data && mainResponse.data.length > 0) {
+        console.log('✅ [MULTI-ENDPOINT] Main endpoint successful:', mainResponse.data.length, 'schedules');
+        return mainResponse;
+      }
+    } catch (error) {
+      console.log('⚠️ [MULTI-ENDPOINT] Main endpoint failed, trying alternatives...');
+    }
+
+    // Thử fetch theo status
+    try {
+      const [bookedRes, completedRes, cancelledRes] = await Promise.all([
+        getSchedulesByStatusAPI('Đã đặt'),
+        getSchedulesByStatusAPI('Hoàn thành'),
+        getSchedulesByStatusAPI('Hủy')
+      ]);
+
+      const allSchedules = [
+        ...(bookedRes.data || []),
+        ...(completedRes.data || []),
+        ...(cancelledRes.data || [])
+      ];
+
+      console.log('✅ [MULTI-ENDPOINT] Status-based fetch successful:', allSchedules.length, 'schedules');
+      return { data: allSchedules };
+    } catch (error) {
+      console.log('⚠️ [MULTI-ENDPOINT] Status-based fetch failed');
+    }
+
+    // Fallback: return empty array
+    console.log('❌ [MULTI-ENDPOINT] All endpoints failed, returning empty array');
+    return { data: [] };
+  } catch (error) {
+    console.error('❌ [MULTI-ENDPOINT] Critical error:', error);
+    return { data: [] };
+  }
+};
+
 // Hàm xử lý thống kê lịch hẹn
 export const getAppointmentStatistics = async (filters = {}) => {
   try {
+    console.log('🔍 [APPOINTMENT STATS] Starting fetch with filters:', filters);
+
     // Gọi các API liên quan đến lịch hẹn
     const [schedulesRes, doctorsRes] = await Promise.all([
-      getAllSchedulesAPI(),
+      fetchAllSchedulesFromMultipleEndpoints(),
       fetchUsersByRoleAPI('DOCTOR')
     ]);
+
+    console.log('📊 [APPOINTMENT STATS] Raw API responses:');
+    console.log('- Schedules response:', schedulesRes);
+    console.log('- Doctors response:', doctorsRes);
 
     const schedules = schedulesRes.data || [];
     const doctors = doctorsRes.data || [];
 
+    console.log('📋 [APPOINTMENT STATS] Processed data:');
+    console.log('- Schedules count:', schedules.length);
+    console.log('- Doctors count:', doctors.length);
+    console.log('- Sample schedule:', schedules[0]);
+
     // Xử lý và tính toán thống kê lịch hẹn
-    return processAppointmentStatistics(schedules, doctors, filters);
+    const result = processAppointmentStatistics(schedules, doctors, filters);
+    console.log('✅ [APPOINTMENT STATS] Final result:', result);
+
+    return result;
   } catch (error) {
-    console.error('Error fetching appointment statistics:', error);
+    console.error('❌ [APPOINTMENT STATS] Error fetching appointment statistics:', error);
     throw error;
   }
 };
@@ -158,37 +231,34 @@ const processOverviewStatistics = (schedules, doctors, patients, labTechnicians,
   const newPatients = patients.filter(patient => {
     if (!patient.createdAt) return false;
     const createdDate = new Date(patient.createdAt);
-    return createdDate.getMonth() === currentMonth && 
+    return createdDate.getMonth() === currentMonth &&
            createdDate.getFullYear() === currentYear;
   });
 
-  // Tính toán số lịch hẹn theo trạng thái
-  const completedSchedules = filteredSchedules.filter(schedule => 
-    schedule.status === 'COMPLETED' || 
-    schedule.status === 'Hoàn thành' || 
-    schedule.status === 'completed'
+  // Tính toán lịch hẹn hôm nay
+  const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
+  const todayAppointments = filteredSchedules.filter(schedule => {
+    return schedule.date === today;
+  });
+
+  // Tính toán số lịch hẹn theo trạng thái (sử dụng đúng status từ Backend)
+  const completedSchedules = filteredSchedules.filter(schedule =>
+    isScheduleCompleted(schedule.status)
   );
-  
-  const cancelledSchedules = filteredSchedules.filter(schedule => 
-    schedule.status === 'CANCELLED' || 
-    schedule.status === 'Đã hủy' || 
-    schedule.status === 'cancelled'
+
+  const cancelledSchedules = filteredSchedules.filter(schedule =>
+    isScheduleCancelled(schedule.status)
   );
-  
-  const pendingSchedules = filteredSchedules.filter(schedule => 
-    schedule.status === 'PENDING' || 
-    schedule.status === 'Đang chờ' || 
-    schedule.status === 'pending' ||
-    schedule.status === 'ACTIVE' || 
-    schedule.status === 'Đang hoạt động' ||
-    schedule.status === 'active'
+
+  const bookedSchedules = filteredSchedules.filter(schedule =>
+    isScheduleBooked(schedule.status)
   );
 
   // Tính toán tỷ lệ hoàn thành và hủy
-  const totalSchedulesWithStatus = completedSchedules.length + cancelledSchedules.length + pendingSchedules.length;
-  const completionRate = totalSchedulesWithStatus > 0 ? 
+  const totalSchedulesWithStatus = completedSchedules.length + cancelledSchedules.length + bookedSchedules.length;
+  const completionRate = totalSchedulesWithStatus > 0 ?
     (completedSchedules.length / totalSchedulesWithStatus) * 100 : 0;
-  const cancellationRate = totalSchedulesWithStatus > 0 ? 
+  const cancellationRate = totalSchedulesWithStatus > 0 ?
     (cancelledSchedules.length / totalSchedulesWithStatus) * 100 : 0;
 
   // Tạo dữ liệu xu hướng theo tháng
@@ -198,22 +268,28 @@ const processOverviewStatistics = (schedules, doctors, patients, labTechnicians,
     staff: {
       totalDoctors: doctors.length,
       totalLabTechnicians: labTechnicians.length,
-      activeStaff: doctors.filter(d => d.accountStatus === 'ACTIVE').length + 
-                   labTechnicians.filter(l => l.accountStatus === 'ACTIVE').length,
+      activeStaff: doctors.filter(d => isAccountActive(d.accountStatus)).length +
+                   labTechnicians.filter(l => isAccountActive(l.accountStatus)).length,
     },
     patients: {
       totalPatients: patients.length,
       newPatients: newPatients.length,
-      activePatients: patients.filter(p => p.accountStatus === 'ACTIVE').length,
+      activePatients: patients.filter(p => isAccountActive(p.accountStatus)).length,
       patientGenderDistribution: calculateGenderDistribution(patients)
     },
     appointments: {
       totalSchedules: totalSchedulesWithStatus,
+      todayAppointments: todayAppointments.length,
       completedSchedules: completedSchedules.length,
       cancelledSchedules: cancelledSchedules.length,
-      pendingSchedules: pendingSchedules.length,
+      bookedSchedules: bookedSchedules.length,
       completionRate: Math.round(completionRate * 10) / 10,
       cancellationRate: Math.round(cancellationRate * 10) / 10,
+      appointmentsByStatus: {
+        completed: completedSchedules.length,
+        cancelled: cancelledSchedules.length,
+        active: bookedSchedules.length
+      },
       monthlyTrend: appointmentTrendByMonth
     }
   };
@@ -228,16 +304,16 @@ const processStaffStatistics = (doctors, labTechnicians, schedules, filters) => 
   const schedulesPerDoctor = doctors.map(doctor => {
     const doctorId = doctor.id || doctor.userId;
     const doctorSchedules = filteredSchedules.filter(s => s.doctorId == doctorId);
-    const completedSchedules = doctorSchedules.filter(s => 
-      s.status === 'COMPLETED' || s.status === 'Hoàn thành' || s.status === 'completed'
+    const completedSchedules = doctorSchedules.filter(s =>
+      isScheduleCompleted(s.status)
     );
-    
+
     return {
       id: doctorId,
       name: doctor.full_name || doctor.fullName || doctor.name || doctor.username,
       totalSchedules: doctorSchedules.length,
       completedSchedules: completedSchedules.length,
-      performance: doctorSchedules.length > 0 ? 
+      performance: doctorSchedules.length > 0 ?
         Math.round((completedSchedules.length / doctorSchedules.length) * 100) : 0
     };
   });
@@ -249,14 +325,14 @@ const processStaffStatistics = (doctors, labTechnicians, schedules, filters) => 
     s.serviceType === 'TEST' || s.serviceType === 'Xét nghiệm' || s.serviceType === 'test'
   );
   
-  const completedLabTechnicianSchedules = labTechnicianSchedules.filter(s => 
-    s.status === 'COMPLETED' || s.status === 'Hoàn thành' || s.status === 'completed'
+  const completedLabTechnicianSchedules = labTechnicianSchedules.filter(s =>
+    isScheduleCompleted(s.status)
   );
 
   // Tính tổng số lịch hẹn của bác sĩ
   const doctorAppointments = filteredSchedules.filter(s => s.doctorId).length;
-  const doctorCompletedAppointments = filteredSchedules.filter(s => 
-    s.doctorId && (s.status === 'COMPLETED' || s.status === 'Hoàn thành' || s.status === 'completed')
+  const doctorCompletedAppointments = filteredSchedules.filter(s =>
+    s.doctorId && isScheduleCompleted(s.status)
   ).length;
 
   // Sắp xếp bác sĩ theo số lịch hẹn giảm dần
@@ -265,15 +341,15 @@ const processStaffStatistics = (doctors, labTechnicians, schedules, filters) => 
   return {
     doctors: {
       total: doctors.length,
-      active: doctors.filter(d => d.accountStatus === 'ACTIVE').length,
-      inactive: doctors.filter(d => d.accountStatus !== 'ACTIVE').length,
+      active: doctors.filter(d => isAccountActive(d.accountStatus)).length,
+      inactive: doctors.filter(d => !isAccountActive(d.accountStatus)).length,
       schedulesPerDoctor,
       topDoctors: topDoctors.slice(0, 5) // Top 5 bác sĩ
     },
     labTechnicians: {
       total: labTechnicians.length,
-      active: labTechnicians.filter(l => l.accountStatus === 'ACTIVE').length,
-      inactive: labTechnicians.filter(l => l.accountStatus !== 'ACTIVE').length,
+      active: labTechnicians.filter(l => isAccountActive(l.accountStatus)).length,
+      inactive: labTechnicians.filter(l => !isAccountActive(l.accountStatus)).length,
     },
     workloadDistribution: {
       doctorAppointments: doctorAppointments,
@@ -355,7 +431,7 @@ const processPatientStatistics = (patients, schedules, filters) => {
 
   return {
     totalPatients: patients.length,
-    activePatients: patients.filter(p => p.accountStatus === 'ACTIVE').length,
+    activePatients: patients.filter(p => isAccountActive(p.accountStatus)).length,
     newPatients: newPatients.length,
     patientsWithAppointments: schedulesWithPatients,
     genderDistribution: calculateGenderDistribution(patients),
@@ -366,46 +442,56 @@ const processPatientStatistics = (patients, schedules, filters) => {
 
 // Xử lý thống kê lịch hẹn
 const processAppointmentStatistics = (schedules, doctors, filters) => {
+  console.log('🔄 [PROCESS APPOINTMENT] Starting processing...');
+  console.log('- Input schedules:', schedules.length);
+  console.log('- Input doctors:', doctors.length);
+  console.log('- Filters:', filters);
+
+
+
   // Xử lý filter
   const filteredSchedules = filterDataByDateRange(schedules, filters);
+  console.log('📅 [PROCESS APPOINTMENT] After date filter:', filteredSchedules.length);
 
-  // Tính toán số lịch hẹn theo trạng thái
-  const completedSchedules = filteredSchedules.filter(schedule => 
-    schedule.status === 'COMPLETED' || 
-    schedule.status === 'Hoàn thành' || 
-    schedule.status === 'completed'
-  );
-  
-  const cancelledSchedules = filteredSchedules.filter(schedule => 
-    schedule.status === 'CANCELLED' || 
-    schedule.status === 'Đã hủy' || 
-    schedule.status === 'cancelled'
-  );
-  
-  const pendingSchedules = filteredSchedules.filter(schedule => 
-    schedule.status === 'PENDING' || 
-    schedule.status === 'Đang chờ' || 
-    schedule.status === 'pending' ||
-    schedule.status === 'ACTIVE' || 
-    schedule.status === 'Đang hoạt động' ||
-    schedule.status === 'active'
+  // Log sample schedule statuses
+  if (filteredSchedules.length > 0) {
+    console.log('📋 [PROCESS APPOINTMENT] Sample schedule statuses:');
+    filteredSchedules.slice(0, 5).forEach((schedule, index) => {
+      console.log(`  ${index + 1}. Status: "${schedule.status}", Date: ${schedule.date}`);
+    });
+  }
+
+  // Tính toán số lịch hẹn theo trạng thái (theo Database thực tế)
+  const completedSchedules = filteredSchedules.filter(schedule =>
+    isScheduleCompleted(schedule.status)
   );
 
-  const emptySchedules = filteredSchedules.filter(schedule => 
-    schedule.status === 'AVAILABLE' || 
-    schedule.status === 'Trống' || 
-    schedule.status === 'available'
+  const cancelledSchedules = filteredSchedules.filter(schedule =>
+    isScheduleCancelled(schedule.status)
   );
 
-  // Tính toán tỷ lệ hoàn thành và hủy
-  const totalSchedulesWithStatus = completedSchedules.length + cancelledSchedules.length + pendingSchedules.length;
-  const completionRate = totalSchedulesWithStatus > 0 ? 
+  const activeSchedules = filteredSchedules.filter(schedule =>
+    isScheduleActive(schedule.status)
+  );
+
+  // Removed emptySchedules logic as it's no longer needed
+
+  // Tính tổng lịch hẹn có status (không tính trống)
+  const bookedSchedules = activeSchedules; // Alias cho compatibility
+
+  // Tính toán tỷ lệ hoàn thành và hủy (dựa trên lịch có status thực tế)
+  const totalSchedulesWithStatus = completedSchedules.length + cancelledSchedules.length + activeSchedules.length;
+
+
+
+  const completionRate = totalSchedulesWithStatus > 0 ?
     (completedSchedules.length / totalSchedulesWithStatus) * 100 : 0;
-  const cancellationRate = totalSchedulesWithStatus > 0 ? 
+  const cancellationRate = totalSchedulesWithStatus > 0 ?
     (cancelledSchedules.length / totalSchedulesWithStatus) * 100 : 0;
+  const activeRate = totalSchedulesWithStatus > 0 ?
+    (activeSchedules.length / totalSchedulesWithStatus) * 100 : 0;
 
-  // Phân bố lịch hẹn theo ngày trong tuần
-  const appointmentsByDayOfWeek = calculateAppointmentsByDayOfWeek(filteredSchedules);
+  // Removed appointmentsByDayOfWeek calculation as it's no longer needed
   
   // Phân bố lịch hẹn theo khung giờ
   const appointmentsByTimeSlot = calculateAppointmentsByTimeSlot(filteredSchedules);
@@ -416,22 +502,28 @@ const processAppointmentStatistics = (schedules, doctors, filters) => {
   // Tạo dữ liệu xu hướng theo tháng
   const monthlyTrend = calculateMonthlyTrend(schedules);
 
+
+
+
+
   return {
-    // Chỉ tính các lịch hẹn thực sự (không tính lịch trống)
+    // Tổng số lịch hẹn
     totalSchedules: totalSchedulesWithStatus,
+    // Breakdown theo status
     completedSchedules: completedSchedules.length,
     cancelledSchedules: cancelledSchedules.length,
-    pendingSchedules: pendingSchedules.length,
-    emptySchedules: emptySchedules.length,
+    bookedSchedules: activeSchedules.length, // Đang hoạt động
+    activeSchedules: activeSchedules.length,
+    // Tỷ lệ
     completionRate: Math.round(completionRate * 10) / 10,
     cancellationRate: Math.round(cancellationRate * 10) / 10,
+    activeRate: Math.round(activeRate * 10) / 10,
+    // Chi tiết theo status
     appointmentsByStatus: {
       completed: completedSchedules.length,
       cancelled: cancelledSchedules.length,
-      pending: pendingSchedules.length,
-      empty: emptySchedules.length
+      active: activeSchedules.length
     },
-    appointmentsByDayOfWeek,
     appointmentsByTimeSlot,
     appointmentsByDoctor,
     monthlyTrend
@@ -478,10 +570,8 @@ const processFinancialStatistics = (schedules, patients, filters) => {
   const averageAppointmentCost = 350000; // Giả định mỗi lịch hẹn hoàn thành có giá trị 350,000 VND
   
   // Tính toán lịch hẹn hoàn thành
-  const completedSchedules = filteredSchedules.filter(schedule => 
-    schedule.status === 'COMPLETED' || 
-    schedule.status === 'Hoàn thành' || 
-    schedule.status === 'completed'
+  const completedSchedules = filteredSchedules.filter(schedule =>
+    isScheduleCompleted(schedule.status)
   );
   
   // Tính doanh thu
@@ -516,10 +606,10 @@ const filterDataByDateRange = (data, filters) => {
   if (!filters.dateRange || !filters.dateRange[0] || !filters.dateRange[1]) {
     return data;
   }
-  
+
   const startDate = new Date(filters.dateRange[0]);
   const endDate = new Date(filters.dateRange[1]);
-  
+
   return data.filter(item => {
     const itemDate = new Date(item.date);
     return itemDate >= startDate && itemDate <= endDate;
@@ -578,24 +668,7 @@ const calculateAgeDistribution = (patients) => {
   return ageGroups;
 };
 
-// Tính toán lịch hẹn theo ngày trong tuần
-const calculateAppointmentsByDayOfWeek = (schedules) => {
-  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  const dayNames = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
-  const appointmentsByDay = [0, 0, 0, 0, 0, 0, 0];
-  
-  schedules.forEach(schedule => {
-    const date = new Date(schedule.date);
-    const dayOfWeek = date.getDay();
-    appointmentsByDay[dayOfWeek]++;
-  });
-  
-  return days.map((day, index) => ({
-    day,
-    dayName: dayNames[index],
-    count: appointmentsByDay[index]
-  }));
-};
+// Removed calculateAppointmentsByDayOfWeek function as it's no longer needed
 
 // Tính toán lịch hẹn theo khung giờ
 const calculateAppointmentsByTimeSlot = (schedules) => {
@@ -654,29 +727,18 @@ const calculateMonthlyTrend = (schedules) => {
     
     const month = date.getMonth();
     
-    // Chỉ tính lịch hẹn có trạng thái rõ ràng (không tính lịch trống)
-    const isEmptySchedule = 
-      schedule.status === 'AVAILABLE' || 
-      schedule.status === 'Trống' || 
-      schedule.status === 'available';
-    
-    if (!isEmptySchedule) {
+    // Tính tất cả lịch hẹn có status hợp lệ từ Backend
+    if (isScheduleCompleted(schedule.status) ||
+        isScheduleCancelled(schedule.status) ||
+        isScheduleBooked(schedule.status)) {
+
       monthlyData[month].total++;
-      
-      if (schedule.status === 'COMPLETED' || 
-          schedule.status === 'Hoàn thành' || 
-          schedule.status === 'completed') {
+
+      if (isScheduleCompleted(schedule.status)) {
         monthlyData[month].completed++;
-      } else if (schedule.status === 'CANCELLED' || 
-                 schedule.status === 'Đã hủy' || 
-                 schedule.status === 'cancelled') {
+      } else if (isScheduleCancelled(schedule.status)) {
         monthlyData[month].cancelled++;
-      } else if (schedule.status === 'PENDING' || 
-                 schedule.status === 'Đang chờ' || 
-                 schedule.status === 'pending' ||
-                 schedule.status === 'ACTIVE' || 
-                 schedule.status === 'Đang hoạt động' ||
-                 schedule.status === 'active') {
+      } else if (isScheduleBooked(schedule.status)) {
         monthlyData[month].pending++;
       }
     }
@@ -694,9 +756,7 @@ const calculateRevenueByMonth = (schedules, averageAppointmentCost) => {
     const date = new Date(schedule.date);
     if (date.getFullYear() !== currentYear) return;
     
-    if (schedule.status === 'COMPLETED' || 
-        schedule.status === 'Hoàn thành' || 
-        schedule.status === 'completed') {
+    if (isScheduleCompleted(schedule.status)) {
       const month = date.getMonth();
       revenueByMonth[month] += averageAppointmentCost;
     }

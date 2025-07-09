@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, Table, Spin, Statistic, Select, Input, Space, Button, Tooltip, Switch, Radio, Typography, Divider, DatePicker, Tag } from 'antd';
 import { UserOutlined, TeamOutlined, CheckCircleOutlined, FilterOutlined, SearchOutlined, ReloadOutlined, BarChartOutlined, FileExcelOutlined, PrinterOutlined } from '@ant-design/icons';
-import { ResponsiveContainer, Tooltip as RechartsTooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid, LabelList, Cell } from 'recharts';
+import { ResponsiveContainer, Tooltip as RechartsTooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid, LabelList, Cell, PieChart, Pie } from 'recharts';
 import { getStaffData, formatStaffDataForExport, exportToExcel } from '../../../../services/report.service';
 import { STAFF_ROLES } from '../../../../types/report.types';
 import './StaffReport.css';
@@ -138,11 +138,28 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
         }
     };
 
-    // Dữ liệu cho biểu đồ phân bố nhân sự
+    // Dữ liệu cho biểu đồ phân bố nhân sự - THIẾT KẾ MỚI
+    const totalStaff = statistics.totalDoctors + statistics.totalLabTechs + statistics.totalManagers;
+
     const distributionData = [
-        { name: 'Bác sĩ', value: statistics.totalDoctors },
-        { name: 'Kỹ thuật viên', value: statistics.totalLabTechs },
-        { name: 'Quản lý', value: statistics.totalManagers }
+        {
+            name: 'Bác sĩ',
+            value: statistics.totalDoctors,
+            percentage: totalStaff > 0 ? Math.round((statistics.totalDoctors / totalStaff) * 100) : 0,
+            color: '#1890ff'
+        },
+        {
+            name: 'Kỹ thuật viên',
+            value: statistics.totalLabTechs,
+            percentage: totalStaff > 0 ? Math.round((statistics.totalLabTechs / totalStaff) * 100) : 0,
+            color: '#52c41a'
+        },
+        {
+            name: 'Quản lý',
+            value: statistics.totalManagers,
+            percentage: totalStaff > 0 ? Math.round((statistics.totalManagers / totalStaff) * 100) : 0,
+            color: '#faad14'
+        }
     ];
     
     // Dữ liệu cho biểu đồ hiệu suất
@@ -642,40 +659,98 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
                     </Col>
                 </Row>
 
-                {/* Biểu đồ phân bố nhân sự */}
-                <Card title="Phân bố nhân sự" className="chart-card">
-                    <ResponsiveContainer width="100%" height={400}>
-                        <BarChart
-                            data={distributionData}
-                            layout="vertical"
-                            margin={{ top: 20, right: 30, left: 100, bottom: 5 }}
-                        >
-                        <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis type="number" />
-                            <YAxis 
-                                dataKey="name" 
-                                type="category" 
-                                width={100}
-                                tick={{ fontSize: 12 }}
-                            />
-                            <RechartsTooltip 
-                                formatter={(value) => [value, 'Số lượng']}
-                            />
-                        <Legend />
-                            <Bar 
-                                dataKey="value" 
-                                name="Số lượng"
-                                fill="#8884d8"
-                                radius={[0, 4, 4, 0]}
-                            >
-                                {distributionData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                ))}
-                                <LabelList dataKey="value" position="right" />
-                            </Bar>
-                    </BarChart>
-                </ResponsiveContainer>
-            </Card>
+                {/* Phân bố nhân sự - THIẾT KẾ TỐI ƯU */}
+                <Row gutter={[16, 16]}>
+                    {/* Pie Chart - Phân bố theo tỷ lệ */}
+                    <Col xs={24} lg={12}>
+                        <Card title="🥧 Phân bố theo tỷ lệ" className="chart-card">
+                            <ResponsiveContainer width="100%" height={400}>
+                                <PieChart>
+                                    <Pie
+                                        data={distributionData}
+                                        cx="50%"
+                                        cy="50%"
+                                        innerRadius={80}
+                                        outerRadius={140}
+                                        paddingAngle={5}
+                                        dataKey="value"
+                                    >
+                                        {distributionData.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={entry.color} />
+                                        ))}
+                                    </Pie>
+                                    <RechartsTooltip
+                                        formatter={(value, name) => [
+                                            `${value} người (${distributionData.find(d => d.name === name)?.percentage}%)`,
+                                            'Số lượng'
+                                        ]}
+                                    />
+                                    <Legend
+                                        verticalAlign="bottom"
+                                        height={50}
+                                        formatter={(value, entry) => (
+                                            <span style={{ color: entry.color, fontSize: '14px' }}>
+                                                {value}: {entry.payload.value} ({entry.payload.percentage}%)
+                                            </span>
+                                        )}
+                                    />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </Card>
+                    </Col>
+
+                    {/* Vertical Bar Chart - So sánh số lượng */}
+                    <Col xs={24} lg={12}>
+                        <Card title="📊 So sánh số lượng" className="chart-card">
+                            <ResponsiveContainer width="100%" height={400}>
+                                <BarChart
+                                    data={distributionData}
+                                    margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+                                >
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis
+                                        dataKey="name"
+                                        tick={{ fontSize: 12 }}
+                                        angle={-45}
+                                        textAnchor="end"
+                                        height={80}
+                                    />
+                                    <YAxis
+                                        tick={{ fontSize: 12 }}
+                                        label={{ value: 'Số lượng', angle: -90, position: 'insideLeft' }}
+                                    />
+                                    <RechartsTooltip
+                                        formatter={(value, name, props) => [
+                                            `${value} người (${props.payload.percentage}%)`,
+                                            'Số lượng'
+                                        ]}
+                                        labelStyle={{ color: '#666' }}
+                                        contentStyle={{
+                                            backgroundColor: '#fff',
+                                            border: '1px solid #d9d9d9',
+                                            borderRadius: '6px'
+                                        }}
+                                    />
+                                    <Bar
+                                        dataKey="value"
+                                        name="Số lượng"
+                                        radius={[6, 6, 0, 0]}
+                                        maxBarSize={80}
+                                    >
+                                        {distributionData.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={entry.color} />
+                                        ))}
+                                        <LabelList
+                                            dataKey="value"
+                                            position="top"
+                                            style={{ fontSize: '14px', fontWeight: 'bold', fill: '#333' }}
+                                        />
+                                    </Bar>
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </Card>
+                    </Col>
+                </Row>
 
                 {/* Biểu đồ hiệu suất nhân viên */}
                 <Card 

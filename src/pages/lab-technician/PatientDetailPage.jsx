@@ -13,6 +13,7 @@ import { Typography, Space, notification, Popconfirm,
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import UpdateTestResultModal from '../../components/lab-technician/UpdateTestResultModal.jsx';
 import dayjs from 'dayjs';
+import { createNotification } from "../../services/notification.service";
 
 const PatientDetail = () => {
   const [type, setType] = useState("");
@@ -53,7 +54,6 @@ const PatientDetail = () => {
 
   const handleUpdateHealthRecord = async () => {
     try {
-      // Gửi đủ các trường như backend yêu cầu
       const updatePayload = {
         id: healthRecordData.id,
         hivStatus: healthRecordData.hivStatus,
@@ -64,7 +64,9 @@ const PatientDetail = () => {
         scheduleId: healthRecordData.schedule?.id,
         regimenId: healthRecordData.regimen?.id,
       };
+      
       const response = await updateHealthRecordAPI(healthRecordData.id, updatePayload);
+      
       if (response.data) {
         notification.success({
           message: 'Hệ thống',
@@ -72,6 +74,40 @@ const PatientDetail = () => {
           pauseOnHover: true,
           description: 'Cập nhật thông tin sức khỏe thành công!'
         });
+
+        console.log("DEBUG | healthRecordData:", healthRecordData);
+
+        // Kiểm tra kết quả xét nghiệm đầy đủ chưa
+        const allResultsFilled = testResultData.every(
+          (test) => test.result !== null && test.result !== ''
+        );
+
+        console.log("DEBUG | All results filled:", allResultsFilled);
+
+        // Nếu trạng thái HIV hợp lệ và đã có đầy đủ kết quả xét nghiệm thì gửi thông báo
+        if (
+          (healthRecordData.hivStatus === "Dương tính" || healthRecordData.hivStatus === "Âm tính") &&
+          allResultsFilled
+        ) {
+          const doctorId = healthRecordData.schedule?.doctor?.id;
+          const patientName = healthRecordData.schedule?.patient?.fullName;
+          if (doctorId && patientName) {
+            try {
+              await createNotification({
+                title: "Thông báo kết quả xét nghiệm",
+                message: `Đã có kết quả xét nghiệm của bệnh nhân ${patientName}`,
+                createdAt: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
+                userId: doctorId,
+              });
+              console.log("Notification sent!");
+            } catch (err) {
+              console.error("Notification error:", err);
+            }
+          } else {
+            console.warn("Không tìm thấy doctorId hoặc patientName để gửi notification");
+          }
+        }
+
         await loadData();
       }
     } catch (error) {
@@ -79,43 +115,6 @@ const PatientDetail = () => {
       alert("Cập nhật thất bại.");
     }
   };
-
-  const handleCreateTestResult = async () => {
-    try {
-      const response = await createTestResultAPI(type, note, expectedResultTime, healthRecordData.id);
-      if (response.data) {
-        notification.success({
-          message: 'Hệ thống',
-          showProgress: true,
-          pauseOnHover: true,
-          description: 'Tạo kết quả xét nghiệm thành công'
-        });
-      }
-      resetAndClose();
-      await loadData();
-    } catch (error) {
-      console.error("Lỗi tạo kết quả:", error.response?.data || error.message);
-      notification.error({
-        message: 'Lỗi',
-        showProgress: true,
-        pauseOnHover: true,
-        description: 'Không thể tạo kết quả xét nghiệm'
-      });
-    }
-  };
-
-  const handleDeleteTestResult = async (testResultId) => {
-    const response = await deleteTestResultAPI(testResultId)
-    if (response.data) {
-      notification.success({
-        message: 'Hệ thống',
-        showProgress: true,
-        pauseOnHover: true,
-        description: 'Xóa kết quả xét nghiệm thành công'
-      })
-      await loadData()
-    }
-  }
 
   const resetAndClose = () => {
     setIsCreateTestResultModalOpen(false)

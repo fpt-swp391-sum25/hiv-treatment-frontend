@@ -372,17 +372,29 @@ const createScheduleAPI = (scheduleData) => {
 }
 
 const getAllSchedulesAPI = () => {
-    // Try the new endpoint first, with fallback to the old one if needed
+    // Sử dụng endpoint chính thức từ API documentation
     const URL_BACKEND = '/api/schedule/list';
-    console.log('Fetching schedules from:', URL_BACKEND);
+    console.log('🔗 [API] Fetching schedules from:', URL_BACKEND);
 
     return axios.get(URL_BACKEND)
+        .then(response => {
+            console.log('✅ [API] Schedule list response:', response);
+            return response;
+        })
         .catch(error => {
-            console.error('Error fetching from /api/schedule/list:', error);
-            console.log('Trying fallback endpoint /api/schedule...');
+            console.error('❌ [API] Error fetching from /api/schedule/list:', error);
+            console.log('🔄 [API] Trying fallback endpoint /api/schedule...');
 
             // If the first endpoint fails, try the fallback
-            return axios.get('/api/schedule');
+            return axios.get('/api/schedule')
+                .then(response => {
+                    console.log('✅ [API] Fallback schedule response:', response);
+                    return response;
+                })
+                .catch(fallbackError => {
+                    console.error('❌ [API] Fallback also failed:', fallbackError);
+                    throw fallbackError;
+                });
         });
 }
 
@@ -391,20 +403,32 @@ const getSchedulesByDoctorAPI = (doctorId) => {
     return axios.get(URL_BACKEND);
 }
 
-const getSchedulesByDateAPI = (date) => {
-    const URL_BACKEND = `/api/schedule/date/${date}`;
+// API functions sử dụng endpoints từ documentation
+const getSchedulesByStatusAPI = (status) => {
+    const URL_BACKEND = `/api/schedule/status/${status}`;
+    console.log('🔗 [API] Fetching schedules by status:', status, 'from:', URL_BACKEND);
     return axios.get(URL_BACKEND);
 }
 
 const getSchedulesByTypeAPI = (type) => {
     const URL_BACKEND = `/api/schedule/type/${type}`;
+    console.log('🔗 [API] Fetching schedules by type:', type, 'from:', URL_BACKEND);
     return axios.get(URL_BACKEND);
 }
 
-const getSchedulesByStatusAPI = (status) => {
-    const URL_BACKEND = `/api/schedule/status/${status}`;
+const getSchedulesByDateAPI = (date) => {
+    const URL_BACKEND = `/api/schedule/date/${date}`;
+    console.log('🔗 [API] Fetching schedules by date:', date, 'from:', URL_BACKEND);
     return axios.get(URL_BACKEND);
 }
+
+const getSchedulesByPatientAPI = (patientId) => {
+    const URL_BACKEND = `/api/schedule/patient-id/${patientId}`;
+    console.log('🔗 [API] Fetching schedules by patient:', patientId, 'from:', URL_BACKEND);
+    return axios.get(URL_BACKEND);
+}
+
+// Đã xóa tất cả duplicate functions
 
 
 const updateScheduleAPI = async (scheduleId, scheduleData) => {
@@ -456,11 +480,6 @@ const deleteScheduleAPI = (scheduleId) => {
     return axios.delete(URL_BACKEND);
 }
 
-const getSchedulesByPatientAPI = (patientId) => {
-    const URL_BACKEND = `/api/schedule/patient-id/${patientId}`;
-    return axios.get(URL_BACKEND);
-}
-
 // Thêm API mới để lấy users theo role
 const fetchUsersByRoleAPI = (role) => {
     // Đảm bảo role được viết hoa theo yêu cầu của BE
@@ -501,6 +520,30 @@ const createDoctorProfileAPI = (profileData) => {
 const checkAvailableSlotsAPI = (doctorId, date) => {
     const URL_BACKEND = `/api/schedule/available-slots?doctorId=${doctorId}&date=${date}`;
     console.log(`Checking available slots for doctor ${doctorId} on date ${date}`);
+    return axios.get(URL_BACKEND);
+};
+
+// ✅ Advanced API functions theo BE Documentation
+const fetchUsersByRoleAndStatusAPI = (role, status) => {
+    const URL_BACKEND = `/api/user/${role.toUpperCase()}/account-status/${status}`;
+    console.log(`Fetching ${role} users with status ${status} from:`, URL_BACKEND);
+    return axios.get(URL_BACKEND);
+};
+
+const fetchUsersByRoleAndVerificationAPI = (role, isVerified) => {
+    const URL_BACKEND = `/api/user/${role.toUpperCase()}/mail-verification-status/${isVerified}`;
+    console.log(`Fetching ${role} users with verification ${isVerified} from:`, URL_BACKEND);
+    return axios.get(URL_BACKEND);
+};
+
+const getSchedulesWithFiltersAPI = (filters = {}) => {
+    const params = new URLSearchParams();
+    if (filters.doctorId) params.append('doctorId', filters.doctorId);
+    if (filters.date) params.append('date', filters.date); // Format: YYYY-MM-DD
+    if (filters.status) params.append('status', filters.status);
+
+    const URL_BACKEND = `/api/schedule?${params.toString()}`;
+    console.log('Fetching schedules with filters from:', URL_BACKEND);
     return axios.get(URL_BACKEND);
 };
 
@@ -1102,10 +1145,13 @@ export {
     getSchedulesByDateAPI,
     getSchedulesByTypeAPI,
     getSchedulesByStatusAPI,
+    getSchedulesByPatientAPI,
     updateScheduleAPI,
     deleteScheduleAPI,
-    getSchedulesByPatientAPI,
     fetchUsersByRoleAPI,
+    fetchUsersByRoleAndStatusAPI,
+    fetchUsersByRoleAndVerificationAPI,
+    getSchedulesWithFiltersAPI,
     fetchAllLabTechniciansAPI,
     fetchDoctorProfileByDoctorIdAPI,
     createDoctorProfileAPI,

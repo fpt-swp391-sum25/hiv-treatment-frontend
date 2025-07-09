@@ -440,9 +440,6 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                                         required
                                     />
                                 </div>
-                                <Form.Text className="text-muted">
-                                    Nhập số phòng làm việc cho bác sĩ (VD: 101, 102, 201...)
-                                </Form.Text>
                             </Form.Group>
                         </div>
                         
