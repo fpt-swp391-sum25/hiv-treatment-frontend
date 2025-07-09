@@ -1,24 +1,29 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Row, Col, Tabs, Spin, Empty, message, Table, Card } from 'antd';
-import { 
-  UserOutlined, 
-  CalendarOutlined, 
-  TeamOutlined
+import {
+  UserOutlined,
+  CalendarOutlined,
+  TeamOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  PlusCircleOutlined,
+  TrophyOutlined
 } from '@ant-design/icons';
 import axios from '../../../services/axios.customize';
-import { 
-  fetchDashboardStatisticsAPI, 
-  fetchStaffStatisticsAPI, 
+import {
+  fetchDashboardStatisticsAPI,
+  fetchStaffStatisticsAPI,
   fetchPatientStatisticsAPI,
   fetchAppointmentStatisticsAPI,
   fetchAllDoctorsAPI
 } from '../../../services/api.service';
-import { 
+import {
   getDashboardStatistics,
   getStaffStatistics,
   getPatientStatistics,
   getAppointmentStatistics
 } from '../../../services/statistics.service';
+import { SCHEDULE_STATUS, STATUS_LABELS } from '../../../constants/status.constants';
 import './Dashboard.css';
 import KPICard from './KPICard';
 import DashboardFilters from './DashboardFilters';
@@ -28,12 +33,12 @@ import AppointmentStatusChart from './AppointmentStatusChart';
 import MonthlyTrendChart from './MonthlyTrendChart';
 import GenderDistributionChart from './GenderDistributionChart';
 import AgeDistributionChart from './AgeDistributionChart';
-import DayOfWeekChart from './DayOfWeekChart';
+
 import StaffWorkloadChart from './StaffWorkloadChart';
 import StaffDistributionChart from './StaffDistributionChart';
 import StaffPerformanceChart from './StaffPerformanceChart';
-import PatientAppointmentRatioChart from './PatientAppointmentRatioChart';
 import PatientRegistrationTrendChart from './PatientRegistrationTrendChart';
+
 
 const { TabPane } = Tabs;
 
@@ -212,87 +217,243 @@ const Dashboard = () => {
     }
   };
 
-  // Hiển thị nội dung tab Tổng quan
+  // Hiển thị nội dung tab Tổng quan - THIẾT KẾ MỚI
   const renderOverviewTab = () => {
     const stats = statistics.overview || {
       staff: {},
       patients: {},
       appointments: {}
     };
-    
+
+    // Tính toán các KPI quan trọng
+    const totalPatients = stats.patients?.totalPatients || 0;
+    const totalStaff = (stats.staff?.totalDoctors || 0) + (stats.staff?.totalLabTechnicians || 0);
+    const todayAppointments = stats.appointments?.todayAppointments || 0;
+    const treatmentSuccessRate = stats.appointments?.completionRate || 0;
+
     return (
       <>
-        <Row gutter={[16, 16]}>
-          <Col xs={24} sm={12} md={8} lg={8}>
-            <KPICard 
-              title="Tổng số bệnh nhân" 
-              value={stats.patients?.totalPatients || 0}
-              type="info"
-              icon={<TeamOutlined />}
-            />
-          </Col>
-          <Col xs={24} sm={12} md={8} lg={8}>
-            <KPICard 
-              title="Bệnh nhân mới" 
-              value={stats.patients?.newPatients || 0}
-              type="info"
-              icon={<TeamOutlined />}
-            />
-          </Col>
+        {/* 📊 SECTION 1: KPI CHÍNH - 4 chỉ số quan trọng nhất */}
+        <div style={{ marginBottom: '32px' }}>
+          <h3 style={{
+            fontSize: '18px',
+            fontWeight: '600',
+            marginBottom: '16px',
+            color: '#1f2937'
+          }}>
+            📊 Tổng quan hệ thống
+          </h3>
+          <Row gutter={[16, 16]}>
+            <Col xs={24} sm={12} md={6}>
+              <KPICard
+                title="Tổng bệnh nhân"
+                value={totalPatients}
+                type="primary"
+                icon={<TeamOutlined />}
+              />
+            </Col>
+            <Col xs={24} sm={12} md={6}>
+              <KPICard
+                title="Tổng nhân viên"
+                value={totalStaff}
+                type="info"
+                icon={<UserOutlined />}
+              />
+            </Col>
+            <Col xs={24} sm={12} md={6}>
+              <KPICard
+                title="Lịch hẹn hôm nay"
+                value={todayAppointments}
+                type="warning"
+                icon={<CalendarOutlined />}
+              />
+            </Col>
+            <Col xs={24} sm={12} md={6}>
+              <KPICard
+                title="Tỷ lệ điều trị thành công"
+                value={`${treatmentSuccessRate}%`}
+                type="success"
+                icon={<CheckCircleOutlined />}
+              />
+            </Col>
+          </Row>
+        </div>
 
-          <Col xs={24} sm={12} md={8} lg={8}>
-            <KPICard 
-              title="Nhân viên  y tế" 
-              value={(stats.staff?.totalDoctors || 0) + (stats.staff?.totalLabTechnicians || 0)}
-              type="warning"
-              icon={<UserOutlined />}
-            />
-          </Col>
-        </Row>
-        
-        <Row gutter={[16, 16]} style={{ marginTop: '16px' }}>
+        {/* 📈 SECTION 2: BIỂU ĐỒ TỔNG QUAN */}
+        <div style={{ marginBottom: '32px' }}>
+          <h3 style={{
+            fontSize: '18px',
+            fontWeight: '600',
+            marginBottom: '16px',
+            color: '#1f2937'
+          }}>
+            📈 Xu hướng và phân bố
+          </h3>
+          <Row gutter={[16, 16]}>
+            <Col xs={24} lg={16}>
+              <Card title="Xu hướng hoạt động theo tháng" style={{ height: '400px' }}>
+                <div className="chart-container">
+                  {stats.appointments?.monthlyTrend ? (
+                    <MonthlyTrendChart data={stats.appointments.monthlyTrend} />
+                  ) : (
+                    <div style={{ height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Empty description="Chưa có dữ liệu xu hướng" />
+                    </div>
+                  )}
+                </div>
+              </Card>
+            </Col>
+            <Col xs={24} lg={8}>
+              <Card title="Phân bố lịch hẹn" style={{ height: '400px' }}>
+                <div className="chart-container">
+                  {stats.appointments?.appointmentsByStatus ? (
+                    <AppointmentStatusChart data={stats.appointments.appointmentsByStatus} />
+                  ) : (
+                    <div style={{ height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Empty description="Chưa có dữ liệu phân bố" />
+                    </div>
+                  )}
+                </div>
+              </Card>
+            </Col>
+          </Row>
+        </div>
 
-          <Col xs={24} sm={12} md={8} lg={8}>
-            <KPICard 
-              title="Tổng số lịch hẹn" 
-              value={stats.appointments?.totalSchedules || 0}
-              type="success"
-              icon={<CalendarOutlined />}
-            />
-          </Col>
-          <Col xs={24} sm={12} md={8} lg={8}>
-            <KPICard 
-              title="Tỷ lệ hoàn thành" 
-              value={`${stats.appointments?.completionRate || 0}%`}
-              type="success"
-              icon={<CalendarOutlined />}
-            />
-          </Col>
-          <Col xs={24} sm={12} md={8} lg={8}>
-            <KPICard 
-              title="Tỷ lệ hủy hẹn" 
-              value={`${stats.appointments?.cancellationRate || 0}%`}
-              type="danger"
-              icon={<CalendarOutlined />}
-            />
-          </Col>
-        </Row>
+        {/* 🎯 SECTION 3: CHỈ SỐ HIỆU SUẤT */}
+        <div style={{ marginBottom: '32px' }}>
+          <h3 style={{
+            fontSize: '18px',
+            fontWeight: '600',
+            marginBottom: '16px',
+            color: '#1f2937'
+          }}>
+            🎯 Chỉ số hiệu suất
+          </h3>
+          <Row gutter={[16, 16]}>
+            <Col xs={24} sm={8}>
+              <KPICard
+                title="Tỷ lệ hủy hẹn"
+                value={`${stats.appointments?.cancellationRate || 0}%`}
+                type="danger"
+                icon={<CloseCircleOutlined />}
+              />
+            </Col>
+            <Col xs={24} sm={8}>
+              <KPICard
+                title="Bệnh nhân mới tháng này"
+                value={stats.patients?.newPatients || 0}
+                type="success"
+                icon={<PlusCircleOutlined />}
+              />
+            </Col>
+            <Col xs={24} sm={8}>
+              <KPICard
+                title="Hiệu suất nhân viên"
+                value={`${Math.round((stats.appointments?.completedSchedules || 0) / Math.max(totalStaff, 1))}`}
+                type="info"
+                icon={<TrophyOutlined />}
+              />
+            </Col>
+          </Row>
+        </div>
 
-        <Row gutter={[16, 16]} style={{ marginTop: '24px' }}>
-          <Col xs={24}>
-            <Card title="Xu hướng lịch hẹn theo tháng">
-              <div className="chart-container">
-                {stats.appointments?.monthlyTrend ? (
-                  <MonthlyTrendChart data={stats.appointments.monthlyTrend} />
-                ) : (
-                  <div style={{ height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Empty description="Chưa có dữ liệu biểu đồ" />
+        {/* 📋 SECTION 4: THÔNG TIN CHI TIẾT */}
+        <div style={{ marginBottom: '32px' }}>
+          <h3 style={{
+            fontSize: '18px',
+            fontWeight: '600',
+            marginBottom: '16px',
+            color: '#1f2937'
+          }}>
+            📋 Thông tin chi tiết
+          </h3>
+          <Row gutter={[16, 16]}>
+            <Col xs={24} lg={12}>
+              <Card
+                title="📊 Tóm tắt hoạt động"
+                style={{ height: '300px' }}
+                bodyStyle={{ padding: '16px' }}
+              >
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ color: '#6b7280' }}>Tổng bệnh nhân:</span>
+                    <span style={{ fontWeight: '600', color: '#1f2937' }}>{totalPatients}</span>
                   </div>
-                )}
-              </div>
-            </Card>
-          </Col>
-        </Row>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ color: '#6b7280' }}>Tổng nhân viên:</span>
+                    <span style={{ fontWeight: '600', color: '#1f2937' }}>{totalStaff}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ color: '#6b7280' }}>Lịch hẹn hôm nay:</span>
+                    <span style={{ fontWeight: '600', color: '#f59e0b' }}>{todayAppointments}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ color: '#6b7280' }}>Tỷ lệ thành công:</span>
+                    <span style={{ fontWeight: '600', color: '#10b981' }}>{treatmentSuccessRate}%</span>
+                  </div>
+                  <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: '12px', marginTop: '12px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ color: '#6b7280' }}>Trạng thái hệ thống:</span>
+                      <span style={{
+                        fontWeight: '600',
+                        color: '#10b981',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}>
+                        <CheckCircleOutlined />
+                        Hoạt động bình thường
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </Col>
+            <Col xs={24} lg={12}>
+              <Card
+                title="⚡ Hoạt động gần đây"
+                style={{ height: '300px' }}
+                bodyStyle={{ padding: '16px' }}
+              >
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div style={{
+                    padding: '8px 12px',
+                    backgroundColor: '#f3f4f6',
+                    borderRadius: '6px',
+                    fontSize: '14px'
+                  }}>
+                    <div style={{ fontWeight: '500', color: '#1f2937' }}>Lịch hẹn mới nhất</div>
+                    <div style={{ color: '#6b7280', fontSize: '12px' }}>
+                      {todayAppointments > 0 ? `${todayAppointments} lịch hẹn hôm nay` : 'Không có lịch hẹn hôm nay'}
+                    </div>
+                  </div>
+                  <div style={{
+                    padding: '8px 12px',
+                    backgroundColor: '#f3f4f6',
+                    borderRadius: '6px',
+                    fontSize: '14px'
+                  }}>
+                    <div style={{ fontWeight: '500', color: '#1f2937' }}>Bệnh nhân mới</div>
+                    <div style={{ color: '#6b7280', fontSize: '12px' }}>
+                      {stats.patients?.newPatients || 0} bệnh nhân mới tháng này
+                    </div>
+                  </div>
+                  <div style={{
+                    padding: '8px 12px',
+                    backgroundColor: '#f3f4f6',
+                    borderRadius: '6px',
+                    fontSize: '14px'
+                  }}>
+                    <div style={{ fontWeight: '500', color: '#1f2937' }}>Hiệu suất điều trị</div>
+                    <div style={{ color: '#6b7280', fontSize: '12px' }}>
+                      Tỷ lệ hoàn thành: {treatmentSuccessRate}%
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </Col>
+          </Row>
+        </div>
       </>
     );
   };
@@ -300,11 +461,6 @@ const Dashboard = () => {
   // Hiển thị nội dung tab Nhân viên
   const renderStaffTab = () => {
     const stats = statistics.staff || { doctors: {}, labTechnicians: {} };
-    
-    // Tính tỷ lệ bác sĩ và kỹ thuật viên
-    const totalStaff = (stats.doctors?.total || 0) + (stats.labTechnicians?.total || 0);
-    const doctorRatio = totalStaff > 0 ? Math.round((stats.doctors?.total || 0) / totalStaff * 100) : 0;
-    const labTechRatio = totalStaff > 0 ? Math.round((stats.labTechnicians?.total || 0) / totalStaff * 100) : 0;
     
     // Dữ liệu cho biểu đồ phân bố nhân viên
     const staffDistributionData = {
@@ -314,36 +470,20 @@ const Dashboard = () => {
     
     return (
       <>
-        <Row gutter={[16, 16]}>
-          <Col xs={24} sm={12} md={8} lg={6}>
-            <KPICard 
-              title="Tổng số bác sĩ" 
+        <Row gutter={[16, 16]} justify="center">
+          <Col xs={24} sm={12} md={10} lg={8}>
+            <KPICard
+              title="Tổng số bác sĩ"
               value={stats.doctors?.total || 0}
               type="info"
               icon={<UserOutlined />}
             />
           </Col>
-          <Col xs={24} sm={12} md={8} lg={6}>
-            <KPICard 
-              title="Kỹ thuật viên" 
+          <Col xs={24} sm={12} md={10} lg={8}>
+            <KPICard
+              title="Kỹ thuật viên"
               value={stats.labTechnicians?.total || 0}
               type="info"
-              icon={<UserOutlined />}
-            />
-          </Col>
-          <Col xs={24} sm={12} md={8} lg={6}>
-            <KPICard 
-              title="Tỷ lệ bác sĩ" 
-              value={`${doctorRatio}%`}
-              type="success"
-              icon={<UserOutlined />}
-            />
-          </Col>
-          <Col xs={24} sm={12} md={8} lg={6}>
-            <KPICard 
-              title="Tỷ lệ kỹ thuật viên" 
-              value={`${labTechRatio}%`}
-              type="warning"
               icon={<UserOutlined />}
             />
           </Col>
@@ -429,80 +569,68 @@ const Dashboard = () => {
     return (
       <>
         <Row gutter={[16, 16]}>
-          <Col xs={24} sm={12} md={8} lg={6}>
-            <KPICard 
-              title="Tổng số bệnh nhân" 
-              value={stats.totalPatients || 0}
-              type="info"
-              icon={<TeamOutlined />}
-            />
-          </Col>
-          <Col xs={24} sm={12} md={8} lg={6}>
-            <KPICard 
-              title="Bệnh nhân mới" 
-              value={stats.newPatients || 0}
-              type="success"
-              icon={<TeamOutlined />}
-            />
-          </Col>
-          <Col xs={24} sm={12} md={8} lg={6}>
-            <KPICard 
-              title="Bệnh nhân đã đặt lịch" 
-              value={stats.patientsWithAppointments || 0}
-              type="warning"
-              icon={<TeamOutlined />}
-            />
-          </Col>
-          <Col xs={24} sm={12} md={8} lg={6}>
-            <KPICard 
-              title="Bệnh nhân hoạt động" 
-              value={stats.activePatients || 0}
-              type="success"
-              icon={<TeamOutlined />}
-            />
-          </Col>
-        </Row>
-        
-        <Row gutter={[16, 16]} style={{ marginTop: '24px' }}>
-          <Col xs={24} md={8}>
-            <Card title="Phân bố bệnh nhân theo giới tính">
-              <div className="chart-container">
+          {/* Cột 1: KPI Card 1 + Chart 1 */}
+          <Col xs={24} lg={8}>
+            <div style={{ marginBottom: '16px' }}>
+              <KPICard
+                title="Tổng số bệnh nhân"
+                value={stats.totalPatients || 0}
+                type="info"
+                icon={<TeamOutlined />}
+              />
+            </div>
+            <Card title="Phân bố theo giới tính" size="small">
+              <div className="chart-container" style={{ height: '280px' }}>
                 {stats.genderDistribution ? (
                   <GenderDistributionChart data={stats.genderDistribution} />
                 ) : (
-                  <div style={{ height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <Empty description="Chưa có dữ liệu giới tính" />
                   </div>
                 )}
               </div>
             </Card>
           </Col>
-          <Col xs={24} md={8}>
-            <Card title="Phân bố bệnh nhân theo độ tuổi">
-              <div className="chart-container">
+
+          {/* Cột 2: KPI Card 2 + Chart 2 */}
+          <Col xs={24} lg={8}>
+            <div style={{ marginBottom: '16px' }}>
+              <KPICard
+                title="Bệnh nhân mới"
+                value={stats.newPatients || 0}
+                type="success"
+                icon={<TeamOutlined />}
+              />
+            </div>
+            <Card title="Phân bố theo độ tuổi" size="small">
+              <div className="chart-container" style={{ height: '280px' }}>
                 {stats.ageGroups ? (
                   <AgeDistributionChart data={stats.ageGroups} />
                 ) : (
-                  <div style={{ height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <Empty description="Chưa có dữ liệu độ tuổi" />
                   </div>
                 )}
               </div>
             </Card>
           </Col>
-          <Col xs={24} md={8}>
-            <PatientAppointmentRatioChart 
-              totalPatients={stats.totalPatients || 0} 
-              patientsWithAppointments={stats.patientsWithAppointments || 0} 
-            />
+
+          {/* Cột 3: Xu hướng đăng ký */}
+          <Col xs={24} lg={8}>
+            <Card title="Xu hướng đăng ký" size="small" style={{ height: '100%' }}>
+              <div className="chart-container" style={{ height: '340px' }}>
+                {stats.registrationTrend && stats.registrationTrend.length > 0 ? (
+                  <PatientRegistrationTrendChart data={stats.registrationTrend} />
+                ) : (
+                  <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Empty description="Chưa có dữ liệu xu hướng" />
+                  </div>
+                )}
+              </div>
+            </Card>
           </Col>
         </Row>
-        
-        <Row gutter={[16, 16]} style={{ marginTop: '16px' }}>
-          <Col xs={24}>
-            <PatientRegistrationTrendChart data={stats.registrationTrend || []} />
-          </Col>
-        </Row>
+
       </>
     );
   };
@@ -510,73 +638,59 @@ const Dashboard = () => {
   // Hiển thị nội dung tab Lịch hẹn
   const renderAppointmentsTab = () => {
     const stats = statistics.appointments || {};
-    
+
+
+
     return (
       <>
         <Row gutter={[16, 16]}>
-          <Col xs={24} sm={12} md={8} lg={6}>
-            <KPICard 
-              title="Tổng số lịch hẹn" 
+          <Col xs={24} sm={12} md={8}>
+            <KPICard
+              title="Tổng số lịch hẹn"
               value={stats.totalSchedules || 0}
               type="info"
               icon={<CalendarOutlined />}
             />
           </Col>
-          <Col xs={24} sm={12} md={8} lg={6}>
-            <KPICard 
-              title="Hoàn thành" 
+          <Col xs={24} sm={12} md={8}>
+            <KPICard
+              title="Hoàn thành"
               value={stats.completedSchedules || 0}
               type="success"
               icon={<CalendarOutlined />}
             />
           </Col>
-          <Col xs={24} sm={12} md={8} lg={6}>
-            <KPICard 
-              title="Đã hủy" 
+          <Col xs={24} sm={12} md={8}>
+            <KPICard
+              title="Đã hủy"
               value={stats.cancelledSchedules || 0}
               type="danger"
               icon={<CalendarOutlined />}
             />
           </Col>
-          <Col xs={24} sm={12} md={8} lg={6}>
-            <KPICard 
-              title="Đang chờ" 
-              value={stats.pendingSchedules || 0}
+        </Row>
+
+        <Row gutter={[16, 16]} style={{ marginTop: '16px' }}>
+          <Col xs={24} sm={12} md={12}>
+            <KPICard
+              title="Đã đặt"
+              value={stats.bookedSchedules || 0}
               type="warning"
               icon={<CalendarOutlined />}
             />
           </Col>
-        </Row>
-        
-        <Row gutter={[16, 16]} style={{ marginTop: '16px' }}>
-          <Col xs={24} sm={12} md={8} lg={6}>
-            <KPICard 
-              title="Tỷ lệ hoàn thành" 
-              value={`${stats.completionRate || 0}%`}
-              type="success"
-              icon={<CalendarOutlined />}
-            />
-          </Col>
-          <Col xs={24} sm={12} md={8} lg={6}>
-            <KPICard 
-              title="Tỷ lệ hủy" 
+          <Col xs={24} sm={12} md={12}>
+            <KPICard
+              title="Tỷ lệ hủy"
               value={`${stats.cancellationRate || 0}%`}
               type="danger"
-              icon={<CalendarOutlined />}
-            />
-          </Col>
-          <Col xs={24} sm={12} md={8} lg={6}>
-            <KPICard 
-              title="Lịch trống" 
-              value={stats.emptySchedules || 0}
-              type="info"
               icon={<CalendarOutlined />}
             />
           </Col>
         </Row>
         
         <Row gutter={[16, 16]} style={{ marginTop: '24px' }}>
-          <Col xs={24} sm={12}>
+          <Col xs={24} md={12}>
             <Card title="Phân bố lịch hẹn theo trạng thái">
               <div className="chart-container">
                 {stats.appointmentsByStatus ? (
@@ -589,19 +703,7 @@ const Dashboard = () => {
               </div>
             </Card>
           </Col>
-          <Col xs={24} sm={12}>
-            <Card title="Lịch hẹn theo ngày trong tuần">
-              <div className="chart-container">
-                {stats.appointmentsByDayOfWeek ? (
-                  <DayOfWeekChart data={stats.appointmentsByDayOfWeek} />
-                ) : (
-                  <div style={{ height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Empty description="Chưa có dữ liệu ngày trong tuần" />
-                  </div>
-                )}
-              </div>
-            </Card>
-          </Col>
+
         </Row>
         
         <Row gutter={[16, 16]} style={{ marginTop: '24px' }}>
@@ -650,9 +752,9 @@ const Dashboard = () => {
   return (
     <div className="dashboard-container">
       <h1 className="dashboard-title">Thống kê tổng quan</h1>
-      
-      <DashboardFilters 
-        onFilterChange={handleFilterChange} 
+
+      <DashboardFilters
+        onFilterChange={handleFilterChange}
         doctors={doctors}
         initialFilters={filters}
       />

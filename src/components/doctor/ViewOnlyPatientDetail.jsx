@@ -7,7 +7,8 @@ import {
   updateHealthRecordAPI,
   createTestResultAPI,
   deleteTestResultAPI,
-  updateTestResultAPI
+  updateTestResultAPI,
+  fetchUsersByRoleAPI
 } from "../../services/api.service.js";
 import {
   Typography, Space, Button, Card, Form, Row,
@@ -18,6 +19,7 @@ import '../../styles/ReturnButton.css'
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { Popconfirm } from 'antd';
+import { createNotification } from "../../services/notification.service";
 
 const ViewOnlyPatientDetail = () => {
   const [healthRecordData, setHealthRecordData] = useState({})
@@ -147,6 +149,25 @@ const ViewOnlyPatientDetail = () => {
 
       for (const type of newTestTypes) {
         await createTestResultAPI(type, "", "", healthRecordData.id);
+      }
+
+      // Sau khi tạo test result thành công, gửi notification cho tất cả LAB_TECHNICIAN
+      try {
+        const labTechRes = await fetchUsersByRoleAPI("LAB_TECHNICIAN");
+        const labTechnicians = labTechRes.data || [];
+        const patientName = healthRecordData.schedule?.patient?.fullName;
+        await Promise.all(
+          labTechnicians.map(labTech =>
+            createNotification({
+              title: "Yêu cầu xét nghiệm",
+              message: `Yêu cầu kết quả xét nghiệm của bệnh nhân ${patientName}`,
+              createdAt: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
+              userId: labTech.id,
+            })
+          )
+        );
+      } catch (err) {
+        console.error("Notification error:", err);
       }
 
       notification.success({

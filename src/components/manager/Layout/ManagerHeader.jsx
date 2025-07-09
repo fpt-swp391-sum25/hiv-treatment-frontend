@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { Layout, Avatar, Typography, Space, Button } from 'antd';
+import { Layout, Avatar, Typography, Space, Button, Popconfirm } from 'antd';
 import { UserOutlined, LogoutOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import appLogo from '../../../assets/appLogo.png';
@@ -57,14 +57,23 @@ const ManagerHeader = () => {
           size={46}
           className="user-avatar"
         />
-        <Button
-          type="primary"
-          danger
-          icon={<LogoutOutlined />}
-          onClick={handleLogout}
-        >
-          Đăng xuất
-        </Button>
+        <Popconfirm
+          title="Đăng xuất"
+          description="Bạn có chắc muốn đăng xuất?"
+          onConfirm={handleLogout}
+          okText="Có"
+          cancelText="Không"
+          placement="left">
+
+
+          <Button
+            type="primary"
+            icon={<LogoutOutlined />}
+            danger
+          >
+            Đăng xuất
+          </Button>
+        </Popconfirm>
       </div>
     </Header>
   );

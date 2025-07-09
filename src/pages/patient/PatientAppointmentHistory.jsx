@@ -130,7 +130,7 @@ export default function PatientAppointmentHistory() {
     const day = String(d.getDate()).padStart(2, '0');
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const year = d.getFullYear();
-    return `${day}/${month}/${year}`;
+    return `${day}-${month}-${year}`;
   };
 
   const columns = [
@@ -252,7 +252,7 @@ export default function PatientAppointmentHistory() {
             {/* Thông tin lịch khám */}
             <Descriptions title="Thông tin lịch khám" bordered size="small" column={2}>
               <Descriptions.Item label="Ngày">{formatDateVN(healthRecord.schedule?.date)}</Descriptions.Item>
-              <Descriptions.Item label="Khung giờ">{healthRecord.schedule?.slot ? healthRecord.schedule.slot.split(":").slice(0,2).join(":") : ''}</Descriptions.Item>
+              <Descriptions.Item label="Khung giờ">{healthRecord.schedule?.slot ? healthRecord.schedule.slot.split(":").slice(0, 2).join(":") : ''}</Descriptions.Item>
               <Descriptions.Item label="Loại lịch">{healthRecord.schedule?.type}</Descriptions.Item>
               <Descriptions.Item label="Bác sĩ">{healthRecord.schedule?.doctor?.fullName}</Descriptions.Item>
             </Descriptions>

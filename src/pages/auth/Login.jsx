@@ -3,7 +3,7 @@ import '@ant-design/v5-patch-for-react-19';
 import { Form, Input, Button, Alert, Segmented, Typography, Divider, notification } from 'antd';
 import { useGoogleLogin } from '@react-oauth/google';
 import { GoogleOutlined, ArrowLeftOutlined } from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { googleLoginAPI, loginAPI } from '../../services/api.service';
 import { useForm } from 'antd/es/form/Form';
 import { AuthContext } from '../../components/context/AuthContext';
@@ -18,6 +18,7 @@ const Login = () => {
     const { user, setUser } = useContext(AuthContext)
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    const location = useLocation()
 
     useEffect(() => {
         const authError = localStorage.getItem('auth_error');
@@ -31,6 +32,11 @@ const Login = () => {
             localStorage.removeItem('auth_error');
         }
     }, []);
+
+
+
+
+
 
     const handleLogin = async () => {
         setLoading(true);
@@ -164,7 +170,7 @@ const Login = () => {
 
     return (
         <div style={{ maxWidth: 500, margin: '40px auto', padding: 24, boxShadow: '0 4px 12px rgba(0,0,0,0.15)', borderRadius: 8 }}>
-            <Link onClick={redirectHomePage}><ArrowLeftOutlined /> Về trang chủ</Link>
+            <Link onClick={redirectHomePage} className='link'><ArrowLeftOutlined /> Về trang chủ</Link>
             <h2 style={{ textAlign: 'center', marginBottom: 24 }}>Đăng nhập</h2>
             {error && <Alert message={error} type="error" style={{ marginBottom: 16 }} />}
             <Form
@@ -197,7 +203,7 @@ const Login = () => {
                 </Form.Item>
 
                 <Form.Item>
-                    <Button type="primary" htmlType="submit" block loading={loading}>
+                    <Button type="primary" htmlType="submit" block loading={loading} className='btn-custom'>
                         Đăng nhập
                     </Button>
                 </Form.Item>
@@ -205,7 +211,7 @@ const Login = () => {
                 <div style={{ textAlign: 'center' }}>
                     <Divider style={{ borderColor: 'black' }} >
                         <Text style={{ fontSize: '15px' }}>Chưa có tài khoản? </Text>
-                        <Link href="/register" style={{ fontSize: '15px' }}>Đăng kí ngay</Link>
+                        <Link href="/register" style={{ fontSize: '15px' }} className='link'>Đăng kí ngay</Link>
                     </Divider>
                 </div>
                 <div style={{ textAlign: 'center', paddingBottom: '15px' }}>

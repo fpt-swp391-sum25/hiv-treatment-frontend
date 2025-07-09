@@ -99,18 +99,17 @@ const AccountLabTechnicians = () => {
             render: (_, { accountStatus }) => {
 
                 let color = accountStatus === 'Đang hoạt động' ? 'green' : 'volcano';
-                let text = accountStatus === 'Đang hoạt động' ? 'Đang hoạt động' : 'Bị khóa';
 
                 return (
                     <Tag color={color} key={accountStatus}>
-                        {text}
+                        {accountStatus}
                     </Tag>
                 );
 
             },
         },
         {
-            title: 'Action',
+            title: '',
             key: 'action',
             render: (_, record) => (
                 <Space size="large">
@@ -137,7 +136,7 @@ const AccountLabTechnicians = () => {
     return (
         <>
             <div style={{ display: 'flex', justifyContent: 'space-between', padding: '15px' }}>
-                <h2>Tài khoản nhân viên</h2>
+                <h2>Tài khoản kỹ thuật viên</h2>
                 <Button onClick={() => setIsOpenModal(true)} type='primary'>Tạo mới</Button>
             </div>
             <Table columns={columns} dataSource={data} rowKey={data.id} />

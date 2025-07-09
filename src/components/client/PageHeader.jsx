@@ -1,4 +1,4 @@
-import { Layout, Button, Avatar, Typography, message, theme, Popover, Tooltip } from "antd";
+import { Layout, Button, Avatar, Typography, message, theme, Popover, Tooltip, Popconfirm } from "antd";
 import { UserOutlined, LogoutOutlined } from "@ant-design/icons";
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
@@ -33,6 +33,22 @@ const PageHeader = () => {
         }
     };
 
+    const handleLogoClick = () => {
+        if (user) {
+            if (user.role === "ADMIN") {
+                navigate('/admin')
+            } else if (user.role === "MANAGER") {
+                navigate('/manager')
+            } else if (user.role === 'LAB_TECHNICIAN') {
+                navigate('/lab-technician')
+            } else if (user.role === "DOCTOR") {
+                navigate('/doctor')
+            } else {
+                navigate('/')
+            }
+        }
+    }
+
     const {
         token: { colorBgContainer, borderRadiusLG },
     } = theme.useToken();
@@ -43,17 +59,35 @@ const PageHeader = () => {
                     src={appLogo}
                     alt="Logo"
                     className="app-logo"
+                    onClick={handleLogoClick}
                 />
             </div>
-            <div className="header-right">
-                <Tooltip title={user.fullName}>
+            <div className="header-right" style={{ cursor: 'pointer' }}>
+                <Tooltip title={user.fullName} >
                     <Text style={{ color: 'black', marginLeft: 4, marginRight: 4 }}>{user.fullName}</Text>
-                    <Avatar icon={<UserOutlined />} />
+                    <Avatar
+                        src={user.avatar !== '' ? user.avatar : null}
+                        icon={user.avatar === '' ? <UserOutlined /> : null}
+                    />
                 </Tooltip>
 
-                <Button type="primary" icon={<LogoutOutlined />} onClick={handleLogout} danger>
-                    Đăng xuất
-                </Button>
+                <Popconfirm
+                    title="Đăng xuất"
+                    description="Bạn có chắc muốn đăng xuất?"
+                    onConfirm={handleLogout}
+                    okText="Có"
+                    cancelText="Không"
+                    placement="left">
+
+
+                    <Button
+                        type="primary"
+                        icon={<LogoutOutlined />}
+                        danger
+                    >
+                        Đăng xuất
+                    </Button>
+                </Popconfirm>
             </div>
         </Header>
     )
