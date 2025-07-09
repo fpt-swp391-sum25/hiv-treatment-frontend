@@ -38,6 +38,7 @@ import DoctorManagement from './components/manager/DoctorManagement/DoctorManage
 import LabTechnicianManagement from './components/manager/LabTechnicianManagement/LabTechnicianManagement';
 import Reports from './components/manager/Reports/Reports';
 import DefaultRegimen from './pages/manager/DefaultRegimenPage';
+import ManagerProfile from './pages/manager/ManagerProfile';
 
 // Import for doctor pages
 import DoctorHome from './pages/doctor/DoctorHome';
@@ -329,6 +330,12 @@ const router = createBrowserRouter([
         path: 'default-regimen',
         element: (
           <PrivateRoute children={<DefaultRegimen />} requiredRole={['MANAGER']} />
+        ),
+        errorElement: <Errors />,
+      }, {
+        path: 'profile',
+        element: (
+          <PrivateRoute children={<ManagerProfile />} requiredRole={['MANAGER']} />
         ),
         errorElement: <Errors />,
       }

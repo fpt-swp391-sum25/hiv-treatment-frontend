@@ -92,6 +92,18 @@ const LabTechnicianPatientList = () => {
             title: 'Ảnh',
             dataIndex: 'avatar',
             key: 'avatar',
+            render: (avatar) =>
+                avatar ? (
+                    <img
+                    src={
+                        avatar.startsWith('data:image')
+                        ? avatar
+                        : `data:image/jpeg;base64,${avatar}`
+                    }
+                    alt="avatar"
+                    style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }}
+                    />
+                ) : 'Không có ảnh',
         },
         {
             title: 'Tên bệnh nhân',

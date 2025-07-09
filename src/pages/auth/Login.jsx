@@ -38,14 +38,17 @@ const Login = () => {
                     description: authError
                 });
             }
-
-
             localStorage.removeItem('auth_error');
         }
         if (user && (user.role === 'ADMIN' || user.role === 'MANAGER' || user.role === 'LAB_TECHNICIAN' || user.role === 'DOCTOR')) {
             redirectHomePage();
         }
     }, []);
+
+
+
+
+
 
     const handleLogin = async () => {
         setLoading(true);
@@ -80,7 +83,12 @@ const Login = () => {
                     description: `Xin chào, ${response.data.fullName || username}!`
                 });
             } else {
-                setError('Thông tin đăng nhập không hợp lệ.');
+                if (response.status === 403) {
+                    setError('Tài khoản chưa xác minh email')
+                } else {
+
+                    setError('Thông tin đăng nhập không hợp lệ.');
+                }
             }
         } catch (error) {
             console.error('Login error:', error);

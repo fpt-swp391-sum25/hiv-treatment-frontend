@@ -227,16 +227,17 @@ const FinancialReport = ({ dateRange, onError, onDateRangeChange }) => {
 
     const summary = generateReportSummary();
 
-    // Tính toán thống kê
+    // Tính toán thống kê - CẬP NHẬT ĐỂ BAO GỒM TẤT CẢ GIAO DỊCH
     const statistics = {
-        totalRevenue: calculateTotalRevenue(paymentData.completed),
+        totalRevenue: calculateTotalRevenue([...paymentData.completed, ...paymentData.pending]), // Bao gồm cả pending
         totalCompleted: paymentData.completed.length,
         totalPending: paymentData.pending.length,
-        totalFailed: paymentData.failed.length
+        totalFailed: paymentData.failed.length,
+        totalTransactions: paymentData.completed.length + paymentData.pending.length + paymentData.failed.length
     };
 
-    // Dữ liệu cho biểu đồ doanh thu theo phương thức thanh toán
-    const revenueByType = groupPaymentsByType(paymentData.completed);
+    // Dữ liệu cho biểu đồ doanh thu theo phương thức thanh toán - CHỈ TÍNH COMPLETED VÀ PENDING
+    const revenueByType = groupPaymentsByType([...paymentData.completed, ...paymentData.pending]);
 
     // Hàm helper để lấy dữ liệu theo khoảng thời gian
     const getRevenueByPeriod = (data, periodType) => {
@@ -289,8 +290,20 @@ const FinancialReport = ({ dateRange, onError, onDateRangeChange }) => {
         });
     };
     
+    // Kết hợp tất cả giao dịch từ các trạng thái khác nhau và sắp xếp theo ID
+    const allPayments = [
+        ...paymentData.completed,
+        ...paymentData.pending,
+        ...paymentData.failed
+    ].sort((a, b) => {
+        // Sắp xếp theo ID tăng dần
+        const idA = Number(a.id) || 0;
+        const idB = Number(b.id) || 0;
+        return idA - idB;
+    });
+
     // Lọc dữ liệu giao dịch theo bộ lọc
-    const filteredPayments = paymentData.completed.filter(payment => {
+    const filteredPayments = allPayments.filter(payment => {
         // Lọc theo loại giao dịch
         if (filters.paymentType !== 'ALL' && payment.type !== filters.paymentType) {
             return false;
@@ -393,7 +406,12 @@ const FinancialReport = ({ dateRange, onError, onDateRangeChange }) => {
                 dataIndex: 'id',
                 key: 'id',
                 width: '10%',
-                sorter: (a, b) => a.id - b.id,
+                sorter: (a, b) => {
+                    const idA = Number(a.id) || 0;
+                    const idB = Number(b.id) || 0;
+                    return idA - idB;
+                },
+                defaultSortOrder: 'ascend',
             },
             {
                 title: 'Thời gian',
