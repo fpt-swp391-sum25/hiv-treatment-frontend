@@ -36,11 +36,11 @@ const LabTechnicianProfile = () => {
     dateOfBirth: '',
     password: '',
     confirmPassword: '',
-    avatar: '',   
+    avatar: '',
   });
 
   useEffect(() => {
-  if (user?.id) {
+    if (user?.id) {
       setEditableUser({
         fullName: user.fullName || '',
         email: user.email || '',
@@ -49,7 +49,7 @@ const LabTechnicianProfile = () => {
         gender: user.gender || '',
         dateOfBirth: user.dateOfBirth || '',
       });
-      setAvatarUrl(user.avatar || ''); 
+      setAvatarUrl(user.avatar || '');
     }
     console.log(user.avatar);
   }, [user]);
@@ -76,7 +76,7 @@ const LabTechnicianProfile = () => {
         const updatedUserRes = await fetchAccountAPI();
         if (updatedUserRes.data) {
           setUser(updatedUserRes.data);
-          localStorage.setItem('user', JSON.stringify(updatedUserRes.data));
+          // localStorage.setItem('user', JSON.stringify(updatedUserRes.data));
           if (updatedUserRes.data.avatar) {
             setAvatarUrl(updatedUserRes.data.avatar);
           }
@@ -100,10 +100,10 @@ const LabTechnicianProfile = () => {
     reader.onload = (e) => {
       const base64String = e.target.result;
 
-      setAvatarUrl(base64String); 
+      setAvatarUrl(base64String);
       setEditableUser((prev) => ({
         ...prev,
-        avatar: base64String, 
+        avatar: base64String,
       }));
     };
     reader.readAsDataURL(file);
@@ -222,7 +222,8 @@ const LabTechnicianProfile = () => {
               }
               format="YYYY-MM-DD"
               onChange={(date) =>
-                setEditableUser((prev) => ({ ...prev,
+                setEditableUser((prev) => ({
+                  ...prev,
                   dateOfBirth: date ? date.toISOString() : '',
                 }))
               }
@@ -240,7 +241,8 @@ const LabTechnicianProfile = () => {
             <Input.Password
               value={editableUser.confirmPassword}
               onChange={(e) =>
-                setEditableUser((prev) => ({ ...prev,
+                setEditableUser((prev) => ({
+                  ...prev,
                   confirmPassword: e.target.value,
                 }))
               }

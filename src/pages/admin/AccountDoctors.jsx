@@ -86,18 +86,17 @@ const AccountDoctors = () => {
             render: (_, { accountStatus }) => {
 
                 let color = accountStatus === 'Đang hoạt động' ? 'green' : 'volcano';
-                let text = accountStatus === 'Đang hoạt động' ? 'Đang hoạt động' : 'Bị khóa';
 
                 return (
                     <Tag color={color} key={accountStatus}>
-                        {text}
+                        {accountStatus}
                     </Tag>
                 );
 
             },
         },
         {
-            title: 'Action',
+            title: '',
             key: 'action',
             render: (_, record) => (
                 <Space size="large">

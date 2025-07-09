@@ -45,10 +45,13 @@ const PageHeader = () => {
                     className="app-logo"
                 />
             </div>
-            <div className="header-right">
-                <Tooltip title={user.fullName}>
+            <div className="header-right" style={{ cursor: 'pointer' }}>
+                <Tooltip title={user.fullName} >
                     <Text style={{ color: 'black', marginLeft: 4, marginRight: 4 }}>{user.fullName}</Text>
-                    <Avatar icon={<UserOutlined />} />
+                    <Avatar
+                        src={user.avatar !== '' ? user.avatar : null}
+                        icon={user.avatar === '' ? <UserOutlined /> : null}
+                    />
                 </Tooltip>
 
                 <Button type="primary" icon={<LogoutOutlined />} onClick={handleLogout} danger>

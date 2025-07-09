@@ -32,7 +32,7 @@ const Register = () => {
 
     return (
         <div style={{ maxWidth: 500, margin: '40px auto', padding: 24, boxShadow: '0 4px 12px rgba(0,0,0,0.15)', borderRadius: 8 }}>
-            <Link href="/"><ArrowLeftOutlined /> Về trang chủ</Link>
+            <Link href="/" className='link'><ArrowLeftOutlined /> Về trang chủ</Link>
             <h2 style={{ textAlign: 'center', marginBottom: 24 }}>Đăng kí</h2>
             <Form
                 form={form}
@@ -56,9 +56,9 @@ const Register = () => {
                     rules={[{ required: true, message: 'Hãy chọn giới tính của bạn' }]}
                 >
                     <Select placeholder="Giới tính">
-                        <Option value="male">Nam</Option>
-                        <Option value="female">Nữ</Option>
-                        <Option value="other">Khác</Option>
+                        <Option value="Nam">Nam</Option>
+                        <Option value="Nữ">Nữ</Option>
+                        <Option value="Khác">Khác</Option>
                     </Select>
                 </Form.Item>
 
@@ -83,7 +83,7 @@ const Register = () => {
 
                 <Form.Item
                     label="Số điện thoại"
-                    name="phone"
+                    name="phoneNumber"
                     rules={[
                         { required: true, message: 'Hãy nhập số điện thoại của bạn' },
                         { pattern: /^[0-9]{10}$/, message: 'Số điện thoại không hợp lệ' },
@@ -124,14 +124,14 @@ const Register = () => {
                 </Form.Item>
 
                 <Form.Item>
-                    <Button type="primary" htmlType="submit" block>
+                    <Button type="primary" htmlType="submit" block className='btn-custom'>
                         Đăng kí
                     </Button>
                 </Form.Item>
                 <div style={{ textAlign: 'center' }}>
                     <Divider style={{ borderColor: 'black' }} >
                         <Text style={{ fontSize: '15px' }}>Đã có tài khoản? </Text>
-                        <Link href="/login" style={{ fontSize: '15px' }}>Đăng nhập ngay</Link>
+                        <Link href="/login" style={{ fontSize: '15px' }} className='link'> Đăng nhập ngay</Link>
                     </Divider>
                 </div>
             </Form>

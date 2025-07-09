@@ -44,8 +44,8 @@ const items = [
   {
     key: '7',
     label: <NavLink to='/admin/system-config'>Cài đặt hệ thống</NavLink>,
-    icon: < SettingOutlined/>,
-    path: '/admin'
+    icon: < SettingOutlined />,
+    path: '/admin/system-config'
   },
 
 ];
