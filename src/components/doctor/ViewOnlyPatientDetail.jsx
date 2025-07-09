@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import {
   fetchHealthRecordByScheduleIdAPI,
   fetchTestResultByHealthRecordIdAPI,
@@ -7,39 +7,39 @@ import {
   updateHealthRecordAPI,
   createTestResultAPI,
   deleteTestResultAPI,
-  updateTestResultAPI,
-  fetchUsersByRoleAPI
+  fetchUsersByRoleAPI,
 } from "../../services/api.service.js";
 import {
   Typography, Space, Button, Card, Form, Row,
   Col, Divider, notification, Modal,
-  Select, Input, DatePicker
+  Select, Input
 } from 'antd';
 import '../../styles/ReturnButton.css'
-import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
+import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { Popconfirm } from 'antd';
 import { createNotification } from "../../services/notification.service";
+import { AuthContext } from "../context/AuthContext.jsx";
 
 const ViewOnlyPatientDetail = () => {
-  const [healthRecordData, setHealthRecordData] = useState({})
-  const [testResultData, setTestResultData] = useState([])
-  const [isIndiateRegimenModalOpen, setIsIndiateRegimenModalOpen] = useState(false)
+  const [healthRecordData, setHealthRecordData] = useState({});
+  const [testResultData, setTestResultData] = useState([]);
+  const [isIndiateRegimenModalOpen, setIsIndiateRegimenModalOpen] = useState(false);
   const [regimenOptions, setRegimenOptions] = useState([]);
   const [selectedRegimenId, setSelectedRegimenId] = useState(null);
   const [isCreateTestResultModalOpen, setIsCreateTestResultModalOpen] = useState(false);
-  const [isUpdateTestResultModalOpen, setIsUpdateTestResultModalOpen] = useState(false);
   const [type, setType] = useState("");
   const [note, setNote] = useState("");
   const [expectedResultTime, setExpectedResultTime] = useState("");
   const [dataUpdate, setDataUpdate] = useState({});
   const [newTestTypes, setNewTestTypes] = useState([]);
   const [currentTestType, setCurrentTestType] = useState("");
-
+  const [height, setHeight] = useState("");
+  const [weight, setWeight] = useState("");
+  const [treatmentStatus, setTreatmentStatus] = useState("");
+  const { user } = useContext(AuthContext);
   const { id } = useParams();
-  const { Title } = Typography;
-  const { Text } = Typography;
-
+  const { Title, Text } = Typography;
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -51,90 +51,81 @@ const ViewOnlyPatientDetail = () => {
       const healthRecord = (await fetchHealthRecordByScheduleIdAPI(id)).data;
       if (healthRecord) {
         setHealthRecordData(healthRecord);
+        setHeight(healthRecord.height || "");
+        setWeight(healthRecord.weight || "");
+        setTreatmentStatus(healthRecord.treatmentStatus || "");
         const testResultRes = await fetchTestResultByHealthRecordIdAPI(healthRecord.id);
         setTestResultData(testResultRes.data || []);
       }
-      const regimenRes = await fetchRegimensByDoctorIdAPI(7);
+      const regimenRes = await fetchRegimensByDoctorIdAPI(user.id);
       setRegimenOptions(regimenRes.data || []);
     } catch (error) {
       console.error("Lỗi khi tải dữ liệu:", error);
     }
   };
 
-  const handleIndicateRegimen = async () => {
-    const updatedHealthRecord = {
-      height: healthRecordData.height,
-      weight: healthRecordData.weight,
-      bloodType: healthRecordData.bloodType,
-      hivStatus: healthRecordData.hivStatus,
-      treatmentStatus: healthRecordData.treatmentStatus,
-      scheduleId: healthRecordData.schedule.id,
-      regimenId: selectedRegimenId
-    };
-
-    console.log(updatedHealthRecord)
-    const response = await updateHealthRecordAPI(healthRecordData.id, updatedHealthRecord);
-
-    if (response.data) {
-      notification.success({
-        title: "Hệ thống",
-        showProgress: true,
-        pauseOnHover: true,
-        description: "Cập nhật phác đồ thành công"
-      })
-    } else {
-      notification.error({
-        title: "Hệ thống",
-        showProgress: true,
-        pauseOnHover: true,
-        description: "Cập nhật phác đồ không thành công"
-      })
-    }
-    await loadData();
-    resetAndClose()
-  }
-
-  const resetAndClose = () => {
-    setSelectedRegimenId(null);
-    setIsIndiateRegimenModalOpen(false);
-    setIsCreateTestResultModalOpen(false);
-    setIsUpdateTestResultModalOpen(false);
-    setCurrentTestType("");
-    setNewTestTypes([]);  
-    setDataUpdate({});
-  };
-
-
-  const handleUpdateTreatmentStatus = async (newStatus) => {
+  const handleUpdateHealthInfo = async () => {
     try {
       const updatedRecord = {
         ...healthRecordData,
-        treatmentStatus: newStatus,
+        height,
+        weight,
+        treatmentStatus,
         scheduleId: healthRecordData.schedule.id,
         regimenId: healthRecordData.regimen?.id || null,
       };
 
       const response = await updateHealthRecordAPI(healthRecordData.id, updatedRecord);
-
       if (response.data) {
         notification.success({
           message: "Hệ thống",
-          showProgress: true,
-          pauseOnHover: true,
-          description: "Cập nhật trạng thái điều trị thành công"
+          description: "Cập nhật thông tin sức khỏe thành công"
         });
-        loadData();
+        await loadData();
       } else {
         throw new Error("Không có dữ liệu trả về");
       }
     } catch (error) {
       notification.error({
         message: "Hệ thống",
-        showProgress: true,
-        pauseOnHover: true,
-        description: "Cập nhật trạng thái điều trị thất bại"
+        description: "Cập nhật thông tin sức khỏe thất bại"
       });
     }
+  };
+
+  const handleIndicateRegimen = async () => {
+    const updatedHealthRecord = {
+      ...healthRecordData,
+      height,
+      weight,
+      treatmentStatus,
+      scheduleId: healthRecordData.schedule.id,
+      regimenId: selectedRegimenId,
+    };
+
+    const response = await updateHealthRecordAPI(healthRecordData.id, updatedHealthRecord);
+    if (response.data) {
+      notification.success({
+        message: "Hệ thống",
+        description: "Cập nhật phác đồ thành công"
+      });
+    } else {
+      notification.error({
+        message: "Hệ thống",
+        description: "Cập nhật phác đồ không thành công"
+      });
+    }
+    await loadData();
+    resetAndClose();
+  };
+
+  const resetAndClose = () => {
+    setSelectedRegimenId(null);
+    setIsIndiateRegimenModalOpen(false);
+    setIsCreateTestResultModalOpen(false);
+    setCurrentTestType("");
+    setNewTestTypes([]);
+    setDataUpdate({});
   };
 
   const handleCreateTestResultsBatch = async () => {
@@ -151,24 +142,20 @@ const ViewOnlyPatientDetail = () => {
         await createTestResultAPI(type, "", "", healthRecordData.id);
       }
 
-      // Sau khi tạo test result thành công, gửi notification cho tất cả LAB_TECHNICIAN
-      try {
-        const labTechRes = await fetchUsersByRoleAPI("LAB_TECHNICIAN");
-        const labTechnicians = labTechRes.data || [];
-        const patientName = healthRecordData.schedule?.patient?.fullName;
-        await Promise.all(
-          labTechnicians.map(labTech =>
-            createNotification({
-              title: "Yêu cầu xét nghiệm",
-              message: `Yêu cầu kết quả xét nghiệm của bệnh nhân ${patientName}`,
-              createdAt: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
-              userId: labTech.id,
-            })
-          )
-        );
-      } catch (err) {
-        console.error("Notification error:", err);
-      }
+      const labTechRes = await fetchUsersByRoleAPI("LAB_TECHNICIAN");
+      const labTechnicians = labTechRes.data || [];
+      const patientName = healthRecordData.schedule?.patient?.fullName;
+
+      await Promise.all(
+        labTechnicians.map(labTech =>
+          createNotification({
+            title: "Yêu cầu xét nghiệm",
+            message: `Yêu cầu kết quả xét nghiệm của bệnh nhân ${patientName}`,
+            createdAt: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
+            userId: labTech.id,
+          })
+        )
+      );
 
       notification.success({
         message: 'Hệ thống',
@@ -185,15 +172,12 @@ const ViewOnlyPatientDetail = () => {
     }
   };
 
-
   const handleDeleteTestResult = async (testResultId) => {
     try {
       const response = await deleteTestResultAPI(testResultId);
       if (response.data) {
         notification.success({
           message: 'Hệ thống',
-          showProgress: true,
-          pauseOnHover: true,
           description: 'Xóa kết quả xét nghiệm thành công!'
         });
         await loadData();
@@ -201,40 +185,33 @@ const ViewOnlyPatientDetail = () => {
     } catch (error) {
       notification.error({
         message: 'Lỗi',
-        showProgress: true,
-        pauseOnHover: true,
         description: 'Không thể xóa kết quả xét nghiệm'
       });
     }
   };
 
   return (
-    <div style={{ marginRight: 10 + 'vw', marginLeft: 10 + 'vw' }}>
+    <div style={{ margin: '0 10vw' }}>
       <Space direction="vertical" style={{ margin: '15px 0 0 0', width: "100%" }}>
-        <Button
-          type="primary"
-          className="custom-yellow-btn"
-          onClick={() => navigate(-1)}
-        >
+        <Button type="primary" className="custom-yellow-btn" onClick={() => navigate(-1)}>
           Quay lại
         </Button>
-
-        <Title level={3} style={{ textAlign: "center", width: "100%" }}>
+        <Title level={3} style={{ textAlign: "center" }}>
           Chi tiết ca khám
         </Title>
       </Space>
 
-      <Card title="Thông tin sức khỏe" style={{ marginTop: 5 + 'vh' }}>
+      <Card title="Thông tin sức khỏe" style={{ marginTop: '5vh' }}>
         <Form layout="vertical">
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item label="Chiều cao">
-                <Text>{healthRecordData.height || ''}</Text>
+                <Input value={height} onChange={(e) => setHeight(e.target.value)} />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item label="Cân nặng">
-                <Text>{healthRecordData.weight || ''}</Text>
+                <Input value={weight} onChange={(e) => setWeight(e.target.value)} />
               </Form.Item>
             </Col>
             <Col span={12}>
@@ -248,15 +225,10 @@ const ViewOnlyPatientDetail = () => {
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item label="Trạng thái điều trị">
-                <Text>{healthRecordData.treatmentStatus || ''}</Text>
-              </Form.Item>
-            </Col>
-            <Col span={12}>
               <Form.Item label="Cập nhật trạng thái điều trị">
                 <Select
-                  value={healthRecordData.treatmentStatus}
-                  onChange={handleUpdateTreatmentStatus}
+                  value={treatmentStatus}
+                  onChange={setTreatmentStatus}
                 >
                   <Select.Option 
                     value="Đang chờ khám" 
@@ -284,6 +256,13 @@ const ViewOnlyPatientDetail = () => {
                   </Select.Option>
                 </Select>
               </Form.Item>
+            </Col>
+          </Row>
+          <Row>
+            <Col span={24} style={{ textAlign: "right" }}>
+              <Button type="primary" onClick={handleUpdateHealthInfo}>
+                Cập nhật thông tin sức khỏe
+              </Button>
             </Col>
           </Row>
         </Form>
