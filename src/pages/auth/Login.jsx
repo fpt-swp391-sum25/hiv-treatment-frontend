@@ -3,7 +3,7 @@ import '@ant-design/v5-patch-for-react-19';
 import { Form, Input, Button, Alert, Segmented, Typography, Divider, notification } from 'antd';
 import { useGoogleLogin } from '@react-oauth/google';
 import { GoogleOutlined, ArrowLeftOutlined } from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { googleLoginAPI, loginAPI } from '../../services/api.service';
 import { useForm } from 'antd/es/form/Form';
 import { AuthContext } from '../../components/context/AuthContext';
@@ -18,6 +18,7 @@ const Login = () => {
     const { user, setUser } = useContext(AuthContext)
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    const location = useLocation()
 
     useEffect(() => {
         const authError = localStorage.getItem('auth_error');
@@ -31,6 +32,11 @@ const Login = () => {
             localStorage.removeItem('auth_error');
         }
     }, []);
+
+
+
+
+
 
     const handleLogin = async () => {
         setLoading(true);

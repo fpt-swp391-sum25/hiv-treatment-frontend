@@ -1,4 +1,4 @@
-import { Layout, Menu, Avatar, Dropdown, Typography, Button, Space, message, Tooltip } from 'antd';
+import { Layout, Menu, Avatar, Dropdown, Typography, Button, Space, message, Tooltip, Popconfirm } from 'antd';
 import { UserOutlined, DownOutlined, LogoutOutlined, CalendarOutlined, FileSearchOutlined, HistoryOutlined, EditOutlined, SettingOutlined, } from '@ant-design/icons';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
@@ -169,14 +169,24 @@ const AppHeader = () => {
                   </Tooltip>
                 </Space>
               </Link>
-              <Button
-                type="primary"
-                icon={<LogoutOutlined />}
-                onClick={handleLogout}
-                danger
-              >
-                Đăng xuất
-              </Button>
+
+              <Popconfirm
+                title="Đăng xuất"
+                description="Bạn có chắc muốn đăng xuất?"
+                onConfirm={handleLogout}
+                okText="Có"
+                cancelText="Không"
+                placement="left">
+
+
+                <Button
+                  type="primary"
+                  icon={<LogoutOutlined />}
+                  danger
+                >
+                  Đăng xuất
+                </Button>
+              </Popconfirm>
             </Space>
           ) : (
             <Space size="middle" className="auth-buttons">
