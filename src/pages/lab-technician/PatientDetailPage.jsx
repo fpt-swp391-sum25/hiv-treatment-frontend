@@ -88,23 +88,35 @@ const PatientDetail = () => {
           (test) => test.result !== null && test.result !== ''
         );
 
-        // Nếu hợp lệ thì gửi thông báo cho bác sĩ
+        // Nếu hợp lệ thì gửi thông báo cho bác sĩ và bệnh nhân
         if (
           (healthRecordData.hivStatus === "Dương tính" || healthRecordData.hivStatus === "Âm tính") &&
           allResultsFilled
         ) {
           const doctorId = healthRecordData.schedule?.doctor?.id;
-          const patientName = healthRecordData.schedule?.patient?.fullName;
-
-          if (doctorId && patientName) {
+          const patient = healthRecordData.schedule?.patient;
+        
+          if (doctorId && patient?.id && patient?.fullName) {
+            const createdAt = dayjs().format('YYYY-MM-DDTHH:mm:ss');
+        
+            // Gửi cho bác sĩ
             await createNotification({
               title: "Thông báo kết quả xét nghiệm",
-              message: `Đã có kết quả xét nghiệm của bệnh nhân ${patientName}`,
-              createdAt: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
+              message: `Đã có kết quả xét nghiệm của bệnh nhân ${patient.fullName}`,
+              createdAt,
               userId: doctorId,
+            });
+        
+            // Gửi cho bệnh nhân
+            await createNotification({
+              title: "Kết quả xét nghiệm đã sẵn sàng",
+              message: "Bạn có thể xem kết quả xét nghiệm mới trong hồ sơ sức khỏe.",
+              createdAt,
+              userId: patient.id,
             });
           }
         }
+        
 
         await loadData();
       }
