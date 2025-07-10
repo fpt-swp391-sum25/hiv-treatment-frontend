@@ -19,14 +19,24 @@ const registerAPI = (values) => {
     const data = {
         fullName: values.fullname,
         gender: values.gender,
-        dateOfBirth: values.dob.format('DD-MM-YYYY'),
+        dateOfBirth: values.dob.format('YYYY-MM-DD'),
         email: values.email,
-        phone: values.phone,
+        phoneNumber: values.phoneNumber,
         address: values.address,
         username: values.username,
         password: values.password
     }
     return axios.post(URL_BACKEND, data)
+}
+
+const verifyEmailAPI = (token) => {
+    const URL_BACKEND = `/api/auth/verify?token=${token}`
+    return axios.get(URL_BACKEND)
+}
+
+const resendVerifyEmailAPI = (email) => {
+    const URL_BACKEND = 'api/auth/resend-email'
+    return axios.get(URL_BACKEND, { email: email })
 }
 
 const bookingAPI = (values) => {
@@ -56,7 +66,7 @@ const fetchAllScheduleAPI = (doctorId, date) => {
         params: {
             doctorId,
             date: date,
-            status: 'Trống',
+
         },
     })
 }
@@ -1086,19 +1096,21 @@ const fetchSystemConfigurationsAPI = () => {
 };
 
 const updateSystemConfigurationAPI = (id, dataUpdate) =>
-  axios.put(`/api/system-configuration/${id}`, dataUpdate);
+    axios.put(`/api/system-configuration/${id}`, dataUpdate);
 
 const createSystemConfigurationAPI = (createData) =>
-  axios.post("/api/system-configurations", createData);
+    axios.post("/api/system-configurations", createData);
 
-const deleteSystemConfigurationAPI  = (id) =>
-  axios.delete(`/api/system-configuration/${id}`);
+const deleteSystemConfigurationAPI = (id) =>
+    axios.delete(`/api/system-configuration/${id}`);
 
 // Export tất cả các hàm API
 export {
     loginAPI,
     googleLoginAPI,
     registerAPI,
+    verifyEmailAPI,
+    resendVerifyEmailAPI,
     bookingAPI,
     cancelBookingAPI,
     fetchAllScheduleAPI,

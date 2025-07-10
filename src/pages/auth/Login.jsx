@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import '@ant-design/v5-patch-for-react-19';
-import { Form, Input, Button, Alert, Segmented, Typography, Divider, notification } from 'antd';
+import { Form, Input, Button, Alert, Segmented, Typography, Divider, notification, Result } from 'antd';
 import { useGoogleLogin } from '@react-oauth/google';
 import { GoogleOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -11,15 +11,15 @@ import { AuthContext } from '../../components/context/AuthContext';
 const { Link, Text } = Typography;
 
 const Login = () => {
-    const form = useForm()
+    const [form] = useForm()
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [email, setEmail] = useState('')
     const [error, setError] = useState('');
+    const [showResend, setShowResend] = useState(false)
     const { user, setUser } = useContext(AuthContext)
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
-    const location = useLocation()
-
     useEffect(() => {
         const authError = localStorage.getItem('auth_error');
         if (authError) {
@@ -83,7 +83,12 @@ const Login = () => {
                     description: `Xin chào, ${response.data.fullName || username}!`
                 });
             } else {
-                setError('Thông tin đăng nhập không hợp lệ.');
+                if (response.status === 403) {
+                    setError('Tài khoản chưa xác minh email')
+                    setShowResend(true)
+                } else {
+                    setError('Thông tin đăng nhập không hợp lệ.');
+                }
             }
         } catch (error) {
             console.error('Login error:', error);
@@ -146,6 +151,8 @@ const Login = () => {
             setError('Không thể xác thực với Google');
             notification.error({
                 message: 'Lỗi đăng nhập',
+                showProgress: true,
+                pauseOnHover: true,
                 description: 'Không thể xác thực với Google'
             });
         }
@@ -169,61 +176,118 @@ const Login = () => {
         }
     }
 
+    const handleResend = async () => {
+        const response = await resendVerifyEmailAPI(email)
+        if (response) {
+            notification.success({
+                message: "Hệ thống",
+                showProgress: true,
+                pauseOnHover: true,
+                description: 'Đã gửi email xác minh'
+            });
+        } else {
+            notification.error({
+                message: "Hệ thống",
+                showProgress: true,
+                pauseOnHover: true,
+                description: 'Lỗi khi gửi email xác minh'
+            });
+        }
+    }
+
 
     return (
         <div style={{ maxWidth: 500, margin: '40px auto', padding: 24, boxShadow: '0 4px 12px rgba(0,0,0,0.15)', borderRadius: 8 }}>
             <Link onClick={redirectHomePage} className='link'><ArrowLeftOutlined /> Về trang chủ</Link>
-            <h2 style={{ textAlign: 'center', marginBottom: 24 }}>Đăng nhập</h2>
-            {error && <Alert message={error} type="error" style={{ marginBottom: 16 }} />}
-            <Form
-                name="loginForm"
-                onFinish={handleLogin}
-                layout="vertical"
-            >
-                <Form.Item
-                    label="Tên đăng nhập"
-                    name="username"
-                    id="username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    rules={[{ required: true, message: 'Hãy nhập tên đăng nhập của bạn' }]}
+            {showResend ? (
+                <Form
+                    form={form}
+                    name="resendVerificationForm"
+                    onFinish={handleResend}
+                    layout="vertical"
+                    style={{ marginTop: 20 }}
                 >
-                    <Input placeholder="Tên đăng nhập" />
-                </Form.Item>
+                    <Form.Item
+                        label="Email"
+                        name="email"
+                        rules={[
+                            { required: true, message: 'Vui lòng nhập email của bạn' },
+                            { type: 'email', message: 'Email không hợp lệ' },
+                        ]}
+                    >
+                        <Input
+                            placeholder="Nhập email của bạn"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                        />
+                    </Form.Item>
+                    <Form.Item>
+                        <Button
+                            type="primary"
+                            htmlType="submit"
+                            block
+                            loading={loading}
+                            style={{ background: '#00bed3', borderColor: '#00bed3' }}
+                        >
+                            Gửi lại email xác minh
+                        </Button>
+                    </Form.Item>
+                </Form>
+            ) : (
+                <>
+                    <h2 style={{ textAlign: 'center', marginBottom: 24 }}>Đăng nhập</h2>
+                    {error && <Alert message={error} type="error" style={{ marginBottom: 16 }} />}
+                    <Form
+                        name="loginForm"
+                        onFinish={handleLogin}
+                        layout="vertical"
+                    >
+                        <Form.Item
+                            label="Tên đăng nhập"
+                            name="username"
+                            id="username"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            rules={[{ required: true, message: 'Hãy nhập tên đăng nhập của bạn' }]}
+                        >
+                            <Input placeholder="Tên đăng nhập" />
+                        </Form.Item>
 
-                <Form.Item
-                    label="Mật khẩu"
-                    id="password"
-                    name="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    rules={[{ required: true, message: 'Hãy nhập mật khẩu của bạn' }]}
-                >
-                    <Input.Password placeholder="Mật khẩu" onKeyDown={(event) => {
-                        if (event.key === 'Enter') form.submit()
-                    }} />
-                </Form.Item>
+                        <Form.Item
+                            label="Mật khẩu"
+                            id="password"
+                            name="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            rules={[{ required: true, message: 'Hãy nhập mật khẩu của bạn' }]}
+                        >
+                            <Input.Password placeholder="Mật khẩu" onKeyDown={(event) => {
+                                if (event.key === 'Enter') form.submit()
+                            }} />
+                        </Form.Item>
 
-                <Form.Item>
-                    <Button type="primary" htmlType="submit" block loading={loading} className='btn-custom'>
-                        Đăng nhập
-                    </Button>
-                </Form.Item>
+                        <Form.Item>
+                            <Button type="primary" htmlType="submit" block loading={loading} className='btn-custom'>
+                                Đăng nhập
+                            </Button>
+                        </Form.Item>
 
-                <div style={{ textAlign: 'center' }}>
-                    <Divider style={{ borderColor: 'black' }} >
-                        <Text style={{ fontSize: '15px' }}>Chưa có tài khoản? </Text>
-                        <Link href="/register" style={{ fontSize: '15px' }} className='link'>Đăng kí ngay</Link>
-                    </Divider>
-                </div>
-                <div style={{ textAlign: 'center', paddingBottom: '15px' }}>
-                    <Text style={{ fontSize: '13px', color: 'gray' }}>Hoặc</Text>
-                </div>
+                        <div style={{ textAlign: 'center' }}>
+                            <Divider style={{ borderColor: 'black' }} >
+                                <Text style={{ fontSize: '15px' }}>Chưa có tài khoản? </Text>
+                                <Link href="/register" style={{ fontSize: '15px' }} className='link'>Đăng kí ngay</Link>
+                            </Divider>
+                        </div>
+                        <div style={{ textAlign: 'center', paddingBottom: '15px' }}>
+                            <Text style={{ fontSize: '13px', color: 'gray' }}>Hoặc</Text>
+                        </div>
 
-                <div style={{ textAlign: 'center' }}>
-                    <Button onClick={handleGoogleLogin} loading={loading}><GoogleOutlined />Đăng nhập với Google</Button>
-                </div>
-            </Form>
+                        <div style={{ textAlign: 'center' }}>
+                            <Button onClick={handleGoogleLogin} loading={loading}><GoogleOutlined />Đăng nhập với Google</Button>
+                        </div>
+                    </Form>
+                </>
+            )}
         </div >
     );
 };
