@@ -19,9 +19,9 @@ const registerAPI = (values) => {
     const data = {
         fullName: values.fullname,
         gender: values.gender,
-        dateOfBirth: values.dob.format('YYYY-MM-DD'),
+        dateOfBirth: values.dob.format('DD-MM-YYYY'),
         email: values.email,
-        phoneNumber: values.phoneNumber,
+        phone: values.phone,
         address: values.address,
         username: values.username,
         password: values.password
@@ -264,13 +264,14 @@ const fetchAllRegimensAPI = () => {
 }
 
 const createRegimenAPI = (components, regimenName,
-    description, indications, contraindications) => {
+    description, indications, contraindications, doctorId) => {
     const createData = {
         components,
         regimenName,
         description,
         indications,
-        contraindications
+        contraindications,
+        doctorId
     }
     const URL_BACKEND = '/api/regimen';
     return axios.post(URL_BACKEND, createData)
@@ -1086,13 +1087,13 @@ const fetchSystemConfigurationsAPI = () => {
 };
 
 const updateSystemConfigurationAPI = (id, dataUpdate) =>
-    axios.put(`/api/system-configuration/${id}`, dataUpdate);
+  axios.put(`/api/system-configuration/${id}`, dataUpdate);
 
 const createSystemConfigurationAPI = (createData) =>
-    axios.post("/api/system-configurations", createData);
+  axios.post("/api/system-configurations", createData);
 
-const deleteSystemConfigurationAPI = (id) =>
-    axios.delete(`/api/system-configuration/${id}`);
+const deleteSystemConfigurationAPI  = (id) =>
+  axios.delete(`/api/system-configuration/${id}`);
 
 // Export tất cả các hàm API
 export {

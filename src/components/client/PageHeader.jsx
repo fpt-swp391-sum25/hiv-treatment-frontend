@@ -19,16 +19,21 @@ const PageHeader = () => {
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(false);
     const [popoverOpen, setPopoverOpen] = useState(false);
-    const unreadCount = notifications.filter(n => !n.read).length;
-      useEffect(() => {
-        loadNotifications()
-      }, [])
+    const unreadCount = notifications.filter(n => !n.isRead).length;
+    useEffect(() => {
+        if (user?.id) {
+            loadNotifications();
+        }
+    }, [user?.id]);
     const loadNotifications = async () => {
         if (!user?.id) return;
         setLoading(true);
         try {
             const res = await getNotificationsByUserId(user.id);
-            setNotifications(res.data || []);
+            setNotifications((res.data || []).map(n => ({
+                ...n,
+                isRead: n.read  // Chuyển `read` → `isRead` để dùng thống nhất
+            })));
         } finally {
             setLoading(false);
         }
@@ -52,7 +57,6 @@ const PageHeader = () => {
             loadNotifications()
         }
     };
-    
 
 
     const handleLogout = async () => {
@@ -112,27 +116,27 @@ const PageHeader = () => {
                 <Popover
                     content={
                         <Spin spinning={loading}>
-                          <List
-                            dataSource={[...notifications].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))}
-                            locale={{ emptyText: "Không có thông báo" }}
-                            renderItem={item => (
-                              <List.Item
-                                style={{
-                                  background: item.read ? "#fff" : "#e6f7ff",
-                                  fontWeight: item.read ? "normal" : "bold",
-                                  cursor: "pointer"
-                                }}
-                                onClick={() => handleNotificationClick(item)}
-                              >
-                                <div>
-                                  <span>{item.title}</span>
-                                  <div style={{ fontSize: 12, color: "#888" }}>{item.message}</div>
-                                  <div style={{ fontSize: 10, color: "#aaa" }}>{item.createdAt}</div>
-                                </div>
-                              </List.Item>
-                            )}
-                            style={{ width: 320, maxHeight: 400, overflow: "auto" }}
-                          />
+                            <List
+                                dataSource={[...notifications].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))}
+                                locale={{ emptyText: "Không có thông báo" }}
+                                renderItem={item => (
+                                    <List.Item
+                                        style={{
+                                            background: item.isRead ? "#fff" : "#e6f7ff",
+                                            fontWeight: item.isRead ? "normal" : "bold",
+                                            cursor: "pointer"
+                                        }}
+                                        onClick={() => handleNotificationClick(item)}
+                                    >
+                                        <div>
+                                            <span>{item.title}</span>
+                                            <div style={{ fontSize: 12, color: "#888" }}>{item.message}</div>
+                                            <div style={{ fontSize: 10, color: "#aaa" }}>{item.createdAt}</div>
+                                        </div>
+                                    </List.Item>
+                                )}
+                                style={{ width: 320, maxHeight: 400, overflow: "auto" }}
+                            />
                         </Spin>
                     }
                     trigger="click"

@@ -4,36 +4,31 @@ import {
   fetchHealthRecordByScheduleIdAPI,
   fetchTestResultByHealthRecordIdAPI,
   updateHealthRecordAPI,
-  deleteTestResultAPI,
-  createTestResultAPI
+  updateTestResultAPI,
 } from "../../services/api.service.js";
-import { Typography, Space, notification, Popconfirm,
-  Button, Input, Modal, DatePicker, Card, Form, Row, Col, Divider, Select
+import {
+  Typography, Space, notification, Button, Input, Card,
+  Form, Row, Col, Divider, Select
 } from 'antd';
-import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import { EditOutlined } from '@ant-design/icons';
 import UpdateTestResultModal from '../../components/lab-technician/UpdateTestResultModal.jsx';
 import dayjs from 'dayjs';
 import { createNotification } from "../../services/notification.service";
 
 
 const PatientDetail = () => {
-  const [type, setType] = useState("");
-  const [note, setNote] = useState("");
-  const [expectedResultTime, setExpectedResultTime] = useState("");
-  const [dataUpdate, setDataUpdate] = useState({})
+  const [dataUpdate, setDataUpdate] = useState({});
   const [healthRecordData, setHealthRecordData] = useState({});
   const [testResultData, setTestResultData] = useState([]);
-  const [isCreateTestResultModalOpen, setIsCreateTestResultModalOpen] = useState(false)
-  const [isUpdateTestResultModalOpen, setIsUpdateTestResultModalOpen] = useState(false)
+  const [isUpdateTestResultModalOpen, setIsUpdateTestResultModalOpen] = useState(false);
 
   const { id } = useParams();
-  const { TextArea } = Input;
   const { Title } = Typography;
   const navigate = useNavigate();
 
   useEffect(() => {
     loadData();
-  }, [dataUpdate]);
+  }, []);
 
   const loadData = async () => {
     try {
@@ -65,9 +60,21 @@ const PatientDetail = () => {
         scheduleId: healthRecordData.schedule?.id,
         regimenId: healthRecordData.regimen?.id,
       };
-      
+
       const response = await updateHealthRecordAPI(healthRecordData.id, updatePayload);
-      
+
+      for (const test of testResultData) {
+        await updateTestResultAPI(
+          test.id,
+          test.type,
+          test.result,
+          test.unit,
+          test.note,
+          test.expectedResultTime,
+          test.actualResultTime
+        );
+      }
+
       if (response.data) {
         notification.success({
           message: 'Hệ thống',
@@ -76,36 +83,26 @@ const PatientDetail = () => {
           description: 'Cập nhật thông tin sức khỏe thành công!'
         });
 
-        console.log("DEBUG | healthRecordData:", healthRecordData);
-
-        // Kiểm tra kết quả xét nghiệm đầy đủ chưa
+        // Kiểm tra đã điền đầy đủ kết quả xét nghiệm chưa
         const allResultsFilled = testResultData.every(
           (test) => test.result !== null && test.result !== ''
         );
 
-        console.log("DEBUG | All results filled:", allResultsFilled);
-
-        // Nếu trạng thái HIV hợp lệ và đã có đầy đủ kết quả xét nghiệm thì gửi thông báo
+        // Nếu hợp lệ thì gửi thông báo cho bác sĩ
         if (
           (healthRecordData.hivStatus === "Dương tính" || healthRecordData.hivStatus === "Âm tính") &&
           allResultsFilled
         ) {
           const doctorId = healthRecordData.schedule?.doctor?.id;
           const patientName = healthRecordData.schedule?.patient?.fullName;
+
           if (doctorId && patientName) {
-            try {
-              await createNotification({
-                title: "Thông báo kết quả xét nghiệm",
-                message: `Đã có kết quả xét nghiệm của bệnh nhân ${patientName}`,
-                createdAt: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
-                userId: doctorId,
-              });
-              console.log("Notification sent!");
-            } catch (err) {
-              console.error("Notification error:", err);
-            }
-          } else {
-            console.warn("Không tìm thấy doctorId hoặc patientName để gửi notification");
+            await createNotification({
+              title: "Thông báo kết quả xét nghiệm",
+              message: `Đã có kết quả xét nghiệm của bệnh nhân ${patientName}`,
+              createdAt: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
+              userId: doctorId,
+            });
           }
         }
 
@@ -117,15 +114,8 @@ const PatientDetail = () => {
     }
   };
 
-  const resetAndClose = () => {
-    setIsCreateTestResultModalOpen(false)
-    setType('')
-    setNote('')
-    setExpectedResultTime('')
-  }
-
   return (
-    <div style={{ marginRight: 10 + 'vw', marginLeft: 10 + 'vw' }}>
+    <div style={{ margin: '0 10vw' }}>
       <Space direction="vertical" style={{ width: "100%" }}>
         <Button onClick={() => navigate(-1)}>← Quay lại</Button>
         <Title level={3} style={{ textAlign: "center", width: "100%" }}>
@@ -133,7 +123,7 @@ const PatientDetail = () => {
         </Title>
       </Space>
 
-      <Card title="Thông tin sức khỏe" style={{ marginTop: 5 + 'vh' }}>
+      <Card title="Thông tin sức khỏe" style={{ marginTop: '5vh' }}>
         <Form layout="vertical">
           <Row gutter={16}>
             <Col span={12}>
@@ -145,9 +135,7 @@ const PatientDetail = () => {
               <Form.Item label="Trạng thái HIV">
                 <Select
                   value={healthRecordData.hivStatus || ''}
-                  onChange={(value) =>
-                    setHealthRecordData((prev) => ({ ...prev, hivStatus: value }))
-                  }
+                  onChange={(value) => setHealthRecordData((prev) => ({ ...prev, hivStatus: value }))}
                   placeholder="Chọn trạng thái"
                 >
                   <Select.Option value="Dương tính">Dương tính</Select.Option>
@@ -161,63 +149,33 @@ const PatientDetail = () => {
         </Form>
       </Card>
 
-      <Divider orientation="center" style={{ marginTop: 10 + 'vh' }}>Kết quả xét nghiệm</Divider>
+      <Divider orientation="center" style={{ marginTop: '10vh' }}>Kết quả xét nghiệm</Divider>
 
       {testResultData.map((test) => (
         <Card key={test.id} style={{ marginTop: 16 }}>
-          <Row gutter={5 + "vw"}>
+          <Row gutter="5vw">
             <Col span={8}>
               <p><strong>Loại:</strong> {test.type}</p>
             </Col>
-
             <Col span={8}>
               <p><strong>Kết quả:</strong> {test.result} {test.unit}</p>
             </Col>
             <Col span={8}>
               <p><strong>Ghi chú:</strong> {test.note}</p>
             </Col>
-
             <Col span={8}>
-              <p>
-                <strong>Thời gian dự kiến:</strong>{" "}
-                {test.expectedResultTime && !isNaN(new Date(test.expectedResultTime))
-                  ? new Intl.DateTimeFormat('vi-VN', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                    hour12: false,
-                  }).format(new Date(test.expectedResultTime))
-                  : ''
-                }
-              </p>
+              <p><strong>Thời gian dự kiến:</strong> {formatDate(test.expectedResultTime)}</p>
             </Col>
-
             <Col span={8}>
-              <p>
-                <strong>Thời gian nhận kết quả:</strong>{" "}
-                {test.actualResultTime && !isNaN(new Date(test.actualResultTime))
-                  ? new Intl.DateTimeFormat('vi-VN', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                    hour12: false,
-                  }).format(new Date(test.actualResultTime))
-                  : ''
-                }
-              </p>
+              <p><strong>Thời gian nhận kết quả:</strong> {formatDate(test.actualResultTime)}</p>
             </Col>
-
             <Col span={8}>
               <Space>
                 <EditOutlined
                   style={{ color: 'orange', cursor: 'pointer' }}
                   onClick={() => {
-                    setIsUpdateTestResultModalOpen(true);
                     setDataUpdate(test);
+                    setIsUpdateTestResultModalOpen(true);
                   }}
                 />
               </Space>
@@ -230,11 +188,28 @@ const PatientDetail = () => {
         isUpdateTestResultModalOpen={isUpdateTestResultModalOpen}
         setIsUpdateTestResultModalOpen={setIsUpdateTestResultModalOpen}
         dataUpdate={dataUpdate}
-        setDataUpdate={setDataUpdate}
-        loadData={loadData}
+        onPreviewUpdate={(updatedTest) => {
+          setTestResultData((prev) =>
+            prev.map((test) => test.id === updatedTest.id ? updatedTest : test)
+          );
+        }}
       />
     </div>
   );
+};
+
+// Format datetime
+const formatDate = (value) => {
+  return value && !isNaN(new Date(value))
+    ? new Intl.DateTimeFormat('vi-VN', {
+        hour: '2-digit',
+        minute: '2-digit',
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour12: false,
+      }).format(new Date(value))
+    : '';
 };
 
 export default PatientDetail;
