@@ -21,10 +21,34 @@ const PageHeader = () => {
     const [popoverOpen, setPopoverOpen] = useState(false);
     const unreadCount = notifications.filter(n => !n.isRead).length;
     useEffect(() => {
+        let intervalId;
+    
+        const pollNotifications = async () => {
+            try {
+                const res = await getNotificationsByUserId(user.id);
+                const latest = res.data.map(n => ({
+                    ...n,
+                    isRead: n.read,
+                }));
+    
+                const hasNew = latest.some(
+                    (n) => !notifications.some((old) => old.id === n.id)
+                );
+    
+                if (hasNew) {
+                    setNotifications(latest);
+                }
+            } catch (error) {
+                console.error("Lỗi khi polling:", error);
+            }
+        };
+    
         if (user?.id) {
-            loadNotifications();
+            intervalId = setInterval(pollNotifications, 10000); // 10s
         }
-    }, [user?.id]);
+    
+        return () => clearInterval(intervalId); // cleanup
+    }, [user?.id, notifications]);
     const loadNotifications = async () => {
         if (!user?.id) return;
         setLoading(true);
@@ -59,7 +83,6 @@ const PageHeader = () => {
     };
 
 
-
     const handleLogout = async () => {
         const response = await logoutAPI()
         if (response.data) {
@@ -72,7 +95,13 @@ const PageHeader = () => {
                 status: '',
                 role: ''
             })
-            localStorage.setItem('auth_error', 'Đăng xuất thành công');
+            
+            .success({
+                message: 'Hệ thống',
+                showProgress: true,
+                pauseOnHover: true,
+                description: 'Đăng xuất thành công'
+            });
             navigate("/login")
         }
     };
