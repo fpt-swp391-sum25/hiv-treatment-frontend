@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-
-import { Layout, Menu, Avatar, Dropdown, Typography, Button, Space, message, Tooltip, Popconfirm, notification } from 'antd';
-import { UserOutlined, DownOutlined, LogoutOutlined, CalendarOutlined, FileSearchOutlined, HistoryOutlined, EditOutlined, SettingOutlined, } from '@ant-design/icons';
-=======
 import {
   Layout,
   Menu,
@@ -25,7 +20,6 @@ import {
   SettingOutlined,
   BellOutlined
 } from '@ant-design/icons';
->>>>>>> f56eaaab8cf23b04269a9df1cf8eacb86ce9aeb2
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useContext } from 'react';
 
