@@ -26,7 +26,7 @@ const ManagerHeader = () => {
         status: '',
         role: ''
       })
-      message.success("Đăng xuất thành công")
+      localStorage.setItem('auth_error', 'Đăng xuất thành công');
       navigate("/login")
     }
   };

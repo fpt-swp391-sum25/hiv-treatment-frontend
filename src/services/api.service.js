@@ -29,6 +29,16 @@ const registerAPI = (values) => {
     return axios.post(URL_BACKEND, data)
 }
 
+const verifyEmailAPI = (token) => {
+    const URL_BACKEND = `/api/auth/verify?token=${token}`
+    return axios.get(URL_BACKEND)
+}
+
+const resendVerifyEmailAPI = (email) => {
+    const URL_BACKEND = 'api/auth/resend-email'
+    return axios.get(URL_BACKEND, { email: email })
+}
+
 const bookingAPI = (values) => {
     const URL_BACKEND = `/api/schedule/`
     const data = {
@@ -56,7 +66,7 @@ const fetchAllScheduleAPI = (doctorId, date) => {
         params: {
             doctorId,
             date: date,
-            status: 'Trống',
+
         },
     })
 }
@@ -1099,6 +1109,8 @@ export {
     loginAPI,
     googleLoginAPI,
     registerAPI,
+    verifyEmailAPI,
+    resendVerifyEmailAPI,
     bookingAPI,
     cancelBookingAPI,
     fetchAllScheduleAPI,
