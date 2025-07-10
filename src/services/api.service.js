@@ -19,7 +19,7 @@ const registerAPI = (values) => {
     const data = {
         fullName: values.fullname,
         gender: values.gender,
-        dateOfBirth: values.dob.format('DD-MM-YYYY'),
+        dateOfBirth: values.dob.format('YYYY-MM-DD'),
         email: values.email,
         phone: values.phone,
         address: values.address,
