@@ -152,7 +152,8 @@ const Booking = () => {
 
             let schedule;
             if (values.doctor) {
-                schedule = selectedSchedules.find(schedule => schedule.doctorId === values.doctor);
+                schedule = selectedSchedules.find(schedule => schedule.doctor.id === values.doctor);
+                console.log(">>>>>>>>>>>>>>>>>>>>>>>>", selectedSchedules)
                 if (!schedule) {
                     throw new Error('Bác sĩ không có lịch hẹn cho khung giờ này');
                 }

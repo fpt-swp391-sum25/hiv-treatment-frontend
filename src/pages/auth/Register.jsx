@@ -1,8 +1,9 @@
 import '@ant-design/v5-patch-for-react-19';
-import { Form, Input, Button, DatePicker, Select, message, Divider, Typography, notification } from 'antd';
+import { Form, Input, Button, DatePicker, Select, message, Divider, Typography, notification, Alert } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { registerAPI } from '../../services/api.service';
+import { useState } from 'react';
 
 const { Option } = Select;
 const { Link, Text } = Typography;
@@ -12,17 +13,15 @@ const dateFormat = 'DD-MM-YYYY';
 const Register = () => {
     const [form] = Form.useForm();
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(false)
+    const [message, setMessage] = useState("")
     const onFinish = async (values) => {
+        setLoading(true)
         const response = await registerAPI(values)
         if (response.data) {
-            notification.success({
-                message: 'Đăng kí thành công',
-                showProgress: true,
-                pauseOnHover: true,
-            })
+            setMessage('Đăng kí thành công, vui lòng xác minh email trước khi đăng nhập!')
         }
-        navigate('/login');
-        return response.data;
+        setLoading(false)
     };
 
     const onFinishFailed = (errorInfo) => {
@@ -34,6 +33,7 @@ const Register = () => {
         <div style={{ maxWidth: 500, margin: '40px auto', padding: 24, boxShadow: '0 4px 12px rgba(0,0,0,0.15)', borderRadius: 8 }}>
             <Link href="/" className='link'><ArrowLeftOutlined /> Về trang chủ</Link>
             <h2 style={{ textAlign: 'center', marginBottom: 24 }}>Đăng kí</h2>
+            {message && <Alert message={message} type="success" style={{ marginBottom: 16 }} />}
             <Form
                 form={form}
                 name="register"
@@ -124,7 +124,7 @@ const Register = () => {
                 </Form.Item>
 
                 <Form.Item>
-                    <Button type="primary" htmlType="submit" block className='btn-custom'>
+                    <Button type="primary" htmlType="submit" block className='btn-custom' loading={loading}>
                         Đăng kí
                     </Button>
                 </Form.Item>

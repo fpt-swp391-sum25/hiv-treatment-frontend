@@ -145,11 +145,11 @@ const AppointmentList = () => {
 
         },
         {
-            title: 'Hành động',
+            title: '',
             key: 'action',
             render: (_, record) => (
                 <>
-                    {['Đã thanh toán', 'Đang chờ thanh toán', 'Đang hoạt động'].includes(record.status) ? (
+                    {['Đã thanh toán', 'Đang chờ thanh toán', 'Đang hoạt động'].includes(record.status) ? (
                         <Popconfirm
                             title="Huỷ lịch hẹn"
                             description="Bạn có chắc muốn hủy lịch hẹn này?"
