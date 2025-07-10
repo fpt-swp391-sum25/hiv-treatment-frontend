@@ -206,12 +206,12 @@ const ViewOnlyPatientDetail = () => {
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item label="Chiều cao">
-                <Input value={height} onChange={(e) => setHeight(e.target.value)} />
+                <Input value={height} onChange={(e) => setHeight(e.target.value)} suffix="cm" />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item label="Cân nặng">
-                <Input value={weight} onChange={(e) => setWeight(e.target.value)} />
+                <Input value={weight} onChange={(e) => setWeight(e.target.value)} suffix="kg" />
               </Form.Item>
             </Col>
             <Col span={12}>

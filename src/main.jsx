@@ -63,7 +63,6 @@ import PaymentCallback from './pages/patient/PaymentCallback';
 import AppointmentResult from './pages/patient/AppointmentResult';
 import PatientAppointmentHistory from './pages/patient/PatientAppointmentHistory';
 import AppointmentList from './pages/patient/AppointmentList';
-import VerifyEmail from './pages/auth/VerifyEmail';
 
 const router = createBrowserRouter([
   {
@@ -371,10 +370,6 @@ const router = createBrowserRouter([
         errorElement: <Errors />
       }
     ]
-  },
-  {
-    path: '/verify',
-    element: <VerifyEmail />
   }
 ]);
 
