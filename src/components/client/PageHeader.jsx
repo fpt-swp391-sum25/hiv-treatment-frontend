@@ -59,7 +59,6 @@ const PageHeader = () => {
     };
 
 
-
     const handleLogout = async () => {
         const response = await logoutAPI()
         if (response.data) {
@@ -72,7 +71,13 @@ const PageHeader = () => {
                 status: '',
                 role: ''
             })
-            localStorage.setItem('auth_error', 'Đăng xuất thành công');
+            
+            .success({
+                message: 'Hệ thống',
+                showProgress: true,
+                pauseOnHover: true,
+                description: 'Đăng xuất thành công'
+            });
             navigate("/login")
         }
     };

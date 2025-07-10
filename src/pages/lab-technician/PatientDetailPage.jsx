@@ -15,6 +15,7 @@ import UpdateTestResultModal from '../../components/lab-technician/UpdateTestRes
 import dayjs from 'dayjs';
 import { createNotification } from "../../services/notification.service";
 
+
 const PatientDetail = () => {
   const [dataUpdate, setDataUpdate] = useState({});
   const [healthRecordData, setHealthRecordData] = useState({});
