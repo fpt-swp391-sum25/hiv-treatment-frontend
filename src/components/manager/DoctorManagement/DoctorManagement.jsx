@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Space, Button, message, Tag, Row, Col, Card, Statistic, Select, Input, Alert } from 'antd';
 import { UserOutlined, CalendarOutlined, FileTextOutlined } from '@ant-design/icons';
-import { 
-    fetchAllDoctorsAPI, 
+import {
+    fetchAllDoctorsAPI,
     fetchDoctorByIdAPI,
-    fetchDoctorProfileByDoctorIdAPI 
+    fetchDoctorProfileByDoctorIdAPI
 } from '../../../services/api.service';
 import UpdateDoctorModal from './UpdateDoctorModal';
 import DoctorProfileDetail from './DoctorProfileDetail';
@@ -30,7 +30,7 @@ const DoctorManagement = () => {
         try {
             const response = await fetchAllDoctorsAPI();
             console.log('Doctors API response:', response);
-            
+
             // Kiểm tra dữ liệu trả về
             if (Array.isArray(response)) {
                 // Trường hợp API trả về trực tiếp mảng bác sĩ
@@ -65,13 +65,13 @@ const DoctorManagement = () => {
         try {
             console.log('Lấy thông tin chi tiết của bác sĩ có ID:', doctor.id);
             setDetailLoading(true);
-            
+
             // Lấy thông tin cơ bản của bác sĩ
             const basicInfoRes = await fetchDoctorByIdAPI(doctor.id);
             console.log('Thông tin cơ bản bác sĩ:', basicInfoRes);
-            
+
             let combinedData = doctor;
-            
+
             // Nếu có dữ liệu cơ bản từ API
             if (basicInfoRes && basicInfoRes.data) {
                 combinedData = {
@@ -79,12 +79,12 @@ const DoctorManagement = () => {
                     ...basicInfoRes.data
                 };
             }
-            
+
             try {
                 // Lấy thông tin doctor_profile theo doctorId
                 const profileRes = await fetchDoctorProfileByDoctorIdAPI(doctor.id);
                 console.log('Thông tin doctor_profile:', profileRes);
-                
+
                 if (profileRes && profileRes.data) {
                     // Kết hợp thông tin cơ bản và thông tin chuyên môn
                     combinedData = {
@@ -99,9 +99,9 @@ const DoctorManagement = () => {
                 console.warn('Không tìm thấy thông tin doctor_profile:', profileError);
                 // Không gây lỗi toàn bộ quá trình nếu không tìm thấy profile
             }
-            
+
             setSelectedDoctor(combinedData);
-            
+
         } catch (error) {
             console.error('Lỗi khi lấy thông tin chi tiết bác sĩ:', error);
             message.error('Không thể tải thông tin chi tiết của bác sĩ');
@@ -126,26 +126,26 @@ const DoctorManagement = () => {
     const handleUpdateSuccess = async () => {
         try {
             message.success('Đang làm mới dữ liệu...');
-            
+
             // Tải lại danh sách bác sĩ
             await loadDoctors();
-            
+
             // Nếu đang xem thông tin chi tiết của bác sĩ, cập nhật lại thông tin chi tiết
             if (selectedDoctor && isProfileDetailVisible) {
                 try {
                     const detailRes = await fetchDoctorByIdAPI(selectedDoctor.id);
                     console.log('Tải lại thông tin chi tiết:', detailRes);
-                    
+
                     if (detailRes && detailRes.data) {
                         // Tìm thông tin cơ bản mới nhất từ danh sách bác sĩ
                         const updatedBasicInfo = doctors.find(d => d.id === selectedDoctor.id) || selectedDoctor;
-                        
+
                         // Cập nhật thông tin chi tiết
                         const updatedDoctor = {
                             ...updatedBasicInfo,
                             ...detailRes.data
                         };
-                        
+
                         console.log('Thông tin bác sĩ đã được cập nhật:', updatedDoctor);
                         setSelectedDoctor(updatedDoctor);
                     }
@@ -153,12 +153,12 @@ const DoctorManagement = () => {
                     console.error('Lỗi khi tải lại thông tin chi tiết:', error);
                 }
             }
-            
-        message.success('Cập nhật thông tin thành công');
+
+            message.success('Cập nhật thông tin thành công');
         } catch (error) {
             console.error('Lỗi khi làm mới dữ liệu:', error);
         } finally {
-        setIsUpdateModalVisible(false);
+            setIsUpdateModalVisible(false);
             setIsProfileModalVisible(false);
         }
     };
@@ -215,16 +215,26 @@ const DoctorManagement = () => {
             width: '20%',
         },
         {
-            title: 'Thao tác',
+            title: '',
             key: 'action',
             fixed: 'right',
             width: '15%',
             render: (_, record) => (
                 <Space size="small">
-                    <Button type="primary" size="small" onClick={() => handleViewProfile(record)}>
+                    <Button
+                        type="primary"
+                        size="small"
+                        onClick={() => handleViewProfile(record)}
+                    >
                         Xem chi tiết
                     </Button>
-                    <Button size="small" onClick={() => handleUpdateDoctor(record)}>
+
+                    <Button
+                        type='default'
+                        size="small"
+
+                        onClick={() => handleUpdateDoctor(record)}
+                    >
                         Cập nhật
                     </Button>
                 </Space>
@@ -244,7 +254,7 @@ const DoctorManagement = () => {
                     style={{ marginBottom: 16 }}
                 />
             )}
-            
+
             <Row gutter={[16, 16]} className="dashboard-stats">
                 <Col xs={24}>
                     <Card>
@@ -309,7 +319,7 @@ const DoctorManagement = () => {
                     onSuccess={handleUpdateSuccess}
                 />
             )}
-            
+
             {/* Modal cập nhật thông tin chuyên môn */}
             {selectedDoctor && (
                 <UpdateDoctorProfileModal

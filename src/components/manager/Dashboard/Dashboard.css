@@ -139,11 +139,11 @@
   .dashboard-title {
     font-size: 20px;
   }
-  
+
   .kpi-value {
     font-size: 24px;
   }
-  
+
   .dashboard-tabs .ant-tabs-tab {
     padding: 8px 12px;
     font-size: 14px;
@@ -207,4 +207,4 @@
   font-weight: 500;
   margin: 0;
   color: #333;
-} 
+}

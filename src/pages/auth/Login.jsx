@@ -83,7 +83,7 @@ const Login = () => {
                     description: `Xin chào, ${response.data.fullName || username}!`
                 });
             } else {
-                if (response.status === 403) {
+                if (response.status === 403 && response.message.includes('ACCOUNT')) {
                     setError('Tài khoản chưa xác minh email')
                     setShowResend(true)
                 } else {
@@ -200,39 +200,42 @@ const Login = () => {
         <div style={{ maxWidth: 500, margin: '40px auto', padding: 24, boxShadow: '0 4px 12px rgba(0,0,0,0.15)', borderRadius: 8 }}>
             <Link onClick={redirectHomePage} className='link'><ArrowLeftOutlined /> Về trang chủ</Link>
             {showResend ? (
-                <Form
-                    form={form}
-                    name="resendVerificationForm"
-                    onFinish={handleResend}
-                    layout="vertical"
-                    style={{ marginTop: 20 }}
-                >
-                    <Form.Item
-                        label="Email"
-                        name="email"
-                        rules={[
-                            { required: true, message: 'Vui lòng nhập email của bạn' },
-                            { type: 'email', message: 'Email không hợp lệ' },
-                        ]}
+                <>
+                    {error && <Alert message={error} type="error" style={{ marginTop: 20 }} />}
+                    <Form
+                        form={form}
+                        name="resendVerificationForm"
+                        onFinish={handleResend}
+                        layout="vertical"
+                        style={{ marginTop: 20 }}
                     >
-                        <Input
-                            placeholder="Nhập email của bạn"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                        />
-                    </Form.Item>
-                    <Form.Item>
-                        <Button
-                            type="primary"
-                            htmlType="submit"
-                            block
-                            loading={loading}
-                            style={{ background: '#00bed3', borderColor: '#00bed3' }}
+                        <Form.Item
+                            label="Email"
+                            name="email"
+                            rules={[
+                                { required: true, message: 'Vui lòng nhập email của bạn' },
+                                { type: 'email', message: 'Email không hợp lệ' },
+                            ]}
                         >
-                            Gửi lại email xác minh
-                        </Button>
-                    </Form.Item>
-                </Form>
+                            <Input
+                                placeholder="Nhập email của bạn"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                            />
+                        </Form.Item>
+                        <Form.Item>
+                            <Button
+                                type="primary"
+                                htmlType="submit"
+                                block
+                                loading={loading}
+                                style={{ background: '#00bed3', borderColor: '#00bed3' }}
+                            >
+                                Gửi lại email xác minh
+                            </Button>
+                        </Form.Item>
+                    </Form>
+                </>
             ) : (
                 <>
                     <h2 style={{ textAlign: 'center', marginBottom: 24 }}>Đăng nhập</h2>

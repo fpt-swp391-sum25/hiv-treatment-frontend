@@ -51,11 +51,11 @@ const ManagerHeader = () => {
       </Title>
 
       <div className="header-right">
-        <Text style={{ color: 'black', marginLeft: 4, marginRight: 4 }}>{user.fullName}</Text>
+        <Text style={{ color: 'black' }}>{user.fullName}</Text>
         <Avatar
-          icon={<UserOutlined />}
-          size={46}
-          className="user-avatar"
+          src={user.avatar || null}
+          icon={!user.avatar ? <UserOutlined /> : null}
+          style={{ margin: '0 8px' }}
         />
         <Popconfirm
           title="Đăng xuất"

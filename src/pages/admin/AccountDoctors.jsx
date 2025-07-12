@@ -1,64 +1,96 @@
 import { useEffect, useState } from 'react';
-import { Button, Input, Modal, notification, Popconfirm, Space, Table, Tag } from 'antd';
+import { Button, Input, Modal, notification, Popconfirm, Space, Spin, Table, Tag } from 'antd';
 import { createAccountAPI, deleteAccountAPI, fetchAccountByRoleAPI } from '../../services/api.service';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import UpdateUserModal from '../../components/admin/UpdateUserModal';
 
 const AccountDoctors = () => {
-
-    const [data, setData] = useState([])
-    const [username, setUsername] = useState("")
-    const [password, setPassword] = useState("")
-    const [email, setEmail] = useState("")
-    const [role, setRole] = useState("DOCTOR")
-    const [dataUpdate, setDataUpdate] = useState({})
-
-    const [isOpenModal, setIsOpenModal] = useState(false)
-    const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false)
+    const [data, setData] = useState([]);
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+    const [email, setEmail] = useState("");
+    const [role, setRole] = useState("DOCTOR");
+    const [dataUpdate, setDataUpdate] = useState({});
+    const [loading, setLoading] = useState(false);
+    const [isOpenModal, setIsOpenModal] = useState(false);
+    const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
 
     useEffect(() => {
-        loadAccounts()
-    }, [])
+        loadAccounts();
+    }, []);
 
     const loadAccounts = async () => {
-        const response = await fetchAccountByRoleAPI(role)
-        setData(response.data)
-    }
+        setLoading(true)
+        try {
+            const response = await fetchAccountByRoleAPI(role);
+            setData(response.data);
+        } catch (error) {
+            notification.error({
+                message: 'Hệ thống',
+                description: error?.message || 'Lỗi khi tải dữ liệu',
+            });
+        }
+        setLoading(false)
+    };
 
     const handleCreate = async () => {
-        const response = await createAccountAPI(username, password, email, role)
-        if (response.data) {
-            notification.success({
-                message: 'Hệ thống',
-                showProgress: true,
-                pauseOnHover: true,
-                description: 'Tạo tài khoản thành công'
-            })
+        setLoading(true);
+        try {
+            const response = await createAccountAPI(username, password, email, role);
+            if (response.data) {
+                notification.success({
+                    message: 'Hệ thống',
+                    description: 'Tạo tài khoản thành công',
+                });
+                resetAndClose();
+                await loadAccounts();
+            } else {
+                notification.error({
+                    message: 'Hệ thống',
+                    description: 'Tạo tài khoản thất bại',
+                });
+            }
+        } catch (error) {
+            notification.error({
+                message: 'Hệ thống',
+                description: error?.message || 'Lỗi khi tạo tài khoản',
+            });
         }
-        resetAndClose()
-        await loadAccounts()
-    }
+        setLoading(false);
+    };
 
     const handleDelete = async (id) => {
-        const response = await deleteAccountAPI(id)
-        if (response.data) {
-            notification.success({
-                message: 'Hệ thống',
-                showProgress: true,
-                pauseOnHover: true,
-                description: 'Xóa tài khoản thành công'
-            })
-            await loadAccounts()
+        setLoading(true);
+        try {
+            const response = await deleteAccountAPI(id);
+            if (response.data) {
+                notification.success({
+                    message: 'Hệ thống',
+                    description: 'Xoá tài khoản thành công',
+                });
+                await loadAccounts();
+            } else {
+                notification.error({
+                    message: 'Hệ thống',
+                    description: 'Xoá tài khoản thất bại',
+                });
+            }
+        } catch (error) {
+            notification.error({
+                message: 'Hệ thống',
+                description: error?.message || 'Lỗi khi xoá tài khoản',
+            });
         }
-    }
+        setLoading(false);
+    };
 
     const resetAndClose = () => {
-        setIsOpenModal(false)
-        setUsername("")
-        setEmail("")
-        setPassword("")
-        setRole("DOCTOR")
-    }
+        setIsOpenModal(false);
+        setUsername("");
+        setEmail("");
+        setPassword("");
+        setRole("DOCTOR");
+    };
 
     const columns = [
         {
@@ -84,15 +116,12 @@ const AccountDoctors = () => {
             key: 'status',
             dataIndex: 'accountStatus',
             render: (_, { accountStatus }) => {
-
                 let color = accountStatus === 'Đang hoạt động' ? 'green' : 'volcano';
-
                 return (
                     <Tag color={color} key={accountStatus}>
                         {accountStatus}
                     </Tag>
                 );
-
             },
         },
         {
@@ -100,11 +129,13 @@ const AccountDoctors = () => {
             key: 'action',
             render: (_, record) => (
                 <Space size="large">
-                    <EditOutlined onClick={() => {
-                        setIsUpdateModalOpen(true);
-                        setDataUpdate(record)
-
-                    }} style={{ color: 'orange' }} />
+                    <EditOutlined
+                        onClick={() => {
+                            setIsUpdateModalOpen(true);
+                            setDataUpdate(record);
+                        }}
+                        style={{ color: 'orange' }}
+                    />
                     <Popconfirm
                         title="Xóa người dùng"
                         description="Bạn có chắc muốn xóa tài khoản này?"
@@ -122,45 +153,73 @@ const AccountDoctors = () => {
 
     return (
         <>
-            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '15px' }}>
-                <h2>Tài khoản bác sĩ</h2>
-                <Button onClick={() => setIsOpenModal(true)} type='primary'>Tạo mới</Button>
+            {loading ? <div style={{
+                position: "fixed",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+            }}>
+                < Spin />
             </div>
-            <Table columns={columns} dataSource={data} rowKey={data.id} />
-            <UpdateUserModal
-                isUpdateModalOpen={isUpdateModalOpen}
-                setIsUpdateModalOpen={setIsUpdateModalOpen}
-                dataUpdate={dataUpdate}
-                setDataUpdate={setDataUpdate}
-                loadAccounts={loadAccounts}
-            />
-            <Modal
-                title="Tạo tài khoản"
-                closable={{ 'aria-label': 'Custom Close Button' }}
-                open={isOpenModal}
-                onOk={handleCreate}
-                onCancel={resetAndClose}
-                okText={"Tạo"}
-                cancelText={"Hủy"}
-            >
-                <div style={{ display: 'flex', gap: '15px', flexDirection: 'column' }}>
-                    <div>
-                        <span>Tên đăng nhập</span>
-                        <Input value={username} onChange={(event) => { setUsername(event.target.value) }} />
+                :
+                <>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '15px' }}>
+                        <h2>Tài khoản bác sĩ</h2>
+                        <Button onClick={() => setIsOpenModal(true)} type='primary'>
+                            Tạo mới
+                        </Button>
                     </div>
-                    <div>
-                        <span>Email</span>
-                        <Input value={email} onChange={(event) => { setEmail(event.target.value) }} />
-                    </div>
-                    <div>
-                        <span>Mật khẩu</span>
-                        <Input.Password value={password} onChange={(event) => { setPassword(event.target.value) }} />
-                    </div>
-
-                </div>
-            </Modal>
-
+                    <Table columns={columns} dataSource={data} rowKey="id" loading={loading} />
+                    <UpdateUserModal
+                        isUpdateModalOpen={isUpdateModalOpen}
+                        setIsUpdateModalOpen={setIsUpdateModalOpen}
+                        dataUpdate={dataUpdate}
+                        setDataUpdate={setDataUpdate}
+                        loadAccounts={loadAccounts}
+                    />
+                    <Modal
+                        title="Tạo tài khoản"
+                        closable={{ 'aria-label': 'Custom Close Button' }}
+                        open={isOpenModal}
+                        onOk={handleCreate}
+                        onCancel={resetAndClose}
+                        okText={"Tạo"}
+                        cancelText={"Hủy"}
+                        confirmLoading={loading}
+                        okButtonProps={{ disabled: loading }}
+                        cancelButtonProps={{ disabled: loading }}
+                    >
+                        <div style={{ display: 'flex', gap: '15px', flexDirection: 'column' }}>
+                            <div>
+                                <span>Tên đăng nhập</span>
+                                <Input
+                                    value={username}
+                                    onChange={(event) => setUsername(event.target.value)}
+                                    disabled={loading}
+                                />
+                            </div>
+                            <div>
+                                <span>Email</span>
+                                <Input
+                                    value={email}
+                                    onChange={(event) => setEmail(event.target.value)}
+                                    disabled={loading}
+                                />
+                            </div>
+                            <div>
+                                <span>Mật khẩu</span>
+                                <Input.Password
+                                    value={password}
+                                    onChange={(event) => setPassword(event.target.value)}
+                                    disabled={loading}
+                                />
+                            </div>
+                        </div>
+                    </Modal>
+                </>
+            }
         </>
-    )
-}
+    );
+};
+
 export default AccountDoctors;

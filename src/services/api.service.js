@@ -76,6 +76,11 @@ const initiatePaymentAPI = (params) => {
     return axios.post(URL_BACKEND, params)
 }
 
+const retryPaymentAPI = (params) => {
+    const URL_BACKEND = '/api/payment/retry'
+    return axios.post(URL_BACKEND, params)
+}
+
 
 const createAccountAPI = (username, password, email, role) => {
     const URL_BACKEND = '/api/user/create'
@@ -192,10 +197,10 @@ const fetchHealthRecordByScheduleIdAPI = (scheduleId) => {
     return axios.get(URL_BACKEND)
 }
 
-const createHealthRecordAPI = (scheduleId) => {
+const createHealthRecordAPI = (paymentRef) => {
     const URL_BACKEND = '/api/health-record'
     const data = {
-        scheduleId: scheduleId
+        paymentRef: paymentRef
     }
     return axios.post(URL_BACKEND, data)
 }
@@ -1087,13 +1092,13 @@ const fetchSystemConfigurationsAPI = () => {
 };
 
 const updateSystemConfigurationAPI = (id, dataUpdate) =>
-  axios.put(`/api/system-configuration/${id}`, dataUpdate);
+    axios.put(`/api/system-configuration/${id}`, dataUpdate);
 
 const createSystemConfigurationAPI = (createData) =>
-  axios.post("/api/system-configurations", createData);
+    axios.post("/api/system-configurations", createData);
 
-const deleteSystemConfigurationAPI  = (id) =>
-  axios.delete(`/api/system-configuration/${id}`);
+const deleteSystemConfigurationAPI = (id) =>
+    axios.delete(`/api/system-configuration/${id}`);
 
 // Export tất cả các hàm API
 export {
@@ -1106,6 +1111,7 @@ export {
     fetchScheduleByDateAPI,
     registerScheduleAPI,
     initiatePaymentAPI,
+    retryPaymentAPI,
     createAccountAPI,
     handlePaymentCallbackAPI,
     fetchAllPatientScheduleAPI,
