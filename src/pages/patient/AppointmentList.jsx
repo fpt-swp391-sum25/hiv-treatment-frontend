@@ -187,7 +187,9 @@ const AppointmentList = () => {
                             okText="Có"
                             cancelText="Không"
                         >
+
                             <Button className="custom-delete-btn" icon={<DeleteOutlined />} >
+
                                 Huỷ
                             </Button>
                         </Popconfirm>

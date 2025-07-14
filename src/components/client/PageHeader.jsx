@@ -96,12 +96,14 @@ const PageHeader = () => {
                 role: ''
             })
 
+
             notification.success({
                 message: 'Hệ thống',
                 showProgress: true,
                 pauseOnHover: true,
                 description: 'Đăng xuất thành công'
             });
+
             navigate("/login")
         }
     };

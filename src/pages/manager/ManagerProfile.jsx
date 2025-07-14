@@ -533,6 +533,7 @@ const ManagerProfile = () => {
                 Lưu thay đổi
               </Button>
               <Button
+                type='primary'
                 onClick={handleCancel}
                 style={{
                   borderRadius: '8px',
@@ -541,7 +542,9 @@ const ManagerProfile = () => {
                   fontSize: '14px',
                   fontWeight: '500'
                 }}
+
                 className='custom-delete-btn'
+
               >
                 Hủy
               </Button>

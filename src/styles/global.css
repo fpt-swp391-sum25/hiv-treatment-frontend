@@ -186,6 +186,7 @@
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) !important;
 }
 
+
 .custom-delete-btn {
     background-color: #ff4d4f !important;
     /* Màu đỏ nhẹ */
@@ -202,6 +203,7 @@
     color: white !important;
     box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.2) !important;
 }
+
 
 
 
@@ -252,4 +254,5 @@
     transition: none !important;
     background-color: #089BAB15 !important;
     color: #04cde4 !important;
+
 }
