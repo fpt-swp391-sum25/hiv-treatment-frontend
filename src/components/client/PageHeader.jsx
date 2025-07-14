@@ -22,7 +22,7 @@ const PageHeader = () => {
     const unreadCount = notifications.filter(n => !n.isRead).length;
     useEffect(() => {
         let intervalId;
-    
+
         const pollNotifications = async () => {
             try {
                 const res = await getNotificationsByUserId(user.id);
@@ -30,11 +30,11 @@ const PageHeader = () => {
                     ...n,
                     isRead: n.read,
                 }));
-    
+
                 const hasNew = latest.some(
                     (n) => !notifications.some((old) => old.id === n.id)
                 );
-    
+
                 if (hasNew) {
                     setNotifications(latest);
                 }
@@ -42,11 +42,11 @@ const PageHeader = () => {
                 console.error("Lỗi khi polling:", error);
             }
         };
-    
+
         if (user?.id) {
             intervalId = setInterval(pollNotifications, 10000); // 10s
         }
-    
+
         return () => clearInterval(intervalId); // cleanup
     }, [user?.id, notifications]);
     const loadNotifications = async () => {
@@ -95,13 +95,13 @@ const PageHeader = () => {
                 status: '',
                 role: ''
             })
-            
-            .success({
-                message: 'Hệ thống',
-                showProgress: true,
-                pauseOnHover: true,
-                description: 'Đăng xuất thành công'
-            });
+
+                .success({
+                    message: 'Hệ thống',
+                    showProgress: true,
+                    pauseOnHover: true,
+                    description: 'Đăng xuất thành công'
+                });
             navigate("/login")
         }
     };

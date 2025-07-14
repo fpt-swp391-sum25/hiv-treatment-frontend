@@ -26,7 +26,7 @@ const PatientList = () => {
     const [selectedMonth, setSelectedMonth] = useState(null);
     const [selectedDate, setSelectedDate] = useState(null);
     const [filteredData, setFilteredData] = useState([]);
-   
+
 
 
     const navigate = useNavigate();

@@ -40,7 +40,7 @@ const ManagerProfile = () => {
     dateOfBirth: '',
     password: '',
     confirmPassword: '',
-    avatar: '',   
+    avatar: '',
   });
 
   // Fetch user data if not available
@@ -50,7 +50,6 @@ const ManagerProfile = () => {
       const response = await fetchAccountAPI();
       if (response.data) {
         setUser(response.data);
-        localStorage.setItem('user', JSON.stringify(response.data));
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
@@ -115,7 +114,6 @@ const ManagerProfile = () => {
         const updatedUserRes = await fetchAccountAPI();
         if (updatedUserRes.data) {
           setUser(updatedUserRes.data);
-          localStorage.setItem('user', JSON.stringify(updatedUserRes.data));
           if (updatedUserRes.data.avatar) {
             setAvatarUrl(updatedUserRes.data.avatar);
           }
@@ -185,7 +183,7 @@ const ManagerProfile = () => {
       <Card
         style={{
           marginBottom: 24,
-          background: 'linear-gradient(135deg, #2056df 0%, #1c48c8 100%)',
+          background: '#089BAB80',
           border: 'none',
           borderRadius: '12px',
           overflow: 'hidden'
@@ -226,7 +224,7 @@ const ManagerProfile = () => {
                   }}
                   onClick={() => fileInputRef.current.click()}
                 >
-                  <EditOutlined style={{ color: '#2056df', fontSize: '14px' }} />
+                  <EditOutlined style={{ color: '#089BAB', fontSize: '14px' }} />
                 </div>
               </div>
               <input
@@ -308,7 +306,7 @@ const ManagerProfile = () => {
             fontSize: '18px',
             fontWeight: 'bold',
             color: '#2c3e50',
-            borderBottom: '2px solid #2056df',
+            borderBottom: '2px solid #089BAB',
             paddingBottom: '8px',
             marginBottom: '8px'
           }}>
@@ -477,9 +475,6 @@ const ManagerProfile = () => {
                 loading={loading}
                 onClick={handleSave}
                 style={{
-                  background: 'linear-gradient(135deg, #2056df 0%, #1c48c8 100%)',
-                  border: 'none',
-                  borderRadius: '8px',
                   padding: '10px 32px',
                   height: 'auto',
                   fontSize: '14px',
@@ -489,6 +484,7 @@ const ManagerProfile = () => {
                 Lưu thay đổi
               </Button>
               <Button
+                type='primary'
                 onClick={handleCancel}
                 style={{
                   borderRadius: '8px',
@@ -497,6 +493,7 @@ const ManagerProfile = () => {
                   fontSize: '14px',
                   fontWeight: '500'
                 }}
+                danger
               >
                 Hủy
               </Button>

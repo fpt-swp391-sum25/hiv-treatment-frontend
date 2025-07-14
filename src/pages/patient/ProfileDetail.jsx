@@ -1,25 +1,35 @@
-import React, { useContext, useEffect, useState } from "react"
-
-import { cancelBookingAPI, fetchAllPatientScheduleAPI, fetchHealthRecordByScheduleIdAPI, fetchUserInfoAPI, updateProfileAPI } from "../../services/api.service"
-import { Layout, message, Spin, Table, Button, Popconfirm, Segmented, Card, Descriptions, Form, Input, Row, Col, Select, DatePicker, notification, Typography, Modal, Avatar } from "antd"
+import React, { useContext, useState, useRef } from "react";
+import {
+    Layout,
+    message,
+    Card,
+    Row,
+    Col,
+    Avatar,
+    Button,
+    Input,
+    Select,
+    DatePicker,
+    Popconfirm,
+    Descriptions,
+    notification,
+    Spin,
+} from "antd";
 import dayjs from "dayjs";
 import { AuthContext } from "../../components/context/AuthContext";
-import { useNavigate } from "react-router-dom";
-import { UserOutlined } from "@ant-design/icons";
-
-
+import { DeleteOutlined, SaveOutlined, UploadOutlined, UserOutlined } from "@ant-design/icons";
+import { updateProfileAPI } from "../../services/api.service";
 
 const { Content } = Layout;
-const { Text } = Typography
 
 const ProfileDetail = () => {
-
-    const { user, setUser } = useContext(AuthContext)
+    const { user, setUser } = useContext(AuthContext);
     const [avatarUrl, setAvatarUrl] = useState(user.avatar);
-    const fileInputRef = React.useRef('');
+    const fileInputRef = useRef(null);
     const [loading, setLoading] = useState(false);
-
-
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [confirmPasswordError, setConfirmPasswordError] = useState('');
 
     const handlePatientInputChange = (field, value) => {
         try {
@@ -27,9 +37,11 @@ const ProfileDetail = () => {
             const updatedPatientInfo = { ...user, [field]: value };
             setUser(updatedPatientInfo);
         } catch (error) {
-            console.error('Update patient error:', error.response || error);
+            console.error("Update patient error:", error.response || error);
             if (error.response?.status !== 401) {
-                message.error(error.response?.data?.message || 'Lỗi khi cập nhật thông tin cá nhân');
+                message.error(
+                    error.response?.data?.message || "Lỗi khi cập nhật thông tin cá nhân"
+                );
             }
         } finally {
             setLoading(false);
@@ -37,17 +49,23 @@ const ProfileDetail = () => {
     };
 
     const handleUpdateProfile = async () => {
-        // user = { ...user, avatarUrl }
-        const response = await updateProfileAPI(user)
+        setLoading(true);
+        const dataUpdate = {
+            ...user, password: newPassword
+        }
+        const response = await updateProfileAPI(dataUpdate);
+        setNewPassword('')
+        setConfirmPassword('')
         if (response.data) {
             notification.success({
-                message: 'Hệ thống',
+                message: "Hệ thống",
                 showProgress: true,
                 pauseOnHover: true,
-                description: 'Cập nhật thành công'
-            })
+                description: "Cập nhật thành công",
+            });
         }
-    }
+        setLoading(false);
+    };
 
     const handleAvatarChange = (event) => {
         const file = event.target.files[0];
@@ -59,181 +77,233 @@ const ProfileDetail = () => {
 
             setAvatarUrl(base64String);
             setUser((prev) => ({
-                ...prev, avatar: base64String
-            }))
+                ...prev,
+                avatar: base64String,
+            }));
         };
         reader.readAsDataURL(file);
     };
 
 
+
     return (
         <Layout>
-            <Content style={{ minHeight: "500px", padding: '15px' }}>
-                <div style={{ display: 'flex', justifyContent: 'center' }}>
-                </div>
+            <Content style={{ padding: 24, minHeight: "500px" }}>
                 {loading ? (
-                    <div style={{
-                        position: "fixed",
-                        top: "50%",
-                        left: "50%",
-                        transform: "translate(-50%, -50%)",
-                    }}>
+                    <div
+                        style={{
+                            position: "fixed",
+                            top: "50%",
+                            left: "50%",
+                            transform: "translate(-50%, -50%)",
+                        }}
+                    >
                         <Spin tip="Đang tải..." />
                     </div>
-
                 ) : (
-                    <Card>
-
-                        <Card
-                            title="Thông tin cá nhân"
-                            style={{ marginTop: '5vh', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
-                        >
-                            {user && Object.keys(user).length > 0 ? (
-                                <div style={{ padding: '20px' }}>
-                                    <Row gutter={16}>
-                                        <Col xs={24} sm={6} style={{ textAlign: 'center' }}>
-                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                                <Avatar
-                                                    src={user.avatar !== '' ? user.avatar : null}
-                                                    icon={user.avatar === '' ? <UserOutlined /> : null}
-                                                    size={120}
-                                                    style={{ border: '2px solid #1890ff', cursor: 'pointer' }}
-                                                    onClick={() => fileInputRef.current.click()}
-                                                />
-                                                <input
-                                                    ref={fileInputRef}
-                                                    type="file"
-                                                    accept="image/*"
-                                                    style={{ display: 'none' }}
-                                                    onChange={handleAvatarChange}
-                                                />
-                                                {avatarUrl && (
-                                                    <Button
-                                                        danger
-                                                        type="link"
-                                                        style={{ marginTop: 8 }}
-                                                        onClick={() => {
-                                                            setAvatarUrl('');
-                                                            setUser((prev) => ({
-                                                                ...prev, avatar: '',
-                                                            }))
-                                                        }}
-                                                    >
-                                                        Xóa ảnh
-                                                    </Button>
-                                                )}
-                                            </div>
-                                        </Col>
-                                    </Row>
-                                    <Row gutter={16}>
-
-
-                                        <Col span={12}>
-                                            <div style={{ marginBottom: '16px' }}>
-                                                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>Họ và tên</label>
-                                                <Input
-                                                    size="large"
-                                                    value={user.fullName || ''}
-                                                    onChange={(e) => handlePatientInputChange('fullName', e.target.value)}
-                                                />
-                                            </div>
-                                        </Col>
-                                        <Col span={12}>
-                                            <div style={{ marginBottom: '16px' }}>
-                                                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>Địa chỉ</label>
-                                                <Input
-                                                    size="large"
-                                                    value={user.address || ''}
-                                                    onChange={(e) => handlePatientInputChange('address', e.target.value)}
-                                                />
-                                            </div>
-                                        </Col>
-                                        <Col span={12}>
-                                            <div style={{ marginBottom: '16px' }}>
-                                                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>Số điện thoại</label>
-                                                <Input
-                                                    size="large"
-                                                    value={user.phoneNumber || ''}
-                                                    onChange={(e) => handlePatientInputChange('phoneNumber', e.target.value)}
-                                                />
-                                            </div>
-                                        </Col>
-                                        <Col span={12}>
-                                            <div style={{ marginBottom: '16px' }}>
-                                                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>Email</label>
-                                                <Input
-                                                    size="large"
-                                                    value={user.email || ''}
-                                                    onChange={(e) => handlePatientInputChange('email', e.target.value)}
-                                                />
-                                            </div>
-                                        </Col>
-                                        <Col span={12}>
-                                            <div style={{ marginBottom: '16px' }}>
-                                                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>Giới tính</label>
-                                                <Select
-                                                    size="large"
-                                                    value={user.gender || ''}
-                                                    onChange={(value) => handlePatientInputChange('gender', value)}
-                                                    style={{ width: '100%' }}
-                                                >
-                                                    <Option value="MALE">Nam</Option>
-                                                    <Option value="FEMALE">Nữ</Option>
-                                                </Select>
-                                            </div>
-                                        </Col>
-                                        <Col span={12}>
-                                            <div style={{ marginBottom: '16px' }}>
-                                                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>Ngày sinh</label>
-                                                <DatePicker
-                                                    size="large"
-                                                    defaultValue={user.dateOfBirth ? dayjs(user.dateOfBirth, 'YYYY-MM-DD') : null}
-                                                    format="YYYY-MM-DD"
-                                                    style={{ width: '100%' }}
-                                                    onChange={(date) => handlePatientInputChange('dateOfBirth', date)}
-                                                />
-                                            </div>
-                                        </Col>
-
-                                        <Col span={12}>
-                                            <div style={{ marginBottom: '16px' }}>
-                                                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>Ngày tạo tài khoản</label>
-                                                <span>{user.createdAt || 'N/A'}</span>
-                                            </div>
-                                        </Col>
-
-
-                                        <Col span={12}>
-                                            <div style={{ marginBottom: '16px' }}>
-                                                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>Mã bệnh nhân</label>
-                                                <span>{user.displayId || 'N/A'}</span>
-                                            </div>
-                                        </Col>
-                                        <Col span={12}>
-                                            <div>
-                                                <Popconfirm
-                                                    title="Cập nhật"
-                                                    description="Bạn có chắc muốn cập nhật thông tin?"
-                                                    onConfirm={handleUpdateProfile}
-                                                    okText="Có"
-                                                    cancelText="Không"
-                                                    placement="left"
-                                                >
-                                                    <Button type="primary" >Lưu</Button>
-                                                </Popconfirm>
-                                            </div>
-                                        </Col>
-                                    </Row>
+                    <Card
+                        title="Thông tin cá nhân"
+                        bordered={false}
+                        style={{ borderRadius: 12, boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }}
+                    >
+                        <Row gutter={32}>
+                            {/* Avatar + Chọn/Xoá ảnh */}
+                            <Col xs={24} md={6} style={{ textAlign: "center" }}>
+                                <Avatar
+                                    size={128}
+                                    src={avatarUrl || null}
+                                    icon={!avatarUrl && <UserOutlined />}
+                                    style={{ border: "2px solid #089BAB", margin: 16, cursor: "pointer" }}
+                                    onClick={() => fileInputRef.current.click()}
+                                />
+                                <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    accept="image/*"
+                                    onChange={handleAvatarChange}
+                                    style={{ display: "none" }}
+                                />
+                                <div>
+                                    <Button
+                                        type="primary"
+                                        onClick={() => fileInputRef.current.click()}
+                                        icon={<UploadOutlined />}
+                                    >
+                                        Chọn ảnh
+                                    </Button>
+                                    {avatarUrl && (
+                                        <Button
+                                            icon={<DeleteOutlined />}
+                                            danger
+                                            type="link"
+                                            onClick={() => {
+                                                setAvatarUrl("");
+                                                setUser((prev) => ({ ...prev, avatar: "" }));
+                                            }}
+                                        >
+                                            Xoá ảnh
+                                        </Button>
+                                    )}
                                 </div>
-                            ) : (
-                                <p style={{ padding: '20px' }}>Không có thông tin bệnh nhân</p>
-                            )}
-                        </Card>
+                            </Col>
+
+                            {/* Form thông tin cá nhân */}
+                            <Col xs={24} md={18}>
+                                <Row gutter={16}>
+                                    <Col span={12}>
+                                        <label
+                                            style={{ display: "block", margin: 8, fontWeight: 500 }}
+                                        >
+                                            Họ và tên
+                                        </label>
+                                        <Input
+                                            value={user.fullName || ""}
+                                            onChange={(e) => handlePatientInputChange("fullName", e.target.value)}
+                                            size="large"
+                                        />
+                                    </Col>
+                                    <Col span={12}>
+                                        <label
+                                            style={{ display: "block", margin: 8, fontWeight: 500 }}
+                                        >
+                                            Email
+                                        </label>
+                                        <Input
+                                            value={user.email || ""}
+                                            onChange={(e) => handlePatientInputChange("email", e.target.value)}
+                                            size="large"
+                                        />
+                                    </Col>
+                                    <Col span={12}>
+                                        <label
+                                            style={{ display: "block", margin: 8, fontWeight: 500 }}
+                                        >
+                                            Số điện thoại
+                                        </label>
+                                        <Input
+                                            value={user.phoneNumber || ""}
+                                            onChange={(e) => handlePatientInputChange("phoneNumber", e.target.value)}
+                                            size="large"
+                                        />
+                                    </Col>
+                                    <Col span={12}>
+                                        <label
+                                            style={{ display: "block", margin: 8, fontWeight: 500 }}
+                                        >
+                                            Địa chỉ
+                                        </label>
+                                        <Input
+                                            value={user.address || ""}
+                                            onChange={(e) => handlePatientInputChange("address", e.target.value)}
+                                            size="large"
+                                        />
+                                    </Col>
+                                    <Col span={12}>
+                                        <label
+                                            style={{ display: "block", margin: 8, fontWeight: 500 }}
+                                        >
+                                            Giới tính
+                                        </label>
+                                        <Select
+                                            value={user.gender || ""}
+                                            onChange={(value) => handlePatientInputChange("gender", value)}
+                                            size="large"
+                                            style={{ width: "100%" }}
+                                        >
+                                            <Select.Option value="MALE">Nam</Select.Option>
+                                            <Select.Option value="FEMALE">Nữ</Select.Option>
+                                        </Select>
+                                    </Col>
+                                    <Col span={12}>
+                                        <label
+                                            style={{ display: "block", margin: 8, fontWeight: 500 }}
+                                        >
+                                            Ngày sinh
+                                        </label>
+                                        <DatePicker
+                                            value={user.dateOfBirth ? dayjs(user.dateOfBirth) : null}
+                                            format="DD-MM-YYYY"
+                                            onChange={(date) => handlePatientInputChange("dateOfBirth", date)}
+                                            size="large"
+                                            style={{ width: "100%" }}
+                                        />
+                                    </Col>
+                                    <Col span={12}>
+                                        <label style={{ display: "block", margin: 8, fontWeight: 500 }}>
+                                            Mật khẩu mới
+                                        </label>
+                                        <Input.Password
+                                            value={newPassword}
+                                            onChange={(e) => setNewPassword(e.target.value)}
+                                            size="large"
+                                            placeholder="Để trống nếu không đổi"
+                                        />
+                                    </Col>
+                                    <Col span={12}>
+                                        <label style={{ display: "block", margin: 8, fontWeight: 500 }}>
+                                            Xác nhận mật khẩu
+                                        </label>
+                                        <Input.Password
+                                            value={confirmPassword}
+                                            onChange={(e) => {
+                                                const value = e.target.value;
+                                                setConfirmPassword(value);
+                                                if (newPassword && value !== newPassword) {
+                                                    setConfirmPasswordError('Mật khẩu xác nhận không khớp');
+                                                } else {
+                                                    setConfirmPasswordError('');
+                                                }
+                                            }}
+                                            size="large"
+                                            placeholder="Nhập lại mật khẩu"
+                                        />
+                                        {confirmPasswordError && newPassword && (
+                                            <div style={{ color: 'red', marginTop: 4 }}>{confirmPasswordError}</div>
+                                        )}
+                                    </Col>
+                                </Row>
+
+                                <hr style={{ margin: "24px 0" }} />
+
+                                {/* Thông tin hệ thống */}
+                                <Descriptions
+                                    title=""
+                                    column={1}
+                                    size="small"
+                                    layout="vertical"
+                                >
+                                    <Descriptions.Item label="Mã bệnh nhân">
+                                        {user.displayId || "N/A"}
+                                    </Descriptions.Item>
+                                    <Descriptions.Item label="Ngày tạo tài khoản">
+                                        {dayjs(user.createdAt).format('DD-MM-YYYY') || "N/A"}
+                                    </Descriptions.Item>
+                                </Descriptions>
+
+                                <div style={{ textAlign: "right", marginTop: 24 }}>
+                                    <Popconfirm
+                                        title="Cập nhật thông tin?"
+                                        onConfirm={handleUpdateProfile}
+                                        okText="Có"
+                                        cancelText="Không"
+                                        placement="left"
+                                    >
+                                        <Button
+                                            type="primary"
+                                            loading={loading}
+                                            icon={<SaveOutlined />}
+                                        >
+                                            Lưu thay đổi
+                                        </Button>
+                                    </Popconfirm>
+                                </div>
+                            </Col>
+                        </Row>
                     </Card>
                 )}
             </Content>
         </Layout>
-    )
-}
+    );
+};
 
-export default ProfileDetail
+export default ProfileDetail;

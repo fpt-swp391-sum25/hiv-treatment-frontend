@@ -76,7 +76,6 @@ const LabTechnicianProfile = () => {
         const updatedUserRes = await fetchAccountAPI();
         if (updatedUserRes.data) {
           setUser(updatedUserRes.data);
-          // localStorage.setItem('user', JSON.stringify(updatedUserRes.data));
           if (updatedUserRes.data.avatar) {
             setAvatarUrl(updatedUserRes.data.avatar);
           }
