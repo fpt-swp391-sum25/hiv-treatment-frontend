@@ -6,6 +6,7 @@ import DoctorStatistic from '../../components/doctor/DoctorStatistic';
 import doctorProfileImage from '../../assets/doctor.png';
 import { useOutletContext } from 'react-router-dom';
 import { AuthContext } from '../../components/context/AuthContext';
+import { validateField } from '../../utils/validate';
 
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
@@ -103,7 +104,7 @@ const DoctorProfile = () => {
               label: 'Thông tin cá nhân',
               children: (
                 <Suspense fallback={<TabContentSkeleton />}>
-                  <DoctorPersonalProfile />
+                  <DoctorPersonalProfile validateField={validateField} />
                 </Suspense>
               )
             },

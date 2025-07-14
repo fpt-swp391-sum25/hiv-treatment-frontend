@@ -186,6 +186,22 @@
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) !important;
 }
 
+.custom-delete-btn {
+    background-color: #ff4d4f !important;
+    /* Màu đỏ nhẹ */
+    color: white !important;
+    border: none !important;
+    transition: all 0.3s ease !important;
+    font-weight: 500;
+    border-radius: 4px;
+}
+
+.custom-delete-btn:hover,
+.custom-delete-btn:focus {
+    background-color: #d9363e !important;
+    color: white !important;
+    box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.2) !important;
+}
 
 
 
@@ -232,9 +248,8 @@
     color: #04cde4 !important;
 }
 
-.ant-menu-item:hover {
+.ant-menu .ant-menu-item:hover {
     transition: none !important;
     background-color: #089BAB15 !important;
     color: #04cde4 !important;
-
 }

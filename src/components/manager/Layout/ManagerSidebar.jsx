@@ -78,15 +78,7 @@ const ManagerSidebar = () => {
           mode="inline"
           selectedKeys={[location.pathname]}
           className="sidebar-menu"
-          items={menuItems.map(item => ({
-            ...item,
-            style: getMenuItemStyle(location.pathname === item.key),
-            icon: React.cloneElement(item.icon, {
-              style: {
-                color: location.pathname === item.key ? '#04cde4' : '#555'
-              }
-            }),
-          }))}
+          items={menuItems}
           onClick={({ key }) => navigate(key)}
         />
       </div>

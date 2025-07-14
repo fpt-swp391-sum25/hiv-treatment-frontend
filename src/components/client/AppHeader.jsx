@@ -198,7 +198,7 @@ const AppHeader = () => {
     <Header className="app-header">
       <div className="header-content">
         <div className="app-logo">
-          <Link to="/">
+          <Link to="/" onClick={() => window.scrollTo(0, 0)}>
             <img src={appLogo} alt="logo" />
           </Link>
         </div>
