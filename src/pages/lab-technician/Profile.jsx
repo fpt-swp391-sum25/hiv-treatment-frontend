@@ -16,6 +16,7 @@ import { MailOutlined, PhoneOutlined, UserOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { AuthContext } from '../../components/context/AuthContext';
 import { updateUserAPI, fetchAccountAPI } from '../../services/api.service';
+import { validateField } from '../../utils/validate';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -24,6 +25,9 @@ const LabTechnicianProfile = () => {
   const { user, setUser } = useContext(AuthContext);
   const [avatarUrl, setAvatarUrl] = useState('');
   const fileInputRef = React.useRef('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState(null)
+  const [errors, setErrors] = useState({});
 
   const [loading, setLoading] = useState(false);
 
@@ -53,6 +57,37 @@ const LabTechnicianProfile = () => {
     }
     console.log(user.avatar);
   }, [user]);
+
+
+  const handleChange = (field, value) => {
+    const updatedUser = {
+      ...editableUser,
+      [field]: value,
+    };
+
+    let newErrors = { ...errors };
+
+    if (field === "password") {
+      // Chỉ validate password
+      newErrors.password = validateField("newPassword", value);
+      // KHÔNG validate confirmPassword ở đây
+    } else if (field === "confirmPassword") {
+      // Khi người dùng bắt đầu nhập confirmPassword, validate khớp với password
+      newErrors.confirmPassword = validateField("confirmPassword", value, {
+        newPassword: updatedUser.password,
+      });
+    } else {
+      // Các field khác
+      const error = validateField(field, value, updatedUser);
+      newErrors[field] = error;
+    }
+
+    setEditableUser(updatedUser);
+    setErrors(newErrors);
+  };
+
+
+
 
 
   const handleUpdate = async () => {
@@ -166,44 +201,50 @@ const LabTechnicianProfile = () => {
 
       <Card>
         <Form layout="vertical" style={{ maxWidth: 500, margin: '0 auto' }}>
-          <Form.Item label="Họ tên">
+          <Form.Item
+            label="Họ tên"
+            validateStatus={errors.fullName ? 'error' : ''}
+            help={errors.fullName}
+          >
             <Input
               value={editableUser.fullName}
-              onChange={(e) =>
-                setEditableUser((prev) => ({ ...prev, fullName: e.target.value }))
-              }
+              onChange={(e) => handleChange('fullName', e.target.value)}
             />
           </Form.Item>
-          <Form.Item label="Email">
+
+          <Form.Item
+            label="Email"
+            validateStatus={errors.email ? 'error' : ''}
+            help={errors.email}
+          >
             <Input
               value={editableUser.email}
-              onChange={(e) =>
-                setEditableUser((prev) => ({ ...prev, email: e.target.value }))
-              }
+              onChange={(e) => handleChange('email', e.target.value)}
             />
           </Form.Item>
-          <Form.Item label="Số điện thoại">
+
+          <Form.Item
+            label="Số điện thoại"
+            validateStatus={errors.phoneNumber ? 'error' : ''}
+            help={errors.phoneNumber}
+          >
             <Input
               value={editableUser.phoneNumber}
-              onChange={(e) =>
-                setEditableUser((prev) => ({ ...prev, phoneNumber: e.target.value }))
-              }
+              onChange={(e) => handleChange('phoneNumber', e.target.value)}
             />
           </Form.Item>
+
           <Form.Item label="Địa chỉ">
             <Input
               value={editableUser.address}
-              onChange={(e) =>
-                setEditableUser((prev) => ({ ...prev, address: e.target.value }))
-              }
+              onChange={(e) => handleChange('address', e.target.value)}
             />
           </Form.Item>
+
           <Form.Item label="Giới tính">
             <Select
               value={editableUser.gender}
-              onChange={(value) =>
-                setEditableUser((prev) => ({ ...prev, gender: value }))
-              }
+              onChange={(value) => handleChange('gender', value)}
               placeholder="Chọn giới tính"
             >
               <Option value="Nam">Nam</Option>
@@ -211,42 +252,47 @@ const LabTechnicianProfile = () => {
               <Option value="Khác">Khác</Option>
             </Select>
           </Form.Item>
-          <Form.Item label="Ngày sinh">
+
+          <Form.Item
+            label="Ngày sinh"
+            validateStatus={errors.dateOfBirth ? 'error' : ''}
+            help={errors.dateOfBirth}
+          >
             <DatePicker
               style={{ width: '100%' }}
-              value={
-                editableUser.dateOfBirth
-                  ? dayjs(editableUser.dateOfBirth)
-                  : ''
-              }
-              format="YYYY-MM-DD"
-              onChange={(date) =>
-                setEditableUser((prev) => ({
-                  ...prev,
-                  dateOfBirth: date ? date.toISOString() : '',
-                }))
-              }
+              value={editableUser.dateOfBirth ? dayjs(editableUser.dateOfBirth) : ''}
+              format="DD-MM-YYYY"
+              onChange={(date) => handleChange('dateOfBirth', date ? date.toISOString() : '')}
             />
           </Form.Item>
-          <Form.Item label="Mật khẩu mới">
+
+          <Form.Item
+            label="Mật khẩu mới"
+            validateStatus={errors.password ? 'error' : ''}
+            help={errors.password}
+            hasFeedback
+          >
             <Input.Password
               value={editableUser.password}
-              onChange={(e) =>
-                setEditableUser((prev) => ({ ...prev, password: e.target.value }))
-              }
+              onChange={(e) => handleChange('password', e.target.value)}
+              placeholder="Để trống nếu không đổi"
             />
           </Form.Item>
-          <Form.Item label="Xác nhận mật khẩu mới">
+
+          <Form.Item
+            label="Xác nhận mật khẩu mới"
+            validateStatus={errors.confirmPassword ? 'error' : ''}
+            help={errors.confirmPassword}
+            hasFeedback
+          >
             <Input.Password
               value={editableUser.confirmPassword}
-              onChange={(e) =>
-                setEditableUser((prev) => ({
-                  ...prev,
-                  confirmPassword: e.target.value,
-                }))
-              }
+              onChange={(e) => handleChange('confirmPassword', e.target.value)}
+              placeholder="Nhập lại mật khẩu"
             />
           </Form.Item>
+
+
           <Form.Item>
             <Button type="primary" onClick={handleUpdate} loading={loading}>
               Cập nhật
@@ -254,6 +300,7 @@ const LabTechnicianProfile = () => {
           </Form.Item>
         </Form>
       </Card>
+
     </div>
   );
 };

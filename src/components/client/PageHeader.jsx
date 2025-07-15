@@ -1,4 +1,4 @@
-import { Layout, Button, Avatar, Typography, message, theme, Popover, Tooltip, Popconfirm, Badge, List, Spin } from "antd";
+import { Layout, Button, Avatar, Typography, message, theme, Popover, Tooltip, Popconfirm, Badge, List, Spin, notification } from "antd";
 import { UserOutlined, LogoutOutlined, BellOutlined } from "@ant-design/icons";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
@@ -96,12 +96,14 @@ const PageHeader = () => {
                 role: ''
             })
 
-                .success({
-                    message: 'Hệ thống',
-                    showProgress: true,
-                    pauseOnHover: true,
-                    description: 'Đăng xuất thành công'
-                });
+
+            notification.success({
+                message: 'Hệ thống',
+                showProgress: true,
+                pauseOnHover: true,
+                description: 'Đăng xuất thành công'
+            });
+
             navigate("/login")
         }
     };

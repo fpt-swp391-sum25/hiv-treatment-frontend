@@ -25,12 +25,14 @@ import { AuthContext } from '../context/AuthContext';
 
 const { Title } = Typography;
 
-const DoctorPersonalProfile = () => {
+const DoctorPersonalProfile = ({ validateField }) => {
   const { user, setUser } = useContext(AuthContext);
 
   const [avatarUrl, setAvatarUrl] = useState(null);
   const fileInputRef = React.useRef(null);
   const [hover, setHover] = useState(false);
+  const [errors, setErrors] = useState({});
+
 
   const [doctorProfile, setDoctorProfile] = useState({
     id: '',
@@ -83,6 +85,29 @@ const DoctorPersonalProfile = () => {
       loadDoctorProfile(user.id);
     }
   }, [user]);
+
+  const handleChange = (field, value) => {
+    const updatedUser = {
+      ...editableUser,
+      [field]: value,
+    };
+
+    let newErrors = { ...errors };
+
+    if (field === "password") {
+      newErrors.password = validateField("newPassword", value);
+    } else if (field === "confirmPassword") {
+      newErrors.confirmPassword = validateField("confirmPassword", value, {
+        newPassword: updatedUser.password,
+      });
+    } else {
+      newErrors[field] = validateField(field, value, updatedUser);
+    }
+
+    setEditableUser(updatedUser);
+    setErrors(newErrors);
+  };
+
 
   // Xử lý chọn file avatar
   const handleAvatarChange = (event) => {
@@ -218,30 +243,30 @@ const DoctorPersonalProfile = () => {
           {/* Đã xóa avatar khỏi form, chỉ giữ lại các trường thông tin cá nhân */}
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item label="Email">
+              <Form.Item
+                label="Email"
+                validateStatus={errors.email ? 'error' : ''}
+                help={errors.email}
+              >
                 <Input
                   value={editableUser.email}
-                  onChange={(e) =>
-                    setEditableUser((prev) => ({
-                      ...prev,
-                      email: e.target.value,
-                    }))
-                  }
+                  onChange={(e) => handleChange('email', e.target.value)}
                 />
               </Form.Item>
+
             </Col>
             <Col span={12}>
-              <Form.Item label="Số điện thoại">
+              <Form.Item
+                label="Số điện thoại"
+                validateStatus={errors.phoneNumber ? 'error' : ''}
+                help={errors.phoneNumber}
+              >
                 <Input
                   value={editableUser.phoneNumber}
-                  onChange={(e) =>
-                    setEditableUser((prev) => ({
-                      ...prev,
-                      phoneNumber: e.target.value,
-                    }))
-                  }
+                  onChange={(e) => handleChange('phoneNumber', e.target.value)}
                 />
               </Form.Item>
+
             </Col>
           </Row>
 
@@ -260,18 +285,18 @@ const DoctorPersonalProfile = () => {
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item label="Mật khẩu mới">
+              <Form.Item
+                label="Mật khẩu mới"
+                validateStatus={errors.password ? 'error' : ''}
+                help={errors.password}
+              >
                 <Input.Password
                   value={editableUser.password}
-                  onChange={(e) =>
-                    setEditableUser((prev) => ({
-                      ...prev,
-                      password: e.target.value,
-                    }))
-                  }
+                  onChange={(e) => handleChange('password', e.target.value)}
                   placeholder="Chỉ nhập nếu muốn thay đổi"
                 />
               </Form.Item>
+
             </Col>
           </Row>
 
@@ -290,18 +315,18 @@ const DoctorPersonalProfile = () => {
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item label="Xác nhận mật khẩu">
+              <Form.Item
+                label="Xác nhận mật khẩu"
+                validateStatus={errors.confirmPassword ? 'error' : ''}
+                help={errors.confirmPassword}
+              >
                 <Input.Password
                   value={editableUser.confirmPassword}
-                  onChange={(e) =>
-                    setEditableUser((prev) => ({
-                      ...prev,
-                      confirmPassword: e.target.value,
-                    }))
-                  }
+                  onChange={(e) => handleChange('confirmPassword', e.target.value)}
                   placeholder="Nhập lại mật khẩu"
                 />
               </Form.Item>
+
             </Col>
           </Row>
 

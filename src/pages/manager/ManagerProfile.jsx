@@ -19,6 +19,7 @@ import { MailOutlined, PhoneOutlined, UserOutlined, CrownOutlined, EditOutlined 
 import dayjs from 'dayjs';
 import { AuthContext } from '../../components/context/AuthContext';
 import { updateUserAPI, fetchAccountAPI } from '../../services/api.service';
+import { validateField } from '../../utils/validate';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -27,6 +28,8 @@ const ManagerProfile = () => {
   const { user, setUser, isAppLoading } = useContext(AuthContext);
   const [avatarUrl, setAvatarUrl] = useState('');
   const fileInputRef = React.useRef('');
+  const [errors, setErrors] = useState({});
+
 
   const [loading, setLoading] = useState(false);
   const [dataLoading, setDataLoading] = useState(true);
@@ -42,6 +45,33 @@ const ManagerProfile = () => {
     confirmPassword: '',
     avatar: '',
   });
+
+  const handleChange = (field, value) => {
+    const updatedUser = {
+      ...editableUser,
+      [field]: value,
+    };
+
+    let newErrors = { ...errors };
+
+    if (field === "password") {
+      // Chỉ validate password
+      newErrors.password = validateField("newPassword", value);
+      // KHÔNG validate confirmPassword ở đây
+    } else if (field === "confirmPassword") {
+      // Khi người dùng bắt đầu nhập confirmPassword, validate khớp với password
+      newErrors.confirmPassword = validateField("confirmPassword", value, {
+        newPassword: updatedUser.password,
+      });
+    } else {
+      // Các field khác
+      const error = validateField(field, value, updatedUser);
+      newErrors[field] = error;
+    }
+
+    setEditableUser(updatedUser);
+    setErrors(newErrors);
+  };
 
   // Fetch user data if not available
   const fetchUserData = async () => {
@@ -323,11 +353,14 @@ const ManagerProfile = () => {
         <Form layout="vertical" style={{ maxWidth: 600, margin: '0 auto' }}>
           <Row gutter={16}>
             <Col xs={24} sm={12}>
-              <Form.Item label={<span style={{ fontWeight: '500', color: '#2c3e50' }}>Họ tên</span>}>
+              <Form.Item label={<span style={{ fontWeight: '500', color: '#2c3e50' }}>Họ tên</span>}
+                validateStatus={errors.fullName ? 'error' : ''}
+                help={errors.fullName}
+              >
                 <Input
                   value={editableUser.fullName}
                   onChange={(e) =>
-                    setEditableUser((prev) => ({ ...prev, fullName: e.target.value }))
+                    handleChange('fullName', e.target.value)
                   }
                   style={{
                     borderRadius: '8px',
@@ -338,11 +371,14 @@ const ManagerProfile = () => {
               </Form.Item>
             </Col>
             <Col xs={24} sm={12}>
-              <Form.Item label={<span style={{ fontWeight: '500', color: '#2c3e50' }}>Email</span>}>
+              <Form.Item label={<span style={{ fontWeight: '500', color: '#2c3e50' }}>Email</span>}
+                validateStatus={errors.email ? 'error' : ''}
+                help={errors.email}
+              >
                 <Input
                   value={editableUser.email}
                   onChange={(e) =>
-                    setEditableUser((prev) => ({ ...prev, email: e.target.value }))
+                    handleChange('email', e.target.value)
                   }
                   style={{
                     borderRadius: '8px',
@@ -356,11 +392,14 @@ const ManagerProfile = () => {
 
           <Row gutter={16}>
             <Col xs={24} sm={12}>
-              <Form.Item label={<span style={{ fontWeight: '500', color: '#2c3e50' }}>Số điện thoại</span>}>
+              <Form.Item label={<span style={{ fontWeight: '500', color: '#2c3e50' }}>Số điện thoại</span>}
+                validateStatus={errors.phoneNumber ? 'error' : ''}
+                help={errors.phoneNumber}
+              >
                 <Input
                   value={editableUser.phoneNumber}
                   onChange={(e) =>
-                    setEditableUser((prev) => ({ ...prev, phoneNumber: e.target.value }))
+                    handleChange('phoneNumber', e.target.value)
                   }
                   style={{
                     borderRadius: '8px',
@@ -381,8 +420,9 @@ const ManagerProfile = () => {
                     borderRadius: '8px',
                   }}
                 >
-                  <Option value="MALE">Nam</Option>
-                  <Option value="FEMALE">Nữ</Option>
+                  <Option value="Nam">Nam</Option>
+                  <Option value="Nữ">Nữ</Option>
+                  <Option value="Khác">Khác</Option>
                 </Select>
               </Form.Item>
             </Col>
@@ -390,21 +430,21 @@ const ManagerProfile = () => {
 
           <Row gutter={16}>
             <Col xs={24} sm={12}>
-              <Form.Item label={<span style={{ fontWeight: '500', color: '#2c3e50' }}>Ngày sinh</span>}>
+              <Form.Item label={<span style={{ fontWeight: '500', color: '#2c3e50' }}>Ngày sinh</span>}
+                validateStatus={errors.dateOfBirth ? 'error' : ''}
+                help={errors.dateOfBirth}
+              >
                 <DatePicker
                   value={editableUser.dateOfBirth ? dayjs(editableUser.dateOfBirth) : null}
                   onChange={(date) =>
-                    setEditableUser((prev) => ({
-                      ...prev,
-                      dateOfBirth: date ? date.format('YYYY-MM-DD') : '',
-                    }))
+                    handleChange('dateOfBirth', date ? date.toISOString() : '')
                   }
                   style={{
                     width: '100%',
                     borderRadius: '8px',
                     padding: '10px 12px'
                   }}
-                  format="DD/MM/YYYY"
+                  format="DD-MM-YYYY"
                 />
               </Form.Item>
             </Col>
@@ -435,11 +475,15 @@ const ManagerProfile = () => {
             </Title>
             <Row gutter={16}>
               <Col xs={24} sm={12}>
-                <Form.Item label={<span style={{ fontWeight: '500', color: '#2c3e50' }}>Mật khẩu mới</span>}>
+                <Form.Item label={<span style={{ fontWeight: '500', color: '#2c3e50' }}>Mật khẩu mới</span>}
+                  validateStatus={errors.password ? 'error' : ''}
+                  help={errors.password}
+                  hasFeedback
+                >
                   <Input.Password
                     value={editableUser.password}
                     onChange={(e) =>
-                      setEditableUser((prev) => ({ ...prev, password: e.target.value }))
+                      handleChange('password', e.target.value)
                     }
                     placeholder="Để trống nếu không đổi"
                     style={{
@@ -451,12 +495,17 @@ const ManagerProfile = () => {
                 </Form.Item>
               </Col>
               <Col xs={24} sm={12}>
-                <Form.Item label={<span style={{ fontWeight: '500', color: '#2c3e50' }}>Xác nhận mật khẩu</span>}>
+                <Form.Item label={<span style={{ fontWeight: '500', color: '#2c3e50' }}>Xác nhận mật khẩu</span>}
+                  validateStatus={errors.confirmPassword ? 'error' : ''}
+                  help={errors.confirmPassword}
+                  hasFeedback
+                >
                   <Input.Password
                     value={editableUser.confirmPassword}
                     onChange={(e) =>
-                      setEditableUser((prev) => ({ ...prev, confirmPassword: e.target.value }))
+                      handleChange('confirmPassword', e.target.value)
                     }
+                    placeholder="Nhập lại mật khẩu"
                     style={{
                       borderRadius: '8px',
                       padding: '10px 12px',
@@ -493,7 +542,9 @@ const ManagerProfile = () => {
                   fontSize: '14px',
                   fontWeight: '500'
                 }}
-                danger
+
+                className='custom-delete-btn'
+
               >
                 Hủy
               </Button>

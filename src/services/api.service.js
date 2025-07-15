@@ -19,12 +19,12 @@ const registerAPI = (values) => {
     const data = {
         fullName: values.fullname,
         gender: values.gender,
-        dateOfBirth: values.dob.format('DD-MM-YYYY'),
+        dateOfBirth: values.dob.format('YYYY-MM-DD'),
         email: values.email,
-        phone: values.phone,
+        phone: values.phoneNumber,
         address: values.address,
         username: values.username,
-        password: values.password
+        password: values.newPassword
     }
     return axios.post(URL_BACKEND, data)
 }
