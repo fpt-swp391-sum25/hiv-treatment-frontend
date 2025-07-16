@@ -20,6 +20,8 @@ import {
   Spin,
   List,
 } from 'antd';
+import { CKEditor } from '@ckeditor/ckeditor5-react';
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, PictureOutlined, UploadOutlined } from '@ant-design/icons';
 import { EyeOutlined } from '@ant-design/icons';
 import { AuthContext } from '../../components/context/AuthContext';
@@ -240,6 +242,7 @@ const DoctorDocumentList = () => {
             icon={<EditOutlined />}
             style={{ marginRight: 8 }}
             onClick={() => openEditModal(record)}
+            type='primary'
           >
             Sửa
           </Button>
@@ -249,7 +252,7 @@ const DoctorDocumentList = () => {
             okText="Xóa"
             cancelText="Hủy"
           >
-            <Button danger icon={<DeleteOutlined />}>Xóa</Button>
+            <Button className='custom-delete-btn' icon={<DeleteOutlined />}>Xóa</Button>
           </Popconfirm>
         </>
       ),
@@ -309,7 +312,14 @@ const DoctorDocumentList = () => {
             name="content"
             rules={[{ required: true, message: 'Vui lòng nhập nội dung' }]}
           >
-            <Input.TextArea rows={5} placeholder="Nhập nội dung" />
+            <CKEditor
+              editor={ClassicEditor}
+              data={form.getFieldValue('content')}
+              onChange={(event, editor) => {
+                const data = editor.getData();
+                form.setFieldValue('content', data);
+              }}
+            />
           </Form.Item>
         </Form>
         {/* Quản lý hình ảnh */}
@@ -344,7 +354,7 @@ const DoctorDocumentList = () => {
                   >
                     Xem
                   </Button>,
-                  <Button danger size="small" onClick={() => handleRemoveImage(img)}>Xóa</Button>
+                  <Button className='custom-delete-btn' size="small" onClick={() => handleRemoveImage(img)}>Xóa</Button>
                 ]}
               >
                 <img

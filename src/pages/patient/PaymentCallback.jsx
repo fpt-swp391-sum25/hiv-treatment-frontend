@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Result, Button } from 'antd';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { handlePaymentCallbackAPI } from '../../services/api.service';
+import { createHealthRecordAPI, handlePaymentCallbackAPI } from '../../services/api.service';
 
 
 const PaymentCallback = () => {
@@ -21,9 +21,10 @@ const PaymentCallback = () => {
 
     const handleCallback = async () => {
         try {
-            await handlePaymentCallbackAPI(queryParams);
-            console.log('Payment success');
-            console.log(queryParams)
+            const response = await handlePaymentCallbackAPI(queryParams);
+            if (queryParams['vnp_ResponseCode'] === '00') {
+                const healthResponse = await createHealthRecordAPI(queryParams['vnp_TxnRef'])
+            }
         } catch (error) {
             console.error('Payment failed:', error.message);
         }

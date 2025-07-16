@@ -1,241 +1,285 @@
-import { useContext, useEffect, useState } from "react"
-
-import { cancelBookingAPI, fetchAllPatientScheduleAPI, fetchHealthRecordByScheduleIdAPI, fetchUserInfoAPI, updateProfileAPI } from "../../services/api.service"
-import { Layout, message, Spin, Table, Button, Popconfirm, Segmented, Card, Descriptions, Form, Input, Row, Col, Select, DatePicker, notification, Typography, Modal } from "antd"
+import {
+    Layout, message, Spin, Table, Button, Popconfirm, Card, Typography,
+    DatePicker, notification, Tabs, Tag, Space, ConfigProvider
+} from "antd";
+import {
+    ClockCircleOutlined,
+    UserOutlined,
+    CalendarOutlined,
+    HistoryOutlined,
+    DeleteOutlined,
+    ScheduleOutlined,
+    FilterOutlined
+} from "@ant-design/icons";
 import dayjs from "dayjs";
-import { AuthContext } from "../../components/context/AuthContext";
-import { useNavigate } from "react-router-dom";
-import PatientAppointmentHistory from "./PatientAppointmentHistory";
 import viVN from 'antd/es/locale/vi_VN';
-import { ConfigProvider } from "antd";
 import 'dayjs/locale/vi';
-
+import { useContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../../components/context/AuthContext";
+import {
+    cancelBookingAPI,
+    fetchAllPatientScheduleAPI,
+    retryPaymentAPI
+} from "../../services/api.service";
+import PatientAppointmentHistory from "./PatientAppointmentHistory";
+import { fetchServicePrices } from "../../services/systemConfiguration.service";
 
 const { Content } = Layout;
-const { Text } = Typography
+const { Text, Title } = Typography;
+
+dayjs.locale('vi');
 
 const AppointmentList = () => {
-
-    const { user } = useContext(AuthContext)
-    const [schedule, setSchedule] = useState([])
+    const { user } = useContext(AuthContext);
+    const [schedule, setSchedule] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [activeSegment, setActiveSegment] = useState('Lịch hẹn');
-    const [userInfo, setUserInfo] = useState({})
-    const navigate = useNavigate()
+    const [activeTab, setActiveTab] = useState('appointment');
     const [monthFilter, setMonthFilter] = useState(null);
-    const [healthRecordData, setHealthRecordData] = useState()
-
+    const [servicePrices, setServicePrices] = useState({});
+    const navigate = useNavigate();
 
     useEffect(() => {
-        loadAllSchedule()
-        loadUserInfo()
-    }, [])
-
-
-
-    const loadUserInfo = async () => {
-        const response = await fetchUserInfoAPI(user.id)
-        if (response.data) {
-            setUserInfo(response.data)
-        }
-    }
+        loadAllSchedule();
+        loadSystemPrices();
+    }, []);
 
     const loadAllSchedule = async () => {
         setLoading(true);
         try {
-            if (!user?.id) {
-                throw new Error('Không tìm thấy thông tin bệnh nhân');
-            }
             const response = await fetchAllPatientScheduleAPI(user.id);
             const today = dayjs().startOf('day');
-            const sortedSchedules = response.data
+            const sorted = response.data
                 .map(item => ({
                     ...item,
                     doctorName: item.doctor?.fullName || 'Không xác định',
                     type: item.type || null,
                     status: item.status || null,
-                    date: dayjs(item.date, 'YYYY-MM-DD').format('DD/MM/YYYY'),
+                    date: dayjs(item.date, 'YYYY-MM-DD').format('DD-MM-YYYY'),
                 }))
                 .filter(item => {
-                    const scheduleDate = dayjs(`${item.date} ${item.slot}`, 'DD/MM/YYYY HH:mm');
+                    const scheduleDate = dayjs(`${item.date} ${item.slot}`, 'DD-MM-YYYY HH:mm');
                     return scheduleDate.isSame(today, 'day') || scheduleDate.isAfter(today);
                 })
                 .sort((a, b) => {
-                    const dateA = dayjs(`${a.date} ${a.slot}`, 'DD/MM/YYYY HH:mm');
-                    const dateB = dayjs(`${b.date} ${b.slot}`, 'DD/MM/YYYY HH:mm');
-                    return dateB - dateA;
+                    const dateA = dayjs(`${a.date} ${a.slot}`, 'DD-MM-YYYY HH:mm');
+                    const dateB = dayjs(`${b.date} ${b.slot}`, 'DD-MM-YYYY HH:mm');
+                    return dateA - dateB;
                 });
-            setSchedule(sortedSchedules);
+
+            setSchedule(sorted);
         } catch (error) {
             message.error(error.message || 'Lỗi khi tải lịch hẹn');
         } finally {
             setLoading(false);
         }
     };
-
-
-
-    const handleMonthFilterChange = (date) => {
-        setMonthFilter(date ? date.format('MM-YYYY ') : null);
+    const loadSystemPrices = async () => {
+        try {
+            const prices = await fetchServicePrices();
+            setServicePrices(prices);
+        } catch (error) {
+            message.error('Không thể tải giá dịch vụ');
+        }
     };
 
-    const filteredSchedules = monthFilter
-        ? schedule.filter(s => dayjs(s.date).format('MM-YYYY ') === monthFilter)
-        : schedule;
+    const handleRetryPayment = async (scheduleId) => {
+        const retrySchedule = schedule.find(item => item.id === scheduleId);
+        if (!retrySchedule) {
+            message.error('Không tìm thấy lịch hẹn');
+            return;
+        }
+        let amount = 0;
+        if (retrySchedule.type === 'Khám') amount = Number(servicePrices['Giá tiền đặt lịch khám']) || 0;
+        if (retrySchedule.type === 'Tái khám') amount = Number(servicePrices['Giá tiền đặt lịch tái khám']) || 0;
+        if (retrySchedule.type === 'Tư vấn') amount = Number(servicePrices['Giá tiền đặt lịch tư vấn']) || 0;
 
-
-
-
-    const handleCancelSchedule = async (scheduleId) => {
-        setLoading(true)
         try {
-            const response = await cancelBookingAPI(scheduleId, user.id)
+            const response = await retryPaymentAPI({ scheduleId: scheduleId, amount: amount })
             if (response.data) {
-                notification.success({
-                    message: 'Hệ thống',
-                    showProgress: true,
-                    pauseOnHover: true,
-                    description: 'Hủy lịch hẹn thành công'
-                })
-                loadAllSchedule()
+                window.location.href = response.data;
             }
         } catch (error) {
-            if (error.response?.status !== 401) {
-                notification.error({
-                    message: 'Hệ thống',
-                    showProgress: true,
-                    pauseOnHover: true,
-                    description: error.message
-                })
-            }
+            message.error("Lỗi khi tạo URL thanh toán.");
+            console.error(error);
         }
-        setLoading(false)
+
+    }
+
+    const handleCancelSchedule = async (scheduleId) => {
+        setLoading(true);
+        try {
+            const response = await cancelBookingAPI(scheduleId, user.id);
+            if (response.data) {
+                notification.success({
+                    message: 'Huỷ lịch hẹn thành công',
+                });
+                loadAllSchedule();
+            }
+        } catch (error) {
+            notification.error({
+                message: 'Lỗi huỷ lịch hẹn',
+                description: error.message,
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const getTypeColor = (type) => {
+        switch (type) {
+            case 'Khám': return 'blue';
+            case 'Tái khám': return 'green';
+            case 'Tư vấn': return 'orange';
+            default: return 'default';
+        }
     };
 
     const columns = [
         {
-            title: 'Tên bác sĩ',
-            dataIndex: 'doctorName',
-            key: 'doctorName',
-        },
-        {
-            title: 'Ngày',
-            dataIndex: 'date',
-            key: 'date',
-
-            render: (date) => date ? dayjs(date).format('DD-MM-YYYY') : '',
-
-        },
-        {
-            title: 'Khung giờ',
-            dataIndex: 'slot',
-            key: 'slot',
-            render: (slot) => slot ? dayjs(slot, 'HH:mm:ss').format('HH:mm') : '',
-        },
-        {
-            title: 'Loại lịch hẹn',
+            title: <><ScheduleOutlined /> Loại lịch</>,
             dataIndex: 'type',
             key: 'type',
-
+            render: type => <Tag color={getTypeColor(type)}>{type}</Tag>,
+        },
+        {
+            title: <><CalendarOutlined /> Ngày</>,
+            dataIndex: 'date',
+            key: 'date',
+        },
+        {
+            title: <><ClockCircleOutlined /> Giờ</>,
+            dataIndex: 'slot',
+            key: 'slot',
+            render: slot => slot ? dayjs(slot, 'HH:mm:ss').format('HH:mm') : '',
+        },
+        {
+            title: <><UserOutlined /> Bác sĩ</>,
+            dataIndex: 'doctorName',
+            key: 'doctorName',
         },
         {
             title: 'Trạng thái',
             dataIndex: 'status',
             key: 'status',
-
+            render: (status) => {
+                let color = 'default';
+                switch (status) {
+                    case 'Đang chờ thanh toán': color = 'gold'; break;
+                    case 'Đã thanh toán': color = 'green'; break;
+                    case 'Đang hoạt động': color = 'blue'; break;
+                    case 'Thanh toán thất bại': color = 'red'; break;
+                    default: color = 'default';
+                }
+                return <Tag color={color}>{status}</Tag>;
+            }
         },
         {
             title: '',
             key: 'action',
-            render: (_, record) => (
-                <>
-                    {['Đã thanh toán', 'Đang chờ thanh toán', 'Đang hoạt động'].includes(record.status) ? (
+            render: (_, record) => {
+                if (['Đã thanh toán', 'Đang chờ thanh toán', 'Đang hoạt động'].includes(record.status)) {
+                    return (
                         <Popconfirm
-                            title="Huỷ lịch hẹn"
-                            description="Bạn có chắc muốn hủy lịch hẹn này?"
-                            onConfirm={() => { handleCancelSchedule(record.id) }}
+                            title="Huỷ lịch hẹn?"
+                            description="Bạn có chắc muốn huỷ?"
+                            onConfirm={() => handleCancelSchedule(record.id)}
                             okText="Có"
                             cancelText="Không"
-                            placement="left"
                         >
-                            <Button
-                                type="primary"
-                                disabled={loading}
-                                danger
-                            >
+
+                            <Button className="custom-delete-btn" icon={<DeleteOutlined />} >
+
                                 Huỷ
                             </Button>
                         </Popconfirm>
-                    ) : null}
-                </>
-            ),
-        },
+                    );
+                } else if (record.status === 'Thanh toán thất bại') {
+                    return (
+                        <Popconfirm
+                            title="Huỷ lịch hẹn?"
+                            description="Bạn có chắc muốn huỷ?"
+                            onConfirm={() => handleRetryPayment(record.id)}
+                            okText="Có"
+                            cancelText="Không"
+                        >
+                            <Button
+                                type="dashed"
+                                danger
+                            >
+                                Thanh toán lại
+                            </Button>
+                        </Popconfirm>
 
+                    );
+                }
+                return null;
+            }
+        }
     ];
 
-    dayjs.locale('vi');
+    const handleMonthFilterChange = (date) => {
+        setMonthFilter(date ? date.format('MM-YYYY') : null);
+    };
+
+    const filteredSchedules = monthFilter
+        ? schedule.filter(s => dayjs(s.date, 'DD-MM-YYYY').format('MM-YYYY') === monthFilter)
+        : schedule;
 
     return (
         <ConfigProvider locale={viVN}>
-            <Layout>
-                <Content style={{ minHeight: "500px", padding: '15px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'center' }}>
-                        <Segmented
-                            options={['Lịch hẹn', 'Lịch sử khám']}
-                            value={activeSegment}
-                            onChange={setActiveSegment}
-                            style={{ marginBottom: '20px' }}
-                        />
-                    </div>
-                    {loading ? (
-                        <div style={{
-                            position: "fixed",
-                            top: "50%",
-                            left: "50%",
-                            transform: "translate(-50%, -50%)",
-                        }}>
-                            <Spin tip="Đang tải..." />
-                        </div>
+            <Spin spinning={loading} tip="Đang tải...">
+                <Card bordered={false} style={{ minHeight: '80vh' }}>
+                    <Tabs
+                        activeKey={activeTab}
+                        onChange={setActiveTab}
+                        type="card"
+                        items={[
+                            {
+                                key: 'appointment',
+                                label: <><ScheduleOutlined /> Lịch hẹn</>,
+                            },
+                            {
+                                key: 'history',
+                                label: <><HistoryOutlined /> Lịch sử</>,
+                            }
+                        ]}
+                    />
 
-                    ) : (
-                        <Card>
-
-                            {activeSegment === 'Lịch hẹn' && (
-                                <Card title="Lịch hẹn"
-                                    style={{ marginTop: '5vh', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-                                    <div style={{ padding: '20px' }}>
-                                        <div style={{ marginBottom: '16px' }}>
-                                            <Text style={{ marginRight: '8px' }}>Lọc theo tháng:</Text>
-                                            <DatePicker.MonthPicker
-                                                format="MM/YYYY"
-                                                onChange={handleMonthFilterChange}
-                                                style={{ width: '150px' }}
-                                                allowClear
-                                                placeholder="Chọn tháng"
-                                            />
-                                        </div>
-                                        <Table
-                                            columns={columns}
-                                            dataSource={filteredSchedules}
-                                            rowKey="id"
-                                            locale={{ emptyText: 'Chưa có lịch hẹn nào' }}
-                                            pagination={{ pageSize: 10 }}
+                    {activeTab === 'appointment' && (
+                        <div style={{ padding: 24, minHeight: '500px' }}>
+                            <Card
+                                title={<Title level={4}><ScheduleOutlined /> Danh sách lịch hẹn</Title>}
+                                extra={
+                                    <Space>
+                                        <FilterOutlined />
+                                        <Text>Lọc theo tháng:</Text>
+                                        <DatePicker.MonthPicker
+                                            format="MM/YYYY"
+                                            onChange={handleMonthFilterChange}
+                                            placeholder="Chọn tháng"
                                         />
-                                    </div>
-                                </Card>
-                            )}
-
-                            {activeSegment === 'Lịch sử khám' && (
-                                <>
-                                    <PatientAppointmentHistory />
-                                </>
-                            )}
-                        </Card>
+                                    </Space>
+                                }
+                            >
+                                <Table
+                                    columns={columns}
+                                    dataSource={filteredSchedules}
+                                    rowKey="id"
+                                    locale={{ emptyText: 'Không có lịch hẹn nào' }}
+                                    pagination={{ pageSize: 10 }}
+                                />
+                            </Card>
+                        </div>
                     )}
-                </Content>
-            </Layout>
-        </ConfigProvider>
-    )
-}
 
-export default AppointmentList
+                    {activeTab === 'history' && (
+                        <PatientAppointmentHistory />
+                    )}
+                </Card>
+            </Spin>
+        </ConfigProvider>
+    );
+};
+
+export default AppointmentList;

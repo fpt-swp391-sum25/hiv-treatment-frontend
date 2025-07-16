@@ -3,11 +3,13 @@
   height: 100vh;
   position: fixed;
   left: 0;
-  top: 80px; /* Đặt vị trí bắt đầu của sidebar bên dưới header */
+  top: 80px;
+  /* Đặt vị trí bắt đầu của sidebar bên dưới header */
   overflow: auto;
-  box-shadow: 2px 0 8px rgba(0,0,0,0.06);
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.06);
   border-right: 1px solid #f0f0f0;
-  z-index: 900; /* Đảm bảo sidebar nằm dưới header nhưng trên các phần tử khác */
+  z-index: 900;
+  /* Đảm bảo sidebar nằm dưới header nhưng trên các phần tử khác */
 }
 
 .sidebar-inner {
@@ -65,7 +67,8 @@
 /* Responsive styles */
 @media (max-width: 768px) {
   .manager-sidebar {
-    top: 70px; /* Điều chỉnh theo chiều cao của header trên màn hình nhỏ */
+    top: 70px;
+    /* Điều chỉnh theo chiều cao của header trên màn hình nhỏ */
   }
 }
 
@@ -74,4 +77,4 @@
   .logout-container {
     margin-top: auto;
   }
-} 
+}
