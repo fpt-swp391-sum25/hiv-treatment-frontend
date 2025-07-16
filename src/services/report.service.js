@@ -692,3 +692,369 @@ export const helpers = {
     calculateRevenueByPeriod,
     formatTransactionDetails
 }; 
+
+// =================================================================
+// MEDICAL REPORT SERVICES
+// =================================================================
+
+// Sử dụng getSchedulesByStatusAPI từ api.service.js thay vì tạo hàm mới
+import { 
+  getSchedulesByStatusAPI, 
+  fetchHealthRecordByScheduleIdAPI, 
+  fetchTestResultByHealthRecordIdAPI,
+  getSchedulesByDoctorAPI,
+  getSchedulesByPatientAPI,
+  fetchDoctorProfileByDoctorIdAPI,
+  fetchHealthRecordsAPI,
+  fetchAllRegimensAPI,
+  getAllSchedulesAPI
+} from './api.service';
+
+// Tổng hợp dữ liệu y tế (báo cáo toàn diện)
+export const getMedicalReportData = async (filters = {}) => {
+  try {
+    console.log('===== BẮT ĐẦU LẤY DỮ LIỆU BÁO CÁO Y TẾ =====');
+    
+    // 1. Lấy tất cả phác đồ điều trị - Endpoint chính xác: /api/regimen
+    console.log('1. Đang gọi API lấy phác đồ điều trị...');
+    const regimensResponse = await fetchAllRegimensAPI();
+    const regimens = regimensResponse?.data || [];
+    console.log(`Đã lấy ${regimens.length} phác đồ điều trị`);
+    
+    // 2. Lấy danh sách lịch hẹn đã hoàn thành - Endpoint chính xác: /api/schedule/list
+    console.log('2. Đang gọi API lấy danh sách lịch hẹn...');
+    let schedules = [];
+    
+    try {
+      // Lấy tất cả lịch hẹn một lần duy nhất
+      const schedulesResponse = await getAllSchedulesAPI();
+      schedules = schedulesResponse?.data || [];
+      console.log(`Đã lấy ${schedules.length} lịch hẹn`);
+    } catch (error) {
+      console.error('Lỗi khi lấy lịch hẹn:', error);
+      schedules = [];
+    }
+    
+    // 3. Lấy health records cho tất cả lịch hẹn
+    console.log('3. Đang lấy health records...');
+    
+    // Chỉ lấy health records cho các lịch hẹn đã được tạo
+    const validScheduleIds = schedules.filter(s => s && s.id).map(s => s.id);
+    console.log(`Số lượng lịch hẹn hợp lệ: ${validScheduleIds.length}`);
+    
+    // Tối ưu: Chỉ lấy health records cho 10 lịch hẹn gần nhất để giảm số lượng API calls
+    const recentScheduleIds = validScheduleIds.slice(0, 10);
+    
+    const healthRecordsPromises = recentScheduleIds.map(scheduleId => {
+      return fetchHealthRecordByScheduleIdAPI(scheduleId)
+        .then(response => response?.data)
+        .catch(() => null);
+    });
+    
+    const healthRecordsResults = await Promise.all(healthRecordsPromises);
+    const healthRecords = healthRecordsResults.filter(record => record !== null);
+    console.log(`Đã lấy ${healthRecords.length} health records hợp lệ`);
+    
+    // 4. Lấy test results cho các health records
+    console.log('4. Đang lấy kết quả xét nghiệm...');
+    
+    const validHealthRecordIds = healthRecords.filter(hr => hr && hr.id).map(hr => hr.id);
+    console.log(`Số lượng health records hợp lệ để lấy test results: ${validHealthRecordIds.length}`);
+    
+    const testResultsPromises = validHealthRecordIds.map(healthRecordId => {
+      return fetchTestResultByHealthRecordIdAPI(healthRecordId)
+        .then(response => response?.data || [])
+        .catch(() => []);
+    });
+    
+    const testResultsArrays = await Promise.all(testResultsPromises);
+    const allTestResults = testResultsArrays.flat();
+    console.log(`Tổng số kết quả xét nghiệm: ${allTestResults.length}`);
+    
+    // 5. Tính toán các số liệu thống kê
+    console.log('5. Tính toán thống kê...');
+    
+    // Đếm số lịch hẹn có treatmentStatus = "Đã khám"
+    const completedAppointments = healthRecords.filter(record => {
+      const status = record.treatmentStatus || record.treatment_status;
+      return status === "Đã khám";
+    }).length;
+    
+    // Đếm số xét nghiệm đã thực hiện từ bảng test_result
+    const testsPerformed = allTestResults.length;
+    
+    // Tổng số phác đồ điều trị
+    const totalRegimens = regimens.length;
+    
+    // 6. Tính toán số lượng bệnh nhân và ca dương/âm tính HIV
+    const patientIds = new Set();
+    let totalPositiveHIV = 0;
+    let totalNegativeHIV = 0;
+    
+    healthRecords.forEach(record => {
+      // Đếm số bệnh nhân duy nhất
+      if (record.patient && record.patient.id) {
+        patientIds.add(record.patient.id);
+      } else if (record.schedule && record.schedule.patientId) {
+        patientIds.add(record.schedule.patientId);
+      }
+      
+      // Đếm ca dương tính/âm tính HIV
+      const hivStatus = record.hivStatus || record.hiv_status;
+      if (hivStatus === "Dương tính" || hivStatus === "Positive") {
+        totalPositiveHIV++;
+      } else if (hivStatus === "Âm tính" || hivStatus === "Negative") {
+        totalNegativeHIV++;
+      }
+    });
+    
+    // 7. Chuẩn bị dữ liệu báo cáo
+    const reports = healthRecords.map(healthRecord => {
+      // Tìm lịch hẹn tương ứng
+      const scheduleId = healthRecord.scheduleId || 
+                        (healthRecord.schedule ? healthRecord.schedule.id : null);
+      const schedule = schedules.find(s => s.id === scheduleId) || {};
+      
+      // Tìm các test results tương ứng
+      const testResults = allTestResults.filter(test => 
+        test.healthRecordId === healthRecord.id || 
+        test.health_record_id === healthRecord.id
+      );
+      
+      return {
+        schedule,
+        healthRecord,
+        testResults
+      };
+    });
+    
+    // 8. Lọc dữ liệu theo các bộ lọc (nếu có)
+    const filteredReports = filterMedicalReports(reports, filters);
+    
+    // 9. Tổng hợp thống kê về test type distribution
+    const testTypeDistribution = calculateTestTypeDistributionFromTestResults(allTestResults);
+    
+    console.log('===== THỐNG KÊ BÁO CÁO Y TẾ =====', {
+      totalAppointments: completedAppointments,
+      totalTestResults: testsPerformed,
+      totalRegimens,
+      totalPatients: patientIds.size,
+      totalPositiveHIV,
+      totalNegativeHIV
+    });
+    
+    return {
+      reports: filteredReports,
+      statistics: {
+        totalAppointments: completedAppointments, // Số lịch hẹn đã khám
+        totalTestResults: testsPerformed, // Tổng số xét nghiệm đã thực hiện
+        testTypeDistribution: testTypeDistribution, // Phân bố theo loại xét nghiệm
+        totalRegimens: totalRegimens, // Tổng số phác đồ điều trị
+        totalPatients: patientIds.size, // Tổng số bệnh nhân
+        totalPositiveHIV: totalPositiveHIV, // Số ca dương tính HIV
+        totalNegativeHIV: totalNegativeHIV // Số ca âm tính HIV
+      }
+    };
+  } catch (error) {
+    console.error('LỖI NGHIÊM TRỌNG KHI TẠO BÁO CÁO Y TẾ:', error);
+    return {
+      reports: [],
+      statistics: {
+        totalAppointments: 0,
+        totalTestResults: 0,
+        testTypeDistribution: [],
+        totalRegimens: 0,
+        totalPatients: 0,
+        totalPositiveHIV: 0,
+        totalNegativeHIV: 0
+      }
+    };
+  }
+};
+
+// Hàm lọc báo cáo y tế theo bộ lọc
+const filterMedicalReports = (reports, filters) => {
+  return reports.filter(report => {
+    const { startDate, endDate, doctorId, patientId, testType } = filters;
+    
+    // Lọc theo khoảng thời gian
+    if (startDate && endDate) {
+      const appointmentDate = dayjs(report.schedule?.date);
+      if (!appointmentDate.isBetween(startDate, endDate, 'day', '[]')) {
+        return false;
+      }
+    }
+    
+    // Lọc theo bác sĩ
+    if (doctorId && report.schedule?.doctorId !== doctorId) {
+      return false;
+    }
+    
+    // Lọc theo bệnh nhân
+    if (patientId && report.schedule?.patientId !== patientId) {
+      return false;
+    }
+    
+    // Lọc theo loại xét nghiệm
+    if (testType && report.testResults) {
+      const hasTestType = report.testResults.some(test => test.type === testType);
+      if (!hasTestType) {
+        return false;
+      }
+    }
+    
+    return true;
+  });
+};
+
+// Tính toán thống kê y tế
+const calculateMedicalStatistics = (reports) => {
+  // Số lượng lịch hẹn
+  const totalAppointments = reports.length;
+  
+  // Tổng số kết quả xét nghiệm
+  let totalTestResults = 0;
+  let testTypeCount = {};
+  
+  // Biến cho thống kê mới
+  const uniquePatientIds = new Set();
+  let totalPositiveHIV = 0;
+  let totalNegativeHIV = 0;
+  
+  reports.forEach(report => {
+    // Đếm số bệnh nhân duy nhất
+    if (report.schedule?.patientId) {
+      uniquePatientIds.add(report.schedule.patientId);
+    }
+    
+    if (report.testResults) {
+      totalTestResults += report.testResults.length;
+      
+      // Đếm theo loại xét nghiệm
+      report.testResults.forEach(test => {
+        const type = test.type || 'Không xác định';
+        testTypeCount[type] = (testTypeCount[type] || 0) + 1;
+        
+        // Đếm kết quả HIV
+        if (type.toLowerCase().includes('hiv') || type.toLowerCase().includes('kháng thể hiv')) {
+          if (test.result && (
+              test.result.toLowerCase().includes('dương tính') || 
+              test.result.toLowerCase().includes('positive') || 
+              test.result === '+'
+            )) {
+            totalPositiveHIV++;
+          } else if (test.result && (
+              test.result.toLowerCase().includes('âm tính') || 
+              test.result.toLowerCase().includes('negative') || 
+              test.result === '-'
+            )) {
+            totalNegativeHIV++;
+          }
+        }
+      });
+    }
+  });
+  
+  // Chuyển đổi testTypeCount thành mảng để dễ sử dụng
+  const testTypeDistribution = Object.entries(testTypeCount).map(([type, count]) => ({
+    type,
+    count,
+    percentage: totalTestResults > 0 ? Math.round((count / totalTestResults) * 100) : 0
+  }));
+  
+  return {
+    totalAppointments,
+    totalTestResults,
+    testTypeDistribution,
+    totalPatients: uniquePatientIds.size,
+    totalPositiveHIV,
+    totalNegativeHIV
+  };
+};
+
+// Helper function để tính phân bố theo loại xét nghiệm
+const calculateTestTypeDistribution = (reports) => {
+  let testTypeCount = {};
+  let totalTestResults = 0;
+  
+  reports.forEach(report => {
+    if (report.testResults && Array.isArray(report.testResults)) {
+      totalTestResults += report.testResults.length;
+      
+      // Đếm theo loại xét nghiệm
+      report.testResults.forEach(test => {
+        const type = test.type || 'Không xác định';
+        testTypeCount[type] = (testTypeCount[type] || 0) + 1;
+      });
+    }
+  });
+  
+  // Chuyển đổi testTypeCount thành mảng để dễ sử dụng
+  return Object.entries(testTypeCount).map(([type, count]) => ({
+    type,
+    count,
+    percentage: totalTestResults > 0 ? Math.round((count / totalTestResults) * 100) : 0
+  }));
+};
+
+// Format dữ liệu báo cáo y tế cho xuất Excel
+export const formatMedicalDataForExport = (reports) => {
+  const exportData = [];
+  
+  reports.forEach(report => {
+    const { schedule, healthRecord, testResults } = report;
+    
+    if (testResults && testResults.length > 0) {
+      testResults.forEach(test => {
+        exportData.push({
+          'ID Lịch hẹn': schedule?.id || '',
+          'Bệnh nhân': schedule?.patientName || '',
+          'Bác sĩ': schedule?.doctorName || '',
+          'Ngày khám': dayjs(schedule?.date).format('DD/MM/YYYY') || '',
+          'Loại xét nghiệm': test.type || '',
+          'Kết quả': test.result || '',
+          'Đơn vị': test.unit || '',
+          'Thời gian có kết quả': test.actualResultTime ? dayjs(test.actualResultTime).format('DD/MM/YYYY HH:mm') : '',
+          'Ghi chú': test.note || ''
+        });
+      });
+    } else {
+      // Trường hợp không có kết quả xét nghiệm
+      exportData.push({
+        'ID Lịch hẹn': schedule?.id || '',
+        'Bệnh nhân': schedule?.patientName || '',
+        'Bác sĩ': schedule?.doctorName || '',
+        'Ngày khám': dayjs(schedule?.date).format('DD/MM/YYYY') || '',
+        'Loại xét nghiệm': '',
+        'Kết quả': '',
+        'Đơn vị': '',
+        'Thời gian có kết quả': '',
+        'Ghi chú': 'Không có kết quả xét nghiệm'
+      });
+    }
+  });
+  
+  return exportData;
+}; 
+
+// Helper function để tính phân bố theo loại xét nghiệm từ test results
+const calculateTestTypeDistributionFromTestResults = (testResults) => {
+  if (!Array.isArray(testResults) || testResults.length === 0) {
+    return [];
+  }
+  
+  // Đếm số lượng mỗi loại xét nghiệm
+  const typeCounts = {};
+  testResults.forEach(test => {
+    const type = test.type || 'Không xác định';
+    typeCounts[type] = (typeCounts[type] || 0) + 1;
+  });
+  
+  // Chuyển đổi thành mảng và tính phần trăm
+  const totalTests = testResults.length;
+  return Object.entries(typeCounts).map(([type, count]) => ({
+    type,
+    count,
+    percentage: Math.round((count / totalTests) * 100)
+  }));
+}; 

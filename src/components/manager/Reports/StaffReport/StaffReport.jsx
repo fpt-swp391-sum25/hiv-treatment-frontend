@@ -218,13 +218,13 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
             title: 'Họ và tên',
             dataIndex: 'fullName',
             key: 'fullName',
-            width: '20%',
+            width: '30%',
         },
         {
             title: 'Vai trò',
             dataIndex: 'role',
             key: 'role',
-            width: '10%',
+            width: '20%',
             render: (role) => {
                 switch (role) {
                     case STAFF_ROLES.DOCTOR:
@@ -242,52 +242,13 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
             title: 'Email',
             dataIndex: 'email',
             key: 'email',
-            width: '20%',
+            width: '25%',
         },
         {
             title: 'Số điện thoại',
             dataIndex: 'phoneNumber',
             key: 'phoneNumber',
-            width: '15%',
-        },
-        {
-            title: 'Số ca đã xử lý',
-            dataIndex: 'casesHandled',
-            key: 'casesHandled',
-            width: '15%',
-            render: (cases, record) => {
-                if (record.role === STAFF_ROLES.DOCTOR) {
-                    return `${cases || 0} ca khám`;
-                } else if (record.role === STAFF_ROLES.LAB_TECHNICIAN) {
-                    return `${cases || 0} xét nghiệm`;
-                }
-                return '-';
-            }
-        },
-        {
-            title: 'Hiệu suất',
-            dataIndex: 'performance',
-            key: 'performance',
-            width: '10%',
-            render: (performance) => {
-                let color = '#52c41a'; // green
-                if (performance < 50) {
-                    color = '#f5222d'; // red
-                } else if (performance < 80) {
-                    color = '#faad14'; // yellow
-                }
-                return performance ? (
-                    <span style={{ color }}>
-                        {performance}%
-                    </span>
-                ) : '-';
-            }
-        },
-        {
-            title: 'Trạng thái',
-            dataIndex: 'status',
-            key: 'status',
-            width: '10%',
+            width: '25%',
         }
     ];
 
@@ -753,42 +714,6 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
                         </Card>
                     </Col>
                 </Row>
-
-                {/* Biểu đồ hiệu suất nhân viên */}
-                <Card 
-                    title="So sánh hiệu suất nhân viên" 
-                    className="chart-card"
-                    extra={
-                        <Space>
-                            <Radio.Group 
-                                value={chartType} 
-                                onChange={e => setChartType(e.target.value)}
-                                buttonStyle="solid"
-                            >
-                                <Radio.Button value="performance">
-                                    <Tooltip title="Hiệu suất">
-                                        <BarChartOutlined /> Hiệu suất
-                                    </Tooltip>
-                                </Radio.Button>
-                                <Radio.Button value="cases">
-                                    <Tooltip title="Số ca xử lý">
-                                        <BarChartOutlined /> Số ca xử lý
-                                    </Tooltip>
-                                </Radio.Button>
-                            </Radio.Group>
-                            <span style={{ marginLeft: 8 }}>
-                                Chỉ hiển thị top 10:
-                                <Switch 
-                                    checked={showTopPerformers}
-                                    onChange={setShowTopPerformers}
-                                    style={{ marginLeft: 8 }}
-                                />
-                            </span>
-                        </Space>
-                    }
-                >
-                    {chartType === 'performance' ? <StaffPerformanceChart /> : <CasesHandledChart />}
-                </Card>
 
                 {/* Bảng danh sách nhân viên */}
                 {/* Bảng danh sách nhân viên */}
