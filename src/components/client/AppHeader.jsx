@@ -99,7 +99,7 @@ const AppHeader = () => {
     };
 
     if (user?.id) {
-        intervalId = setInterval(pollNotifications, 10000); // 10s
+        intervalId = setInterval(pollNotifications, 1000); // 1s
     }
 
     return () => clearInterval(intervalId); // cleanup
