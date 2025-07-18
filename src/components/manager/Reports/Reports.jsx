@@ -4,10 +4,12 @@ import {
     BarChartOutlined, 
     DollarCircleOutlined,
     FileExcelOutlined,
-    PrinterOutlined
+    PrinterOutlined,
+    MedicineBoxOutlined
 } from '@ant-design/icons';
 import StaffReport from './StaffReport/StaffReport';
 import FinancialReport from './FinancialReport/FinancialReport';
+import MedicalReport from './MedicalReport/MedicalReport';
 import dayjs from 'dayjs';
 import { exportToExcel, formatStaffDataForExport, formatPaymentDataForExport, getStaffData, getPaymentStats } from '../../../services/report.service';
 import { PAYMENT_STATUS, EXPORT_TYPES } from '../../../types/report.types';
@@ -163,6 +165,16 @@ const Reports = () => {
                 </span>
             ),
             children: <FinancialReport dateRange={dateRange} onError={handleError} />
+        },
+        {
+            key: 'medical',
+            label: (
+                <span>
+                    <MedicineBoxOutlined />
+                    Báo cáo y tế
+                </span>
+            ),
+            children: <MedicalReport dateRange={dateRange} onError={handleError} onDateRangeChange={handleDateRangeChange} />
         }
     ];
 

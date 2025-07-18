@@ -1100,6 +1100,13 @@ const createSystemConfigurationAPI = (createData) =>
 const deleteSystemConfigurationAPI = (id) =>
     axios.delete(`/api/system-configuration/${id}`);
 
+// Fetch all health records
+const fetchHealthRecordsAPI = () => {
+  const URL_BACKEND = '/api/health-record';
+  console.log('Fetching all health records');
+  return axios.get(URL_BACKEND);
+};
+
 // Export tất cả các hàm API
 export {
     loginAPI,
@@ -1130,6 +1137,7 @@ export {
     fetchAllDocumentsAPI,
     fetchUsersAPI,
     fetchHealthRecordByScheduleIdAPI,
+    fetchHealthRecordsAPI,
     createHealthRecordAPI,
     fetchTestResultByHealthRecordIdAPI,
     updateHealthRecordAPI,

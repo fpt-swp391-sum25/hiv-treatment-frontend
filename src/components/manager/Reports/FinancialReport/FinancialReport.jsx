@@ -227,17 +227,17 @@ const FinancialReport = ({ dateRange, onError, onDateRangeChange }) => {
 
     const summary = generateReportSummary();
 
-    // Tính toán thống kê - CẬP NHẬT ĐỂ BAO GỒM TẤT CẢ GIAO DỊCH
+    // Tính toán thống kê - CẬP NHẬT ĐỂ CHỈ TÍNH CÁC GIAO DỊCH ĐÃ THANH TOÁN
     const statistics = {
-        totalRevenue: calculateTotalRevenue([...paymentData.completed, ...paymentData.pending]), // Bao gồm cả pending
+        totalRevenue: calculateTotalRevenue(paymentData.completed), // Chỉ tính giao dịch đã hoàn thành
         totalCompleted: paymentData.completed.length,
         totalPending: paymentData.pending.length,
         totalFailed: paymentData.failed.length,
         totalTransactions: paymentData.completed.length + paymentData.pending.length + paymentData.failed.length
     };
 
-    // Dữ liệu cho biểu đồ doanh thu theo phương thức thanh toán - CHỈ TÍNH COMPLETED VÀ PENDING
-    const revenueByType = groupPaymentsByType([...paymentData.completed, ...paymentData.pending]);
+    // Dữ liệu cho biểu đồ doanh thu theo phương thức thanh toán - CHỈ TÍNH COMPLETED
+    const revenueByType = groupPaymentsByType(paymentData.completed);
 
     // Hàm helper để lấy dữ liệu theo khoảng thời gian
     const getRevenueByPeriod = (data, periodType) => {
@@ -428,18 +428,6 @@ const FinancialReport = ({ dateRange, onError, onDateRangeChange }) => {
                 width: '25%',
             },
             {
-                title: 'Phương thức',
-                dataIndex: 'account',
-                key: 'account',
-                width: '15%',
-                filters: [
-                    { text: 'Thanh toán tại quầy', value: PAYMENT_ACCOUNT.COUNTER },
-                    { text: 'Thanh toán online', value: PAYMENT_ACCOUNT.ONLINE },
-                    { text: 'Bảo hiểm y tế', value: PAYMENT_ACCOUNT.INSURANCE },
-                ],
-                onFilter: (value, record) => record.account === value,
-            },
-            {
                 title: 'Số tiền',
                 dataIndex: 'amount',
                 key: 'amount',
@@ -567,10 +555,12 @@ const FinancialReport = ({ dateRange, onError, onDateRangeChange }) => {
                         showTotal: (total) => `Tổng số ${total} giao dịch`
                     }}
                     summary={(pageData) => {
-                        const total = pageData.reduce((sum, payment) => sum + (Number(payment.amount) || 0), 0);
+                        // Chỉ tính tổng cho các giao dịch đã hoàn thành
+                        const completedPayments = pageData.filter(payment => payment.status === PAYMENT_STATUS.COMPLETED);
+                        const total = completedPayments.reduce((sum, payment) => sum + (Number(payment.amount) || 0), 0);
                         return (
                             <Table.Summary.Row>
-                                <Table.Summary.Cell index={0} colSpan={4}>
+                                <Table.Summary.Cell index={0} colSpan={3}>
                                     <strong>Tổng</strong>
                                 </Table.Summary.Cell>
                                 <Table.Summary.Cell index={1}>
