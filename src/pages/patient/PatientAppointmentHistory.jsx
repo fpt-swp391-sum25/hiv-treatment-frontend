@@ -6,7 +6,8 @@ import {
 import {
   CalendarOutlined, ClockCircleOutlined, UserOutlined,
   FileTextOutlined, SearchOutlined, MedicineBoxOutlined,
-  FileDoneOutlined
+  FileDoneOutlined,
+  ScheduleOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { getSchedulesByPatientAPI, fetchTestResultByHealthRecordIdAPI } from '../../services/api.service';
@@ -89,28 +90,28 @@ export default function PatientAppointmentHistory() {
 
   const columns = [
     {
-      title: 'Loại lịch',
+      title: <><ScheduleOutlined /> Loại lịch</>,
       dataIndex: 'type',
       key: 'type',
       render: type => <Tag color={getTypeColor(type)}>{type}</Tag>,
     },
     {
-      title: 'Ngày',
+      title: <><CalendarOutlined /> Ngày</>,
       dataIndex: 'date',
       key: 'date',
-      render: d => <><CalendarOutlined /> {formatDate(d)}</>,
+      render: d => <> {formatDate(d)}</>,
     },
     {
-      title: 'Khung giờ',
+      title: <><ClockCircleOutlined /> Giờ</>,
       dataIndex: 'slot',
       key: 'slot',
-      render: s => <><ClockCircleOutlined /> {s?.slice(0, 5)}</>,
+      render: s => <> {s?.slice(0, 5)}</>,
     },
     {
-      title: 'Bác sĩ',
+      title: <><UserOutlined /> Bác sĩ</>,
       dataIndex: ['doctor', 'fullName'],
       key: 'doctor',
-      render: name => <><UserOutlined /> {name || 'Không rõ'}</>,
+      render: name => <> {name || 'Không rõ'}</>,
     },
     {
       title: '',
