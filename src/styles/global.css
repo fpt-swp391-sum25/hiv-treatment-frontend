@@ -14,3 +14,245 @@
 .btn-custom:hover {
     background: #00bed3 !important;
 }
+
+/* Tab */
+.ant-tabs-card .ant-tabs-tab {
+    background-color: #ffffff !important;
+    color: black !important;
+
+    transition: all 0.3s;
+}
+
+.ant-tabs-card .ant-tabs-tab-active {
+    background-color: #089BAB15 !important;
+    color: #04cde4 !important;
+}
+
+.ant-tabs-card .ant-tabs-tab-active .ant-tabs-tab-btn {
+    color: #04cde4 !important;
+}
+
+.ant-tabs-card .ant-tabs-tab {
+    border-radius: 4px 4px 0 0;
+}
+
+.ant-tabs-content-holder {
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+}
+
+.ant-tabs-card .ant-tabs-tab:hover {
+    background-color: #089BAB15 !important;
+    color: #04cde4 !important;
+}
+
+/* Button */
+.ant-btn-primary:not(.ant-btn-dangerous):not([data-danger]) {
+    background-color: #00bed3 !important;
+    color: #fff !important;
+}
+
+.ant-btn-primary:not(.ant-btn-dangerous):hover {
+    background-color: #089BAB95 !important;
+    color: #fff !important;
+}
+
+.ant-btn-primary:disabled {
+    background-color: #f5f5f5 !important;
+    color: #d9d9d9 !important;
+    border-color: #d9d9d9 !important;
+}
+
+
+.ant-btn.ant-btn-dangerous {
+    position: relative !important;
+    overflow: hidden !important;
+    background-color: #FF6B6B !important;
+    color: white !important;
+    height: 40px !important;
+    border-radius: 24px !important;
+    font-weight: 600 !important;
+    z-index: 1 !important;
+}
+
+
+.ant-btn.ant-btn-dangerous::before {
+    content: "" !important;
+    position: absolute !important;
+    top: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: linear-gradient(270deg, #E63946, #FF6B6B, #E63946) !important;
+    background-size: 200% 100% !important;
+    transform: translateX(100%) !important;
+    transition: transform 0.6s ease, background-position 0.6s ease !important;
+    z-index: -1 !important;
+}
+
+
+.ant-btn.ant-btn-dangerous:hover::before {
+    transform: translateX(0%) !important;
+}
+
+
+.ant-btn.ant-btn-dangerous:hover {
+    color: #fff !important;
+}
+
+
+.ant-btn.ant-btn-text {
+    position: relative !important;
+    overflow: hidden !important;
+    background: linear-gradient(90deg, #ffffff, #cffbff) !important;
+    color: #089BAB !important;
+    height: 40px !important;
+    border-radius: 24px !important;
+    font-weight: 600 !important;
+    z-index: 1 !important;
+}
+
+
+.ant-btn.ant-btn-text::before {
+    content: "" !important;
+    position: absolute !important;
+    top: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: linear-gradient(90deg, #cffbff, #ffffff) !important;
+    background-size: 200% 100% !important;
+    transform: translateX(100%) !important;
+    transition: transform 0.6s ease, background-position 0.6s ease !important;
+    z-index: -1 !important;
+}
+
+
+.ant-btn.ant-btn-text:hover::before {
+    transform: translateX(0%) !important;
+}
+
+
+.ant-btn.ant-btn-text:hover {
+    color: #089BAB !important;
+    box-shadow: 0 3px 6px rgb(0, 0, 0) !important;
+}
+
+
+.ant-btn-default {
+    background-color: transparent !important;
+    color: black !important;
+
+}
+
+.ant-btn-default:hover {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+.btn-sign-up {
+    position: relative !important;
+    overflow: hidden !important;
+    background: #00C49A !important;
+    color: #fff !important;
+    height: 40px !important;
+    border-radius: 24px !important;
+    font-weight: 600 !important;
+    z-index: 1 !important;
+}
+
+
+.btn-sign-up::before {
+    content: "" !important;
+    position: absolute !important;
+    top: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: linear-gradient(270deg, #01fdcf, #00C49A, #01fdcf) !important;
+    background-size: 200% 100% !important;
+    transform: translateX(100%) !important;
+    transition: transform 0.6s ease, background-position 0.6s ease !important;
+    z-index: -1 !important;
+}
+
+
+.btn-sign-up:hover::before {
+    transform: translateX(0%) !important;
+}
+
+
+.btn-sign-up:hover {
+    color: #fff !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) !important;
+}
+
+
+.custom-delete-btn {
+    background-color: #ff4d4f !important;
+    /* Màu đỏ nhẹ */
+    color: white !important;
+    border: none !important;
+    transition: all 0.3s ease !important;
+    font-weight: 500;
+    border-radius: 4px;
+}
+
+.custom-delete-btn:hover,
+.custom-delete-btn:focus {
+    background-color: #d9363e !important;
+    color: white !important;
+    box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.2) !important;
+}
+
+
+
+
+.ant-popconfirm-buttons>.ant-btn:not(.ant-btn-primary):not(.ant-btn-dangerous) {
+    color: black !important;
+    background-color: transparent !important;
+}
+
+.ant-popconfirm-buttons>.ant-btn:not(.ant-btn-primary):not(.ant-btn-dangerous):hover {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+
+
+/* Modal */
+.ant-modal-footer>.ant-btn:not(.ant-btn-primary):not(.ant-btn-dangerous) {
+    color: black !important;
+    background-color: transparent !important;
+}
+
+.ant-modal-footer>.ant-btn:not(.ant-btn-primary):not(.ant-btn-dangerous):hover {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+.ant-modal .ant-modal-title {
+    color: #00bed3 !important;
+}
+
+/* Sidebar */
+.ant-menu .ant-menu-item,
+.ant-menu .ant-menu-submenu-title,
+.ant-menu .ant-menu-title-content {
+    transition: none !important;
+}
+
+.ant-menu-item-selected {
+    transition: none !important;
+    background-color: #089BAB15 !important;
+    color: #04cde4 !important;
+}
+
+.ant-menu-submenu-selected>.ant-menu-submenu-title {
+    transition: none !important;
+    color: #04cde4 !important;
+}
+
+.ant-menu .ant-menu-item:hover {
+    transition: none !important;
+    background-color: #089BAB15 !important;
+    color: #04cde4 !important;
+
+}

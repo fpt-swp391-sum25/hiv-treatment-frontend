@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Button, Input, Modal, notification, Popconfirm, Select, Space, Table, Tag } from 'antd';
+import { Button, Input, Modal, notification, Popconfirm, Select, Space, Spin, Table, Tag } from 'antd';
 import { createAccountAPI, deleteAccountAPI, fetchAccountByRoleAPI } from '../../services/api.service';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import UpdateUserModal from '../../components/admin/UpdateUserModal';
@@ -12,6 +12,7 @@ const AccountManagers = () => {
     const [email, setEmail] = useState("")
     const [role, setRole] = useState("MANAGER")
     const [dataUpdate, setDataUpdate] = useState({})
+    const [loading, setLoading] = useState(false)
 
     const [isOpenModal, setIsOpenModal] = useState(false)
     const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false)
@@ -21,18 +22,21 @@ const AccountManagers = () => {
     }, [])
 
     const loadAccounts = async () => {
-        const response = await fetchAccountByRoleAPI(role)
-        console.log(response.data)
-
-        if (response.data) {
-
-            setData(response.data)
-            console.log(response.data)
-
+        setLoading(true)
+        try {
+            const response = await fetchAccountByRoleAPI(role);
+            setData(response.data);
+        } catch (error) {
+            notification.error({
+                message: 'Hệ thống',
+                description: error?.message || 'Lỗi khi tải dữ liệu',
+            });
         }
+        setLoading(false)
     }
 
     const handleCreate = async () => {
+        setLoading(true)
         const response = await createAccountAPI(username, password, email, role)
         if (response.data) {
             notification.success({
@@ -44,9 +48,11 @@ const AccountManagers = () => {
         }
         resetAndClose()
         await loadAccounts()
+        setLoading(false)
     }
 
     const handleDelete = async (id) => {
+        setLoading(true)
         const response = await deleteAccountAPI(id)
         if (response.data) {
             notification.success({
@@ -56,6 +62,7 @@ const AccountManagers = () => {
                 description: 'Xóa tài khoản thành công'
             })
             await loadAccounts()
+            setLoading(false)
         }
     }
 
@@ -129,44 +136,56 @@ const AccountManagers = () => {
 
     return (
         <>
-            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '15px' }}>
-                <h2>Tài khoản quản lí</h2>
-                <Button onClick={() => setIsOpenModal(true)} type='primary'>Tạo mới</Button>
+            {loading ? <div style={{
+                position: "fixed",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+            }}>
+                < Spin />
             </div>
-            <Table columns={columns} dataSource={data} rowKey={data.id} />
-            <UpdateUserModal
-                isUpdateModalOpen={isUpdateModalOpen}
-                setIsUpdateModalOpen={setIsUpdateModalOpen}
-                dataUpdate={dataUpdate}
-                setDataUpdate={setDataUpdate}
-                loadAccounts={loadAccounts}
-            />
-            <Modal
-                title="Tạo tài khoản"
-                closable={{ 'aria-label': 'Custom Close Button' }}
-                open={isOpenModal}
-                onOk={handleCreate}
-                onCancel={resetAndClose}
-                okText={"Tạo"}
-                cancelText={"Hủy"}
-            >
-                <div style={{ display: 'flex', gap: '15px', flexDirection: 'column' }}>
-                    <div>
-                        <span>Tên đăng nhập</span>
-                        <Input value={username} onChange={(event) => { setUsername(event.target.value) }} />
+                :
+                <>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '15px' }}>
+                        <h2>Tài khoản quản lí</h2>
+                        <Button onClick={() => setIsOpenModal(true)} type='primary'>Tạo mới</Button>
                     </div>
-                    <div>
-                        <span>Email</span>
-                        <Input value={email} onChange={(event) => { setEmail(event.target.value) }} />
-                    </div>
-                    <div>
-                        <span>Mật khẩu</span>
-                        <Input.Password value={password} onChange={(event) => { setPassword(event.target.value) }} />
-                    </div>
+                    <Table columns={columns} dataSource={data} rowKey={data.id} />
+                    <UpdateUserModal
+                        isUpdateModalOpen={isUpdateModalOpen}
+                        setIsUpdateModalOpen={setIsUpdateModalOpen}
+                        dataUpdate={dataUpdate}
+                        setDataUpdate={setDataUpdate}
+                        loadAccounts={loadAccounts}
+                    />
+                    <Modal
+                        title="Tạo tài khoản"
+                        closable={{ 'aria-label': 'Custom Close Button' }}
+                        open={isOpenModal}
+                        onOk={handleCreate}
+                        onCancel={resetAndClose}
+                        okText={"Tạo"}
+                        cancelText={"Hủy"}
+                        loading={loading}
+                    >
+                        <div style={{ display: 'flex', gap: '15px', flexDirection: 'column' }}>
+                            <div>
+                                <span>Tên đăng nhập</span>
+                                <Input value={username} onChange={(event) => { setUsername(event.target.value) }} />
+                            </div>
+                            <div>
+                                <span>Email</span>
+                                <Input value={email} onChange={(event) => { setEmail(event.target.value) }} />
+                            </div>
+                            <div>
+                                <span>Mật khẩu</span>
+                                <Input.Password value={password} onChange={(event) => { setPassword(event.target.value) }} />
+                            </div>
 
-                </div>
-            </Modal>
-
+                        </div>
+                    </Modal>
+                </>
+            }
         </>
     )
 }

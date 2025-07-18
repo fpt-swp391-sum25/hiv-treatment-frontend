@@ -21,7 +21,6 @@ const ManagerPage = () => {
       const response = await fetchAccountAPI();
       if (response.data) {
         setUser(response.data);
-        localStorage.setItem('user', JSON.stringify(response.data));
         setIsAppLoading(false);
       }
     } catch (error) {
