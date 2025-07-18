@@ -1,13 +1,29 @@
 import React, { useContext, useState, useRef } from "react";
 import {
-    Layout, message, Card, Row, Col, Avatar, Button, Input, Select, DatePicker,
-    Popconfirm, Descriptions, notification, Spin
+
+    Layout,
+    message,
+    Card,
+    Row,
+    Col,
+    Avatar,
+    Button,
+    Input,
+    Select,
+    DatePicker,
+    Popconfirm,
+    Descriptions,
+    notification,
+    Spin,
+
 } from "antd";
 import dayjs from "dayjs";
 import { AuthContext } from "../../components/context/AuthContext";
 import { DeleteOutlined, SaveOutlined, UploadOutlined, UserOutlined } from "@ant-design/icons";
 import { updateProfileAPI } from "../../services/api.service";
+
 import { validateField } from "../../utils/validate";
+
 
 const { Content } = Layout;
 
@@ -75,14 +91,26 @@ const ProfileDetail = () => {
 
     return (
         <Layout>
-            <Content style={{ padding: 24 }}>
+            <Content style={{ padding: 24, minHeight: "500px" }}>
                 {loading ? (
-                    <div style={{ textAlign: "center", marginTop: 100 }}>
-                        <Spin tip="Đang cập nhật..." />
+                    <div
+                        style={{
+                            position: "fixed",
+                            top: "50%",
+                            left: "50%",
+                            transform: "translate(-50%, -50%)",
+                        }}
+                    >
+                        <Spin tip="Đang tải..." />
                     </div>
                 ) : (
-                    <Card title="Thông tin cá nhân" style={{ borderRadius: 12, boxShadow: "0 4px 12px #0001" }}>
+                    <Card
+                        title="Thông tin cá nhân"
+                        bordered={false}
+                        style={{ borderRadius: 12, boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }}
+                    >
                         <Row gutter={32}>
+                            {/* Avatar + Chọn/Xoá ảnh */}
                             <Col xs={24} md={6} style={{ textAlign: "center" }}>
                                 <Avatar
                                     size={128}
@@ -99,19 +127,28 @@ const ProfileDetail = () => {
                                     style={{ display: "none" }}
                                 />
                                 <div>
-                                    <Button type="primary" icon={<UploadOutlined />} onClick={() => fileInputRef.current.click()}>
+                                    <Button
+                                        type="primary"
+                                        onClick={() => fileInputRef.current.click()}
+                                        icon={<UploadOutlined />}
+                                    >
                                         Chọn ảnh
                                     </Button>
                                     {avatarUrl && (
-                                        <Button type="link" danger icon={<DeleteOutlined />} onClick={() => {
-                                            setAvatarUrl("");
-                                            setUser(prev => ({ ...prev, avatar: "" }));
-                                        }}>
+                                        <Button
+                                            className="custom-delete-btn"
+                                            icon={<DeleteOutlined />}
+                                            type="link"
+                                            onClick={() => {
+                                                setAvatarUrl("");
+                                                setUser((prev) => ({ ...prev, avatar: "" }));
+                                            }}
+                                        >
                                             Xoá ảnh
                                         </Button>
                                     )}
                                 </div>
-                            </Col>
+                            </Col >
 
                             <Col xs={24} md={18}>
                                 <Row gutter={16}>
@@ -228,9 +265,20 @@ const ProfileDetail = () => {
 
                                 <hr style={{ margin: "24px 0" }} />
 
-                                <Descriptions column={1} size="small" layout="vertical">
-                                    <Descriptions.Item label="Mã bệnh nhân">{user.displayId || "N/A"}</Descriptions.Item>
-                                    <Descriptions.Item label="Ngày tạo tài khoản">{dayjs(user.createdAt).format("DD-MM-YYYY")}</Descriptions.Item>
+                                {/* Thông tin hệ thống */}
+                                <Descriptions
+                                    title=""
+                                    column={1}
+                                    size="small"
+                                    layout="vertical"
+                                >
+                                    <Descriptions.Item label="Mã bệnh nhân">
+                                        {user.displayId || "N/A"}
+                                    </Descriptions.Item>
+                                    <Descriptions.Item label="Ngày tạo tài khoản">
+                                        {dayjs(user.createdAt).format('DD-MM-YYYY') || "N/A"}
+                                    </Descriptions.Item>
+
                                 </Descriptions>
 
                                 <div style={{ textAlign: "right", marginTop: 24 }}>
@@ -241,17 +289,21 @@ const ProfileDetail = () => {
                                         cancelText="Không"
                                         placement="left"
                                     >
-                                        <Button type="primary" loading={loading} icon={<SaveOutlined />}>
+                                        <Button
+                                            type="primary"
+                                            loading={loading}
+                                            icon={<SaveOutlined />}
+                                        >
                                             Lưu thay đổi
                                         </Button>
                                     </Popconfirm>
-                                </div>
-                            </Col>
-                        </Row>
-                    </Card>
+                                </div >
+                            </Col >
+                        </Row >
+                    </Card >
                 )}
-            </Content>
-        </Layout>
+            </Content >
+        </Layout >
     );
 };
 

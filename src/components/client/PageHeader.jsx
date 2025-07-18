@@ -102,6 +102,7 @@ const PageHeader = () => {
                 pauseOnHover: true,
                 description: 'Đăng xuất thành công'
             });
+
             navigate("/login")
         }
     };
