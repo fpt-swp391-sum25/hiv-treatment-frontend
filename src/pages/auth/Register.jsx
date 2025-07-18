@@ -1,61 +1,118 @@
 import '@ant-design/v5-patch-for-react-19';
-import { Form, Input, Button, DatePicker, Select, message, Divider, Typography, notification, Alert } from 'antd';
+import {
+    Form,
+    Input,
+    Button,
+    DatePicker,
+    Select,
+    message as antdMessage,
+    Divider,
+    Typography,
+    Alert,
+    notification,
+} from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { registerAPI } from '../../services/api.service';
 import { useState } from 'react';
+import { validateField } from '../../utils/validate';
 
 const { Option } = Select;
 const { Link, Text } = Typography;
 const dateFormat = 'DD-MM-YYYY';
 
-
 const Register = () => {
     const [form] = Form.useForm();
     const navigate = useNavigate();
-    const [loading, setLoading] = useState(false)
-    const [message, setMessage] = useState("")
+    const [loading, setLoading] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
+    const [errors, setErrors] = useState({});
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState(null)
+
     const onFinish = async (values) => {
-        setLoading(true)
-        const response = await registerAPI(values)
-        if (response.data) {
-            setMessage('Đăng kí thành công, vui lòng xác minh email trước khi đăng nhập!')
+        setLoading(true);
+        try {
+            const response = await registerAPI(values);
+            if (response.data) {
+                setSuccessMessage(
+                    'Đăng kí thành công, vui lòng xác minh email trước khi đăng nhập!'
+                );
+                form.resetFields();
+            } else if (response.message.includes('USERNAME')) {
+                notification.error({
+                    message: "Hệ thống",
+                    description: "Tên người dùng đã tồn tại",
+                });
+            }
+        } catch (error) {
+            antdMessage.error('Đăng ký thất bại, vui lòng thử lại.');
         }
-        setLoading(false)
+        setLoading(false);
     };
 
-    const onFinishFailed = (errorInfo) => {
-        console.log('Failed:', errorInfo);
-        message.error('Please correct the errors in the form before submitting.');
+    const onFinishFailed = () => {
+        antdMessage.error('Vui lòng kiểm tra lại thông tin.');
     };
 
     return (
-        <div style={{ maxWidth: 500, margin: '40px auto', padding: 24, boxShadow: '0 4px 12px rgba(0,0,0,0.15)', borderRadius: 8 }}>
-            <Link href="/" className='link'><ArrowLeftOutlined /> Về trang chủ</Link>
+        <div
+            style={{
+                maxWidth: 500,
+                margin: '40px auto',
+                padding: 24,
+                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                borderRadius: 8,
+            }}
+        >
+            <Link href="/" className="link">
+                <ArrowLeftOutlined /> Về trang chủ
+            </Link>
             <h2 style={{ textAlign: 'center', marginBottom: 24 }}>Đăng kí</h2>
-            {message && <Alert message={message} type="success" style={{ marginBottom: 16 }} />}
+            {successMessage && (
+                <Alert
+                    message={successMessage}
+                    type="success"
+                    style={{ marginBottom: 16 }}
+                />
+            )}
             <Form
                 form={form}
                 name="register"
                 layout="vertical"
                 onFinish={onFinish}
                 onFinishFailed={onFinishFailed}
-
             >
                 <Form.Item
                     label="Họ và tên"
                     name="fullname"
-                    rules={[{ required: true, message: 'Hãy nhập tên của bạn' }]}
+                    rules={[
+                        {
+                            validator: (_, value) => {
+                                const error = validateField('fullname', value);
+                                if (error) return Promise.reject(error);
+                                return Promise.resolve();
+                            },
+                        },
+                    ]}
                 >
-                    <Input placeholder="Họ và tên" />
+                    <Input placeholder="Họ và tên" autoComplete="name" />
                 </Form.Item>
 
                 <Form.Item
                     label="Giới tính"
                     name="gender"
-                    rules={[{ required: true, message: 'Hãy chọn giới tính của bạn' }]}
+                    rules={[
+                        {
+                            validator: (_, value) => {
+                                const error = validateField('gender', value);
+                                if (error) return Promise.reject(error);
+                                return Promise.resolve();
+                            },
+                        },
+                    ]}
                 >
-                    <Select placeholder="Giới tính">
+                    <Select placeholder="Giới tính" allowClear>
                         <Option value="Nam">Nam</Option>
                         <Option value="Nữ">Nữ</Option>
                         <Option value="Khác">Khác</Option>
@@ -65,73 +122,158 @@ const Register = () => {
                 <Form.Item
                     label="Ngày sinh"
                     name="dob"
-                    rules={[{ required: true, message: 'Hãy điền ngày sinh của bạn' }]}
+                    rules={[
+                        {
+                            validator: (_, value) => {
+                                const error = validateField('dob', value);
+                                if (error) return Promise.reject(error);
+                                return Promise.resolve();
+                            },
+                        },
+                    ]}
                 >
-                    <DatePicker style={{ width: '100%' }} placeholder="Ngày sinh" format={dateFormat} />
+                    <DatePicker
+                        style={{ width: '100%' }}
+                        placeholder="Ngày sinh"
+                        format={dateFormat}
+                    />
                 </Form.Item>
 
                 <Form.Item
                     label="Email"
                     name="email"
                     rules={[
-                        { required: true, message: 'Hãy nhập email của bạn' },
-                        { type: 'email', message: 'Email không hợp lệ' },
+                        {
+                            validator: (_, value) => {
+                                const error = validateField('email', value);
+                                if (error) return Promise.reject(error);
+                                return Promise.resolve();
+                            },
+                        },
                     ]}
                 >
-                    <Input placeholder="Email" />
+                    <Input placeholder="Email" autoComplete="email" />
                 </Form.Item>
 
                 <Form.Item
                     label="Số điện thoại"
                     name="phoneNumber"
                     rules={[
-                        { required: true, message: 'Hãy nhập số điện thoại của bạn' },
-                        { pattern: /^[0-9]{10}$/, message: 'Số điện thoại không hợp lệ' },
+                        {
+                            validator: (_, value) => {
+                                const error = validateField('phoneNumber', value);
+                                if (error) return Promise.reject(error);
+                                return Promise.resolve();
+                            },
+                        },
                     ]}
                 >
-                    <Input placeholder="Số điện thoại" />
+                    <Input placeholder="Số điện thoại" autoComplete="tel" />
                 </Form.Item>
 
                 <Form.Item
                     label="Địa chỉ"
                     name="address"
-                    rules={[{ required: true, message: 'Hãy nhập địa chỉ của bạn' }]}
+                    rules={[
+                        {
+                            validator: (_, value) => {
+                                const error = validateField('address', value);
+                                if (error) return Promise.reject(error);
+                                return Promise.resolve();
+                            },
+                        },
+                    ]}
                 >
-                    <Input.TextArea placeholder="Địa chỉ" autoSize={{ minRows: 2, maxRows: 4 }} />
+                    <Input.TextArea
+                        placeholder="Địa chỉ"
+                        autoSize={{ minRows: 2, maxRows: 4 }}
+                    />
                 </Form.Item>
 
                 <Form.Item
                     label="Tên đăng nhập"
                     name="username"
                     rules={[
-                        { required: true, message: 'Hãy nhập tên đăng nhập của bạn' },
-                        { min: 4, message: 'Tên đăng nhập phải có ít nhất 4 chữ cái' },
+                        {
+                            validator: (_, value) => {
+                                const error = validateField('username', value);
+                                if (error) return Promise.reject(error);
+                                return Promise.resolve();
+                            },
+                        },
                     ]}
                 >
-                    <Input placeholder="Tên đăng nhập" />
+                    <Input placeholder="Tên đăng nhập" autoComplete="username" />
                 </Form.Item>
 
                 <Form.Item
                     label="Mật khẩu"
-                    name="password"
+                    name="newPassword"
                     rules={[
-                        { required: true, message: 'Hãy nhập mật khẩu của bạn' },
-                        { min: 6, message: 'Mật khẩu phải có ít nhất 6 kí tự' },
+                        {
+                            validator: (_, value) => {
+                                const error = validateField('newPassword', value);
+                                if (error) return Promise.reject(error);
+                                return Promise.resolve();
+                            },
+                        },
                     ]}
                     hasFeedback
                 >
-                    <Input.Password placeholder="Mật khẩu" />
+                    <Input.Password
+                        placeholder="Mật khẩu"
+                        autoComplete="new-password"
+                        onChange={(e) => {
+                            setNewPassword(e.target.value);
+                        }}
+                    />
                 </Form.Item>
 
+                <Form.Item
+                    label="Xác nhận mật khẩu"
+                    name="confirmPassword"
+                    dependencies={['newPassword']}
+                    hasFeedback
+                    rules={[
+                        {
+                            validator: (_, value) => {
+                                const password = form.getFieldValue('newPassword');
+                                if (!value) return Promise.resolve();
+                                const error = validateField('confirmPassword', value, { newPassword: password });
+                                if (error) return Promise.reject(error);
+                                return Promise.resolve();
+                            },
+                        },
+                    ]}
+                >
+                    <Input.Password
+                        placeholder="Xác nhận mật khẩu"
+                        autoComplete="new-password"
+                        onChange={(e) => {
+                            setConfirmPassword(e.target.value);
+                        }}
+                    />
+                </Form.Item>
+
+
                 <Form.Item>
-                    <Button type="primary" htmlType="submit" block className='btn-custom' loading={loading}>
+                    <Button
+                        type="primary"
+                        htmlType="submit"
+                        block
+                        className="btn-custom"
+                        loading={loading}
+                    >
                         Đăng kí
                     </Button>
                 </Form.Item>
                 <div style={{ textAlign: 'center' }}>
-                    <Divider style={{ borderColor: 'black' }} >
+                    <Divider style={{ borderColor: 'black' }}>
                         <Text style={{ fontSize: '15px' }}>Đã có tài khoản? </Text>
-                        <Link href="/login" style={{ fontSize: '15px' }} className='link'> Đăng nhập ngay</Link>
+                        <Link href="/login" style={{ fontSize: '15px' }} className="link">
+                            {' '}
+                            Đăng nhập ngay
+                        </Link>
                     </Divider>
                 </div>
             </Form>
@@ -140,4 +282,3 @@ const Register = () => {
 };
 
 export default Register;
-

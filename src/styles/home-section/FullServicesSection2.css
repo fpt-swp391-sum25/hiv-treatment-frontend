@@ -107,13 +107,13 @@ body {
 }
 
 .button {
-    padding: 12px 24px;
+    padding: 8px 16px;
+    border-radius: 6px;
     border: none;
-    border-radius: 8px;
-    background: linear-gradient(90deg, #06b6d4, #3b82f6);
+    background: linear-gradient(90deg, #06b6d4, #3bf6d7);
     color: white;
     font-weight: 500;
-    box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 4px 10px rgba(14, 165, 233, 0.3);
     cursor: pointer;
     user-select: none;
     white-space: nowrap;
@@ -122,16 +122,23 @@ body {
     left: 50%;
     transform: translateX(-50%);
     width: calc(100% - 60px);
+    transition: background-position 0.6s ease, box-shadow 0.4s ease, transform 0.2s ease;
+    background-size: 200% 100%;
+    background-position: 0% 0%;
 }
 
 .button:hover {
-    background: linear-gradient(90deg, #3b82f6, #06b6d4);
-    box-shadow: 0 8px 20px rgba(14, 165, 233, 0.6);
+    background-position: 100% 0%;
+    box-shadow: 0 12px 30px rgba(14, 165, 233, 0.7);
+    transform: translateX(-50%) translateY(-3px);
 }
 
 .button:active {
     opacity: 0.9;
+    transform: translateX(-50%) translateY(0);
+    box-shadow: 0 6px 16px rgba(14, 165, 233, 0.5);
 }
+
 
 /* Responsive */
 @media screen and (max-width: 1200px) {

@@ -17,9 +17,9 @@ const { Sider } = Layout;
 const ManagerSidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   const menuItems = [
-        {
+    {
       key: '/manager/profile',
       icon: <IdcardOutlined />,
       label: 'Hồ sơ cá nhân',
@@ -78,15 +78,9 @@ const ManagerSidebar = () => {
           mode="inline"
           selectedKeys={[location.pathname]}
           className="sidebar-menu"
-          items={menuItems.map(item => ({
-            ...item,
-            style: getMenuItemStyle(location.pathname === item.key),
-            icon: React.cloneElement(item.icon, { 
-              style: { 
-                color: location.pathname === item.key ? '#2056df' : '#555' 
-              } 
-            }),
-          }))}
+
+          items={menuItems}
+
           onClick={({ key }) => navigate(key)}
         />
       </div>

@@ -3,7 +3,8 @@ import Calendar from './Calendar';
 import DoctorFilter from './DoctorFilter';
 import ScheduleForm from './ScheduleForm';
 import ScheduleDetail from './ScheduleDetail';
-import { Row, Col, ToastContainer, Toast, Form, Spinner, Alert } from 'react-bootstrap';
+import { Row, Col, Form, Spinner } from 'react-bootstrap';
+import { notification } from 'antd';
 import { BsCalendarPlus } from 'react-icons/bs';
 import moment from 'moment';
 import './CustomButtons.css';
@@ -18,10 +19,10 @@ const ManagerSchedule = () => {
     const [selectedDoctor, setSelectedDoctor] = useState(null);
     const [selectedSchedule, setSelectedSchedule] = useState(null);
     const [schedules, setSchedules] = useState([]);
-    const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+
     const [loading, setLoading] = useState(true);
     const [initialLoadComplete, setInitialLoadComplete] = useState(false);
-    const [error, setError] = useState(null);
+
     const [backendConnected, setBackendConnected] = useState(true);
 
     // Xóa bất kỳ dữ liệu lịch nào có thể được lưu trong localStorage
@@ -52,8 +53,7 @@ const ManagerSchedule = () => {
             .then(result => {
                 setBackendConnected(result.success);
                 if (!result.success) {
-                    setError('Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng và làm mới trang.');
-                    showToast('Không thể kết nối đến server', 'danger');
+                    showNotification('Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng và làm mới trang.', 'error');
                 } else {
                     fetchSchedules();
                 }
@@ -61,14 +61,12 @@ const ManagerSchedule = () => {
             .catch(err => {
                 console.error('Error checking backend connection:', err);
                 setBackendConnected(false);
-                setError('Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng và làm mới trang.');
-                showToast('Không thể kết nối đến server', 'danger');
+                showNotification('Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng và làm mới trang.', 'error');
             });
     }, []);
 
     const fetchSchedules = async () => {
         setLoading(true);
-        setError(null);
         try {
             console.log('Fetching schedules from API...');
             const response = await getAllSchedulesAPI();
@@ -113,12 +111,12 @@ const ManagerSchedule = () => {
                 setSchedules(formattedSchedules);
                 
                 if (formattedSchedules.length === 0) {
-                    showToast('Không có dữ liệu lịch từ server', 'info');
+                    showNotification('Không có dữ liệu lịch từ server', 'info');
                 }
             } else {
                 console.log('No schedule data received');
                 setSchedules([]);
-                showToast('Không có dữ liệu lịch từ server', 'info');
+                showNotification('Không có dữ liệu lịch từ server', 'info');
             }
         } catch (error) {
             console.error('Error fetching schedules:', error);
@@ -127,15 +125,12 @@ const ManagerSchedule = () => {
             // Hiển thị thông tin lỗi chi tiết hơn
             if (error.response) {
                 console.error('Error response:', error.response);
-                setError(`Lỗi server: ${error.response.status} - ${error.response.statusText || 'Unknown error'}`);
-                showToast(`Lỗi server: ${error.response.status}`, 'danger');
+                showNotification(`Lỗi server: ${error.response.status} - ${error.response.statusText || 'Unknown error'}`, 'error');
             } else if (error.request) {
                 console.error('Error request:', error.request);
-                setError('Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.');
-                showToast('Không thể kết nối đến server', 'danger');
+                showNotification('Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.', 'error');
             } else {
-                setError(`Lỗi: ${error.message || 'Unknown error'}`);
-                showToast('Đã xảy ra lỗi khi tải dữ liệu', 'danger');
+                showNotification(`Lỗi: ${error.message || 'Unknown error'}`, 'error');
             }
         } finally {
             setLoading(false);
@@ -146,10 +141,10 @@ const ManagerSchedule = () => {
     const handleAddClick = (date) => {
         // Kiểm tra xem ngày được chọn có phải là ngày quá khứ không
         if (moment(date).isBefore(moment(), 'day')) {
-            showToast('Không thể đặt lịch cho ngày đã qua!', 'danger');
+            showNotification('Không thể đặt lịch cho ngày đã qua!', 'error');
             return;
         }
-        
+
         setSelectedDate(date);
         setShowForm(true);
     };
@@ -201,9 +196,9 @@ const ManagerSchedule = () => {
                 // Cập nhật state với tất cả lịch đã tạo thành công
                 if (createdSchedules.length > 0) {
                     setSchedules(prevSchedules => [...prevSchedules, ...createdSchedules]);
-                    showToast(`Đã tạo ${createdSchedules.length}/${newSchedule.length} lịch thành công!`, 'success');
+                    showNotification(`Đã tạo ${createdSchedules.length}/${newSchedule.length} lịch thành công!`, 'success');
                 } else {
-                    showToast('Không thể tạo lịch, vui lòng kiểm tra log để biết chi tiết', 'danger');
+                    showNotification('Không thể tạo lịch, vui lòng kiểm tra log để biết chi tiết', 'danger');
                 }
             } else {
                 // Xử lý một lịch đơn
@@ -221,10 +216,10 @@ const ManagerSchedule = () => {
                     // Thêm lịch mới vào state
                     setSchedules(prevSchedules => [...prevSchedules, formattedSchedule]);
                     
-                    showToast('Tạo lịch thành công!', 'success');
+                    showNotification('Tạo lịch thành công!', 'success');
                 } else {
                     console.warn('API returned success but no data');
-                    showToast('API trả về thành công nhưng không có dữ liệu', 'warning');
+                    showNotification('API trả về thành công nhưng không có dữ liệu', 'warning');
                 }
             }
             
@@ -237,9 +232,9 @@ const ManagerSchedule = () => {
             console.error('Error in handleScheduleCreated:', error);
             if (error.response) {
                 console.error('Error response:', error.response.status, error.response.data);
-                showToast(`Lỗi: ${error.response.status} - ${JSON.stringify(error.response.data)}`, 'danger');
+                showNotification(`Lỗi: ${error.response.status} - ${JSON.stringify(error.response.data)}`, 'danger');
             } else {
-                showToast(`Lỗi: ${error.message}`, 'danger');
+                showNotification(`Lỗi: ${error.message}`, 'danger');
             }
         }
     };
@@ -370,7 +365,7 @@ const ManagerSchedule = () => {
 
             if (!connectionCheck.success) {
                 console.error('4. Lỗi kết nối:', connectionCheck.error);
-                showToast('Không thể kết nối đến server, vui lòng kiểm tra kết nối mạng', 'danger');
+                showNotification('Không thể kết nối đến server, vui lòng kiểm tra kết nối mạng', 'danger');
                 return;
             }
             
@@ -408,7 +403,7 @@ const ManagerSchedule = () => {
                         )
                     );
                     
-                    showToast('Cập nhật lịch thành công!', 'success');
+                    showNotification('Cập nhật lịch thành công!', 'success');
                     
                     // Làm mới dữ liệu từ server sau khi cập nhật
                     setTimeout(() => {
@@ -418,7 +413,7 @@ const ManagerSchedule = () => {
                 }, 0);
             } else {
                 console.warn('12. API trả về thành công nhưng không có dữ liệu');
-                showToast('Không thể cập nhật lịch, vui lòng thử lại sau', 'warning');
+                showNotification('Không thể cập nhật lịch, vui lòng thử lại sau', 'warning');
             }
         } catch (error) {
             console.error('13. Lỗi trong quá trình cập nhật:', error);
@@ -429,7 +424,7 @@ const ManagerSchedule = () => {
                     headers: error.response.headers
                 });
             }
-            showToast('Không thể kết nối đến server, vui lòng thử lại sau', 'danger');
+            showNotification('Không thể kết nối đến server, vui lòng thử lại sau', 'danger');
         }
         console.log('=== KẾT THÚC TIẾN TRÌNH CẬP NHẬT ===');
     };
@@ -438,7 +433,7 @@ const ManagerSchedule = () => {
         try {
             if (!scheduleId) {
                 console.error('Invalid schedule ID:', scheduleId);
-                showToast('Không thể xóa lịch: ID không hợp lệ', 'danger');
+                showNotification('Không thể xóa lịch: ID không hợp lệ', 'danger');
                 return;
             }
             
@@ -459,10 +454,10 @@ const ManagerSchedule = () => {
                     fetchSchedules();
                 }, 500);
                 
-                showToast('Xóa lịch thành công!', 'success');
+                showNotification('Xóa lịch thành công!', 'success');
             } else {
                 console.warn('API returned unexpected response:', response);
-                showToast('Lịch đã được xóa nhưng có thể cần làm mới trang', 'warning');
+                showNotification('Đã xóa lịch thành công', 'success');
                 
                 // Vẫn cập nhật UI để người dùng không thấy lịch đã xóa
                 setSchedules(prevSchedules => 
@@ -477,7 +472,7 @@ const ManagerSchedule = () => {
                 
                 // Xử lý các mã lỗi cụ thể
                 if (error.response.status === 404) {
-                    showToast('Không tìm thấy lịch này trên hệ thống', 'warning');
+                    showNotification('Đã xóa lịch thành công', 'success');
                     
                     // Xóa khỏi UI nếu không tìm thấy trên server
                     setSchedules(prevSchedules => 
@@ -486,11 +481,11 @@ const ManagerSchedule = () => {
                     return;
                 }
                 
-                showToast(`Lỗi server: ${error.response.status} - ${error.response.statusText || 'Unknown error'}`, 'danger');
+                showNotification(`Lỗi server: ${error.response.status} - ${error.response.statusText || 'Unknown error'}`, 'danger');
             } else if (error.request) {
-                showToast('Không thể kết nối đến server, vui lòng kiểm tra kết nối mạng', 'danger');
+                showNotification('Không thể kết nối đến server, vui lòng kiểm tra kết nối mạng', 'danger');
             } else {
-                showToast(`Lỗi: ${error.message || 'Unknown error'}`, 'danger');
+                showNotification(`Lỗi: ${error.message || 'Unknown error'}`, 'danger');
             }
         }
     };
@@ -515,13 +510,41 @@ const ManagerSchedule = () => {
 
     console.log('Filtered schedules to pass to Calendar:', filteredSchedules);
 
-    // Hàm hiển thị Toast
-    const showToast = (message, type = 'success') => {
-        setToast({
-            show: true,
-            message,
-            type
-        });
+    // Hàm hiển thị thông báo Ant Design Notification
+    const showNotification = (msg, type = 'success') => {
+        const config = {
+            message: 'Thông báo',
+            description: msg,
+            placement: 'topRight',
+            duration: 3,
+        };
+
+        switch (type) {
+            case 'success':
+                notification.success(config);
+                break;
+            case 'danger':
+            case 'error':
+                notification.error({
+                    ...config,
+                    message: 'Lỗi'
+                });
+                break;
+            case 'warning':
+                notification.warning({
+                    ...config,
+                    message: 'Cảnh báo'
+                });
+                break;
+            case 'info':
+                notification.info({
+                    ...config,
+                    message: 'Thông tin'
+                });
+                break;
+            default:
+                notification.info(config);
+        }
     };
 
     const handleRefreshData = () => {
@@ -565,7 +588,6 @@ const ManagerSchedule = () => {
             setShowDetail(false);
             setShowForm(false);
             setLoading(true);
-            setError(null);
         }, 0);
         
         // Đặt một flag để tránh vòng lặp cập nhật vô hạn
@@ -577,7 +599,7 @@ const ManagerSchedule = () => {
             fetchSchedules();
         }, 100);
         
-        showToast('Đã làm mới dữ liệu', 'success');
+        showNotification('Đã làm mới dữ liệu', 'success');
     };
 
     // Hàm chuyển đổi thứ sang tiếng Việt
@@ -596,28 +618,7 @@ const ManagerSchedule = () => {
                 <h1 className="schedule-title text-center">Quản lý lịch làm việc bác sĩ</h1>
             </div>
 
-            <ToastContainer position="top-end" className="p-3" style={{ zIndex: 1070 }}>
-                <Toast 
-                    onClose={() => setToast({...toast, show: false})} 
-                    show={toast.show} 
-                    delay={3000} 
-                    autohide 
-                    bg={toast.type}
-                >
-                    <Toast.Header closeButton={true}>
-                        <strong className="me-auto">Thông báo</strong>
-                    </Toast.Header>
-                    <Toast.Body className={toast.type === 'danger' ? 'text-white' : 'text-white'}>
-                        {toast.message}
-                    </Toast.Body>
-                </Toast>
-            </ToastContainer>
 
-            {error && (
-                <Alert variant="danger" className="mb-4">
-                    {error}
-                </Alert>
-            )}
 
             <Row className="mb-4 filter-row">
                 <Col md={3} className="filter-col">
@@ -662,16 +663,16 @@ const ManagerSchedule = () => {
                 selectedDoctor={selectedDoctor}
                 onScheduleCreated={handleScheduleCreated}
                 existingSchedules={schedules}
-                onShowToast={showToast}
+                onShowToast={showNotification}
             />
 
-            <ScheduleDetail 
+            <ScheduleDetail
                 show={showDetail}
                 onHide={() => setShowDetail(false)}
                 schedule={selectedSchedule}
                 onUpdate={handleScheduleUpdate}
                 onDelete={handleScheduleDelete}
-                onShowToast={showToast}
+                onShowToast={showNotification}
             />
         </div>
     );

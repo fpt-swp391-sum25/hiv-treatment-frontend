@@ -89,8 +89,8 @@ const DoctorList = () => {
                       : 'Chưa rõ năm kinh nghiệm'}
                   </p>
                   <p>{mergedDoctors.qualifications}</p>
-                  <Link to={`/booking?doctorId=${mergedDoctors.id}`} className="btn-primary">
-                    Đặt lịch
+                  <Link to={`/booking?doctorId=${mergedDoctors.id}`} >
+                    <button className="btn-primary">Đặt lịch</button>
                   </Link>
                 </div>
               </div>
