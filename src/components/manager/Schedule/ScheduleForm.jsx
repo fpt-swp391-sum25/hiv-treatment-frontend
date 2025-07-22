@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Button, Form, Row, Col, Alert, Spinner } from 'react-bootstrap';
+import { Modal, Button, Form, Row, Col, Spinner } from 'react-bootstrap';
+import { notification } from 'antd';
 import { ScheduleStatus, SlotTimes, StatusMapping } from '../../../types/schedule.types';
 import './ScheduleForm.css';
 import moment from 'moment';
@@ -334,14 +335,24 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         if (!formData.doctorId) {
             console.error('Missing doctorId');
             console.groupEnd();
-            onShowToast('Vui lòng chọn bác sĩ từ danh sách', 'danger');
+            notification.error({
+                message: 'Lỗi',
+                description: 'Vui lòng chọn bác sĩ từ danh sách',
+                placement: 'topRight',
+                duration: 3
+            });
             return false;
         }
 
         if (formData.scheduleType === 'single' && !formData.slot) {
             console.error('Missing slot for single schedule');
             console.groupEnd();
-            onShowToast('Vui lòng chọn khung giờ làm việc', 'danger');
+            notification.error({
+                message: 'Lỗi',
+                description: 'Vui lòng chọn khung giờ làm việc',
+                placement: 'topRight',
+                duration: 3
+            });
             return false;
         }
 
@@ -349,7 +360,12 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         if (!formData.date) {
             console.error('Missing date');
             console.groupEnd();
-            onShowToast('Vui lòng chọn ngày', 'danger');
+            notification.error({
+                message: 'Lỗi',
+                description: 'Vui lòng chọn ngày',
+                placement: 'topRight',
+                duration: 3
+            });
             return false;
         }
 
@@ -357,7 +373,12 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         if (moment(formData.date).isBefore(moment(), 'day')) {
             console.error('Date is in the past', formData.date);
             console.groupEnd();
-            onShowToast('Không thể đặt lịch cho ngày đã qua!', 'danger');
+            notification.error({
+                message: 'Lỗi',
+                description: 'Không thể đặt lịch cho ngày đã qua!',
+                placement: 'topRight',
+                duration: 3
+            });
             return false;
         }
 
@@ -365,7 +386,12 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         if (moment(formData.date).day() === 0) { // 0 = Chủ nhật
             console.error('Cannot schedule on Sunday', formData.date);
             console.groupEnd();
-            onShowToast('Không thể đặt lịch vào Chủ nhật!', 'danger');
+            notification.error({
+                message: 'Lỗi',
+                description: 'Không thể đặt lịch vào Chủ nhật!',
+                placement: 'topRight',
+                duration: 3
+            });
             return false;
         }
 
@@ -373,7 +399,12 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         if (!formData.roomCode || formData.roomCode.trim() === '') {
             console.error('Missing room code');
             console.groupEnd();
-            onShowToast('Vui lòng nhập số phòng', 'danger');
+            notification.error({
+                message: 'Lỗi',
+                description: 'Vui lòng nhập số phòng',
+                placement: 'topRight',
+                duration: 3
+            });
             return false;
         }
 
@@ -462,11 +493,14 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                 console.log('Creating multiple schedules for shift:', schedules);
                 setTimeout(() => {
                     onScheduleCreated(schedules);
-                    const shiftName = formData.shiftType === 'morning' ? 'sáng' : 'chiều';
-                    onShowToast(`Đã tạo ${schedules.length} lịch cho ca ${shiftName} thành công!`, 'success');
                 }, 0);
             } else {
-                onShowToast('Không thể tạo lịch do trùng lặp với lịch hiện có', 'warning');
+                notification.warning({
+                    message: 'Cảnh báo',
+                    description: 'Không thể tạo lịch do trùng lặp với lịch hiện có',
+                    placement: 'topRight',
+                    duration: 3
+                });
             }
         } else {
             // Đặt lịch theo khung giờ đơn (cách hiện tại)
@@ -480,7 +514,12 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         if (conflictingSchedules.length > 0) {
             console.error('Schedule conflicts with existing schedules', conflictingSchedules);
             console.groupEnd();
-            onShowToast('Bác sĩ đã có lịch vào khung giờ này!', 'danger');
+            notification.error({
+                message: 'Lỗi',
+                description: 'Bác sĩ đã có lịch vào khung giờ này!',
+                placement: 'topRight',
+                duration: 3
+            });
             return;
         }
 
@@ -502,7 +541,6 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         console.log('Creating single schedule:', newSchedule);
         setTimeout(() => {
             onScheduleCreated(newSchedule);
-            onShowToast('Tạo lịch thành công!', 'success');
         }, 0);
         }
 
@@ -547,7 +585,18 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                {error && <Alert variant="danger">{error}</Alert>}
+                {error && (
+                    <div style={{
+                        padding: '12px 16px',
+                        backgroundColor: '#fff2f0',
+                        border: '1px solid #ffccc7',
+                        borderRadius: '6px',
+                        marginBottom: '16px',
+                        color: '#cf1322'
+                    }}>
+                        {error}
+                    </div>
+                )}
                 
                 <Form onSubmit={handleSubmit}>
                     {/* Section: Thông tin cơ bản */}

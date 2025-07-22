@@ -1,4 +1,4 @@
-import { Layout, Button, Avatar, Typography, message, theme, Popover, Tooltip, Popconfirm, Badge, List, Spin, notification } from "antd";
+import { Layout, Button, Avatar, Typography, message, theme, Popover, Tooltip, Popconfirm, Badge, List, Spin } from "antd";
 import { UserOutlined, LogoutOutlined, BellOutlined } from "@ant-design/icons";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
@@ -22,7 +22,7 @@ const PageHeader = () => {
     const unreadCount = notifications.filter(n => !n.isRead).length;
     useEffect(() => {
         let intervalId;
-
+    
         const pollNotifications = async () => {
             try {
                 const res = await getNotificationsByUserId(user.id);
@@ -30,11 +30,11 @@ const PageHeader = () => {
                     ...n,
                     isRead: n.read,
                 }));
-
+    
                 const hasNew = latest.some(
                     (n) => !notifications.some((old) => old.id === n.id)
                 );
-
+    
                 if (hasNew) {
                     setNotifications(latest);
                 }
@@ -42,11 +42,11 @@ const PageHeader = () => {
                 console.error("Lỗi khi polling:", error);
             }
         };
-
+    
         if (user?.id) {
-            intervalId = setInterval(pollNotifications, 10000); // 10s
+            intervalId = setInterval(pollNotifications, 1000); // 1s
         }
-
+    
         return () => clearInterval(intervalId); // cleanup
     }, [user?.id, notifications]);
     const loadNotifications = async () => {
@@ -95,15 +95,13 @@ const PageHeader = () => {
                 status: '',
                 role: ''
             })
-
-
-            notification.success({
+            
+            .success({
                 message: 'Hệ thống',
                 showProgress: true,
                 pauseOnHover: true,
                 description: 'Đăng xuất thành công'
             });
-
             navigate("/login")
         }
     };

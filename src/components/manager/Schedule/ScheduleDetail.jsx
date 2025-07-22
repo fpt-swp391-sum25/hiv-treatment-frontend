@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Button, Form, Alert, Row, Col, Spinner, Badge } from 'react-bootstrap';
+import { Modal, Button, Form, Row, Col, Spinner, Badge } from 'react-bootstrap';
+import { notification } from 'antd';
 import { ScheduleStatus, SlotTimes, StatusMapping } from '../../../types/schedule.types';
 import moment from 'moment';
 import { deleteScheduleAPI, updateScheduleAPI } from '../../../services/api.service';
@@ -187,7 +188,6 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                     console.log('8. Bắt đầu gọi hàm cập nhật');
                     onUpdate(updatedSchedule);
                     handleClose();
-                    onShowToast('Cập nhật lịch thành công', 'success');
                     console.log('=== KẾT THÚC CẬP NHẬT LỊCH ===');
                 } catch (error) {
                     console.error('9. Lỗi khi gọi hàm cập nhật:', error);
@@ -218,7 +218,12 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
             
             if (!schedule || !schedule.id) {
                 console.error('Invalid schedule ID:', schedule);
-                onShowToast('Không thể xóa lịch: ID không hợp lệ', 'danger');
+                notification.error({
+                    message: 'Lỗi',
+                    description: 'Không thể xóa lịch: ID không hợp lệ',
+                    placement: 'topRight',
+                    duration: 3
+                });
                 return;
             }
             
@@ -230,13 +235,17 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
             // Sử dụng setTimeout để tránh FlushSync error
             setTimeout(() => {
                 // Thông báo thành công và đóng modal
-                onShowToast('Đã xóa lịch thành công', 'success');
                 onDelete(schedule.id);
                 onHide();
             }, 0);
         } catch (error) {
             console.error('Error deleting schedule:', error);
-            onShowToast('Không thể xóa lịch, vui lòng thử lại sau', 'danger');
+            notification.error({
+                message: 'Lỗi',
+                description: 'Không thể xóa lịch, vui lòng thử lại sau',
+                placement: 'topRight',
+                duration: 3
+            });
         } finally {
             setDeleting(false);
             setConfirmDelete(false);
@@ -291,12 +300,16 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
             // Cập nhật state với danh sách lịch mới
             if (updatedSchedules?.data) {
                 setSchedules(updatedSchedules.data);
-                message.success('Cập nhật lịch thành công!');
                 handleClose();
             }
         } catch (error) {
             console.error('Lỗi khi cập nhật lịch:', error);
-            message.error('Không thể cập nhật lịch. Vui lòng thử lại!');
+            notification.error({
+                message: 'Lỗi',
+                description: 'Không thể cập nhật lịch. Vui lòng thử lại!',
+                placement: 'topRight',
+                duration: 3
+            });
         } finally {
             setIsLoading(false);
         }
@@ -313,11 +326,17 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
             </Modal.Header>
             <Modal.Body>
                 {confirmDelete ? (
-                    <Alert variant="danger">
-                        <p className="mb-2"><strong>Xác nhận xóa lịch làm việc</strong></p>
-                        <p className="mb-2">Bạn có chắc chắn muốn xóa lịch làm việc của bác sĩ {formData.doctorName} vào ngày {formatDate(formData.date)} lúc {formatTime(formData.slot)}?</p>
-                        <p className="mb-0">Thao tác này không thể hoàn tác và sẽ xóa dữ liệu khỏi hệ thống.</p>
-                    </Alert>
+                    <div style={{
+                        padding: '16px',
+                        backgroundColor: '#fff2f0',
+                        border: '1px solid #ffccc7',
+                        borderRadius: '6px',
+                        marginBottom: '16px'
+                    }}>
+                        <p style={{ marginBottom: '8px', fontWeight: 'bold', color: '#cf1322' }}>Xác nhận xóa lịch làm việc</p>
+                        <p style={{ marginBottom: '8px', color: '#262626' }}>Bạn có chắc chắn muốn xóa lịch làm việc của bác sĩ {formData.doctorName} vào ngày {formatDate(formData.date)} lúc {formatTime(formData.slot)}?</p>
+                        <p style={{ marginBottom: '0', color: '#8c8c8c' }}>Thao tác này không thể hoàn tác và sẽ xóa dữ liệu khỏi hệ thống.</p>
+                    </div>
                 ) : (
                     <Form onSubmit={handleSubmit}>
                         {/* Thông tin cơ bản */}
