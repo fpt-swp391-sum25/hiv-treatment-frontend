@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Card, Table, Spin, Statistic, Select, Input, Space, Button, Tooltip, Switch, Radio, Typography, Divider, DatePicker, Tag } from 'antd';
-import { UserOutlined, TeamOutlined, CheckCircleOutlined, FilterOutlined, SearchOutlined, ReloadOutlined, BarChartOutlined, FileExcelOutlined, PrinterOutlined } from '@ant-design/icons';
-import { ResponsiveContainer, Tooltip as RechartsTooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid, LabelList, Cell, PieChart, Pie } from 'recharts';
+import { Row, Col, Card, Table, Spin, Statistic, Select, Input, Space, Button, Typography, Divider, DatePicker, Tag, Alert } from 'antd';
+import { UserOutlined, TeamOutlined, FilterOutlined, SearchOutlined, ReloadOutlined, FileExcelOutlined, PrinterOutlined, DownloadOutlined, MedicineBoxOutlined, ExperimentOutlined, SettingOutlined } from '@ant-design/icons';
 import { getStaffData, formatStaffDataForExport, exportToExcel } from '../../../../services/report.service';
 import { STAFF_ROLES } from '../../../../types/report.types';
 import './StaffReport.css';
@@ -11,13 +10,6 @@ const { Option } = Select;
 const { Search } = Input;
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
-
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28'];
-const PERFORMANCE_COLORS = {
-    high: '#52c41a',  // green
-    medium: '#faad14', // yellow
-    low: '#f5222d'    // red
-};
 
 const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
     const [loading, setLoading] = useState(true);
@@ -30,44 +22,39 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
     // State cho bộ lọc
     const [filters, setFilters] = useState({
         role: 'ALL',
-        status: 'ALL',
         searchText: '',
-        performanceRange: 'ALL'
     });
     const [showFilters, setShowFilters] = useState(false);
-    
-    // State cho biểu đồ
-    const [chartType, setChartType] = useState('performance');
-    const [showTopPerformers, setShowTopPerformers] = useState(true);
     const [selectedDatePreset, setSelectedDatePreset] = useState('all');
+    const [activeTab, setActiveTab] = useState('all'); // 'all', 'doctors', 'labTechnicians', 'managers'
 
     useEffect(() => {
         fetchStaffData();
     }, [dateRange]);
 
     const fetchStaffData = async () => {
-            try {
+        try {
             setLoading(true);
-                const data = await getStaffData();
+            const data = await getStaffData();
             setStaffData({
                 doctors: Array.isArray(data.doctors) ? data.doctors : [],
                 labTechnicians: Array.isArray(data.labTechnicians) ? data.labTechnicians : [],
                 managers: Array.isArray(data.managers) ? data.managers : []
             });
-            } catch (error) {
-                console.error('Error fetching staff data:', error);
+        } catch (error) {
+            console.error('Error fetching staff data:', error);
             onError(error);
-            } finally {
-                setLoading(false);
-            }
-        };
+        } finally {
+            setLoading(false);
+        }
+    };
 
     // Tính toán thống kê
     const statistics = {
         totalDoctors: staffData.doctors.length,
         totalLabTechs: staffData.labTechnicians.length,
         totalManagers: staffData.managers.length,
-        totalStaff: staffData.doctors.length + staffData.labTechnicians.length + staffData.managers.length
+        totalStaff: staffData.doctors.length + staffData.labTechnicians.length + staffData.managers.length,
     };
 
     // Xử lý thay đổi khoảng thời gian
@@ -138,101 +125,39 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
         }
     };
 
-    // Dữ liệu cho biểu đồ phân bố nhân sự - THIẾT KẾ MỚI
-    const totalStaff = statistics.totalDoctors + statistics.totalLabTechs + statistics.totalManagers;
-
-    const distributionData = [
-        {
-            name: 'Bác sĩ',
-            value: statistics.totalDoctors,
-            percentage: totalStaff > 0 ? Math.round((statistics.totalDoctors / totalStaff) * 100) : 0,
-            color: '#1890ff'
-        },
-        {
-            name: 'Kỹ thuật viên',
-            value: statistics.totalLabTechs,
-            percentage: totalStaff > 0 ? Math.round((statistics.totalLabTechs / totalStaff) * 100) : 0,
-            color: '#52c41a'
-        },
-        {
-            name: 'Quản lý',
-            value: statistics.totalManagers,
-            percentage: totalStaff > 0 ? Math.round((statistics.totalManagers / totalStaff) * 100) : 0,
-            color: '#faad14'
-        }
-    ];
-    
-    // Dữ liệu cho biểu đồ hiệu suất
-    const getPerformanceData = () => {
-        // Kết hợp dữ liệu bác sĩ và kỹ thuật viên
-        const staffWithPerformance = [
-            ...staffData.doctors,
-            ...staffData.labTechnicians
-        ].filter(staff => staff.performance !== undefined);
-        
-        // Sắp xếp theo hiệu suất giảm dần
-        const sortedStaff = [...staffWithPerformance].sort((a, b) => b.performance - a.performance);
-        
-        // Lấy top performers hoặc tất cả
-        const displayData = showTopPerformers ? sortedStaff.slice(0, 10) : sortedStaff;
-        
-        return displayData.map(staff => ({
-            name: staff.fullName || 'Không có tên',
-            performance: staff.performance || 0,
-            role: staff.role === STAFF_ROLES.DOCTOR ? 'Bác sĩ' : 'Kỹ thuật viên',
-            color: getPerformanceColor(staff.performance)
-        }));
-    };
-    
-    // Hàm lấy màu dựa trên hiệu suất
-    const getPerformanceColor = (performance) => {
-        if (performance >= 80) return PERFORMANCE_COLORS.high;
-        if (performance >= 50) return PERFORMANCE_COLORS.medium;
-        return PERFORMANCE_COLORS.low;
-    };
-    
-    // Dữ liệu cho biểu đồ số ca xử lý
-    const getCasesHandledData = () => {
-        // Kết hợp dữ liệu bác sĩ và kỹ thuật viên
-        const staffWithCases = [
-            ...staffData.doctors,
-            ...staffData.labTechnicians
-        ].filter(staff => staff.casesHandled !== undefined);
-        
-        // Sắp xếp theo số ca xử lý giảm dần
-        const sortedStaff = [...staffWithCases].sort((a, b) => b.casesHandled - a.casesHandled);
-        
-        // Lấy top performers hoặc tất cả
-        const displayData = showTopPerformers ? sortedStaff.slice(0, 10) : sortedStaff;
-        
-        return displayData.map(staff => ({
-            name: staff.fullName || 'Không có tên',
-            cases: staff.casesHandled || 0,
-            role: staff.role === STAFF_ROLES.DOCTOR ? 'Bác sĩ' : 'Kỹ thuật viên'
-        }));
-    };
-
     // Cấu hình cột cho bảng nhân viên
     const columns = [
+        {
+            title: 'STT',
+            key: 'index',
+            width: '5%',
+            render: (text, record, index) => index + 1,
+        },
         {
             title: 'Họ và tên',
             dataIndex: 'fullName',
             key: 'fullName',
-            width: '30%',
+            width: '25%',
+            render: (text, record) => (
+                <Space>
+                    {getRoleIcon(record.role)}
+                    <span>{text}</span>
+                </Space>
+            ),
         },
         {
             title: 'Vai trò',
             dataIndex: 'role',
             key: 'role',
-            width: '20%',
+            width: '15%',
             render: (role) => {
                 switch (role) {
                     case STAFF_ROLES.DOCTOR:
-                        return 'Bác sĩ';
+                        return <Tag color="blue">Bác sĩ</Tag>;
                     case STAFF_ROLES.LAB_TECHNICIAN:
-                        return 'Kỹ thuật viên';
+                        return <Tag color="green">Kỹ thuật viên</Tag>;
                     case STAFF_ROLES.MANAGER:
-                        return 'Quản lý';
+                        return <Tag color="purple">Quản lý</Tag>;
                     default:
                         return role;
                 }
@@ -248,43 +173,54 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
             title: 'Số điện thoại',
             dataIndex: 'phoneNumber',
             key: 'phoneNumber',
-            width: '25%',
+            width: '15%',
+        },
+        {
+            title: 'Ngày tham gia',
+            dataIndex: 'created_at',
+            key: 'created_at',
+            width: '15%',
+            render: (date) => date ? dayjs(date).format('DD/MM/YYYY') : 'N/A'
         }
     ];
 
-    // Tạo danh sách nhân viên cho bảng
-    const staffList = [
-        ...staffData.doctors.map(doc => ({ ...doc, role: STAFF_ROLES.DOCTOR })),
-        ...staffData.labTechnicians.map(tech => ({ ...tech, role: STAFF_ROLES.LAB_TECHNICIAN })),
-        ...staffData.managers.map(mgr => ({ ...mgr, role: STAFF_ROLES.MANAGER }))
-    ];
+    // Hàm lấy icon cho từng vai trò
+    const getRoleIcon = (role) => {
+        switch (role) {
+            case STAFF_ROLES.DOCTOR:
+                return <MedicineBoxOutlined style={{ color: '#1890ff' }} />;
+            case STAFF_ROLES.LAB_TECHNICIAN:
+                return <ExperimentOutlined style={{ color: '#52c41a' }} />;
+            case STAFF_ROLES.MANAGER:
+                return <SettingOutlined style={{ color: '#722ed1' }} />;
+            default:
+                return <UserOutlined />;
+        }
+    };
+
+    // Tạo danh sách nhân viên cho bảng dựa trên tab đang chọn
+    const getStaffList = () => {
+        switch (activeTab) {
+            case 'doctors':
+                return staffData.doctors.map(doc => ({ ...doc, role: STAFF_ROLES.DOCTOR }));
+            case 'labTechnicians':
+                return staffData.labTechnicians.map(tech => ({ ...tech, role: STAFF_ROLES.LAB_TECHNICIAN }));
+            case 'managers':
+                return staffData.managers.map(mgr => ({ ...mgr, role: STAFF_ROLES.MANAGER }));
+            default:
+                return [
+                    ...staffData.doctors.map(doc => ({ ...doc, role: STAFF_ROLES.DOCTOR })),
+                    ...staffData.labTechnicians.map(tech => ({ ...tech, role: STAFF_ROLES.LAB_TECHNICIAN })),
+                    ...staffData.managers.map(mgr => ({ ...mgr, role: STAFF_ROLES.MANAGER }))
+                ];
+        }
+    };
     
     // Lọc danh sách nhân viên theo bộ lọc
-    const filteredStaffList = staffList.filter(staff => {
+    const filteredStaffList = getStaffList().filter(staff => {
         // Lọc theo vai trò
         if (filters.role !== 'ALL' && staff.role !== filters.role) {
             return false;
-        }
-        
-        // Lọc theo trạng thái
-        if (filters.status !== 'ALL' && staff.status !== filters.status) {
-            return false;
-        }
-        
-        // Lọc theo hiệu suất
-        if (filters.performanceRange !== 'ALL') {
-            const performance = staff.performance || 0;
-            switch (filters.performanceRange) {
-                case 'LOW':
-                    if (performance >= 50) return false;
-                    break;
-                case 'MEDIUM':
-                    if (performance < 50 || performance >= 80) return false;
-                    break;
-                case 'HIGH':
-                    if (performance < 80) return false;
-                    break;
-            }
         }
         
         // Lọc theo từ khóa tìm kiếm
@@ -312,19 +248,13 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
     const resetFilters = () => {
         setFilters({
             role: 'ALL',
-            status: 'ALL',
             searchText: '',
-            performanceRange: 'ALL'
         });
     };
 
     // Xuất Excel
     const handleExportExcel = () => {
-        const staffList = [
-            ...staffData.doctors.map(doc => ({ ...doc, role: 'Bác sĩ' })),
-            ...staffData.labTechnicians.map(tech => ({ ...tech, role: 'Kỹ thuật viên' })),
-            ...staffData.managers.map(mgr => ({ ...mgr, role: 'Quản lý' }))
-        ];
+        const staffList = getStaffList();
         
         if (staffList.length === 0) {
             onError?.(new Error('Không có dữ liệu để xuất báo cáo'));
@@ -332,112 +262,30 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
         }
         
         const formattedData = staffList.map(staff => ({
+            'STT': '',  // Sẽ được điền sau
             'Họ tên': staff.fullName || '',
-            'Vai trò': staff.role || '',
+            'Vai trò': staff.role === STAFF_ROLES.DOCTOR ? 'Bác sĩ' : 
+                       staff.role === STAFF_ROLES.LAB_TECHNICIAN ? 'Kỹ thuật viên' : 'Quản lý',
             'Email': staff.email || '',
             'Số điện thoại': staff.phoneNumber || '',
-            'Trạng thái': staff.status || '',
-            'Số ca xử lý': staff.casesHandled || 0,
-            'Hiệu suất': staff.performance ? `${staff.performance}%` : 'N/A'
+            'Ngày tham gia': staff.created_at ? dayjs(staff.created_at).format('DD/MM/YYYY') : 'N/A'
         }));
         
-        exportToExcel(formattedData, 'BaoCaoNhanSu');
+        // Thêm STT
+        formattedData.forEach((item, index) => {
+            item['STT'] = index + 1;
+        });
+        
+        const reportTitle = activeTab === 'doctors' ? 'BaoCaoNhanSu_BacSi' : 
+                           activeTab === 'labTechnicians' ? 'BaoCaoNhanSu_KyThuatVien' : 
+                           activeTab === 'managers' ? 'BaoCaoNhanSu_QuanLy' : 'BaoCaoNhanSu_TatCa';
+                           
+        exportToExcel(formattedData, reportTitle);
     };
     
     // In báo cáo
     const handlePrint = () => {
         window.print();
-    };
-
-
-    
-    // Component biểu đồ hiệu suất nhân viên
-    const StaffPerformanceChart = () => {
-        const performanceData = getPerformanceData();
-        
-        if (performanceData.length === 0) {
-            return <div className="empty-chart">Không có dữ liệu hiệu suất</div>;
-        }
-        
-        return (
-            <ResponsiveContainer width="100%" height={400}>
-                <BarChart
-                    data={performanceData}
-                    layout="vertical"
-                    margin={{ top: 20, right: 30, left: 100, bottom: 5 }}
-                >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis type="number" domain={[0, 100]} unit="%" />
-                    <YAxis 
-                        dataKey="name" 
-                        type="category" 
-                        width={100}
-                        tick={{ fontSize: 12 }}
-                    />
-                    <RechartsTooltip
-                        formatter={(value, name) => [`${value}%`, 'Hiệu suất']}
-                        labelFormatter={(label, payload) => {
-                            if (payload && payload.length > 0) {
-                                return `${label} (${payload[0].payload.role})`;
-                            }
-                            return label;
-                        }}
-                    />
-                    <Legend />
-                    <Bar 
-                        dataKey="performance" 
-                        name="Hiệu suất"
-                        fill="#8884d8"
-                        radius={[0, 4, 4, 0]}
-                    >
-                        {performanceData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                        <LabelList dataKey="performance" position="right" formatter={(value) => `${value}%`} />
-                    </Bar>
-                </BarChart>
-            </ResponsiveContainer>
-        );
-    };
-    
-    // Component biểu đồ số ca xử lý
-    const CasesHandledChart = () => {
-        const casesData = getCasesHandledData();
-        
-        if (casesData.length === 0) {
-            return <div className="empty-chart">Không có dữ liệu số ca xử lý</div>;
-        }
-        
-        return (
-            <ResponsiveContainer width="100%" height={400}>
-                <BarChart
-                    data={casesData}
-                    layout="vertical"
-                    margin={{ top: 20, right: 30, left: 100, bottom: 5 }}
-                >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis type="number" />
-                    <YAxis 
-                        dataKey="name" 
-                        type="category" 
-                        width={100}
-                        tick={{ fontSize: 12 }}
-                    />
-                    <RechartsTooltip 
-                        formatter={(value) => [value, 'Số lượng']}
-                    />
-                    <Legend />
-                    <Bar 
-                        dataKey="cases" 
-                        name="Số ca xử lý"
-                        fill="#82ca9d"
-                        radius={[0, 4, 4, 0]}
-                    >
-                        <LabelList dataKey="cases" position="right" />
-                    </Bar>
-                </BarChart>
-            </ResponsiveContainer>
-        );
     };
 
     return (
@@ -458,6 +306,7 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
                             <Button 
                                 icon={<FileExcelOutlined />}
                                 onClick={handleExportExcel}
+                                type="primary"
                             >
                                 Xuất Excel
                             </Button>
@@ -530,31 +379,6 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
                                 </Select>
                             </Col>
                             <Col xs={24} sm={12} md={8} lg={6}>
-                                <Typography.Text strong>Trạng thái</Typography.Text>
-                                <Select
-                                    value={filters.status}
-                                    onChange={value => handleFilterChange('status', value)}
-                                    style={{ width: '100%', marginTop: 8 }}
-                                >
-                                    <Option value="ALL">Tất cả trạng thái</Option>
-                                    <Option value="ACTIVE">Đang hoạt động</Option>
-                                    <Option value="INACTIVE">Không hoạt động</Option>
-                                </Select>
-                            </Col>
-                            <Col xs={24} sm={12} md={8} lg={6}>
-                                <Typography.Text strong>Hiệu suất</Typography.Text>
-                                <Select
-                                    value={filters.performanceRange}
-                                    onChange={value => handleFilterChange('performanceRange', value)}
-                                    style={{ width: '100%', marginTop: 8 }}
-                                >
-                                    <Option value="ALL">Tất cả hiệu suất</Option>
-                                    <Option value="LOW">Thấp (&lt;50%)</Option>
-                                    <Option value="MEDIUM">Trung bình (50-80%)</Option>
-                                    <Option value="HIGH">Cao (≥80%)</Option>
-                                </Select>
-                            </Col>
-                            <Col xs={24} sm={12} md={8} lg={6}>
                                 <Typography.Text strong>Tìm kiếm</Typography.Text>
                                 <Search
                                     placeholder="Tìm kiếm nhân viên"
@@ -585,157 +409,119 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
                 {/* Thống kê tổng quan */}
                 <Row gutter={[16, 16]} className="statistics-row">
                     <Col xs={24} sm={12} md={6}>
-                        <Card>
+                        <Card className="statistic-card">
                             <Statistic
                                 title="Tổng số nhân viên"
                                 value={statistics.totalStaff}
                                 prefix={<TeamOutlined />}
+                                valueStyle={{ color: '#1890ff' }}
                             />
                         </Card>
                     </Col>
                     <Col xs={24} sm={12} md={6}>
-                        <Card>
+                        <Card className="statistic-card" onClick={() => setActiveTab('doctors')}>
                             <Statistic
                                 title="Bác sĩ"
                                 value={statistics.totalDoctors}
-                                prefix={<UserOutlined style={{ color: '#1890ff' }} />}
+                                prefix={<MedicineBoxOutlined />}
+                                valueStyle={{ color: '#1890ff' }}
                             />
                         </Card>
                     </Col>
                     <Col xs={24} sm={12} md={6}>
-                        <Card>
+                        <Card className="statistic-card" onClick={() => setActiveTab('labTechnicians')}>
                             <Statistic
                                 title="Kỹ thuật viên"
                                 value={statistics.totalLabTechs}
-                                prefix={<UserOutlined style={{ color: '#52c41a' }} />}
+                                prefix={<ExperimentOutlined />}
+                                valueStyle={{ color: '#52c41a' }}
                             />
                         </Card>
                     </Col>
                     <Col xs={24} sm={12} md={6}>
-                        <Card>
+                        <Card className="statistic-card" onClick={() => setActiveTab('managers')}>
                             <Statistic
                                 title="Quản lý"
                                 value={statistics.totalManagers}
-                                prefix={<UserOutlined style={{ color: '#722ed1' }} />}
+                                prefix={<SettingOutlined />}
+                                valueStyle={{ color: '#722ed1' }}
                             />
                         </Card>
                     </Col>
                 </Row>
 
-                {/* Phân bố nhân sự - THIẾT KẾ TỐI ƯU */}
-                <Row gutter={[16, 16]}>
-                    {/* Pie Chart - Phân bố theo tỷ lệ */}
-                    <Col xs={24} lg={12}>
-                        <Card title="🥧 Phân bố theo tỷ lệ" className="chart-card">
-                            <ResponsiveContainer width="100%" height={400}>
-                                <PieChart>
-                                    <Pie
-                                        data={distributionData}
-                                        cx="50%"
-                                        cy="50%"
-                                        innerRadius={80}
-                                        outerRadius={140}
-                                        paddingAngle={5}
-                                        dataKey="value"
-                                    >
-                                        {distributionData.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={entry.color} />
-                                        ))}
-                                    </Pie>
-                                    <RechartsTooltip
-                                        formatter={(value, name) => [
-                                            `${value} người (${distributionData.find(d => d.name === name)?.percentage}%)`,
-                                            'Số lượng'
-                                        ]}
-                                    />
-                                    <Legend
-                                        verticalAlign="bottom"
-                                        height={50}
-                                        formatter={(value, entry) => (
-                                            <span style={{ color: entry.color, fontSize: '14px' }}>
-                                                {value}: {entry.payload.value} ({entry.payload.percentage}%)
-                                            </span>
-                                        )}
-                                    />
-                                </PieChart>
-                            </ResponsiveContainer>
-                        </Card>
-                    </Col>
+                {/* Tab lọc theo vai trò */}
+                <div className="staff-tabs">
+                    <Button 
+                        type={activeTab === 'all' ? 'primary' : 'default'}
+                        onClick={() => setActiveTab('all')}
+                    >
+                        Tất cả nhân viên
+                    </Button>
+                    <Button 
+                        type={activeTab === 'doctors' ? 'primary' : 'default'}
+                        onClick={() => setActiveTab('doctors')}
+                    >
+                        Bác sĩ
+                    </Button>
+                    <Button 
+                        type={activeTab === 'labTechnicians' ? 'primary' : 'default'}
+                        onClick={() => setActiveTab('labTechnicians')}
+                    >
+                        Kỹ thuật viên
+                    </Button>
+                    <Button 
+                        type={activeTab === 'managers' ? 'primary' : 'default'}
+                        onClick={() => setActiveTab('managers')}
+                    >
+                        Quản lý
+                    </Button>
+                </div>
 
-                    {/* Vertical Bar Chart - So sánh số lượng */}
-                    <Col xs={24} lg={12}>
-                        <Card title="📊 So sánh số lượng" className="chart-card">
-                            <ResponsiveContainer width="100%" height={400}>
-                                <BarChart
-                                    data={distributionData}
-                                    margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
-                                >
-                                    <CartesianGrid strokeDasharray="3 3" />
-                                    <XAxis
-                                        dataKey="name"
-                                        tick={{ fontSize: 12 }}
-                                        angle={-45}
-                                        textAnchor="end"
-                                        height={80}
-                                    />
-                                    <YAxis
-                                        tick={{ fontSize: 12 }}
-                                        label={{ value: 'Số lượng', angle: -90, position: 'insideLeft' }}
-                                    />
-                                    <RechartsTooltip
-                                        formatter={(value, name, props) => [
-                                            `${value} người (${props.payload.percentage}%)`,
-                                            'Số lượng'
-                                        ]}
-                                        labelStyle={{ color: '#666' }}
-                                        contentStyle={{
-                                            backgroundColor: '#fff',
-                                            border: '1px solid #d9d9d9',
-                                            borderRadius: '6px'
-                                        }}
-                                    />
-                                    <Bar
-                                        dataKey="value"
-                                        name="Số lượng"
-                                        radius={[6, 6, 0, 0]}
-                                        maxBarSize={80}
-                                    >
-                                        {distributionData.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={entry.color} />
-                                        ))}
-                                        <LabelList
-                                            dataKey="value"
-                                            position="top"
-                                            style={{ fontSize: '14px', fontWeight: 'bold', fill: '#333' }}
-                                        />
-                                    </Bar>
-                                </BarChart>
-                            </ResponsiveContainer>
-                        </Card>
-                    </Col>
-                </Row>
-
-                {/* Bảng danh sách nhân viên */}
                 {/* Bảng danh sách nhân viên */}
                 <Card
                     title={
                         <Space>
-                            <span>Danh sách nhân viên</span>
+                            <span>Danh sách {
+                                activeTab === 'doctors' ? 'bác sĩ' : 
+                                activeTab === 'labTechnicians' ? 'kỹ thuật viên' : 
+                                activeTab === 'managers' ? 'quản lý' : 'nhân viên'
+                            }</span>
                             <Tag color="blue">{filteredStaffList.length} nhân viên</Tag>
                         </Space>
                     }
                     className="table-card"
+                    extra={
+                        <Button 
+                            type="primary" 
+                            icon={<DownloadOutlined />} 
+                            onClick={handleExportExcel}
+                        >
+                            Xuất danh sách
+                        </Button>
+                    }
                 >
-                    <Table
-                        columns={columns}
-                        dataSource={filteredStaffList}
-                        rowKey="id"
-                        pagination={{
-                            pageSize: 10,
-                            showSizeChanger: true,
-                            showTotal: (total) => `Tổng số ${total} nhân viên`
-                        }}
-                    />
+                    {filteredStaffList.length > 0 ? (
+                        <Table
+                            columns={columns}
+                            dataSource={filteredStaffList}
+                            rowKey="id"
+                            pagination={{
+                                pageSize: 10,
+                                showSizeChanger: true,
+                                showTotal: (total) => `Tổng số ${total} nhân viên`
+                            }}
+                            bordered
+                            size="middle"
+                        />
+                    ) : (
+                        <Alert
+                            message="Không có dữ liệu"
+                            description="Không tìm thấy nhân viên nào phù hợp với điều kiện lọc."
+                            type="info"
+                            showIcon
+                        />
+                    )}
                 </Card>
             </div>
         </Spin>

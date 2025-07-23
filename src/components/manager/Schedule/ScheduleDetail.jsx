@@ -233,20 +233,42 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
             
             // Gọi API để xóa lịch
             console.log('Deleting schedule:', schedule.id);
-            const response = await deleteScheduleAPI(schedule.id);
-            console.log('Delete response:', response);
             
-            // Sử dụng setTimeout để tránh FlushSync error
-            setTimeout(() => {
-                // Thông báo thành công và đóng modal
-                onDelete(schedule.id);
+            try {
+                const response = await deleteScheduleAPI(schedule.id);
+                console.log('Delete response:', response);
+                
+                // Đóng modal trước
                 onHide();
-            }, 0);
+                
+                // Sau đó thông báo cho component cha về việc xóa thành công
+                // để component cha có thể cập nhật UI và làm mới dữ liệu
+                onDelete(schedule.id);
+                
+            } catch (apiError) {
+                console.error('API error when deleting schedule:', apiError);
+                
+                // Kiểm tra nếu lỗi 404 (không tìm thấy) - có thể lịch đã bị xóa trước đó
+                if (apiError.response && apiError.response.status === 404) {
+                    console.log('Schedule not found, may have been deleted already');
+                    onHide();
+                    onDelete(schedule.id); // Vẫn gọi onDelete để cập nhật UI
+                    return;
+                }
+                
+                // Các lỗi khác
+                notification.error({
+                    message: 'Lỗi',
+                    description: 'Không thể xóa lịch, vui lòng thử lại sau',
+                    placement: 'topRight',
+                    duration: 3
+                });
+            }
         } catch (error) {
-            console.error('Error deleting schedule:', error);
+            console.error('Error in handleDelete function:', error);
             notification.error({
                 message: 'Lỗi',
-                description: 'Không thể xóa lịch, vui lòng thử lại sau',
+                description: 'Đã xảy ra lỗi khi xử lý yêu cầu xóa',
                 placement: 'topRight',
                 duration: 3
             });

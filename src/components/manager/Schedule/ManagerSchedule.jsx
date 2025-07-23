@@ -82,31 +82,34 @@ const ManagerSchedule = () => {
 
     const fetchSchedules = async () => {
         setLoading(true);
+        console.log('🔄 Bắt đầu tải dữ liệu lịch...');
+        
         try {
-            console.log('Fetching schedules from API...');
+            console.log('📡 Gọi API getAllSchedulesAPI...');
             const response = await getAllSchedulesAPI();
-            console.log('API response for schedules:', response);
+            console.log('✅ Nhận được phản hồi từ API:', response);
             
             // Kiểm tra cấu trúc response để xác định nơi chứa dữ liệu
             let schedulesData = [];
             
             if (response && response.data) {
                 schedulesData = response.data;
-                console.log('Found data in response.data:', schedulesData);
+                console.log('📋 Tìm thấy dữ liệu trong response.data:', schedulesData.length, 'lịch');
             } else if (response && Array.isArray(response)) {
                 schedulesData = response;
-                console.log('Found array data directly in response:', schedulesData);
+                console.log('📋 Tìm thấy dữ liệu mảng trực tiếp trong response:', schedulesData.length, 'lịch');
             } else if (response) {
                 schedulesData = response;
-                console.log('Using entire response as data:', schedulesData);
+                console.log('📋 Sử dụng toàn bộ response làm dữ liệu');
             }
             
             // Đảm bảo schedulesData là một mảng
             const schedulesList = Array.isArray(schedulesData) ? schedulesData : [];
             
-            console.log('Schedules data after processing:', schedulesList);
+            console.log('📊 Dữ liệu lịch sau khi xử lý:', schedulesList.length, 'lịch');
             
             if (schedulesList.length > 0) {
+                console.log('🔍 Bắt đầu nhóm và định dạng lịch...');
                 // Nhóm các lịch theo doctorId + date + slot để đếm số lượng bệnh nhân
                 const slotGroups = {};
                 
@@ -139,7 +142,7 @@ const ManagerSchedule = () => {
                     slotGroups[key].schedules.push(schedule);
                 });
                 
-                console.log('Slot groups after counting:', slotGroups);
+                console.log('👥 Nhóm lịch sau khi đếm:', Object.keys(slotGroups).length, 'nhóm');
                 
                 // Chọn một lịch đại diện cho mỗi nhóm và thêm thông tin số lượng bệnh nhân
                 const representativeSchedules = [];
@@ -156,6 +159,8 @@ const ManagerSchedule = () => {
                     representativeSchedules.push(schedule);
                 });
                 
+                console.log('👨‍⚕️ Lịch đại diện đã tạo:', representativeSchedules.length, 'lịch');
+                
                 // Đảm bảo tất cả lịch đều có trạng thái là "available" (Làm việc)
                 const updatedSchedulesList = representativeSchedules.map(schedule => ({
                     ...schedule,
@@ -166,32 +171,45 @@ const ManagerSchedule = () => {
                 const formattedSchedules = updatedSchedulesList
                     .map(schedule => {
                         const formatted = formatScheduleFromAPI(schedule);
-                        console.log(`Formatted schedule ${schedule.id}:`, formatted);
                         return formatted;
                     })
                     .filter(Boolean); // Lọc bỏ các giá trị null
                 
-                console.log('Final formatted schedules:', formattedSchedules);
-                setSchedules(formattedSchedules);
+                console.log('✨ Lịch đã định dạng cuối cùng:', formattedSchedules.length, 'lịch');
+                
+                // Sử dụng setTimeout để tránh FlushSync error
+                setTimeout(() => {
+                    setSchedules(formattedSchedules);
+                    console.log('🎉 Đã cập nhật state với dữ liệu mới');
+                }, 0);
                 
                 if (formattedSchedules.length === 0) {
                     showNotification('Không có dữ liệu lịch từ server', 'info');
                 }
             } else {
-                console.log('No schedule data received');
-                setSchedules([]);
+                console.log('⚠️ Không nhận được dữ liệu lịch');
+                
+                // Sử dụng setTimeout để tránh FlushSync error
+                setTimeout(() => {
+                    setSchedules([]);
+                }, 0);
+                
                 showNotification('Không có dữ liệu lịch từ server', 'info');
             }
         } catch (error) {
-            console.error('Error fetching schedules:', error);
-            setSchedules([]);
+            console.error('❌ Lỗi khi tải dữ liệu lịch:', error);
+            
+            // Sử dụng setTimeout để tránh FlushSync error
+            setTimeout(() => {
+                setSchedules([]);
+            }, 0);
             
             // Hiển thị thông tin lỗi chi tiết hơn
             if (error.response) {
-                console.error('Error response:', error.response);
+                console.error('❌ Lỗi phản hồi:', error.response);
                 showNotification(`Lỗi server: ${error.response.status} - ${error.response.statusText || 'Unknown error'}`, 'error');
             } else if (error.request) {
-                console.error('Error request:', error.request);
+                console.error('❌ Lỗi yêu cầu:', error.request);
                 showNotification('Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.', 'error');
             } else {
                 showNotification(`Lỗi: ${error.message || 'Unknown error'}`, 'error');
@@ -199,6 +217,7 @@ const ManagerSchedule = () => {
         } finally {
             setLoading(false);
             setInitialLoadComplete(true);
+            console.log('🏁 Kết thúc quá trình tải dữ liệu lịch');
         }
     };
 
@@ -522,12 +541,19 @@ const ManagerSchedule = () => {
                     prevSchedules.filter(schedule => schedule.id !== scheduleId)
                 );
                 
-                // Làm mới dữ liệu từ server sau khi xóa
-                setTimeout(() => {
-                    fetchSchedules();
-                }, 500);
+                showNotification('Xóa lịch thành công! Đang làm mới dữ liệu...', 'success');
                 
-                showNotification('Xóa lịch thành công!', 'success');
+                // Làm mới dữ liệu từ server sau khi xóa
+                // Sử dụng async/await để đảm bảo dữ liệu được làm mới
+                try {
+                    // Đặt một timeout ngắn để đảm bảo UI được cập nhật trước
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                    await fetchSchedules();
+                    showNotification('Dữ liệu đã được cập nhật', 'success');
+                } catch (refreshError) {
+                    console.error('Error refreshing schedules:', refreshError);
+                    showNotification('Không thể làm mới dữ liệu, vui lòng tải lại trang', 'warning');
+                }
             } else {
                 console.warn('API returned unexpected response:', response);
                 showNotification('Đã xóa lịch thành công', 'success');
@@ -536,6 +562,11 @@ const ManagerSchedule = () => {
                 setSchedules(prevSchedules => 
                     prevSchedules.filter(schedule => schedule.id !== scheduleId)
                 );
+                
+                // Vẫn thử làm mới dữ liệu
+                setTimeout(() => {
+                    fetchSchedules();
+                }, 300);
             }
         } catch (error) {
             console.error('Error deleting schedule:', error);
@@ -551,6 +582,11 @@ const ManagerSchedule = () => {
                     setSchedules(prevSchedules => 
                         prevSchedules.filter(schedule => schedule.id !== scheduleId)
                     );
+                    
+                    // Vẫn thử làm mới dữ liệu
+                    setTimeout(() => {
+                        fetchSchedules();
+                    }, 300);
                     return;
                 }
                 

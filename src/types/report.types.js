@@ -31,9 +31,9 @@ export const REPORT_STATUS = {
 
 // Payment Status
 export const PAYMENT_STATUS = {
-    COMPLETED: 'Đã thanh toán',
+    COMPLETED: 'Thanh toán thành công',
     PENDING: 'Chờ thanh toán',
-    FAILED: 'Thất bại'
+    FAILED: 'Thanh toán thất bại'
 };
 
 // Payment Account Types

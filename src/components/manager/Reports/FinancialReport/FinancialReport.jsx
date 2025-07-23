@@ -1,23 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Card, Table, Button, Select, Space, Typography, Spin, Empty, Statistic, Tag, Alert, Input, Tooltip, Divider, DatePicker, Switch, Radio } from 'antd';
-import { DownloadOutlined, PrinterOutlined, FileExcelOutlined, DollarCircleOutlined, CheckCircleOutlined, ClockCircleOutlined, ExceptionOutlined, FilterOutlined, ReloadOutlined, ArrowUpOutlined, ArrowDownOutlined, MinusOutlined } from '@ant-design/icons';
-import { 
-    LineChart, 
-    Line, 
-    XAxis, 
-    YAxis, 
-    CartesianGrid, 
-    Tooltip as RechartsTooltip, 
-    Legend, 
-    ResponsiveContainer, 
-    BarChart, 
-    Bar, 
-    LabelList,
-    Cell
-} from 'recharts';
+import { Row, Col, Card, Table, Button, Select, Space, Typography, Spin, Empty, Statistic, Tag, Alert, Input, Tooltip, Divider, DatePicker, Switch } from 'antd';
+import { DownloadOutlined, PrinterOutlined, FileExcelOutlined, DollarCircleOutlined, CheckCircleOutlined, ClockCircleOutlined, ExceptionOutlined, FilterOutlined, ReloadOutlined } from '@ant-design/icons';
 import { getPaymentStats, calculateTotalRevenue, formatPaymentDataForExport, exportToExcel, groupPaymentsByType } from '../../../../services/report.service';
 import dayjs from 'dayjs';
-import { PAYMENT_STATUS, PAYMENT_ACCOUNT, PAYMENT_TYPE } from '../../../../types/report.types';
+import { PAYMENT_STATUS } from '../../../../types/report.types';
 import './FinancialReport.css';
 
 const { Title, Text } = Typography;
@@ -32,19 +18,11 @@ const FinancialReport = ({ dateRange, onError, onDateRangeChange }) => {
         pending: [],
         failed: []
     });
-    const [reportType, setReportType] = useState('monthly');
-    const [comparisonEnabled, setComparisonEnabled] = useState(false);
-    const [comparisonDateRange, setComparisonDateRange] = useState([
-        dayjs().subtract(2, 'month').startOf('month'),
-        dayjs().subtract(1, 'month').endOf('month')
-    ]);
-    const [comparisonData, setComparisonData] = useState([]);
     const [selectedDatePreset, setSelectedDatePreset] = useState('all');
     
     // State cho bộ lọc
     const [filters, setFilters] = useState({
-        paymentType: 'ALL',
-        paymentMethod: 'ALL',
+        appointmentType: 'ALL',
         amountRange: 'ALL',
         status: 'ALL',
         searchText: '',
@@ -58,7 +36,6 @@ const FinancialReport = ({ dateRange, onError, onDateRangeChange }) => {
 
     // Xử lý thay đổi khoảng thời gian
     const handleDateRangeChange = (dates) => {
-        // Gọi hàm callback để cập nhật dateRange ở component cha
         if (typeof onDateRangeChange === 'function') {
             onDateRangeChange(dates);
         }
@@ -118,20 +95,10 @@ const FinancialReport = ({ dateRange, onError, onDateRangeChange }) => {
                 end = null;
         }
         
-        // Gọi hàm callback để cập nhật dateRange ở component cha
         if (typeof onDateRangeChange === 'function' && start && end) {
             onDateRangeChange([start, end]);
         }
     };
-
-    // Fetch dữ liệu so sánh khi bật tính năng so sánh hoặc thay đổi khoảng thời gian so sánh
-    useEffect(() => {
-        if (comparisonEnabled && comparisonDateRange[0] && comparisonDateRange[1]) {
-            fetchComparisonData();
-        } else {
-            setComparisonData([]);
-        }
-    }, [comparisonEnabled, comparisonDateRange]);
 
     const fetchPaymentData = async () => {
         try {
@@ -155,63 +122,6 @@ const FinancialReport = ({ dateRange, onError, onDateRangeChange }) => {
         }
     };
 
-    // Fetch dữ liệu cho khoảng thời gian so sánh
-    const fetchComparisonData = async () => {
-        try {
-            setLoading(true);
-            const completed = await getPaymentStats(PAYMENT_STATUS.COMPLETED);
-            
-            // Lọc dữ liệu theo khoảng thời gian so sánh
-            const filteredData = Array.isArray(completed) 
-                ? completed.filter(payment => {
-            const paymentDate = dayjs(payment.createdAt);
-                    return paymentDate.isAfter(comparisonDateRange[0], 'day') && 
-                           paymentDate.isBefore(comparisonDateRange[1], 'day');
-                })
-                : [];
-            
-            setComparisonData(filteredData);
-        } catch (error) {
-            console.error('Error fetching comparison data:', error);
-            onError?.(error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const generateReportSummary = () => {
-        if (!Array.isArray(paymentData.completed) || paymentData.completed.length === 0) {
-            return {
-                currentRevenue: 0,
-                previousRevenue: 0,
-                growth: 0,
-                transactionCount: 0,
-                averageTransaction: 0
-            };
-        }
-
-        const totalRevenue = calculateTotalRevenue(paymentData.completed);
-        const previousPeriodRevenue = calculatePreviousPeriodRevenue();
-        const revenueGrowth = previousPeriodRevenue === 0 ? 0 : 
-            ((totalRevenue - previousPeriodRevenue) / previousPeriodRevenue) * 100;
-
-        return {
-            currentRevenue: totalRevenue,
-            previousRevenue: previousPeriodRevenue,
-            growth: revenueGrowth,
-            transactionCount: paymentData.completed.length,
-            averageTransaction: paymentData.completed.length === 0 ? 0 : totalRevenue / paymentData.completed.length
-        };
-    };
-
-    const calculatePreviousPeriodRevenue = () => {
-        if (!comparisonEnabled || comparisonData.length === 0) {
-        return 0;
-        }
-        
-        return calculateTotalRevenue(comparisonData);
-    };
-
     const handleExportExcel = () => {
         if (!Array.isArray(paymentData.completed) || paymentData.completed.length === 0) {
             onError?.(new Error('Không có dữ liệu để xuất báo cáo'));
@@ -225,9 +135,7 @@ const FinancialReport = ({ dateRange, onError, onDateRangeChange }) => {
         window.print();
     };
 
-    const summary = generateReportSummary();
-
-    // Tính toán thống kê - CẬP NHẬT ĐỂ CHỈ TÍNH CÁC GIAO DỊCH ĐÃ THANH TOÁN
+    // Tính toán thống kê - CHỈ TÍNH CÁC GIAO DỊCH ĐÃ THANH TOÁN
     const statistics = {
         totalRevenue: calculateTotalRevenue(paymentData.completed), // Chỉ tính giao dịch đã hoàn thành
         totalCompleted: paymentData.completed.length,
@@ -236,59 +144,8 @@ const FinancialReport = ({ dateRange, onError, onDateRangeChange }) => {
         totalTransactions: paymentData.completed.length + paymentData.pending.length + paymentData.failed.length
     };
 
-    // Dữ liệu cho biểu đồ doanh thu theo phương thức thanh toán - CHỈ TÍNH COMPLETED
+    // Dữ liệu cho biểu đồ doanh thu theo loại lịch hẹn - CHỈ TÍNH COMPLETED
     const revenueByType = groupPaymentsByType(paymentData.completed);
-
-    // Hàm helper để lấy dữ liệu theo khoảng thời gian
-    const getRevenueByPeriod = (data, periodType) => {
-        if (!Array.isArray(data) || data.length === 0) return [];
-
-        const groupedData = data.reduce((acc, payment) => {
-            const date = dayjs(payment.createdAt || new Date());
-            let key = '';
-
-            switch (periodType) {
-                case 'daily':
-                    key = date.format('DD/MM');
-                    break;
-                case 'weekly':
-                    key = `Tuần ${date.week()} - ${date.format('MM/YYYY')}`;
-                    break;
-                case 'monthly':
-                    key = date.format('MM/YYYY');
-                    break;
-                case 'quarterly':
-                    key = `Q${Math.floor((date.month() / 3)) + 1}/${date.year()}`;
-                    break;
-                case 'yearly':
-                    key = date.format('YYYY');
-                    break;
-                default:
-                    key = date.format('DD/MM/YYYY');
-            }
-
-            if (!acc[key]) {
-                acc[key] = {
-                    period: key,
-                    revenue: 0,
-                    transactions: 0
-                };
-            }
-
-            acc[key].revenue += Number(payment.amount) || 0;
-            acc[key].transactions += 1;
-            return acc;
-        }, {});
-
-        return Object.values(groupedData).sort((a, b) => {
-            // Sắp xếp theo thời gian
-            const getTime = (period) => {
-                const [day, month, year] = period.split('/');
-                return new Date(year, month - 1, day || 1).getTime();
-            };
-            return getTime(a.period) - getTime(b.period);
-        });
-    };
     
     // Kết hợp tất cả giao dịch từ các trạng thái khác nhau và sắp xếp theo ID
     const allPayments = [
@@ -296,7 +153,6 @@ const FinancialReport = ({ dateRange, onError, onDateRangeChange }) => {
         ...paymentData.pending,
         ...paymentData.failed
     ].sort((a, b) => {
-        // Sắp xếp theo ID tăng dần
         const idA = Number(a.id) || 0;
         const idB = Number(b.id) || 0;
         return idA - idB;
@@ -304,13 +160,8 @@ const FinancialReport = ({ dateRange, onError, onDateRangeChange }) => {
 
     // Lọc dữ liệu giao dịch theo bộ lọc
     const filteredPayments = allPayments.filter(payment => {
-        // Lọc theo loại giao dịch
-        if (filters.paymentType !== 'ALL' && payment.type !== filters.paymentType) {
-            return false;
-        }
-        
-        // Lọc theo phương thức thanh toán
-        if (filters.paymentMethod !== 'ALL' && payment.account !== filters.paymentMethod) {
+        // Lọc theo loại lịch hẹn
+        if (filters.appointmentType !== 'ALL' && payment.schedule?.type !== filters.appointmentType) {
             return false;
         }
         
@@ -342,18 +193,20 @@ const FinancialReport = ({ dateRange, onError, onDateRangeChange }) => {
                 String(payment.id).toLowerCase().includes(searchLower);
             const descMatch = payment.description && 
                 payment.description.toLowerCase().includes(searchLower);
-            const patientMatch = payment.patientId && 
-                String(payment.patientId).toLowerCase().includes(searchLower);
+            const patientMatch = payment.schedule?.patient?.fullName && 
+                payment.schedule.patient.fullName.toLowerCase().includes(searchLower);
+            const doctorMatch = payment.schedule?.doctor?.fullName && 
+                payment.schedule.doctor.fullName.toLowerCase().includes(searchLower);
             
             // Nếu không khớp với bất kỳ trường nào, trả về false để loại bỏ
-            if (!(idMatch || descMatch || patientMatch)) {
+            if (!(idMatch || descMatch || patientMatch || doctorMatch)) {
                 return false;
             }
         }
         
         // Lọc theo ngày cụ thể (nếu có)
         if (filters.dateFilter && filters.dateFilter.length === 2) {
-            const paymentDate = dayjs(payment.createdAt);
+            const paymentDate = dayjs(payment.time);
             return paymentDate.isAfter(filters.dateFilter[0], 'day') && 
                    paymentDate.isBefore(filters.dateFilter[1], 'day');
         }
@@ -372,36 +225,18 @@ const FinancialReport = ({ dateRange, onError, onDateRangeChange }) => {
     // Reset bộ lọc
     const resetFilters = () => {
         setFilters({
-            paymentType: 'ALL',
-            paymentMethod: 'ALL',
+            appointmentType: 'ALL',
             amountRange: 'ALL',
             status: 'ALL',
             searchText: '',
             dateFilter: null
         });
     };
-    
-    // Xử lý bật/tắt tính năng so sánh
-    const handleComparisonToggle = (checked) => {
-        setComparisonEnabled(checked);
-        if (checked && (!comparisonDateRange[0] || !comparisonDateRange[1])) {
-            // Thiết lập khoảng thời gian mặc định cho so sánh (tháng trước)
-            setComparisonDateRange([
-                dayjs().subtract(2, 'month').startOf('month'),
-                dayjs().subtract(1, 'month').endOf('month')
-            ]);
-        }
-    };
-    
-    // Xử lý thay đổi khoảng thời gian so sánh
-    const handleComparisonDateChange = (dates) => {
-        setComparisonDateRange(dates);
-    };
 
     // Component bảng giao dịch
     const TransactionsTable = () => {
-    const columns = [
-        {
+        const columns = [
+            {
                 title: 'Mã giao dịch',
                 dataIndex: 'id',
                 key: 'id',
@@ -415,17 +250,29 @@ const FinancialReport = ({ dateRange, onError, onDateRangeChange }) => {
             },
             {
                 title: 'Thời gian',
-                dataIndex: 'createdAt',
-                key: 'createdAt',
+                dataIndex: 'time',
+                key: 'time',
                 width: '15%',
                 render: (date) => dayjs(date).format('DD/MM/YYYY HH:mm'),
-                sorter: (a, b) => dayjs(a.createdAt).valueOf() - dayjs(b.createdAt).valueOf(),
+                sorter: (a, b) => dayjs(a.time).valueOf() - dayjs(b.time).valueOf(),
             },
             {
-                title: 'Mô tả',
-                dataIndex: 'description',
-                key: 'description',
-                width: '25%',
+                title: 'Bệnh nhân',
+                key: 'patient',
+                width: '15%',
+                render: (_, record) => record.schedule?.patient?.fullName || 'N/A',
+            },
+            {
+                title: 'Bác sĩ',
+                key: 'doctor',
+                width: '15%',
+                render: (_, record) => record.schedule?.doctor?.fullName || 'N/A',
+            },
+            {
+                title: 'Loại lịch hẹn',
+                key: 'appointmentType',
+                width: '15%',
+                render: (_, record) => record.schedule?.type || 'N/A',
             },
             {
                 title: 'Số tiền',
@@ -496,25 +343,15 @@ const FinancialReport = ({ dateRange, onError, onDateRangeChange }) => {
                     <div className="filters-container" style={{ marginBottom: 16 }}>
                         <Space wrap>
                             <Select
-                                value={filters.paymentType}
-                                onChange={value => handleFilterChange('paymentType', value)}
-                                style={{ width: 150 }}
-                            >
-                                <Option value="ALL">Tất cả loại</Option>
-                                <Option value={PAYMENT_TYPE.APPOINTMENT}>Khám bệnh</Option>
-                                <Option value={PAYMENT_TYPE.TEST}>Xét nghiệm</Option>
-                                <Option value={PAYMENT_TYPE.MEDICINE}>Thuốc</Option>
-                            </Select>
-                            
-                            <Select
-                                value={filters.paymentMethod}
-                                onChange={value => handleFilterChange('paymentMethod', value)}
+                                value={filters.appointmentType}
+                                onChange={value => handleFilterChange('appointmentType', value)}
                                 style={{ width: 180 }}
                             >
-                                <Option value="ALL">Tất cả phương thức</Option>
-                                <Option value={PAYMENT_ACCOUNT.COUNTER}>Thanh toán tại quầy</Option>
-                                <Option value={PAYMENT_ACCOUNT.ONLINE}>Thanh toán online</Option>
-                                <Option value={PAYMENT_ACCOUNT.INSURANCE}>Bảo hiểm y tế</Option>
+                                <Option value="ALL">Tất cả loại lịch hẹn</Option>
+                                <Option value="Khám định kỳ">Khám định kỳ</Option>
+                                <Option value="Khám theo dõi">Khám theo dõi</Option>
+                                <Option value="Xét nghiệm">Xét nghiệm</Option>
+                                <Option value="Tư vấn">Tư vấn</Option>
                             </Select>
                             
                             <Select
@@ -542,7 +379,7 @@ const FinancialReport = ({ dateRange, onError, onDateRangeChange }) => {
                                 Đặt lại
                             </Button>
                         </Space>
-            </div>
+                    </div>
                 )}
                 
                 <Table
@@ -560,7 +397,7 @@ const FinancialReport = ({ dateRange, onError, onDateRangeChange }) => {
                         const total = completedPayments.reduce((sum, payment) => sum + (Number(payment.amount) || 0), 0);
                         return (
                             <Table.Summary.Row>
-                                <Table.Summary.Cell index={0} colSpan={3}>
+                                <Table.Summary.Cell index={0} colSpan={5}>
                                     <strong>Tổng</strong>
                                 </Table.Summary.Cell>
                                 <Table.Summary.Cell index={1}>
@@ -596,18 +433,18 @@ const FinancialReport = ({ dateRange, onError, onDateRangeChange }) => {
                     </Col>
                     <Col span={8} style={{ textAlign: 'right' }}>
                         <Space>
-                                <Button 
-                                    icon={<FileExcelOutlined />}
-                                    onClick={handleExportExcel}
-                                >
-                                    Xuất Excel
-                                </Button>
-                                <Button 
-                                    icon={<PrinterOutlined />}
-                                    onClick={handlePrint}
-                                >
-                                    In báo cáo
-                                </Button>
+                            <Button 
+                                icon={<FileExcelOutlined />}
+                                onClick={handleExportExcel}
+                            >
+                                Xuất Excel
+                            </Button>
+                            <Button 
+                                icon={<PrinterOutlined />}
+                                onClick={handlePrint}
+                            >
+                                In báo cáo
+                            </Button>
                             <Button
                                 icon={<FilterOutlined />}
                                 onClick={() => setShowFilters(!showFilters)}
@@ -615,9 +452,9 @@ const FinancialReport = ({ dateRange, onError, onDateRangeChange }) => {
                             >
                                 Bộ lọc
                             </Button>
-                            </Space>
-                        </Col>
-                    </Row>
+                        </Space>
+                    </Col>
+                </Row>
 
                 {/* Bộ lọc */}
                 {showFilters && (
@@ -651,36 +488,24 @@ const FinancialReport = ({ dateRange, onError, onDateRangeChange }) => {
                                             <Option value="thisYear">Năm nay</Option>
                                             <Option value="lastYear">Năm trước</Option>
                                         </Select>
-                </Space>
+                                    </Space>
                                 </Space>
                             </Col>
                             <Col span={24}>
                                 <Divider style={{ margin: '12px 0' }} />
                             </Col>
                             <Col xs={24} sm={12} md={8} lg={6}>
-                                <Typography.Text strong>Loại giao dịch</Typography.Text>
+                                <Typography.Text strong>Loại lịch hẹn</Typography.Text>
                                 <Select
-                                    value={filters.paymentType}
-                                    onChange={value => handleFilterChange('paymentType', value)}
+                                    value={filters.appointmentType}
+                                    onChange={value => handleFilterChange('appointmentType', value)}
                                     style={{ width: '100%', marginTop: 8 }}
                                 >
                                     <Option value="ALL">Tất cả loại</Option>
-                                    <Option value={PAYMENT_TYPE.APPOINTMENT}>Khám bệnh</Option>
-                                    <Option value={PAYMENT_TYPE.TEST}>Xét nghiệm</Option>
-                                    <Option value={PAYMENT_TYPE.MEDICINE}>Thuốc</Option>
-                                </Select>
-                            </Col>
-                            <Col xs={24} sm={12} md={8} lg={6}>
-                                <Typography.Text strong>Phương thức thanh toán</Typography.Text>
-                                <Select
-                                    value={filters.paymentMethod}
-                                    onChange={value => handleFilterChange('paymentMethod', value)}
-                                    style={{ width: '100%', marginTop: 8 }}
-                                >
-                                    <Option value="ALL">Tất cả phương thức</Option>
-                                    <Option value={PAYMENT_ACCOUNT.COUNTER}>Thanh toán tại quầy</Option>
-                                    <Option value={PAYMENT_ACCOUNT.ONLINE}>Thanh toán online</Option>
-                                    <Option value={PAYMENT_ACCOUNT.INSURANCE}>Bảo hiểm y tế</Option>
+                                    <Option value="Khám định kỳ">Khám định kỳ</Option>
+                                    <Option value="Khám theo dõi">Khám theo dõi</Option>
+                                    <Option value="Xét nghiệm">Xét nghiệm</Option>
+                                    <Option value="Tư vấn">Tư vấn</Option>
                                 </Select>
                             </Col>
                             <Col xs={24} sm={12} md={8} lg={6}>
@@ -724,13 +549,13 @@ const FinancialReport = ({ dateRange, onError, onDateRangeChange }) => {
                                 </Space>
                             </Col>
                         </Row>
-            </Card>
+                    </Card>
                 )}
 
                 {/* Thống kê tổng quan */}
                 <Row gutter={[16, 16]} className="statistics-row">
                     <Col xs={24} sm={12} md={6}>
-                <Card>
+                        <Card>
                             <Statistic
                                 title="Tổng doanh thu"
                                 value={statistics.totalRevenue}
@@ -741,8 +566,8 @@ const FinancialReport = ({ dateRange, onError, onDateRangeChange }) => {
                                     minimumFractionDigits: 0
                                 }).format(value || 0)}
                                 prefix={<DollarCircleOutlined />}
-                    />
-                </Card>
+                            />
+                        </Card>
                     </Col>
                     <Col xs={24} sm={12} md={6}>
                         <Card>
@@ -750,8 +575,8 @@ const FinancialReport = ({ dateRange, onError, onDateRangeChange }) => {
                                 title="Giao dịch hoàn thành"
                                 value={statistics.totalCompleted}
                                 prefix={<CheckCircleOutlined style={{ color: '#52c41a' }} />}
-                        />
-                    </Card>
+                            />
+                        </Card>
                     </Col>
                     <Col xs={24} sm={12} md={6}>
                         <Card>
@@ -775,7 +600,7 @@ const FinancialReport = ({ dateRange, onError, onDateRangeChange }) => {
 
                 {/* Bảng danh sách giao dịch */}
                 <TransactionsTable />
-        </div>
+            </div>
         </Spin>
     );
 };
