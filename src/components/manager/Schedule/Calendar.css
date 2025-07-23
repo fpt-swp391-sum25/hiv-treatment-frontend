@@ -1219,3 +1219,34 @@
 .fc-popover .week-day-event {
   margin-bottom: 6px !important;
 }
+
+/* Thêm CSS cho hiển thị số lượng bệnh nhân */
+.week-event-patients, .list-event-patients, .time-event-patients {
+    display: flex;
+    align-items: center;
+    font-size: 0.8rem;
+    color: rgba(0, 0, 0, 0.7);
+    margin-left: 5px;
+    font-weight: 500;
+}
+
+.list-event-patients {
+    margin-left: 10px;
+    padding: 2px 5px;
+    background-color: rgba(0, 0, 0, 0.05);
+    border-radius: 3px;
+}
+
+/* Màu sắc cho số lượng bệnh nhân */
+.fc-event-main[data-patients="0"] .week-event-patients,
+.fc-event-main[data-patients="0"] .list-event-patients,
+.fc-event-main[data-patients="0"] .time-event-patients {
+    color: #28a745;
+}
+
+.fc-event-main[data-patients="full"] .week-event-patients,
+.fc-event-main[data-patients="full"] .list-event-patients,
+.fc-event-main[data-patients="full"] .time-event-patients {
+    color: #dc3545;
+    font-weight: bold;
+}

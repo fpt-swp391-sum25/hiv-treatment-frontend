@@ -5,7 +5,7 @@ import { ScheduleStatus, SlotTimes, StatusMapping } from '../../../types/schedul
 import moment from 'moment';
 import { deleteScheduleAPI, updateScheduleAPI } from '../../../services/api.service';
 import './ScheduleDetail.css';
-import { BsCalendarWeek, BsClock, BsDoorOpen, BsPerson, BsBriefcase } from 'react-icons/bs';
+import { BsCalendarWeek, BsClock, BsDoorOpen, BsPerson, BsBriefcase, BsPersonPlus } from 'react-icons/bs';
 
 const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToast }) => {
     const [formData, setFormData] = useState({
@@ -17,7 +17,9 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
         slot: '',
         roomCode: '',
         original_status: ScheduleStatus.AVAILABLE,
-        shiftType: null // Thêm trường thông tin ca làm việc
+        shiftType: null, // Thêm trường thông tin ca làm việc
+        currentPatients: 0, // Thêm trường số bệnh nhân hiện tại
+        maxPatients: 5 // Thêm trường số bệnh nhân tối đa
     });
     const [loading, setLoading] = useState(false);
     const [confirmDelete, setConfirmDelete] = useState(false);
@@ -60,7 +62,9 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                 roomCode: schedule.roomCode || '',
                 original_status: schedule.original_status, // Lưu trạng thái gốc từ BE
                 shiftType: shiftTypeValue, // Lấy từ type hoặc shiftType
-                type: schedule.type // Lưu trữ trường type gốc
+                type: schedule.type, // Lưu trữ trường type gốc
+                currentPatients: schedule.currentPatients || 0, // Lấy số bệnh nhân hiện tại
+                maxPatients: schedule.maxPatients || 5 // Lấy số bệnh nhân tối đa
             });
         }
         
@@ -400,6 +404,23 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                                         ) : (
                                             <span className="text-muted">Không thuộc ca nào</span>
                                         )}
+                                    </div>
+                                </Col>
+                            </Row>
+                            
+                            {/* Hiển thị thông tin số lượng bệnh nhân */}
+                            <Row className="mt-3">
+                                <Col md={6} className="d-flex align-items-center">
+                                    <BsPersonPlus className="text-success me-2" size={20} />
+                                    <div>
+                                        <div className="text-muted small">Số bệnh nhân</div>
+                                        <Badge 
+                                            bg={formData.currentPatients >= formData.maxPatients ? 'danger' : 
+                                               formData.currentPatients > 0 ? 'warning' : 'success'}
+                                            className="p-2"
+                                        >
+                                            {formData.currentPatients} / {formData.maxPatients}
+                                        </Badge>
                                     </div>
                                 </Col>
                             </Row>

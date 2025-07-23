@@ -10,7 +10,14 @@ import moment from 'moment';
 import './CustomButtons.css';
 import './Schedule.css';
 import { ScheduleStatus, StatusMapping } from '../../../types/schedule.types';
-import { getAllSchedulesAPI, updateScheduleAPI, deleteScheduleAPI, createScheduleAPI, checkBackendConnection } from '../../../services/api.service';
+import { 
+    getAllSchedulesAPI, 
+    updateScheduleAPI, 
+    deleteScheduleAPI, 
+    createScheduleAPI, 
+    checkBackendConnection,
+    getSlotCountsAPI
+} from '../../../services/api.service';
 
 const ManagerSchedule = () => {
     const [showForm, setShowForm] = useState(false);
@@ -49,20 +56,28 @@ const ManagerSchedule = () => {
         });
         
         // Kiểm tra kết nối đến backend
-        checkBackendConnection()
-            .then(result => {
-                setBackendConnected(result.success);
-                if (!result.success) {
-                    showNotification('Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng và làm mới trang.', 'error');
-                } else {
+        // Bỏ qua lỗi kết nối và tiếp tục tải dữ liệu
+        try {
+            checkBackendConnection()
+                .then(result => {
+                    setBackendConnected(result.success);
+                    // Luôn tải dữ liệu bất kể kết nối thành công hay không
                     fetchSchedules();
-                }
-            })
-            .catch(err => {
-                console.error('Error checking backend connection:', err);
-                setBackendConnected(false);
-                showNotification('Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng và làm mới trang.', 'error');
-            });
+                })
+                .catch(err => {
+                    console.error('Error checking backend connection:', err);
+                    // Vẫn đặt backendConnected = true để không chặn UI
+                    setBackendConnected(true);
+                    // Vẫn tải dữ liệu ngay cả khi kiểm tra kết nối thất bại
+                    fetchSchedules();
+                });
+        } catch (error) {
+            console.error('Exception in connection check:', error);
+            // Vẫn đặt backendConnected = true để không chặn UI
+            setBackendConnected(true);
+            // Vẫn tải dữ liệu
+            fetchSchedules();
+        }
     }, []);
 
     const fetchSchedules = async () => {
@@ -92,8 +107,57 @@ const ManagerSchedule = () => {
             console.log('Schedules data after processing:', schedulesList);
             
             if (schedulesList.length > 0) {
+                // Nhóm các lịch theo doctorId + date + slot để đếm số lượng bệnh nhân
+                const slotGroups = {};
+                
+                schedulesList.forEach(schedule => {
+                    // Xác định doctorId
+                    let doctorId = null;
+                    if (schedule.doctorId) {
+                        doctorId = schedule.doctorId;
+                    } else if (schedule.doctor_id) {
+                        doctorId = schedule.doctor_id;
+                    } else if (schedule.doctor && schedule.doctor.id) {
+                        doctorId = schedule.doctor.id;
+                    }
+                    
+                    if (!doctorId) return; // Bỏ qua nếu không có doctorId
+                    
+                    const key = `${doctorId}_${schedule.date}_${schedule.slot}`;
+                    if (!slotGroups[key]) {
+                        slotGroups[key] = {
+                            total: 0,
+                            booked: 0,
+                            schedules: []
+                        };
+                    }
+                    
+                    slotGroups[key].total++;
+                    if (schedule.patient_id || (schedule.patient && schedule.patient.id)) {
+                        slotGroups[key].booked++;
+                    }
+                    slotGroups[key].schedules.push(schedule);
+                });
+                
+                console.log('Slot groups after counting:', slotGroups);
+                
+                // Chọn một lịch đại diện cho mỗi nhóm và thêm thông tin số lượng bệnh nhân
+                const representativeSchedules = [];
+                
+                Object.entries(slotGroups).forEach(([key, group]) => {
+                    // Ưu tiên lịch trống để hiển thị
+                    const emptySchedule = group.schedules.find(s => !s.patient_id && (!s.patient || !s.patient.id));
+                    const schedule = emptySchedule || group.schedules[0];
+                    
+                    // Thêm thông tin số lượng bệnh nhân
+                    schedule.currentPatients = group.booked;
+                    schedule.maxPatients = group.total;
+                    
+                    representativeSchedules.push(schedule);
+                });
+                
                 // Đảm bảo tất cả lịch đều có trạng thái là "available" (Làm việc)
-                const updatedSchedulesList = schedulesList.map(schedule => ({
+                const updatedSchedulesList = representativeSchedules.map(schedule => ({
                     ...schedule,
                     status: 'available' // Ghi đè trạng thái thành "available"
                 }));
@@ -325,6 +389,10 @@ const ManagerSchedule = () => {
             // Định dạng hiển thị khung giờ
             const slotDisplay = slot ? slot.substring(0, 5) : '08:00';
             
+            // Lấy thông tin số lượng bệnh nhân
+            const currentPatients = schedule.currentPatients !== undefined ? schedule.currentPatients : 0;
+            const maxPatients = schedule.maxPatients !== undefined ? schedule.maxPatients : 5;
+            
             // Tạo title với thông tin đầy đủ hơn
             let title = `${doctorName} - ${slotDisplay} - P.${roomCode}`;
             
@@ -333,6 +401,9 @@ const ManagerSchedule = () => {
                 const shiftName = shiftType === 'morning' ? 'Ca sáng' : 'Ca chiều';
                 title = `${doctorName} - ${shiftName} - ${slotDisplay} - P.${roomCode}`;
             }
+            
+            // Thêm thông tin số lượng bệnh nhân vào title
+            title += ` (${currentPatients}/${maxPatients})`;
             
             return {
                 id: id,
@@ -345,7 +416,9 @@ const ManagerSchedule = () => {
                 roomCode: roomCode,
                 slot: slot,
                 original_status: schedule.status, // Lưu trữ status nguyên bản từ BE
-                shiftType: shiftType // Lưu thông tin ca làm việc từ trường type
+                shiftType: shiftType, // Lưu thông tin ca làm việc từ trường type
+                currentPatients: currentPatients, // Thêm thông tin số bệnh nhân hiện tại
+                maxPatients: maxPatients // Thêm thông tin số bệnh nhân tối đa
             };
         } catch (error) {
             console.error('Error formatting schedule:', error, schedule);
