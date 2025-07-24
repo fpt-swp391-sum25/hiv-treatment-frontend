@@ -29,6 +29,7 @@ ChartJS.register(
  * @param {Array} props.data - Dữ liệu xu hướng đăng ký bệnh nhân mới theo thời gian
  */
 const PatientRegistrationTrendChart = ({ data = [] }) => {
+  console.log('[DEBUG] PatientRegistrationTrendChart received data:', data);
   const [chartData, setChartData] = useState(null);
   const [chartOptions, setChartOptions] = useState(null);
 
@@ -83,6 +84,12 @@ const PatientRegistrationTrendChart = ({ data = [] }) => {
             font: {
               size: 12
             }
+          },
+          ticks: {
+            callback: function(value) {
+              return Number.isInteger(value) ? value : '';
+            },
+            stepSize: 1
           }
         },
         x: {
@@ -126,4 +133,4 @@ const PatientRegistrationTrendChart = ({ data = [] }) => {
   );
 };
 
-export default PatientRegistrationTrendChart; 
+export default PatientRegistrationTrendChart;
