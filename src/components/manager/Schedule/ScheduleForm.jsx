@@ -5,7 +5,7 @@ import { ScheduleStatus, SlotTimes, StatusMapping } from '../../../types/schedul
 import './ScheduleForm.css';
 import moment from 'moment';
 import { fetchAllDoctorsAPI } from '../../../services/api.service';
-import { BsPerson, BsCalendarCheck, BsDoorOpen, BsClock, BsLayersFill, BsArrowRepeat } from 'react-icons/bs';
+import { BsPerson, BsCalendarCheck, BsDoorOpen, BsClock, BsLayersFill, BsArrowRepeat, BsPersonPlus } from 'react-icons/bs';
 
 const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCreated, existingSchedules, onShowToast }) => {
     const [doctors, setDoctors] = useState([]);
@@ -19,7 +19,7 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
     const [filteredDoctors, setFilteredDoctors] = useState([]);
     const [selectedDoctorIndex, setSelectedDoctorIndex] = useState(-1);
     const [formData, setFormData] = useState({
-        doctorId: '',
+        doctorId: selectedDoctor || '',
         doctorName: '',
         date: moment(selectedDate).format('YYYY-MM-DD'),
         status: ScheduleStatus.AVAILABLE,
@@ -29,6 +29,7 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         roomCode: '101',
         scheduleType: 'single',
         shiftType: 'morning',
+        maxPatients: 3 // Thêm trường số lượng bệnh nhân tối đa, mặc định là 3
     });
     
     // Sử dụng SlotTimes từ schedule.types.js
@@ -137,6 +138,7 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             roomCode: '101',
             scheduleType: 'single',
             shiftType: 'morning',
+            maxPatients: 3
         });
 
         // Reset search states
@@ -417,6 +419,10 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
     const createSchedule = () => {
         console.group('Schedule Creation');
         console.log('Creating schedule with form data:', formData);
+        
+        // Đảm bảo maxPatients là số hợp lệ từ 1 đến 5
+        const maxPatients = Math.min(Math.max(parseInt(formData.maxPatients) || 1, 1), 5);
+        console.log('Using maxPatients value:', maxPatients);
 
         // Xử lý đặt lịch theo ca hoặc theo khung giờ đơn
         if (formData.scheduleType === 'shift') {
@@ -427,16 +433,18 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             // Tạo lịch cho từng khung giờ trong ca
             for (const slotObj of shiftSlots) {
                 // Kiểm tra trùng lịch
-                const hasConflict = existingSchedules.some(schedule => 
+                const conflictingSchedules = existingSchedules.filter(schedule => 
                     schedule.date === formData.date && 
                     schedule.doctorId.toString() === formData.doctorId.toString() &&
                     schedule.slot === slotObj.value
                 );
                 
-                if (!hasConflict) {
+                if (conflictingSchedules.length === 0) {
                     const selectedDoc = doctors.find(doc => doc.id.toString() === formData.doctorId.toString());
                     const doctorName = selectedDoc ? selectedDoc.name : '';
                     
+                    // Tạo nhiều lịch theo số lượng bệnh nhân tối đa
+                    for (let i = 0; i < maxPatients; i++) {
                     const newSchedule = {
                         doctorId: formData.doctorId,
                         doctorName: doctorName,
@@ -446,10 +454,19 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                         roomCode: formData.roomCode,
                         type: null,
                         patient_id: null,
-                        shiftType: formData.shiftType
+                            shiftType: formData.shiftType,
+                            maxPatients: maxPatients // Lưu thông tin để frontend biết đây là phần của nhóm maxPatients
                     };
                     
                     schedules.push(newSchedule);
+                    }
+                } else {
+                    notification.warning({
+                        message: 'Cảnh báo',
+                        description: `Đã có lịch cho khung giờ ${slotObj.label}. Vui lòng chọn khung giờ khác.`,
+                        placement: 'topRight',
+                        duration: 3
+                    });
                 }
             }
             
@@ -460,16 +477,18 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                     
                     // Tạo lịch cho từng khung giờ trong ca cho các tuần lặp lại
                     for (const slotObj of shiftSlots) {
-                        const hasConflict = existingSchedules.some(schedule => 
+                        const conflictingSchedules = existingSchedules.filter(schedule => 
                             schedule.date === newDate && 
                             schedule.doctorId.toString() === formData.doctorId.toString() &&
                             schedule.slot === slotObj.value
                         );
                         
-                        if (!hasConflict) {
+                        if (conflictingSchedules.length === 0) {
                             const selectedDoc = doctors.find(doc => doc.id.toString() === formData.doctorId.toString());
                             const doctorName = selectedDoc ? selectedDoc.name : '';
                             
+                            // Tạo nhiều lịch theo số lượng bệnh nhân tối đa
+                            for (let i = 0; i < maxPatients; i++) {
                             const newSchedule = {
                                 doctorId: formData.doctorId,
                                 doctorName: doctorName,
@@ -479,10 +498,12 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                                 roomCode: formData.roomCode,
                                 type: null,
                                 patient_id: null,
-                                shiftType: formData.shiftType
+                                    shiftType: formData.shiftType,
+                                    maxPatients: maxPatients // Lưu thông tin để frontend biết đây là phần của nhóm maxPatients
                             };
                             
                             schedules.push(newSchedule);
+                            }
                         }
                     }
                 }
@@ -490,7 +511,7 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             
             // Thông báo số lịch được tạo
             if (schedules.length > 0) {
-                console.log('Creating multiple schedules for shift:', schedules);
+                console.log(`Creating ${schedules.length} schedules for shift:`, schedules);
                 setTimeout(() => {
                     onScheduleCreated(schedules);
                 }, 0);
@@ -503,7 +524,7 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                 });
             }
         } else {
-            // Đặt lịch theo khung giờ đơn (cách hiện tại)
+            // Đặt lịch theo khung giờ đơn
         // Kiểm tra trùng lịch
         const conflictingSchedules = existingSchedules.filter(schedule => 
             schedule.date === formData.date && 
@@ -523,10 +544,14 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             return;
         }
 
-        // Tạo một lịch đơn
+            // Tạo nhiều lịch theo số lượng bệnh nhân tối đa
         const selectedDoc = doctors.find(doc => doc.id.toString() === formData.doctorId.toString());
         const doctorName = selectedDoc ? selectedDoc.name : '';
         
+            const schedules = [];
+            
+            // Tạo maxPatients lịch trống
+            for (let i = 0; i < maxPatients; i++) {
         const newSchedule = {
             doctorId: formData.doctorId,
             doctorName: doctorName,
@@ -535,12 +560,16 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             slot: formData.slot,
             roomCode: formData.roomCode,
             type: null,
-            patient_id: null
+                    patient_id: null,
+                    maxPatients: maxPatients // Lưu thông tin để frontend biết đây là phần của nhóm maxPatients
         };
         
-        console.log('Creating single schedule:', newSchedule);
+                schedules.push(newSchedule);
+            }
+            
+            console.log(`Creating ${maxPatients} schedules for single slot:`, schedules);
         setTimeout(() => {
-            onScheduleCreated(newSchedule);
+                onScheduleCreated(schedules);
         }, 0);
         }
 
@@ -731,6 +760,26 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                                     onChange={handleChange}
                                     required
                                 />
+                            </Form.Group>
+                        </Col>
+                        <Col md={6}>
+                            <Form.Group>
+                                <Form.Label className="d-flex align-items-center">
+                                    <BsPersonPlus className="me-2 text-primary" />
+                                    Số bệnh nhân tối đa
+                                </Form.Label>
+                                <Form.Control
+                                    type="number"
+                                    name="maxPatients"
+                                    value={formData.maxPatients}
+                                    onChange={handleChange}
+                                    min={1}
+                                    max={5}
+                                    required
+                                />
+                                <Form.Text className="text-muted">
+                                    Số lượng bệnh nhân tối đa có thể đặt lịch trong cùng khung giờ này (tối đa 5)
+                                </Form.Text>
                             </Form.Group>
                         </Col>
                             </Row>
@@ -984,6 +1033,12 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                                         : formData.shiftType === 'morning' ? 'Ca sáng (08:00-11:00)' : 'Ca chiều (13:00-16:00)'
                                     }
                                 </span>
+                            </div>
+                        </div>
+                        <div className="summary-row">
+                            <div className="summary-item">
+                                <span className="summary-label">Số bệnh nhân tối đa:</span>
+                                <span className="summary-value">{formData.maxPatients}</span>
                             </div>
                         </div>
                     </div>

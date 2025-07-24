@@ -1,6 +1,6 @@
 import {
     Layout, Button, Table, Typography, Input,
-    DatePicker, Select, Row, Col
+    DatePicker, Select, Row, Col, Tabs
 } from "antd";
 import { useState, useEffect, useContext } from "react";
 import {
@@ -17,6 +17,7 @@ dayjs.locale('vi');
 
 const { Content } = Layout;
 const { Title } = Typography;
+const { TabPane } = Tabs;
 
 const PatientList = () => {
     const { user } = useContext(AuthContext);
@@ -176,6 +177,12 @@ const PatientList = () => {
         },
     ]
 
+    // Tạo 4 danh sách theo trạng thái điều trị
+    const waitingList = filteredData.filter(item => item.treatmentStatus === 'Đang chờ khám');
+    const examinedList = filteredData.filter(item => item.treatmentStatus === 'Đã khám');
+    const consultedList = filteredData.filter(item => item.treatmentStatus === 'Đã tư vấn');
+    const absentList = filteredData.filter(item => item.treatmentStatus === 'Không đến');
+
     return (
         <Layout>
             <Row gutter={[16, 16]} style={{ margin: '3vh 1vw 0 1vw' }}>
@@ -231,15 +238,36 @@ const PatientList = () => {
                 }}>
                     <Title>Danh sách bệnh nhân</Title>
                 </div>
-                <Table style={{ margin: '0 10px 0 10px' }}
-                    columns={columns}
-                    dataSource={[...filteredData].sort((a, b) => {
-                        if (a.treatmentStatus === 'Đang chờ khám' && b.treatmentStatus !== 'Đang chờ khám') return -1;
-                        if (a.treatmentStatus !== 'Đang chờ khám' && b.treatmentStatus === 'Đang chờ khám') return 1;
-                        return 0;
-                    })}
-                    rowKey={(record) => record.id}
-                />
+                <Tabs defaultActiveKey="waiting">
+                    <TabPane tab="Đang chờ khám" key="waiting">
+                        <Table style={{ margin: '0 10px 0 10px' }}
+                            columns={columns}
+                            dataSource={waitingList}
+                            rowKey={(record) => record.id}
+                        />
+                    </TabPane>
+                    <TabPane tab="Đã khám" key="examined">
+                        <Table style={{ margin: '0 10px 0 10px' }}
+                            columns={columns}
+                            dataSource={examinedList}
+                            rowKey={(record) => record.id}
+                        />
+                    </TabPane>
+                    <TabPane tab="Đã tư vấn" key="consulted">
+                        <Table style={{ margin: '0 10px 0 10px' }}
+                            columns={columns}
+                            dataSource={consultedList}
+                            rowKey={(record) => record.id}
+                        />
+                    </TabPane>
+                    <TabPane tab="Không đến" key="absent">
+                        <Table style={{ margin: '0 10px 0 10px' }}
+                            columns={columns}
+                            dataSource={absentList}
+                            rowKey={(record) => record.id}
+                        />
+                    </TabPane>
+                </Tabs>
             </Content>
             <Outlet />
         </Layout>

@@ -5,7 +5,7 @@ import { ScheduleStatus, SlotTimes, StatusMapping } from '../../../types/schedul
 import moment from 'moment';
 import { deleteScheduleAPI, updateScheduleAPI } from '../../../services/api.service';
 import './ScheduleDetail.css';
-import { BsCalendarWeek, BsClock, BsDoorOpen, BsPerson, BsBriefcase } from 'react-icons/bs';
+import { BsCalendarWeek, BsClock, BsDoorOpen, BsPerson, BsBriefcase, BsPersonPlus } from 'react-icons/bs';
 
 const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToast }) => {
     const [formData, setFormData] = useState({
@@ -17,7 +17,9 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
         slot: '',
         roomCode: '',
         original_status: ScheduleStatus.AVAILABLE,
-        shiftType: null // Thêm trường thông tin ca làm việc
+        shiftType: null, // Thêm trường thông tin ca làm việc
+        currentPatients: 0, // Thêm trường số bệnh nhân hiện tại
+        maxPatients: 5 // Thêm trường số bệnh nhân tối đa
     });
     const [loading, setLoading] = useState(false);
     const [confirmDelete, setConfirmDelete] = useState(false);
@@ -60,7 +62,9 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                 roomCode: schedule.roomCode || '',
                 original_status: schedule.original_status, // Lưu trạng thái gốc từ BE
                 shiftType: shiftTypeValue, // Lấy từ type hoặc shiftType
-                type: schedule.type // Lưu trữ trường type gốc
+                type: schedule.type, // Lưu trữ trường type gốc
+                currentPatients: schedule.currentPatients || 0, // Lấy số bệnh nhân hiện tại
+                maxPatients: schedule.maxPatients || 5 // Lấy số bệnh nhân tối đa
             });
         }
         
@@ -229,20 +233,42 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
             
             // Gọi API để xóa lịch
             console.log('Deleting schedule:', schedule.id);
-            const response = await deleteScheduleAPI(schedule.id);
-            console.log('Delete response:', response);
             
-            // Sử dụng setTimeout để tránh FlushSync error
-            setTimeout(() => {
-                // Thông báo thành công và đóng modal
-                onDelete(schedule.id);
+            try {
+                const response = await deleteScheduleAPI(schedule.id);
+                console.log('Delete response:', response);
+                
+                // Đóng modal trước
                 onHide();
-            }, 0);
+                
+                // Sau đó thông báo cho component cha về việc xóa thành công
+                // để component cha có thể cập nhật UI và làm mới dữ liệu
+                onDelete(schedule.id);
+                
+            } catch (apiError) {
+                console.error('API error when deleting schedule:', apiError);
+                
+                // Kiểm tra nếu lỗi 404 (không tìm thấy) - có thể lịch đã bị xóa trước đó
+                if (apiError.response && apiError.response.status === 404) {
+                    console.log('Schedule not found, may have been deleted already');
+                    onHide();
+                    onDelete(schedule.id); // Vẫn gọi onDelete để cập nhật UI
+                    return;
+                }
+                
+                // Các lỗi khác
+                notification.error({
+                    message: 'Lỗi',
+                    description: 'Không thể xóa lịch, vui lòng thử lại sau',
+                    placement: 'topRight',
+                    duration: 3
+                });
+            }
         } catch (error) {
-            console.error('Error deleting schedule:', error);
+            console.error('Error in handleDelete function:', error);
             notification.error({
                 message: 'Lỗi',
-                description: 'Không thể xóa lịch, vui lòng thử lại sau',
+                description: 'Đã xảy ra lỗi khi xử lý yêu cầu xóa',
                 placement: 'topRight',
                 duration: 3
             });
@@ -400,6 +426,23 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                                         ) : (
                                             <span className="text-muted">Không thuộc ca nào</span>
                                         )}
+                                    </div>
+                                </Col>
+                            </Row>
+                            
+                            {/* Hiển thị thông tin số lượng bệnh nhân */}
+                            <Row className="mt-3">
+                                <Col md={6} className="d-flex align-items-center">
+                                    <BsPersonPlus className="text-success me-2" size={20} />
+                                    <div>
+                                        <div className="text-muted small">Số bệnh nhân</div>
+                                        <Badge 
+                                            bg={formData.currentPatients >= formData.maxPatients ? 'danger' : 
+                                               formData.currentPatients > 0 ? 'warning' : 'success'}
+                                            className="p-2"
+                                        >
+                                            {formData.currentPatients} / {formData.maxPatients}
+                                        </Badge>
                                     </div>
                                 </Col>
                             </Row>
