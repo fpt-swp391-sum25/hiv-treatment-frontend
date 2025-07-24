@@ -200,7 +200,7 @@ const MedicalReport = () => {
             </Card>
           </Col>
         </Row>
-        
+
         {/* Tóm tắt tình hình HIV */}
         <Divider>Tóm tắt tình hình HIV</Divider>
         <Row>
@@ -348,7 +348,7 @@ const MedicalReport = () => {
                 {
                   title: 'Tỷ lệ dương tính',
                   key: 'positiveRate',
-                  render: (_, record) => {
+        render: (_, record) => {
                     const total = record.positive + record.negative;
                     const rate = total > 0 ? Math.round((record.positive / total) * 100) : 0;
                     return `${rate}%`;
@@ -389,7 +389,7 @@ const MedicalReport = () => {
               <li>Tăng cường các hoạt động truyền thông về phòng chống HIV/AIDS</li>
               <li>Theo dõi sát sao các ca dương tính mới để đảm bảo tiếp cận điều trị sớm</li>
             </ul>
-          </div>
+        </div>
         </Card>
       </div>
     );
@@ -420,7 +420,7 @@ const MedicalReport = () => {
       if (!acc[patientId]) {
         acc[patientId] = {
           patient: {
-            id: patientId,
+          id: patientId,
             fullName: patient.fullName,
             phone: patient.phone,
             email: patient.email,
@@ -460,7 +460,7 @@ const MedicalReport = () => {
     if (patientList.length === 0) {
       return <Empty description="Không có dữ liệu lịch sử bệnh nhân" />;
     }
-
+    
     return (
       <div className="patient-appointments-tab">
         <Row gutter={[16, 16]}>
@@ -503,7 +503,7 @@ const MedicalReport = () => {
                 <>
                   <Divider orientation="left">Lịch sử khám bệnh và kết quả xét nghiệm</Divider>
                   
-                  <List
+              <List
                     dataSource={item.appointments}
                     renderItem={appointment => (
                       <Card 
@@ -557,7 +557,7 @@ const MedicalReport = () => {
                               <Table
                                 dataSource={appointment.testResults}
                                 rowKey={(record, index) => `${appointment.id}-test-${index}`}
-                                size="small"
+                          size="small"
                                 pagination={false}
                                 columns={[
                                   {
@@ -600,12 +600,12 @@ const MedicalReport = () => {
                               />
                             ) : (
                               <Empty description="Không có kết quả xét nghiệm" />
-                            )}
-                          </div>
+                      )}
+                    </div>
                         )}
                       </Card>
-                    )}
-                  />
+                )}
+              />
                 </>
               )}
             </Card>
@@ -616,26 +616,26 @@ const MedicalReport = () => {
   };
 
   return (
-    <div className="medical-report-container">
-      <div className="report-actions">
+      <div className="medical-report-container">
+        <div className="report-actions">
         <Space>
-          <Button 
-            icon={<FilterOutlined />} 
+              <Button
+                icon={<FilterOutlined />}
             onClick={toggleFilters}
-          >
-            Bộ lọc
-          </Button>
-          <Button 
-            icon={<FileExcelOutlined />} 
-            onClick={handleExportExcel}
+              >
+                Bộ lọc
+              </Button>
+              <Button
+                icon={<FileExcelOutlined />}
+                onClick={handleExportExcel}
             loading={exportLoading}
-          >
-            Xuất Excel
-          </Button>
+              >
+                Xuất Excel
+              </Button>
         </Space>
       </div>
 
-      {showFilters && (
+          {showFilters && (
         <Card className="filter-card">
           <Space direction="vertical" style={{ width: '100%' }}>
             <div>
@@ -649,15 +649,15 @@ const MedicalReport = () => {
               </div>
             </div>
             <Button type="primary" onClick={loadReportData}>
-              Áp dụng
-            </Button>
+                    Áp dụng
+                  </Button>
           </Space>
-        </Card>
+            </Card>
       )}
 
       <Spin spinning={loading}>
-        <Tabs 
-          activeKey={activeTab} 
+        <Tabs
+          activeKey={activeTab}
           onChange={setActiveTab}
           className="report-tabs"
           items={[
@@ -679,7 +679,7 @@ const MedicalReport = () => {
           ]}
         />
       </Spin>
-    </div>
+      </div>
   );
 };
 
