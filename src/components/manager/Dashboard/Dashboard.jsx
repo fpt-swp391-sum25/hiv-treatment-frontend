@@ -260,22 +260,6 @@ const Dashboard = () => {
                 icon={<UserOutlined />}
               />
             </Col>
-            <Col xs={24} sm={12} md={6}>
-              <KPICard
-                title="Lịch hẹn hôm nay"
-                value={todayAppointments}
-                type="warning"
-                icon={<CalendarOutlined />}
-              />
-            </Col>
-            <Col xs={24} sm={12} md={6}>
-              <KPICard
-                title="Tỷ lệ điều trị thành công"
-                value={`${treatmentSuccessRate}%`}
-                type="success"
-                icon={<CheckCircleOutlined />}
-              />
-            </Col>
           </Row>
         </div>
 
@@ -654,7 +638,7 @@ const Dashboard = () => {
           </Col>
           <Col xs={24} sm={12} md={8}>
             <KPICard
-              title="Hoàn thành"
+              title="Đã Khám"
               value={stats.completedSchedules || 0}
               type="success"
               icon={<CalendarOutlined />}

@@ -767,43 +767,48 @@ const calculateRevenueByMonth = (schedules, averageAppointmentCost) => {
 
 // Tính toán xu hướng đăng ký bệnh nhân mới theo thời gian
 const calculatePatientRegistrationTrend = (patients) => {
+  console.log('[DEBUG] Input patients for registration trend:', patients);
+  // Nếu dữ liệu bệnh nhân quá ít, thêm dữ liệu mẫu để test biểu đồ
+  let testPatients = [...patients];
+  if (testPatients.length < 6) {
+    const now = new Date();
+    for (let i = 1; i <= 5; i++) {
+      testPatients.push({
+        createdAt: new Date(now.getFullYear(), now.getMonth() - i, 10).toISOString(),
+        id: 100 + i,
+        fullName: `Test User ${i}`
+      });
+    }
+  }
   // Tạo đối tượng để lưu trữ số lượng bệnh nhân đăng ký theo tháng
   const registrationByMonth = {};
-  
   // Lấy 6 tháng gần nhất
   const currentDate = new Date();
   const months = [];
-  
   for (let i = 5; i >= 0; i--) {
     const month = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
     const monthKey = `${month.getFullYear()}-${month.getMonth() + 1}`;
     const monthLabel = `${month.getMonth() + 1}/${month.getFullYear()}`;
-    
     months.push({
       key: monthKey,
       label: monthLabel,
       count: 0
     });
-    
     registrationByMonth[monthKey] = 0;
   }
-  
   // Đếm số lượng bệnh nhân đăng ký theo tháng
-  patients.forEach(patient => {
+  testPatients.forEach(patient => {
     if (!patient.createdAt) return;
-    
     const createdDate = new Date(patient.createdAt);
     const monthKey = `${createdDate.getFullYear()}-${createdDate.getMonth() + 1}`;
-    
     if (registrationByMonth[monthKey] !== undefined) {
       registrationByMonth[monthKey]++;
     }
   });
-  
   // Cập nhật số lượng vào mảng kết quả
   months.forEach(month => {
     month.count = registrationByMonth[month.key];
   });
-  
+  console.log('[DEBUG] Output registration trend:', months);
   return months;
 }; 
