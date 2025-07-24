@@ -58,14 +58,14 @@ const ManagerSchedule = () => {
         // Kiểm tra kết nối đến backend
         // Bỏ qua lỗi kết nối và tiếp tục tải dữ liệu
         try {
-        checkBackendConnection()
-            .then(result => {
-                setBackendConnected(result.success);
+            checkBackendConnection()
+                .then(result => {
+                    setBackendConnected(result.success);
                     // Luôn tải dữ liệu bất kể kết nối thành công hay không
                     fetchSchedules();
-            })
-            .catch(err => {
-                console.error('Error checking backend connection:', err);
+                })
+                .catch(err => {
+                    console.error('Error checking backend connection:', err);
                     // Vẫn đặt backendConnected = true để không chặn UI
                     setBackendConnected(true);
                     // Vẫn tải dữ liệu ngay cả khi kiểm tra kết nối thất bại
@@ -179,7 +179,7 @@ const ManagerSchedule = () => {
                 
                 // Sử dụng setTimeout để tránh FlushSync error
                 setTimeout(() => {
-                setSchedules(formattedSchedules);
+                    setSchedules(formattedSchedules);
                     console.log('🎉 Đã cập nhật state với dữ liệu mới');
                 }, 0);
                 
@@ -191,7 +191,7 @@ const ManagerSchedule = () => {
                 
                 // Sử dụng setTimeout để tránh FlushSync error
                 setTimeout(() => {
-                setSchedules([]);
+                    setSchedules([]);
                 }, 0);
                 
                 showNotification('Không có dữ liệu lịch từ server', 'info');
@@ -201,7 +201,7 @@ const ManagerSchedule = () => {
             
             // Sử dụng setTimeout để tránh FlushSync error
             setTimeout(() => {
-            setSchedules([]);
+                setSchedules([]);
             }, 0);
             
             // Hiển thị thông tin lỗi chi tiết hơn

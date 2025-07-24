@@ -235,9 +235,9 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
             console.log('Deleting schedule:', schedule.id);
             
             try {
-            const response = await deleteScheduleAPI(schedule.id);
-            console.log('Delete response:', response);
-            
+                const response = await deleteScheduleAPI(schedule.id);
+                console.log('Delete response:', response);
+                
                 // Đóng modal trước
                 onHide();
                 
@@ -251,7 +251,7 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                 // Kiểm tra nếu lỗi 404 (không tìm thấy) - có thể lịch đã bị xóa trước đó
                 if (apiError.response && apiError.response.status === 404) {
                     console.log('Schedule not found, may have been deleted already');
-                onHide();
+                    onHide();
                     onDelete(schedule.id); // Vẫn gọi onDelete để cập nhật UI
                     return;
                 }

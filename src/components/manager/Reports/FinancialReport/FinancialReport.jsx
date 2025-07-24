@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, Table, Button, Select, Space, Typography, Spin, Empty, Statistic, Tag, Alert, Input, Tooltip, Divider, DatePicker, Switch } from 'antd';
-import { DownloadOutlined, FileExcelOutlined, DollarCircleOutlined, CheckCircleOutlined, ClockCircleOutlined, ExceptionOutlined, FilterOutlined, ReloadOutlined } from '@ant-design/icons';
+import { DownloadOutlined, PrinterOutlined, FileExcelOutlined, DollarCircleOutlined, CheckCircleOutlined, ClockCircleOutlined, ExceptionOutlined, FilterOutlined, ReloadOutlined } from '@ant-design/icons';
 import { getPaymentStats, calculateTotalRevenue, formatPaymentDataForExport, exportToExcel, groupPaymentsByType } from '../../../../services/report.service';
 import dayjs from 'dayjs';
 import { PAYMENT_STATUS } from '../../../../types/report.types';
@@ -129,6 +129,10 @@ const FinancialReport = ({ dateRange, onError, onDateRangeChange }) => {
         }
         const formattedData = formatPaymentDataForExport(paymentData.completed);
         exportToExcel(formattedData, 'BaoCaoTaiChinh');
+    };
+
+    const handlePrint = () => {
+        window.print();
     };
 
     // Tính toán thống kê - CHỈ TÍNH CÁC GIAO DỊCH ĐÃ THANH TOÁN
@@ -434,6 +438,12 @@ const FinancialReport = ({ dateRange, onError, onDateRangeChange }) => {
                                 onClick={handleExportExcel}
                             >
                                 Xuất Excel
+                            </Button>
+                            <Button 
+                                icon={<PrinterOutlined />}
+                                onClick={handlePrint}
+                            >
+                                In báo cáo
                             </Button>
                             <Button
                                 icon={<FilterOutlined />}

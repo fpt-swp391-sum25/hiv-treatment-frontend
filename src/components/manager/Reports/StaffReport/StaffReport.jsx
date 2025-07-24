@@ -33,21 +33,21 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
     }, [dateRange]);
 
     const fetchStaffData = async () => {
-            try {
+        try {
             setLoading(true);
-                const data = await getStaffData();
+            const data = await getStaffData();
             setStaffData({
                 doctors: Array.isArray(data.doctors) ? data.doctors : [],
                 labTechnicians: Array.isArray(data.labTechnicians) ? data.labTechnicians : [],
                 managers: Array.isArray(data.managers) ? data.managers : []
             });
-            } catch (error) {
-                console.error('Error fetching staff data:', error);
+        } catch (error) {
+            console.error('Error fetching staff data:', error);
             onError(error);
-            } finally {
-                setLoading(false);
-            }
-        };
+        } finally {
+            setLoading(false);
+        }
+    };
 
     // Tính toán thống kê
     const statistics = {
@@ -209,10 +209,10 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
                 return staffData.managers.map(mgr => ({ ...mgr, role: STAFF_ROLES.MANAGER }));
             default:
                 return [
-        ...staffData.doctors.map(doc => ({ ...doc, role: STAFF_ROLES.DOCTOR })),
-        ...staffData.labTechnicians.map(tech => ({ ...tech, role: STAFF_ROLES.LAB_TECHNICIAN })),
-        ...staffData.managers.map(mgr => ({ ...mgr, role: STAFF_ROLES.MANAGER }))
-    ];
+                    ...staffData.doctors.map(doc => ({ ...doc, role: STAFF_ROLES.DOCTOR })),
+                    ...staffData.labTechnicians.map(tech => ({ ...tech, role: STAFF_ROLES.LAB_TECHNICIAN })),
+                    ...staffData.managers.map(mgr => ({ ...mgr, role: STAFF_ROLES.MANAGER }))
+                ];
         }
     };
     
@@ -279,7 +279,7 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
         const reportTitle = activeTab === 'doctors' ? 'BaoCaoNhanSu_BacSi' : 
                            activeTab === 'labTechnicians' ? 'BaoCaoNhanSu_KyThuatVien' : 
                            activeTab === 'managers' ? 'BaoCaoNhanSu_QuanLy' : 'BaoCaoNhanSu_TatCa';
-        
+                           
         exportToExcel(formattedData, reportTitle);
     };
     
@@ -502,15 +502,15 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
                     }
                 >
                     {filteredStaffList.length > 0 ? (
-                    <Table
-                        columns={columns}
-                        dataSource={filteredStaffList}
-                        rowKey="id"
-                        pagination={{
-                            pageSize: 10,
-                            showSizeChanger: true,
-                            showTotal: (total) => `Tổng số ${total} nhân viên`
-                        }}
+                        <Table
+                            columns={columns}
+                            dataSource={filteredStaffList}
+                            rowKey="id"
+                            pagination={{
+                                pageSize: 10,
+                                showSizeChanger: true,
+                                showTotal: (total) => `Tổng số ${total} nhân viên`
+                            }}
                             bordered
                             size="middle"
                         />
@@ -520,7 +520,7 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
                             description="Không tìm thấy nhân viên nào phù hợp với điều kiện lọc."
                             type="info"
                             showIcon
-                    />
+                        />
                     )}
                 </Card>
             </div>
