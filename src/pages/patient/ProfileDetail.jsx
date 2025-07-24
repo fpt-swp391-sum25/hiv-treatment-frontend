@@ -54,8 +54,8 @@ const ProfileDetail = () => {
 
         if (newPassword && newPassword !== confirmPassword) {
             newErrors.confirmPassword = "Mật khẩu xác nhận không khớp";
-        }
 
+        }
         if (Object.keys(newErrors).length > 0) {
             return setErrors(newErrors);
         }
