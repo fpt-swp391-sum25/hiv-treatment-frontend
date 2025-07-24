@@ -108,10 +108,19 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
         }, 0);
     };
 
-    const getStatusColor = (status) => {
+    const getStatusColor = (status, currentPatients = 0, maxPatients = 5) => {
+        if (status === ScheduleStatus.AVAILABLE) {
+            // Gradient màu từ xanh lá (trống hoàn toàn) đến vàng (gần đầy) đến đỏ (đã đầy)
+            if (currentPatients === 0) {
+                return '#28a745'; // success - xanh lá (lịch trống hoàn toàn)
+            } else if (currentPatients < maxPatients) {
+                return '#ffc107'; // warning - vàng (có bệnh nhân nhưng chưa đầy)
+            } else {
+                return '#dc3545'; // danger - đỏ (đã đầy)
+            }
+        }
+        
         switch (status) {
-            case ScheduleStatus.AVAILABLE:
-                return '#28a745'; // success - xanh lá (lịch trống)
             case 'cancelled':
                 return '#dc3545'; // danger - đỏ (đã hủy)
             case 'active':
@@ -149,12 +158,19 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
             const endMoment = moment(startDateTime).add(30, 'minutes');
             const endDateTime = endMoment.format('YYYY-MM-DDTHH:mm:ss');
             
+            // Lấy thông tin số lượng bệnh nhân
+            const currentPatients = event.currentPatients !== undefined ? event.currentPatients : 0;
+            const maxPatients = event.maxPatients !== undefined ? event.maxPatients : 5;
+            
+            // Lấy màu sắc dựa trên trạng thái và số lượng bệnh nhân
+            const color = getStatusColor(event.status, currentPatients, maxPatients);
+            
             return {
                 id: event.id,
                 title: event.title || 'Không xác định',
                 start: startDateTime,
                 end: endDateTime,
-                color: getStatusColor(event.status),
+                color: color,
                 extendedProps: {
                     ...event
                 },
@@ -200,8 +216,13 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
         // Lấy thông tin khung giờ
         const slotTime = eventData.slot ? eventData.slot.substring(0, 5) : '';
         
-        // Lấy màu sắc theo trạng thái
-        const statusColor = getStatusColor(eventData.status);
+        // Lấy thông tin số lượng bệnh nhân
+        const currentPatients = eventData.currentPatients !== undefined ? eventData.currentPatients : 0;
+        const maxPatients = eventData.maxPatients !== undefined ? eventData.maxPatients : 5;
+        const patientInfo = `${currentPatients}/${maxPatients}`;
+        
+        // Lấy màu sắc theo trạng thái và số lượng bệnh nhân
+        const statusColor = getStatusColor(eventData.status, currentPatients, maxPatients);
         
         // Kiểm tra loại view hiện tại
         const viewType = eventInfo.view.type;
@@ -218,11 +239,16 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
                         <div className="week-event-title">
                             {eventData.doctorName || 'Không có tên'}
                         </div>
+                        <div className="d-flex justify-content-between">
                         {roomInfo && (
                             <div className="week-event-room">
                                 {roomInfo}
                             </div>
                         )}
+                            <div className="week-event-patients">
+                                {patientInfo}
+                            </div>
+                        </div>
                     </div>
                 </div>
             );
@@ -234,6 +260,7 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
                     <div className="list-event-info">
                         {slotTime && <span className="list-event-time">{slotTime}</span>}
                         {roomInfo && <span className="list-event-room">{roomInfo}</span>}
+                        <span className="list-event-patients">{patientInfo}</span>
                     </div>
                 </div>
             );
@@ -242,7 +269,10 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
             return (
                 <div className="time-event-content">
                     <div className="time-event-title">{eventData.doctorName || 'Không có tên'}</div>
+                    <div className="d-flex justify-content-between">
                     {roomInfo && <div className="time-event-room">{roomInfo}</div>}
+                        <div className="time-event-patients">{patientInfo}</div>
+                    </div>
                 </div>
             );
         }

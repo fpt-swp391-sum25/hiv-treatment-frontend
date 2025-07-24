@@ -125,7 +125,8 @@ export const getStaffData = async () => {
                 role: 'DOCTOR',
                 status: doctor.status || 'ACTIVE',
                 casesHandled: doctorSchedules.length,
-                performance: calculatePerformance(doctorSchedules.length, completedSchedules.length)
+                performance: calculatePerformance(doctorSchedules.length, completedSchedules.length),
+                created_at: doctor.created_at || doctor.createdAt
             };
         });
 
@@ -142,7 +143,8 @@ export const getStaffData = async () => {
                 role: 'LAB_TECHNICIAN',
                 status: tech.status || 'ACTIVE',
                 casesHandled: techTestResults.length,
-                performance: calculatePerformance(techTestResults.length, completedTests.length)
+                performance: calculatePerformance(techTestResults.length, completedTests.length),
+                created_at: tech.created_at || tech.createdAt
             };
         });
 
@@ -153,7 +155,8 @@ export const getStaffData = async () => {
             email: manager.email,
             phoneNumber: manager.phoneNumber,
             role: 'MANAGER',
-            status: manager.status || 'ACTIVE'
+            status: manager.status || 'ACTIVE',
+            created_at: manager.created_at || manager.createdAt
         }));
 
         // 5. Trả về kết quả với các chỉ số tổng hợp
@@ -213,10 +216,11 @@ export const getPaymentStats = async (status) => {
     try {
         let url = '/api/payment';
         if (status) {
-            url = `/api/payment/status/${status}`;
+            url = `/api/payment/status/${encodeURIComponent(status)}`;
         }
         const response = await axios.get(url);
-        return response.data || [];
+        // Đảm bảo trả về mảng dữ liệu
+        return Array.isArray(response.data) ? response.data : [];
     } catch (error) {
         console.error('Error in getPaymentStats:', error);
         throw error;
@@ -308,6 +312,7 @@ export const aggregateDataByDate = (data, startDate, endDate) => {
 
 // Helper function để tính tổng doanh thu
 export const calculateTotalRevenue = (payments) => {
+    if (!Array.isArray(payments)) return 0;
     return payments.reduce((total, payment) => total + (Number(payment.amount) || 0), 0);
 };
 
@@ -377,6 +382,7 @@ export const exportToExcel = async (data, fileName) => {
     }
 };
 
+// Format dữ liệu thanh toán cho xuất Excel
 export const formatPaymentDataForExport = (payments) => {
     if (!Array.isArray(payments) || payments.length === 0) {
         return [];
@@ -384,105 +390,47 @@ export const formatPaymentDataForExport = (payments) => {
     
     return payments.map(payment => ({
         'Mã giao dịch': payment.id || 'N/A',
-        'Thời gian': payment.createdAt ? dayjs(payment.createdAt).format('DD/MM/YYYY HH:mm') : dayjs().format('DD/MM/YYYY HH:mm'),
-        'Mã bệnh nhân': payment.patientId || 'N/A',
-        'Phương thức': payment.account || 'Không xác định',
-        'Tên dịch vụ': payment.name || 'Không xác định',
+        'Mã tham chiếu': payment.paymentRef || 'N/A',
+        'Thời gian': payment.time ? dayjs(payment.time).format('DD/MM/YYYY HH:mm') : 'N/A',
         'Mô tả': payment.description || '',
         'Số tiền': typeof payment.amount === 'number' 
             ? new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(payment.amount)
             : '0 VNĐ',
-        'Trạng thái': payment.status || 'Không xác định'
+        'Trạng thái': payment.status || 'Không xác định',
+        'Bệnh nhân': payment.schedule?.patient?.fullName || 'N/A',
+        'Số điện thoại': payment.schedule?.patient?.phoneNumber || 'N/A',
+        'Bác sĩ': payment.schedule?.doctor?.fullName || 'N/A',
+        'Loại lịch hẹn': payment.schedule?.type || 'N/A',
+        'Phòng': payment.schedule?.roomCode || 'N/A'
     }));
 };
 
-export const formatStaffDataForExport = (staffData) => {
-    if (!staffData || !staffData.doctors || !staffData.labTechnicians || !staffData.managers) {
+// Nhóm thanh toán theo loại
+export const groupPaymentsByType = (payments) => {
+    if (!Array.isArray(payments) || payments.length === 0) {
         return [];
     }
     
-    const doctors = Array.isArray(staffData.doctors) ? staffData.doctors : [];
-    const labTechs = Array.isArray(staffData.labTechnicians) ? staffData.labTechnicians : [];
-    const managers = Array.isArray(staffData.managers) ? staffData.managers : [];
-    
-    const allStaff = [
-        ...doctors.map(doc => ({ ...doc, role: 'Bác sĩ' })),
-        ...labTechs.map(tech => ({ ...tech, role: 'Kỹ thuật viên' })),
-        ...managers.map(mgr => ({ ...mgr, role: 'Quản lý' }))
-    ];
+    // Nhóm theo loại giao dịch (mặc định)
+    const grouped = payments.reduce((acc, payment) => {
+        // Sử dụng schedule.type từ cấu trúc mới
+        const type = payment.schedule?.type || 'Không xác định';
+        if (!acc[type]) {
+            acc[type] = {
+                count: 0,
+                total: 0
+            };
+        }
+        acc[type].count += 1;
+        acc[type].total += Number(payment.amount) || 0;
+        return acc;
+    }, {});
 
-    return allStaff.map(staff => ({
-        'Họ và tên': staff.fullName || 'Không có tên',
-        'Vai trò': staff.role || 'Không xác định',
-        'Email': staff.email || 'Không có email',
-        'Số điện thoại': staff.phoneNumber || 'Không có SĐT',
-        'Số ca xử lý': staff.casesHandled || 0,
-        'Hiệu suất': staff.performance ? `${staff.performance}%` : 'N/A',
-        'Trạng thái': staff.status || 'Không xác định',
-        'ID': staff.id || 'N/A'
+    return Object.entries(grouped).map(([type, data]) => ({
+        name: type,
+        count: data.count,
+        total: data.total
     }));
-};
-
-export const groupPaymentsByType = (payments, groupBy = 'account') => {
-    if (!Array.isArray(payments)) {
-        return {};
-    }
-    
-    if (groupBy === 'day' || groupBy === 'week' || groupBy === 'month') {
-        // Nhóm theo thời gian (ngày/tuần/tháng)
-        const grouped = {};
-        
-        payments.forEach(payment => {
-            if (!payment || !payment.createdAt) return;
-            
-            const date = dayjs(payment.createdAt);
-            if (!date.isValid()) return;
-            
-            let key = '';
-            
-            switch (groupBy) {
-                case 'day':
-                    key = date.format('YYYY-MM-DD');
-                    break;
-                case 'week':
-                    key = `${date.year()}-W${date.week()}`;
-                    break;
-                case 'month':
-                    key = date.format('YYYY-MM');
-                    break;
-                default:
-                    key = date.format('YYYY-MM-DD');
-            }
-            
-            if (!grouped[key]) {
-                grouped[key] = [];
-            }
-            
-            grouped[key].push(payment);
-        });
-        
-        return grouped;
-    } else {
-        // Nhóm theo loại giao dịch (mặc định)
-        const grouped = payments.reduce((acc, payment) => {
-            const type = payment.account || 'unknown';
-            if (!acc[type]) {
-                acc[type] = {
-                    count: 0,
-                    total: 0
-                };
-            }
-            acc[type].count += 1;
-            acc[type].total += Number(payment.amount) || 0;
-            return acc;
-        }, {});
-
-        return Object.entries(grouped).map(([type, data]) => ({
-            name: type,
-            count: data.count,
-            total: data.total
-        }));
-    }
 };
 
 // Staff Report Services
@@ -1057,4 +1005,32 @@ const calculateTestTypeDistributionFromTestResults = (testResults) => {
     count,
     percentage: Math.round((count / totalTests) * 100)
   }));
+}; 
+
+// Format dữ liệu nhân viên cho xuất Excel
+export const formatStaffDataForExport = (staffData) => {
+    if (!staffData || !staffData.doctors || !staffData.labTechnicians || !staffData.managers) {
+        return [];
+    }
+    
+    const doctors = Array.isArray(staffData.doctors) ? staffData.doctors : [];
+    const labTechs = Array.isArray(staffData.labTechnicians) ? staffData.labTechnicians : [];
+    const managers = Array.isArray(staffData.managers) ? staffData.managers : [];
+    
+    const allStaff = [
+        ...doctors.map(doc => ({ ...doc, role: 'Bác sĩ' })),
+        ...labTechs.map(tech => ({ ...tech, role: 'Kỹ thuật viên' })),
+        ...managers.map(mgr => ({ ...mgr, role: 'Quản lý' }))
+    ];
+
+    return allStaff.map(staff => ({
+        'Họ và tên': staff.fullName || 'Không có tên',
+        'Vai trò': staff.role || 'Không xác định',
+        'Email': staff.email || 'Không có email',
+        'Số điện thoại': staff.phoneNumber || 'Không có SĐT',
+        'Số ca xử lý': staff.casesHandled || 0,
+        'Hiệu suất': staff.performance ? `${staff.performance}%` : 'N/A',
+        'Trạng thái': staff.status || 'Không xác định',
+        'ID': staff.id || 'N/A'
+    }));
 }; 
