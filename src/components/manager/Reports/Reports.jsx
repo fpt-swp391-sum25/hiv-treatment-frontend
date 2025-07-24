@@ -7,7 +7,7 @@ import {
     PrinterOutlined,
     MedicineBoxOutlined
 } from '@ant-design/icons';
-import StaffReport from './StaffReport';
+import StaffReport from './StaffReport/StaffReport';
 import FinancialReport from './FinancialReport/FinancialReport';
 import MedicalReport from './MedicalReport/MedicalReport';
 import dayjs from 'dayjs';
