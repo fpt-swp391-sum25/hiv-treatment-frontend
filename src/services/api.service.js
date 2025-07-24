@@ -1126,9 +1126,9 @@ const deleteSystemConfigurationAPI = (id) =>
 
 // Fetch all health records
 const fetchHealthRecordsAPI = () => {
-  const URL_BACKEND = '/api/health-record';
-  console.log('Fetching all health records');
-  return axios.get(URL_BACKEND);
+    const URL_BACKEND = '/api/health-record';
+    console.log('Fetching all health records');
+    return axios.get(URL_BACKEND);
 };
 
 // Hàm để lấy số lượng bệnh nhân trong mỗi slot

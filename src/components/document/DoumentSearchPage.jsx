@@ -58,14 +58,23 @@ const ResourceSearchPage = () => {
   const handleSearch = (e) => {
     const inputValue = e.target.value;
     setSearchTerm(inputValue);
-    const term = inputValue.toLowerCase();
+    const term = normalizeString(inputValue.toLowerCase());
     const filtered = documents.filter(
       (doc) =>
-        doc.title.toLowerCase().includes(term) ||
-        doc.author?.toLowerCase().includes(term) ||
-        doc.content?.toLowerCase().includes(term)
+        normalizeString(doc.title).includes(term) ||
+        normalizeString(doc.author ? doc.author : '').toLowerCase().includes(term) ||
+        normalizeString(doc.content ? doc.content : '').toLowerCase().includes(term)
     );
     setFilteredDocs(filtered);
+  };
+
+  const normalizeString = (str) => {
+    return str
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
   };
 
   const showModal = (doc) => {
