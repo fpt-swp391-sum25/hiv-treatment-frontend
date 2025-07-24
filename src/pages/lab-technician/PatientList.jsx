@@ -82,6 +82,15 @@ const LabTechnicianPatientList = () => {
         navigate(`/lab-technician/patient-detail/${record.id}`);
     };
 
+    const normalizeString = (str) => {
+        return str
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/\s+/g, ' ')
+            .trim();
+    };
+
     const columns = [
         {
             title: 'Mã bệnh nhân',
@@ -95,13 +104,13 @@ const LabTechnicianPatientList = () => {
             render: (avatar) =>
                 avatar ? (
                     <img
-                    src={
-                        avatar.startsWith('data:image')
-                        ? avatar
-                        : `data:image/jpeg;base64,${avatar}`
-                    }
-                    alt="avatar"
-                    style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }}
+                        src={
+                            avatar.startsWith('data:image')
+                                ? avatar
+                                : `data:image/jpeg;base64,${avatar}`
+                        }
+                        alt="avatar"
+                        style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }}
                     />
                 ) : 'Không có ảnh',
         },
@@ -157,7 +166,7 @@ const LabTechnicianPatientList = () => {
                     >
                         {slotOptions.map(slot => (
                             <Option key={slot} value={slot}>
-                                {slot.slice(0,5)}
+                                {slot.slice(0, 5)}
                             </Option>
                         ))}
                     </Select>

@@ -1,4 +1,4 @@
-import { Layout, Button, Avatar, Typography, message, theme, Popover, Tooltip, Popconfirm, Badge, List, Spin, notification } from "antd";
+import { Layout, Button, Avatar, Typography, message, theme, Popover, Tooltip, Popconfirm, Badge, List, Spin } from "antd";
 import { UserOutlined, LogoutOutlined, BellOutlined } from "@ant-design/icons";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
@@ -44,7 +44,7 @@ const PageHeader = () => {
         };
 
         if (user?.id) {
-            intervalId = setInterval(pollNotifications, 10000); // 10s
+            intervalId = setInterval(pollNotifications, 1000); // 1s
         }
 
         return () => clearInterval(intervalId); // cleanup
@@ -102,7 +102,6 @@ const PageHeader = () => {
                 pauseOnHover: true,
                 description: 'Đăng xuất thành công'
             });
-
             navigate("/login")
         }
     };

@@ -18,8 +18,7 @@ import {
   UserOutlined,
   LogoutOutlined,
   SettingOutlined,
-  BellOutlined,
-  UserAddOutlined
+  BellOutlined
 } from '@ant-design/icons';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useContext } from 'react';
@@ -32,7 +31,6 @@ import {
   getNotificationsByUserId,
   updateNotification
 } from '../../services/notification.service';
-import dayjs from 'dayjs';
 
 const { Header } = Layout;
 const { Text } = Typography;
@@ -101,10 +99,10 @@ const AppHeader = () => {
     };
 
     if (user?.id) {
-      intervalId = setInterval(pollNotifications, 10000);
+      intervalId = setInterval(pollNotifications, 1000); // 1s
     }
 
-    return () => clearInterval(intervalId);
+    return () => clearInterval(intervalId); // cleanup
   }, [user?.id, notifications]);
 
   const loadNotifications = async () => {
@@ -166,7 +164,7 @@ const AppHeader = () => {
       label: item.scrollTo ? (
         <a onClick={() => handleMenuClick(item.scrollTo)}>{item.label}</a>
       ) : (
-        <Link to={item.path} onClick={() => window.scrollTo(0, 0)}>
+        <Link to={item.path} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
           {item.label}
         </Link>
       )
@@ -198,7 +196,7 @@ const AppHeader = () => {
     <Header className="app-header">
       <div className="header-content">
         <div className="app-logo">
-          <Link to="/" onClick={() => window.scrollTo(0, 0)}>
+          <Link to="/">
             <img src={appLogo} alt="logo" />
           </Link>
         </div>
@@ -206,13 +204,6 @@ const AppHeader = () => {
         <Menu
           mode="horizontal"
           selectedKeys={[selectedMenuKey]}
-          onClick={({ key }) => {
-            const clickedItem = topMenuItems.find(item => item.key === key);
-            if (clickedItem?.scrollTo) {
-              setActiveSection(key);
-              handleMenuClick(clickedItem.scrollTo);
-            }
-          }}
           items={mapMenuItems(topMenuItems)}
           className="main-menu"
         />
@@ -229,33 +220,20 @@ const AppHeader = () => {
                       renderItem={(item) => (
                         <List.Item
                           style={{
-                            background: item.read ? '#fff' : '#f0faff',
-                            padding: 12,
-                            cursor: 'pointer',
-                            transition: 'background 0.3s'
+                            background: item.read ? '#fff' : '#e6f7ff',
+                            fontWeight: item.read ? 'normal' : 'bold',
+                            cursor: 'pointer'
                           }}
                           onClick={() => handleNotificationClick(item)}
-                          className="notification-item"
                         >
-                          <List.Item.Meta
-                            title={
-                              <Space>
-                                <BellOutlined style={{ color: '#1890ff' }} />
-                                <Text strong>{item.title}</Text>
-                              </Space>
-                            }
-                            description={
-                              <div style={{ fontSize: 13, color: '#595959' }}>
-                                <div>{item.message}</div>
-                                <div style={{ fontSize: 11, color: '#8c8c8c', marginTop: 4 }}>
-                                  {dayjs(item.createdAt).format('HH:mm - DD/MM/YYYY')}
-                                </div>
-                              </div>
-                            }
-                          />
+                          <div>
+                            <span>{item.title}</span>
+                            <div style={{ fontSize: 12, color: '#888' }}>{item.message}</div>
+                            <div style={{ fontSize: 10, color: '#aaa' }}>{item.createdAt}</div>
+                          </div>
                         </List.Item>
                       )}
-                      style={{ width: 320, maxHeight: 400, overflow: 'auto' }}
+                      style={{ width: 300, maxHeight: 400, overflow: 'auto' }}
                     />
                   </Spin>
                 }
@@ -298,27 +276,14 @@ const AppHeader = () => {
               </Popconfirm>
             </Space>
           ) : (
-            <Space size="small" className="auth-buttons">
+            <Space size="middle" className="auth-buttons">
               <Link to="/login">
-                <Button
-                  icon={<UserOutlined style={{ fontSize: '18px' }} />}
-                  type='text'
-                >
-                  Đăng nhập
-                </Button>
+                <Button type='text'>Đăng nhập</Button>
               </Link>
-
               <Link to="/register">
-                <Button
-                  icon={<UserAddOutlined style={{ fontSize: '18px' }} />}
-                  className='btn-sign-up'
-                >
-                  Đăng ký
-                </Button>
+                <Button className='btn-sign-up'>Đăng ký</Button>
               </Link>
             </Space>
-
-
           )}
         </div>
       </div>

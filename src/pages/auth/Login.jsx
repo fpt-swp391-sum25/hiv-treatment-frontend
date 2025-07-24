@@ -7,6 +7,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { googleLoginAPI, loginAPI } from '../../services/api.service';
 import { useForm } from 'antd/es/form/Form';
 import { AuthContext } from '../../components/context/AuthContext';
+import { validateField } from '../../utils/validate';
+import { sendResetPasswordAPI } from '../../services/auth.service';
 
 const { Link, Text } = Typography;
 
@@ -17,6 +19,7 @@ const Login = () => {
     const [email, setEmail] = useState('')
     const [error, setError] = useState('');
     const [showResend, setShowResend] = useState(false)
+    const [showForgotPassword, setShowForgotPassword] = useState(false)
     const { user, setUser } = useContext(AuthContext)
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
@@ -44,11 +47,6 @@ const Login = () => {
             redirectHomePage();
         }
     }, []);
-
-
-
-
-
 
     const handleLogin = async () => {
         setLoading(true);
@@ -178,7 +176,7 @@ const Login = () => {
 
     const handleResend = async () => {
         const response = await resendVerifyEmailAPI(email)
-        if (response) {
+        if (response.data) {
             notification.success({
                 message: "Hệ thống",
                 showProgress: true,
@@ -196,10 +194,77 @@ const Login = () => {
     }
 
 
+    const handleForgotPassword = async () => {
+        setLoading(true)
+        const response = await sendResetPasswordAPI(email)
+        if (response.data) {
+            notification.success({
+                message: "Hệ thống",
+                showProgress: true,
+                pauseOnHover: true,
+                description: 'Đã gửi email đổi mật khẩu'
+            });
+        } else if (response.status === 404) {
+            notification.error({
+                message: "Hệ thống",
+                showProgress: true,
+                pauseOnHover: true,
+                description: 'Không tìm thấy email'
+            });
+        } else {
+            notification.error({
+                message: "Hệ thống",
+                showProgress: true,
+                pauseOnHover: true,
+                description: 'Lỗi khi gửi email đổi mật khẩu'
+            });
+        }
+        setLoading(false)
+    }
+
+
     return (
         <div style={{ maxWidth: 500, margin: '40px auto', padding: 24, boxShadow: '0 4px 12px rgba(0,0,0,0.15)', borderRadius: 8 }}>
-            <Link onClick={redirectHomePage} className='link'><ArrowLeftOutlined /> Về trang chủ</Link>
-            {showResend ? (
+
+            {showForgotPassword ? (
+                <>
+                    <div>
+                        <Link onClick={() => { setShowForgotPassword(false) }} className='link'><ArrowLeftOutlined /> Quay lại trang đăng nhập</Link>
+                    </div>
+                    <h2 style={{ textAlign: 'center', margin: 24 }}>Quên mật khẩu</h2>
+                    <Form
+                        form={form}
+                        name='forgotPasswordForm'
+                        onFinish={handleForgotPassword}
+                        layout='vertical'
+                    >
+                        <Form.Item
+                            label='Email đăng kí'
+                            name='email'
+                            rules={[
+                                {
+                                    validator: (_, value) => {
+                                        const error = validateField('email', value);
+                                        if (error) return Promise.reject(error);
+                                        return Promise.resolve();
+                                    },
+                                },
+                            ]}
+                        >
+                            <Input
+                                placeholder='Nhập email của bạn'
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                            >
+
+                            </Input>
+                        </Form.Item>
+                        <Form.Item >
+                            <Button type='primary' htmlType="submit" block loading={loading}>Đặt lại mật khẩu</Button>
+                        </Form.Item>
+                    </Form>
+                </>
+            ) : showResend ? (
                 <>
                     {error && <Alert message={error} type="error" style={{ marginTop: 20 }} />}
                     <Form
@@ -238,6 +303,7 @@ const Login = () => {
                 </>
             ) : (
                 <>
+                    <Link onClick={redirectHomePage} className='link'><ArrowLeftOutlined /> Về trang chủ</Link>
                     <h2 style={{ textAlign: 'center', marginBottom: 24 }}>Đăng nhập</h2>
                     {error && <Alert message={error} type="error" style={{ marginBottom: 16 }} />}
                     <Form
@@ -268,7 +334,9 @@ const Login = () => {
                                 if (event.key === 'Enter') form.submit()
                             }} />
                         </Form.Item>
-
+                        <div style={{ textAlign: 'left', marginBottom: '15px', marginTop: '-15px' }}>
+                            <Link onClick={() => { setShowForgotPassword(true) }} className='link'> Quên mật khẩu?</Link>
+                        </div>
                         <Form.Item>
                             <Button type="primary" htmlType="submit" block loading={loading} className='btn-custom'>
                                 Đăng nhập

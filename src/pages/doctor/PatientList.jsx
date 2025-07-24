@@ -34,8 +34,8 @@ const PatientList = () => {
     useEffect(() => {
         const filtered = data.filter(item => {
             const matchesText =
-                item.fullName.toLowerCase().includes(searchText.toLowerCase()) ||
-                item.patientCode.toLowerCase().includes(searchText.toLowerCase());
+                normalizeString(item.fullName).includes(normalizeString(searchText)) ||
+                normalizeString(item.patientCode).includes(normalizeString(searchText));
 
             const dateObj = dayjs(item.date);
             const matchesYear = selectedYear ? dateObj.year() === selectedYear : true;
@@ -97,6 +97,15 @@ const PatientList = () => {
 
     const handleViewDetail = (record) => {
         navigate(`/doctor/patients/${record.id}`);
+    };
+
+    const normalizeString = (str) => {
+        return str
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/\s+/g, ' ')
+            .trim();
     };
 
     const columns = [
