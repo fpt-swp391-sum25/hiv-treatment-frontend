@@ -1,76 +1,120 @@
 .medical-report-container {
-  padding: 16px;
+  padding: 20px;
 }
 
 .report-actions {
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.filter-card {
+  margin-bottom: 16px;
+}
+
+.report-tabs {
+  background-color: #fff;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Căn giữa các tab */
+.report-tabs .ant-tabs-nav {
   margin-bottom: 20px;
+}
+
+.report-tabs .ant-tabs-nav-wrap {
+  display: flex;
+  justify-content: center;
+}
+
+.report-tabs .ant-tabs-nav-list {
+  width: auto;
+}
+
+.report-tabs .ant-tabs-tab {
+  padding: 8px 20px;
+  font-size: 16px;
 }
 
 .medical-stat-card {
   height: 100%;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
+  transition: all 0.3s;
 }
 
 .medical-stat-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
-.filter-card {
+.report-card {
+  margin-bottom: 16px;
+}
+
+.report-content {
   margin-top: 16px;
-  border-radius: 8px;
 }
 
-.report-tabs {
-  background-color: white;
-  padding: 16px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.test-type-list {
-  padding: 16px;
-  background-color: #f5f5f5;
-  border-radius: 8px;
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-.expanded-health-record {
-  padding: 16px;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  margin: 10px 0;
+/* Tab Lịch sử bệnh nhân */
+.patient-appointments-tab {
+  padding: 0 16px;
 }
 
 .patient-card {
   margin-bottom: 16px;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
-.test-results-section {
-  margin-top: 8px;
-  padding: 8px;
+.patient-card .ant-card-head {
+  background-color: #f0f5ff;
+}
+
+.patient-card .ant-card-head-title {
+  display: flex;
+  align-items: center;
+}
+
+.patient-card .ant-descriptions {
+  margin-bottom: 16px;
+}
+
+/* Card cho từng lần khám */
+.appointment-card {
+  margin-bottom: 8px;
+}
+
+.appointment-card .ant-card-head {
   background-color: #f9f9f9;
-  border-radius: 4px;
+  padding: 8px 12px;
 }
 
-/* Print styles */
-@media print {
-  .report-actions,
-  .ant-tabs-nav {
-    display: none !important;
+.appointment-card .ant-card-head-title {
+  display: flex;
+  align-items: center;
+}
+
+.appointment-card .ant-card-body {
+  padding: 12px;
+}
+
+/* Kết quả xét nghiệm */
+.test-results-section {
+  margin-top: 16px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .medical-report-container {
+    padding: 10px;
   }
   
-  .report-tabs,
-  .medical-stat-card,
-  .filter-card {
-    box-shadow: none !important;
-    border: 1px solid #ddd !important;
+  .report-tabs {
+    padding: 8px;
   }
   
-  .ant-table-pagination {
-    display: none !important;
+  .patient-card .ant-descriptions-item {
+    padding-bottom: 8px;
   }
 } 
