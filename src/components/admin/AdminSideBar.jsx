@@ -36,13 +36,13 @@ const AdminSidebar = () => {
         },
         {
           key: '5',
-          label: <NavLink to='/admin/lab-technician'>Kỹ thuật viên</NavLink>,
-          path: '/admin/lab-technician'
+          label: <NavLink to='/admin/lab-technicians'>Kỹ thuật viên</NavLink>,
+          path: '/admin/lab-technicians'
         },
         {
           key: '6',
-          label: <NavLink to='/admin/users'>Bệnh nhân</NavLink>,
-          path: '/admin/users'
+          label: <NavLink to='/admin/patients'>Bệnh nhân</NavLink>,
+          path: '/admin/patients'
 
         },
       ],

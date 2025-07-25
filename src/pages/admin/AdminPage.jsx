@@ -1,10 +1,11 @@
-import { Layout, message, theme } from 'antd';
+import { Breadcrumb, Layout, message, theme } from 'antd';
 import PageHeader from '../../components/client/PageHeader';
 import AdminSidebar from '../../components/admin/AdminSideBar';
-import { Outlet } from 'react-router-dom';
+import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useContext, useEffect } from 'react';
 import { AuthContext } from '../../components/context/AuthContext';
 import { fetchAccountAPI } from '../../services/api.service';
+import { HomeOutlined } from '@ant-design/icons';
 const { Content } = Layout;
 
 const Admin = () => {
@@ -32,12 +33,45 @@ const Admin = () => {
             }
         }
     }
+
+    const location = useLocation();
+    const pathSnippets = location.pathname.split('/').filter(i => i);
+
+    const breadcrumbNameMap = {
+        '/admin/managers': 'Quản lí',
+        '/admin/doctors': 'Bác sĩ',
+        '/admin/lab-technicians': 'Kỹ thuật viên',
+        '/admin/patients': 'Bệnh nhân',
+        '/admin/system-config': 'Cài đặt hệ thống',
+    };
+
+    const breadcrumbItems = [
+        {
+            title: <Link to="/admin"><HomeOutlined /></Link>,
+            key: 'home',
+        },
+        ...pathSnippets.map((_, idx) => {
+            const url = `/${pathSnippets.slice(0, idx + 1).join('/')}`;
+            if (url === '/admin') return null; // avoid duplicating Home
+            return {
+                title: <Link to={url}>{breadcrumbNameMap[url]}</Link>,
+                key: url,
+            };
+        }).filter(Boolean),
+    ];
+
     return (
         <Layout>
             <PageHeader />
             <Layout>
                 <AdminSidebar />
                 <Layout style={{ padding: '15px' }}>
+                    <Breadcrumb
+                        style={{ marginBottom: 16 }}
+                        items={
+                            breadcrumbItems
+                        }
+                    />
                     <Content
                         style={{
                             padding: 15,

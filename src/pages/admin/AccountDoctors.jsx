@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Button, Input, Modal, notification, Popconfirm, Space, Spin, Table, Tag } from 'antd';
 import { createAccountAPI, deleteAccountAPI, fetchAccountByRoleAPI } from '../../services/api.service';
-import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EditOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import UpdateUserModal from '../../components/admin/UpdateUserModal';
 
 const AccountDoctors = () => {
@@ -57,6 +57,27 @@ const AccountDoctors = () => {
             });
         }
         setLoading(false);
+    };
+
+    const showDeleteModal = (record) => {
+        Modal.confirm({
+            title: "Xoá người dùng",
+            content: (
+                <div>
+                    <div style={{ marginBottom: 12, color: "#888" }}>
+                        Bạn có chắc muốn xoá tài khoản sau?
+                    </div>
+                    <div>
+                        <p><b>Tên đăng nhập:</b> {record.username}</p>
+                        <p><b>Email:</b> {record.email}</p>
+                    </div>
+                </div>
+            ),
+            okText: "Có",
+            cancelText: "Không",
+            okButtonProps: { loading: loading },
+            onOk: () => handleDelete(record.id),
+        });
     };
 
     const handleDelete = async (id) => {
@@ -136,16 +157,9 @@ const AccountDoctors = () => {
                         }}
                         style={{ color: 'orange' }}
                     />
-                    <Popconfirm
-                        title="Xóa người dùng"
-                        description="Bạn có chắc muốn xóa tài khoản này?"
-                        onConfirm={() => handleDelete(record.id)}
-                        okText="Có"
-                        cancelText="Không"
-                        placement="left"
-                    >
-                        <DeleteOutlined style={{ color: 'red' }} />
-                    </Popconfirm>
+
+                    <DeleteOutlined style={{ color: 'red' }} onClick={() => showDeleteModal(record)} />
+
                 </Space>
             ),
         },
@@ -166,7 +180,7 @@ const AccountDoctors = () => {
                     <div style={{ display: 'flex', justifyContent: 'space-between', padding: '15px' }}>
                         <h2>Tài khoản bác sĩ</h2>
                         <Button onClick={() => setIsOpenModal(true)} type='primary'>
-                            Tạo mới
+                            <PlusCircleOutlined />Tạo mới
                         </Button>
                     </div>
                     <Table columns={columns} dataSource={data} rowKey="id" loading={loading} />

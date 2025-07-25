@@ -7,6 +7,7 @@ import {
   Spin,
   Space,
   notification,
+  Popconfirm,
 } from "antd";
 import {
   SaveOutlined,
@@ -108,29 +109,36 @@ const AdminSystemConfig = () => {
   }
 
   return (
-    <div style={{ padding: 32 }}>
-      <Card
-        title="Cấu hình hệ thống"
-        className="admin-system-config-card"
-        extra={
+
+    <Card
+      title="Cấu hình hệ thống"
+      extra={
+        <Popconfirm
+          title="Lưu thay đổi"
+          description="Bạn có chắc chắn muốn lưu thay đổi?"
+          onConfirm={handleSaveAll}
+          okText="Có"
+          cancelText="Không"
+          placement="left"
+          loading={saving}
+        >
           <Button
             type="primary"
             icon={<SaveOutlined />}
-            loading={saving}
-            onClick={handleSaveAll}
           >
             Lưu tất cả
           </Button>
-        }
-      >
-        <Table
-          columns={columns}
-          dataSource={configs}
-          rowKey="id"
-          pagination={false}
-        />
-      </Card>
-    </div>
+        </Popconfirm>
+      }
+    >
+      <Table
+        columns={columns}
+        dataSource={configs}
+        rowKey="id"
+        pagination={false}
+      />
+    </Card>
+
   );
 };
 

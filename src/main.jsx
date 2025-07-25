@@ -217,13 +217,13 @@ const router = createBrowserRouter([
         ),
         errorElement: <Errors />,
       },
-      {
-        path: 'schedule',
-        element: (
-          <PrivateRoute children={<DoctorSchedule />} requiredRole={['DOCTOR']} />
-        ),
-        errorElement: <Errors />,
-      },
+      // {
+      //   path: 'schedule',
+      //   element: (
+      //     <PrivateRoute children={<DoctorSchedule />} requiredRole={['DOCTOR']} />
+      //   ),
+      //   errorElement: <Errors />,
+      // },
       {
         path: 'patients',
         element: (
@@ -269,12 +269,12 @@ const router = createBrowserRouter([
         errorElement: <Errors />,
       },
       {
-        path: '/admin/lab-technician',
+        path: '/admin/lab-technicians',
         element: (<PrivateRoute children={<AccountLabTechnicians />} requiredRole={['ADMIN']} />),
         errorElement: <Errors />,
       },
       {
-        path: '/admin/users',
+        path: '/admin/patients',
         element: (<PrivateRoute children={<AccountPatients />} requiredRole={['ADMIN']} />),
         errorElement: <Errors />,
       },

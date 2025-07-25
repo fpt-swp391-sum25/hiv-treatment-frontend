@@ -1,6 +1,8 @@
 import {
     Layout, message, Spin, Table, Button, Popconfirm, Card, Typography,
-    DatePicker, notification, Tabs, Tag, Space, ConfigProvider
+    DatePicker, notification, Tabs, Tag, Space, ConfigProvider,
+    Tooltip,
+    Modal
 } from "antd";
 import {
     ClockCircleOutlined,
@@ -25,6 +27,7 @@ import {
 } from "../../services/api.service";
 import PatientAppointmentHistory from "./PatientAppointmentHistory";
 import { fetchServicePrices } from "../../services/systemConfiguration.service";
+
 
 const { Content } = Layout;
 const { Text, Title } = Typography;
@@ -131,6 +134,28 @@ const AppointmentList = () => {
             setLoading(false);
         }
     };
+    const showCancelModal = (record) => {
+        Modal.confirm({
+            title: "Huỷ lịch hẹn?",
+            content: (
+                <div>
+                    <div style={{ marginBottom: 12, color: "#888" }}>
+                        Bạn có chắc muốn huỷ lịch hẹn dưới đây?
+                    </div>
+                    <div>
+                        <p><b>Loại lịch:</b> {record.type}</p>
+                        <p><b>Ngày:</b> {dayjs(record.date, "DD-MM-YYYY").format("DD/MM/YYYY")}</p>
+                        <p><b>Giờ:</b> {record.slot ? dayjs(record.slot, "HH:mm:ss").format("HH:mm") : ""}</p>
+                        <p><b>Bác sĩ:</b> {record.doctorName}</p>
+                    </div>
+                </div>
+            ),
+            okText: "Có",
+            cancelText: "Không",
+            onOk: () => handleCancelSchedule(record.id),
+            okButtonProps: { loading: loading },
+        });
+    };
 
     const getTypeColor = (type) => {
         switch (type) {
@@ -184,20 +209,33 @@ const AppointmentList = () => {
             title: '',
             key: 'action',
             render: (_, record) => {
+                const appointmentDateTime = dayjs(`${record.date} ${record.slot}`, 'DD-MM-YYYY HH:mm')
+                const now = dayjs()
+                const canCancel = appointmentDateTime.diff(now, 'hour') >= 24
+                console.log('>>>>>>>>check can cancel ', canCancel)
+
                 if (['Đã thanh toán', 'Đang chờ thanh toán', 'Đang hoạt động'].includes(record.status)) {
-                    return (
-                        <Popconfirm
-                            title="Huỷ lịch hẹn?"
-                            description="Bạn có chắc muốn huỷ?"
-                            onConfirm={() => handleCancelSchedule(record.id)}
-                            okText="Có"
-                            cancelText="Không"
-                        >
-                            <Button className="custom-delete-btn" icon={<DeleteOutlined />} >
+                    if (canCancel) {
+
+
+                        return (
+                            <Button
+                                className="custom-delete-btn"
+                                icon={<DeleteOutlined />}
+                                onClick={() => showCancelModal(record)}
+                            >
                                 Huỷ
                             </Button>
-                        </Popconfirm>
-                    );
+                        );
+                    } else {
+                        return (
+                            <Tooltip title='Chỉ được huỷ trước 24 giờ'>
+                                <Button className="custom-delete-btn" icon={<DeleteOutlined />} disabled >
+                                    Huỷ
+                                </Button>
+                            </Tooltip>
+                        )
+                    }
                 } else if (record.status === 'Thanh toán thất bại') {
                     return (
                         <Popconfirm

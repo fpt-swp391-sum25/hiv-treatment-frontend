@@ -9,7 +9,7 @@ const { Title } = Typography;
 
 const icons = [ScheduleOutlined, UnorderedListOutlined, UnorderedListOutlined, UserOutlined, FileTextOutlined];
 const labels = ['Lịch làm việc', 'Danh sách bệnh nhân', 'Danh sách phác đồ', 'Hồ sơ cá nhân', 'Quản lý document'];
-const paths = ['/doctor/schedule', '/doctor/patients', '/doctor/regimens', '/doctor/profile', '/doctor/documents'];
+const paths = ['/doctor', '/doctor/patients', '/doctor/regimens', '/doctor/profile', '/doctor/documents'];
 const items = icons.map(
   (icon, index) => ({
     key: String(index + 1),
