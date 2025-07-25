@@ -901,6 +901,25 @@ const getSlotCountsAPI = (doctorId, date) => {
         });
 };
 
+// services/api.service.js
+const getHealthRecordByDoctorIdAPI = async (doctorId, filterType, selectedDate) => {
+  const params = {};
+
+  if (filterType) params.filterType = filterType;
+  if (selectedDate) params.selectedDate = selectedDate;
+
+  try {
+    const response = await axios.get(`/api/health-record/doctor-id/${doctorId}`, {
+      params
+    });
+    return response;
+  } catch (error) {
+    console.error('Lỗi gọi API getHealthRecordByDoctorIdAPI:', error);
+    throw error;
+  }
+};
+
+
 // Export tất cả các hàm API
 export {
     loginAPI,
@@ -971,5 +990,6 @@ export {
     createSystemConfigurationAPI,
     deleteSystemConfigurationAPI,
     fetchHealthRecordsAPI,
-    getSlotCountsAPI
+    getSlotCountsAPI,
+    getHealthRecordByDoctorIdAPI,
 }

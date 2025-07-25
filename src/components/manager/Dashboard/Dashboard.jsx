@@ -11,7 +11,9 @@ import axios from '../../../services/axios.customize';
 import {
   fetchStaffStatisticsAPI,
   fetchAppointmentStatisticsAPI,
-  fetchAllDoctorsAPI
+  fetchAllDoctorsAPI,
+  fetchAccountByRoleAPI,
+  getHealthRecordByDoctorIdAPI
 } from '../../../services/api.service';
 import {
   getStaffStatistics,
@@ -22,6 +24,7 @@ import { SCHEDULE_STATUS, STATUS_LABELS } from '../../../constants/status.consta
 import './Dashboard.css';
 import KPICard from './KPICard';
 import DashboardFilters from './DashboardFilters';
+import dayjs from 'dayjs';
 
 // Import các biểu đồ cần thiết
 import AppointmentStatusChart from './AppointmentStatusChart';
@@ -51,6 +54,7 @@ const Dashboard = () => {
   const [filters, setFilters] = useState({
     dateRange: [null, null],
     period: 'month', // 'day', 'week', 'month', 'year'
+    selectedDate: null,
     doctorId: null,
   });
 
@@ -58,6 +62,122 @@ const Dashboard = () => {
   const [doctors, setDoctors] = useState([]);
   // State cho tab hiện tại
   const [activeTab, setActiveTab] = useState('staff');
+
+  const convertSelectedDate = (date, filterType) => {
+    if (!date) return null;
+
+    switch (filterType) {
+      case 'year':
+        return dayjs(date).startOf('year').format('YYYY-MM-DD');
+      case 'quarter':
+        return dayjs(date).startOf('quarter').format('YYYY-MM-DD');
+      case 'month':
+      default:
+        return dayjs(date).startOf('month').format('YYYY-MM-DD');
+    }
+  };
+
+  const getDateRangeFromFilter = (selectedDate, filterType) => {
+    if (!selectedDate) return { startDate: null, endDate: null };
+
+    const day = dayjs(selectedDate);
+
+    switch (filterType) {
+      case 'month':
+        return {
+          startDate: day.startOf('month').format('YYYY-MM-DD'),
+          endDate: day.endOf('month').format('YYYY-MM-DD'),
+        };
+      case 'quarter':
+        return {
+          startDate: day.startOf('quarter').format('YYYY-MM-DD'),
+          endDate: day.endOf('quarter').format('YYYY-MM-DD'),
+        };
+      case 'year':
+        return {
+          startDate: day.startOf('year').format('YYYY-MM-DD'),
+          endDate: day.endOf('year').format('YYYY-MM-DD'),
+        };
+      case 'day':
+      default:
+        const formatted = day.format('YYYY-MM-DD');
+        return { startDate: formatted, endDate: formatted };
+    }
+  };
+
+  const fetchDoctorPerformanceStatistics = useCallback(async () => {
+    setLoading(true);
+    try {
+      const doctorResponse = await fetchAccountByRoleAPI('DOCTOR');
+      const doctors = doctorResponse?.data || [];
+
+      const performanceData = await Promise.all(
+        doctors.map(async (doctor) => {
+          const doctorId = doctor.id || doctor.user_id || doctor.userId;
+          const name = doctor.full_name || doctor.fullName || doctor.name || `BS. ${doctorId}`;
+
+          try {
+            const { selectedDate, period: filterType } = filters;
+
+            const formattedDate = selectedDate ? dayjs(selectedDate).format('YYYY-MM-DD') : null;
+
+            console.log(`Gọi API cho bác sĩ ${name} - doctorId: ${doctorId}, filterType: ${filterType}, selectedDate: ${formattedDate}`);
+
+            const healthRecordRes = await getHealthRecordByDoctorIdAPI(
+              doctorId,
+              filterType,
+              formattedDate
+            );
+
+
+            const records = healthRecordRes?.data || [];
+
+            // Group records by treatmentStatus
+            const stats = records.reduce((acc, record) => {
+              const status = record.treatmentStatus || 'Không rõ';
+              acc[status] = (acc[status] || 0) + 1;
+              console.log('Record for doctor', name, ':', record);
+              return acc;
+            }, {});
+
+            return {
+              name,
+              waitingSchedules: stats['Đang chờ khám'] || 0,
+              completedSchedules: stats['Đã khám'] || 0,
+              consultationSchedules: stats['Tư vấn'] || 0,
+              absentSchedules: stats['Không đến'] || 0,
+            };
+          } catch (err) {
+            console.error(`Lỗi khi lấy health record của ${name}:`, err);
+            return {
+              name,
+              waitingSchedules: 0,
+              completedSchedules: 0,
+              consultationSchedules: 0,
+              absentSchedules: 0,
+            };
+          }
+        })
+      )
+
+      // Lưu vào statistics.staff.doctors.schedulesPerDoctor
+      setStatistics(prev => ({
+        ...prev,
+        staff: {
+          ...prev.staff,
+          doctors: {
+            ...prev.staff?.doctors,
+            schedulesPerDoctor: performanceData
+          }
+        }
+      }));
+    } catch (err) {
+      console.error('Lỗi khi fetch hiệu suất bác sĩ:', err);
+      message.error('Không thể tải dữ liệu hiệu suất bác sĩ');
+    } finally {
+      setLoading(false);
+    }
+  }, [filters]);
 
   // Fetch danh sách bác sĩ
   useEffect(() => {
@@ -108,11 +228,17 @@ const Dashboard = () => {
   // Fetch thống kê nhân viên
   const fetchStaffStatistics = useCallback(async () => {
     if (activeTab !== 'staff') return;
-    
+
     setLoading(true);
     try {
-      const data = await getStaffStatistics(filters);
-      console.log('Staff statistics:', data);
+      const { startDate, endDate } = getDateRangeFromFilter(filters.selectedDate, filters.period);
+
+      const data = await getStaffStatistics({
+        ...filters,
+        startDate,
+        endDate,
+      });
+
       setStatistics(prev => ({ ...prev, staff: data }));
     } catch (error) {
       console.error('Error fetching staff statistics:', error);
@@ -122,14 +248,22 @@ const Dashboard = () => {
     }
   }, [filters, activeTab]);
 
+
+
   // Fetch thống kê lịch hẹn
   const fetchAppointmentStatistics = useCallback(async () => {
     if (activeTab !== 'appointments') return;
-    
+
     setLoading(true);
     try {
-      const data = await getAppointmentStatistics(filters);
-      console.log('Appointment statistics:', data);
+      const { startDate, endDate } = getDateRangeFromFilter(filters.selectedDate, filters.period);
+
+      const data = await getAppointmentStatistics({
+        ...filters,
+        startDate,
+        endDate,
+      });
+
       setStatistics(prev => ({ ...prev, appointments: data }));
     } catch (error) {
       console.error('Error fetching appointment statistics:', error);
@@ -139,11 +273,14 @@ const Dashboard = () => {
     }
   }, [filters, activeTab]);
 
+
+
   // Gọi API tương ứng dựa vào tab đang active
   useEffect(() => {
     switch (activeTab) {
       case 'staff':
         fetchStaffStatistics();
+        fetchDoctorPerformanceStatistics();
         break;
       case 'appointments':
         fetchAppointmentStatistics();
@@ -154,7 +291,8 @@ const Dashboard = () => {
   }, [
     activeTab, 
     fetchStaffStatistics, 
-    fetchAppointmentStatistics
+    fetchAppointmentStatistics,
+    fetchDoctorPerformanceStatistics,
   ]);
 
   // Xử lý thay đổi bộ lọc
@@ -184,7 +322,10 @@ const Dashboard = () => {
 
   // Hiển thị nội dung tab Hiệu suất làm việc
   const renderPerformanceTab = () => {
-    const stats = statistics.staff || { doctors: {}, labTechnicians: {} };
+    const stats = {
+      doctors: statistics.staff?.doctors|| {},
+      labTechnicians: statistics.staff?.labTechnicians || {},
+    };
     
     return (
       <>
