@@ -81,9 +81,11 @@ const Login = () => {
                     description: `Xin chào, ${response.data.fullName || username}!`
                 });
             } else {
-                if (response.status === 403 && response.message.includes('ACCOUNT')) {
+                if (response.status === 403 && response.message.includes('NOT VERIFIED')) {
                     setError('Tài khoản chưa xác minh email')
                     setShowResend(true)
+                } else if (response.status === 403 && response.message.includes('UNACTIVE')) {
+                    setError('Tài khoản của bạn đã bị tạm khóa')
                 } else {
                     setError('Thông tin đăng nhập không hợp lệ.');
                 }
@@ -265,7 +267,11 @@ const Login = () => {
                     </Form>
                 </>
             ) : showResend ? (
+
                 <>
+                    <div>
+                        <Link onClick={() => { setShowResend(false) }} className='link'><ArrowLeftOutlined /> Quay lại trang đăng nhập</Link>
+                    </div>
                     {error && <Alert message={error} type="error" style={{ marginTop: 20 }} />}
                     <Form
                         form={form}
