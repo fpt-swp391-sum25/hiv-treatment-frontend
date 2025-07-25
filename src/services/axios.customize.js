@@ -3,7 +3,6 @@ import axios from "axios";
 
 // Log baseURL to help with debugging
 const baseURL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080';
-console.log('Backend URL:', baseURL);
 
 const instance = axios.create({
     baseURL: baseURL
@@ -15,55 +14,26 @@ instance.interceptors.request.use(function (config) {
     if (typeof window !== "undefined" && window && window.localStorage && window.localStorage.getItem('access_token')) {
         const token = window.localStorage.getItem('access_token');
         config.headers.Authorization = 'Bearer ' + token;
-        console.log('Token found, adding to request headers:', token.substring(0, 15) + '...');
-    } else {
-        console.log('No access token found in localStorage for this request');
-        // Không tự động chuyển hướng đến trang đăng nhập
-        // Để các trang công khai vẫn hoạt động bình thường
     }
-
-    // Log the full request for debugging
-    console.log('API Request:', {
-        method: config.method?.toUpperCase(),
-        url: config.baseURL + config.url,
-        headers: config.headers,
-        data: config.data
-    });
-
     return config;
 }, function (error) {
-    // Do something with request error
-    console.error('Request interceptor error:', error);
     return Promise.reject(error);
 });
 
 
 // Add a response interceptor
 instance.interceptors.response.use(function (response) {
-    // Any status code that lie within the range of 2xx cause this function to trigger
-    // Do something with response data
-    console.log("Response received from " + response.config.url + ":", {
-        status: response.status,
-        statusText: response.statusText,
-        headers: response.headers,
-        data: response.data
-    });
 
     // Handle different response formats
     if (response.data) {
         if (response.data.data !== undefined) {
-            // Format 1: { data: [...] }
             return response.data;
         } else if (Array.isArray(response.data)) {
-            // Format 2: Direct array in data
             return { data: response.data };
         }
     }
     return response;
 }, function (error) {
-    // Any status codes that falls outside the range of 2xx cause this function to trigger
-    // More detailed error logging
-    console.error("API Error on " + (error.config?.url || 'unknown endpoint') + ":");
 
     if (error.response) {
         // The request was made and the server responded with a status code
