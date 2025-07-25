@@ -126,7 +126,19 @@ const PageHeader = () => {
         token: { colorBgContainer, borderRadiusLG },
     } = theme.useToken();
     return (
-        <Header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: colorBgContainer, }}>
+        <Header
+            style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                backgroundColor: colorBgContainer,
+                position: 'sticky',
+                top: 0,
+                zIndex: 1000,
+                width: '100%',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                height: '80px'
+            }}>
             <div>
                 <img
                     src={appLogo}

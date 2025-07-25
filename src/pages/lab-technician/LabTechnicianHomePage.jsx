@@ -55,10 +55,11 @@ const LabTechnicianHomePage = () => {
                     key: url
                 }
             }
-            return {
-                title: <Link to={url}>{breadcrumbNameMap[url]}</Link>,
-                key: url,
-            }
+            if (breadcrumbNameMap[url])
+                return {
+                    title: <Link to={url}>{breadcrumbNameMap[url]}</Link>,
+                    key: url,
+                }
         }).filter(Boolean),
     ]
 

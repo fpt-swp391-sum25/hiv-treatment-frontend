@@ -301,12 +301,6 @@ const router = createBrowserRouter([
         ),
         errorElement: <Errors />,
       }, {
-        path: 'dashboard',
-        element: (
-          <PrivateRoute children={<ManagerDashboard />} requiredRole={['MANAGER']} />
-        ),
-        errorElement: <Errors />,
-      }, {
         path: 'schedule',
         element: (
           <PrivateRoute children={<ManagerSchedule />} requiredRole={['MANAGER']} />
