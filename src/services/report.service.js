@@ -655,13 +655,14 @@ import {
   fetchDoctorProfileByDoctorIdAPI,
   fetchHealthRecordsAPI,
   fetchAllRegimensAPI,
-  getAllSchedulesAPI
+  getAllSchedulesAPI,
+  fetchUsersByRoleAPI
 } from './api.service';
 
 // Tổng hợp dữ liệu y tế (báo cáo toàn diện)
 export const getMedicalReportData = async (filters = {}) => {
   try {
-    console.log('===== BẮT ĐẦU LẤY DỮ LIỆU BÁO CÁO Y TẾ =====');
+    console.log('===== BẮT ĐẦU LẤY DỮ LIỆU BÁO CÁO Y TẾ =====', filters);
     
     // 1. Lấy tất cả phác đồ điều trị - Endpoint chính xác: /api/regimen
     console.log('1. Đang gọi API lấy phác đồ điều trị...');
@@ -669,7 +670,7 @@ export const getMedicalReportData = async (filters = {}) => {
     const regimens = regimensResponse?.data || [];
     console.log(`Đã lấy ${regimens.length} phác đồ điều trị`);
     
-    // 2. Lấy danh sách lịch hẹn đã hoàn thành - Endpoint chính xác: /api/schedule/list
+    // 2. Lấy danh sách lịch hẹn - Endpoint chính xác: /api/schedule/list
     console.log('2. Đang gọi API lấy danh sách lịch hẹn...');
     let schedules = [];
     
@@ -683,6 +684,18 @@ export const getMedicalReportData = async (filters = {}) => {
       schedules = [];
     }
     
+    // 2.1 Lấy danh sách bệnh nhân từ API
+    console.log('2.1 Đang lấy danh sách bệnh nhân...');
+    let patients = [];
+    try {
+      const patientsResponse = await fetchUsersByRoleAPI('PATIENT');
+      patients = patientsResponse?.data || [];
+      console.log(`Đã lấy ${patients.length} bệnh nhân từ API`);
+    } catch (error) {
+      console.error('Lỗi khi lấy danh sách bệnh nhân:', error);
+      patients = [];
+    }
+    
     // 3. Lấy health records cho tất cả lịch hẹn
     console.log('3. Đang lấy health records...');
     
@@ -690,8 +703,10 @@ export const getMedicalReportData = async (filters = {}) => {
     const validScheduleIds = schedules.filter(s => s && s.id).map(s => s.id);
     console.log(`Số lượng lịch hẹn hợp lệ: ${validScheduleIds.length}`);
     
-    // Tối ưu: Chỉ lấy health records cho 10 lịch hẹn gần nhất để giảm số lượng API calls
-    const recentScheduleIds = validScheduleIds.slice(0, 10);
+    // Tăng số lượng health records lấy về, không giới hạn
+    // const maxRecordsToFetch = 50;
+    // const recentScheduleIds = validScheduleIds.slice(0, maxRecordsToFetch);
+    const recentScheduleIds = validScheduleIds; // Lấy tất cả lịch hẹn
     
     const healthRecordsPromises = recentScheduleIds.map(scheduleId => {
       return fetchHealthRecordByScheduleIdAPI(scheduleId)
@@ -739,12 +754,16 @@ export const getMedicalReportData = async (filters = {}) => {
     let totalPositiveHIV = 0;
     let totalNegativeHIV = 0;
     
+    // 6.1 Thu thập ID bệnh nhân từ health records
     healthRecords.forEach(record => {
       // Đếm số bệnh nhân duy nhất
+      let patientId = null;
       if (record.patient && record.patient.id) {
-        patientIds.add(record.patient.id);
+        patientId = record.patient.id;
+        patientIds.add(patientId);
       } else if (record.schedule && record.schedule.patientId) {
-        patientIds.add(record.schedule.patientId);
+        patientId = record.schedule.patientId;
+        patientIds.add(patientId);
       }
       
       // Đếm ca dương tính/âm tính HIV
@@ -755,6 +774,18 @@ export const getMedicalReportData = async (filters = {}) => {
         totalNegativeHIV++;
       }
     });
+    
+    // 6.2 Thu thập ID bệnh nhân từ schedules
+    schedules.forEach(schedule => {
+      if (schedule.patientId) {
+        patientIds.add(schedule.patientId);
+      } else if (schedule.patient && schedule.patient.id) {
+        patientIds.add(schedule.patient.id);
+      }
+    });
+    
+    // 6.3 Sử dụng danh sách bệnh nhân từ API nếu patientIds vẫn trống
+    const totalPatients = patientIds.size > 0 ? patientIds.size : patients.length;
     
     // 7. Chuẩn bị dữ liệu báo cáo
     const reports = healthRecords.map(healthRecord => {
@@ -782,11 +813,14 @@ export const getMedicalReportData = async (filters = {}) => {
     // 9. Tổng hợp thống kê về test type distribution
     const testTypeDistribution = calculateTestTypeDistributionFromTestResults(allTestResults);
     
+    // 10. Tính toán xu hướng HIV theo thời gian
+    const hivTrends = calculateHIVTrends(healthRecords);
+    
     console.log('===== THỐNG KÊ BÁO CÁO Y TẾ =====', {
       totalAppointments: completedAppointments,
       totalTestResults: testsPerformed,
       totalRegimens,
-      totalPatients: patientIds.size,
+      totalPatients,
       totalPositiveHIV,
       totalNegativeHIV
     });
@@ -798,9 +832,10 @@ export const getMedicalReportData = async (filters = {}) => {
         totalTestResults: testsPerformed, // Tổng số xét nghiệm đã thực hiện
         testTypeDistribution: testTypeDistribution, // Phân bố theo loại xét nghiệm
         totalRegimens: totalRegimens, // Tổng số phác đồ điều trị
-        totalPatients: patientIds.size, // Tổng số bệnh nhân
+        totalPatients: totalPatients, // Tổng số bệnh nhân
         totalPositiveHIV: totalPositiveHIV, // Số ca dương tính HIV
-        totalNegativeHIV: totalNegativeHIV // Số ca âm tính HIV
+        totalNegativeHIV: totalNegativeHIV, // Số ca âm tính HIV
+        hivTrends: hivTrends // Xu hướng HIV theo thời gian
       }
     };
   } catch (error) {
@@ -814,10 +849,58 @@ export const getMedicalReportData = async (filters = {}) => {
         totalRegimens: 0,
         totalPatients: 0,
         totalPositiveHIV: 0,
-        totalNegativeHIV: 0
+        totalNegativeHIV: 0,
+        hivTrends: []
       }
     };
   }
+};
+
+// Tính toán xu hướng HIV theo thời gian
+const calculateHIVTrends = (healthRecords) => {
+  // Nhóm theo tháng
+  const monthlyData = {};
+  
+  healthRecords.forEach(record => {
+    // Lấy thời gian từ lịch hẹn hoặc health record
+    let recordDate;
+    if (record.schedule && record.schedule.date) {
+      recordDate = dayjs(record.schedule.date);
+    } else if (record.createdAt) {
+      recordDate = dayjs(record.createdAt);
+    } else {
+      return; // Bỏ qua nếu không có ngày
+    }
+    
+    if (!recordDate.isValid()) return;
+    
+    const monthKey = recordDate.format('YYYY-MM');
+    
+    if (!monthlyData[monthKey]) {
+      monthlyData[monthKey] = {
+        month: monthKey,
+        positive: 0,
+        negative: 0,
+        unknown: 0,
+        total: 0
+      };
+    }
+    
+    // Đếm theo trạng thái HIV
+    const hivStatus = record.hivStatus || record.hiv_status;
+    if (hivStatus === "Dương tính" || hivStatus === "Positive") {
+      monthlyData[monthKey].positive++;
+    } else if (hivStatus === "Âm tính" || hivStatus === "Negative") {
+      monthlyData[monthKey].negative++;
+    } else {
+      monthlyData[monthKey].unknown++;
+    }
+    
+    monthlyData[monthKey].total++;
+  });
+  
+  // Chuyển đổi thành mảng và sắp xếp theo thời gian
+  return Object.values(monthlyData).sort((a, b) => a.month.localeCompare(b.month));
 };
 
 // Hàm lọc báo cáo y tế theo bộ lọc
@@ -984,6 +1067,30 @@ export const formatMedicalDataForExport = (reports) => {
   
   return exportData;
 }; 
+
+// Hàm xuất báo cáo y tế ra Excel
+export const exportMedicalReportToExcel = async (startDate, endDate) => {
+  try {
+    // Lấy dữ liệu báo cáo y tế
+    const reportData = await getMedicalReportData({
+      startDate,
+      endDate
+    });
+    
+    // Format dữ liệu cho Excel
+    const formattedData = formatMedicalDataForExport(reportData.reports);
+    
+    // Tạo tên file với timestamp
+    const timestamp = dayjs().format('YYYYMMDD_HHmmss');
+    const fileName = `BaoCaoYTe_${timestamp}`;
+    
+    // Xuất file Excel
+    return exportToExcel(formattedData, fileName);
+  } catch (error) {
+    console.error('Lỗi khi xuất báo cáo y tế ra Excel:', error);
+    throw new Error('Không thể xuất báo cáo. Vui lòng thử lại sau.');
+  }
+};
 
 // Helper function để tính phân bố theo loại xét nghiệm từ test results
 const calculateTestTypeDistributionFromTestResults = (testResults) => {

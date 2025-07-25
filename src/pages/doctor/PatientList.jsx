@@ -35,8 +35,8 @@ const PatientList = () => {
     useEffect(() => {
         const filtered = data.filter(item => {
             const matchesText =
-                item.fullName.toLowerCase().includes(searchText.toLowerCase()) ||
-                item.patientCode.toLowerCase().includes(searchText.toLowerCase());
+                normalizeString(item.fullName).includes(normalizeString(searchText)) ||
+                normalizeString(item.patientCode).includes(normalizeString(searchText));
 
             const dateObj = dayjs(item.date);
             const matchesYear = selectedYear ? dateObj.year() === selectedYear : true;
@@ -100,6 +100,15 @@ const PatientList = () => {
         navigate(`/doctor/patients/${record.id}`);
     };
 
+    const normalizeString = (str) => {
+        return str
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/\s+/g, ' ')
+            .trim();
+    };
+
     const columns = [
         {
             title: 'Mã bệnh nhân',
@@ -110,6 +119,18 @@ const PatientList = () => {
             title: 'Ảnh',
             dataIndex: 'avatar',
             key: 'avatar',
+            render: (avatar) =>
+                avatar ? (
+                    <img
+                        src={
+                            avatar.startsWith('data:image')
+                                ? avatar
+                                : `data:image/jpeg;base64,${avatar}`
+                        }
+                        alt="avatar"
+                        style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }}
+                    />
+                ) : 'Không có ảnh',
         },
         {
             title: 'Tên bệnh nhân',

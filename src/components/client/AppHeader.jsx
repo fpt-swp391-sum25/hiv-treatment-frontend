@@ -79,31 +79,31 @@ const AppHeader = () => {
     let intervalId;
 
     const pollNotifications = async () => {
-        try {
-            const res = await getNotificationsByUserId(user.id);
-            const latest = res.data.map(n => ({
-                ...n,
-                isRead: n.read,
-            }));
+      try {
+        const res = await getNotificationsByUserId(user.id);
+        const latest = res.data.map(n => ({
+          ...n,
+          isRead: n.read,
+        }));
 
-            const hasNew = latest.some(
-                (n) => !notifications.some((old) => old.id === n.id)
-            );
+        const hasNew = latest.some(
+          (n) => !notifications.some((old) => old.id === n.id)
+        );
 
-            if (hasNew) {
-                setNotifications(latest);
-            }
-        } catch (error) {
-            console.error("Lỗi khi polling:", error);
+        if (hasNew) {
+          setNotifications(latest);
         }
+      } catch (error) {
+        console.error("Lỗi khi polling:", error);
+      }
     };
 
     if (user?.id) {
-        intervalId = setInterval(pollNotifications, 1000); // 1s
+      intervalId = setInterval(pollNotifications, 1000); // 1s
     }
 
     return () => clearInterval(intervalId); // cleanup
-}, [user?.id, notifications]);
+  }, [user?.id, notifications]);
 
   const loadNotifications = async () => {
     setLoading(true);
@@ -278,10 +278,10 @@ const AppHeader = () => {
           ) : (
             <Space size="middle" className="auth-buttons">
               <Link to="/login">
-                <Button>Đăng nhập</Button>
+                <Button type='text'>Đăng nhập</Button>
               </Link>
               <Link to="/register">
-                <Button>Đăng ký</Button>
+                <Button className='btn-sign-up'>Đăng ký</Button>
               </Link>
             </Space>
           )}
