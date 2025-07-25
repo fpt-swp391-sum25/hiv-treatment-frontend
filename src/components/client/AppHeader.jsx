@@ -48,6 +48,12 @@ const AppHeader = () => {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   useEffect(() => {
+    if (location.pathname !== '/') {
+      setActiveSection('');
+    }
+  }, [location.pathname]);
+
+  useEffect(() => {
     const handleScroll = () => {
       const sections = [
         { id: 'care-section', key: 'home' },
@@ -147,13 +153,15 @@ const AppHeader = () => {
     { key: 'appointments', label: 'Lịch hẹn', path: '/appointment' },
   ];
 
-  const handleMenuClick = (scrollTo) => {
+  const handleMenuClick = (scrollTo, key) => {
     if (location.pathname !== '/') {
       navigate('/');
       setTimeout(() => {
+        setActiveSection(key);
         scrollToSection(scrollTo);
       }, 100);
     } else {
+      setActiveSection(key);
       scrollToSection(scrollTo);
     }
   };
@@ -162,7 +170,7 @@ const AppHeader = () => {
     items.map((item) => ({
       key: item.key,
       label: item.scrollTo ? (
-        <a onClick={() => handleMenuClick(item.scrollTo)}>{item.label}</a>
+        <a onClick={() => handleMenuClick(item.scrollTo, item.key)}>{item.label}</a>
       ) : (
         <Link to={item.path} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
           {item.label}

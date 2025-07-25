@@ -1,0 +1,55 @@
+.booking-form-modern,
+.ant-form,
+.ant-card-body {
+    min-width: 260px;
+    width: 100%;
+}
+
+.slot-grid-modern {
+    width: 100%;
+    min-width: 320px;
+    justify-content: flex-start;
+}
+
+
+@media (max-width: 991px) {
+    .ant-card {
+        margin-bottom: 18px;
+    }
+}
+
+@media (max-width: 600px) {
+    .slot-grid-modern {
+        gap: 6px 0;
+        justify-content: center;
+    }
+
+    .slot-grid-modern .ant-btn {
+        width: 95px !important;
+        margin: 3px !important;
+        font-size: 15px !important;
+    }
+
+    .ant-card {
+        padding: 4px;
+        border-radius: 12px !important;
+        box-shadow: 0 2px 8px rgba(44, 62, 80, 0.06) !important;
+    }
+
+    .ant-card-body {
+        padding: 12px !important;
+    }
+
+    .ant-row {
+        padding: 8px !important;
+    }
+}
+
+/* Dành cho màn hình siêu bé */
+@media (max-width: 420px) {
+    .slot-grid-modern .ant-btn {
+        width: 100% !important;
+        margin: 3px 0 !important;
+        min-width: 0;
+    }
+}
