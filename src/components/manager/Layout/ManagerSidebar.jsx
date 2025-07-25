@@ -19,13 +19,9 @@ const ManagerSidebar = () => {
   const location = useLocation();
 
   const menuItems = [
+
     {
-      key: '/manager/profile',
-      icon: <IdcardOutlined />,
-      label: 'Hồ sơ cá nhân',
-    },
-    {
-      key: '/manager/dashboard',
+      key: '/manager',
       icon: <BarChartOutlined />,
       label: 'Thống kê',
     },
@@ -45,16 +41,20 @@ const ManagerSidebar = () => {
       label: 'Quản lí lịch',
     },
     {
+      key: '/manager/default-regimen',
+      icon: <SolutionOutlined />,
+      label: 'Phác đồ mặc định',
+    },
+    {
       key: '/manager/reports',
       icon: <FileOutlined />,
       label: 'Báo cáo',
     },
     {
-      key: '/manager/default-regimen',
-      icon: <SolutionOutlined />,
-      label: 'Phác đồ mặc định',
+      key: '/manager/profile',
+      icon: <IdcardOutlined />,
+      label: 'Hồ sơ cá nhân',
     },
-
   ];
 
   // Custom styles cho menu items
