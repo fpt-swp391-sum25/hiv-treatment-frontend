@@ -136,8 +136,8 @@ const ProfileDetail = () => {
                                     </Button>
                                     {avatarUrl && (
                                         <Button
+                                            className="custom-delete-btn"
                                             icon={<DeleteOutlined />}
-                                            danger
                                             type="link"
                                             onClick={() => {
                                                 setAvatarUrl("");
@@ -148,7 +148,7 @@ const ProfileDetail = () => {
                                         </Button>
                                     )}
                                 </div>
-                            </Col>
+                            </Col >
 
                             <Col xs={24} md={18}>
                                 <Row gutter={16}>
@@ -297,13 +297,13 @@ const ProfileDetail = () => {
                                             Lưu thay đổi
                                         </Button>
                                     </Popconfirm>
-                                </div>
-                            </Col>
-                        </Row>
-                    </Card>
+                                </div >
+                            </Col >
+                        </Row >
+                    </Card >
                 )}
-            </Content>
-        </Layout>
+            </Content >
+        </Layout >
     );
 };
 

@@ -78,9 +78,7 @@ const ManagerSidebar = () => {
           mode="inline"
           selectedKeys={[location.pathname]}
           className="sidebar-menu"
-
           items={menuItems}
-
           onClick={({ key }) => navigate(key)}
         />
       </div>

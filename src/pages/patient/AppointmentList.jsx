@@ -20,6 +20,7 @@ import { AuthContext } from "../../components/context/AuthContext";
 import {
     cancelBookingAPI,
     fetchAllPatientScheduleAPI,
+    fetchHealthRecordByScheduleIdAPI,
     retryPaymentAPI
 } from "../../services/api.service";
 import PatientAppointmentHistory from "./PatientAppointmentHistory";
@@ -67,7 +68,13 @@ const AppointmentList = () => {
                     return dateA - dateB;
                 });
 
-            setSchedule(sorted);
+            const withHealthStatus = await Promise.all(sorted.map(async item => {
+                const healthRecord = await fetchHealthRecordByScheduleIdAPI(item.id)
+                return { ...item, healthRecordStatus: healthRecord?.data?.treatmentStatus || null }
+
+            }))
+            const filtered = withHealthStatus.filter(item => item.healthRecordStatus !== 'Đã khám')
+            setSchedule(filtered);
         } catch (error) {
             message.error(error.message || 'Lỗi khi tải lịch hẹn');
         } finally {
@@ -101,7 +108,6 @@ const AppointmentList = () => {
             }
         } catch (error) {
             message.error("Lỗi khi tạo URL thanh toán.");
-            console.error(error);
         }
 
     }
@@ -187,9 +193,7 @@ const AppointmentList = () => {
                             okText="Có"
                             cancelText="Không"
                         >
-
                             <Button className="custom-delete-btn" icon={<DeleteOutlined />} >
-
                                 Huỷ
                             </Button>
                         </Popconfirm>
