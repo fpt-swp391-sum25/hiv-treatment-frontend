@@ -7,6 +7,7 @@ import {
 import {
   FileSearchOutlined, ExperimentOutlined, MedicineBoxOutlined, TeamOutlined,
   FilterOutlined, FileExcelOutlined, FilePdfOutlined, UserOutlined, CalendarOutlined, UpOutlined, DownOutlined
+  FilterOutlined, FileExcelOutlined, FilePdfOutlined, UserOutlined, CalendarOutlined, UpOutlined, DownOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { getMedicalReportData, exportMedicalReportToExcel } from '../../../../services/report.service';
@@ -22,6 +23,7 @@ const HIV_COLORS = {
   unknown: '#faad14'
 };
 
+const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
 const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(false);
@@ -118,8 +120,70 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
     return Object.values(patientAppointments);
   }, [reportData.reports]);
 
+  // Memoized patient list
+  const patientList = useMemo(() => {
+    const { reports } = reportData;
+    
+    if (!reports || !Array.isArray(reports) || reports.length === 0) {
+      return [];
+    }
+
+    // Group appointments by patient
+    const patientAppointments = reports.reduce((acc, report) => {
+      if (!report) return acc;
+      
+      const schedule = report.schedule || {};
+      const healthRecord = report.healthRecord || {};
+      
+      // Lấy thông tin bệnh nhân từ schedule
+      const patient = schedule.patient || {};
+      const patientId = patient.id || schedule.patientId;
+      
+      if (!patientId) return acc;
+      
+      if (!acc[patientId]) {
+        acc[patientId] = {
+          patient: {
+            id: patientId,
+            fullName: patient.fullName,
+            phone: patient.phone,
+            email: patient.email,
+            address: patient.address,
+            gender: patient.gender,
+            dateOfBirth: patient.dateOfBirth
+          },
+          appointments: []
+        };
+      }
+      
+      acc[patientId].appointments.push({
+        id: healthRecord.id || `temp-${Math.random()}`,
+        scheduleId: schedule.id,
+        date: schedule.date,
+        slot: schedule.slot,
+        roomCode: schedule.room_code || schedule.roomCode,
+        status: schedule.status,
+        type: schedule.type,
+        doctorId: schedule.doctor_id || schedule.doctorId,
+        doctorName: schedule.doctor?.fullName,
+        treatmentStatus: healthRecord.treatment_status || healthRecord.treatmentStatus,
+        hivStatus: healthRecord.hiv_status || healthRecord.hivStatus,
+        bloodType: healthRecord.blood_type || healthRecord.bloodType,
+        weight: healthRecord.weight,
+        testResults: report.testResults || []
+      });
+      
+      return acc;
+    }, {});
+
+    return Object.values(patientAppointments);
+  }, [reportData.reports]);
+
   // Handlers
   const handleDateRangeChange = (dates) => {
+    if (onDateRangeChange) {
+      onDateRangeChange(dates);
+    }
     if (onDateRangeChange) {
       onDateRangeChange(dates);
     }
@@ -140,9 +204,11 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
     } catch (error) {
       console.error('Error loading medical report data:', error);
       onError?.(error);
+      onError?.(error);
     } finally {
       setLoading(false);
     }
+  }, [dateRange, onError]);
   }, [dateRange, onError]);
 
   const handleExportExcel = async () => {
@@ -154,6 +220,109 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
       await exportMedicalReportToExcel(startDate, endDate);
     } catch (error) {
       console.error('Error exporting medical report:', error);
+      onError?.(error);
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
+  // Xuất báo cáo PDF
+  const handleExportPDF = async () => {
+    setExportLoading(true);
+    try {
+      const { statistics } = reportData;
+      
+      // Import động jsPDF và jsPDF-autotable để tránh lỗi khi khởi tạo ứng dụng
+      const { default: jsPDF } = await import('jspdf');
+      const { default: autoTable } = await import('jspdf-autotable');
+      
+      const doc = new jsPDF();
+      
+      // Tiêu đề báo cáo
+      const title = 'BÁO CÁO Y TẾ';
+      doc.setFontSize(18);
+      doc.text(title, 14, 22);
+      
+      // Thông tin báo cáo
+      const reportDate = dayjs().format('DD/MM/YYYY HH:mm');
+      const reportPeriod = dateRange && dateRange.length === 2 
+          ? `${dateRange[0].format('DD/MM/YYYY')} - ${dateRange[1].format('DD/MM/YYYY')}` 
+          : 'Tất cả thời gian';
+          
+      doc.setFontSize(12);
+      doc.text(`Thời gian xuất báo cáo: ${reportDate}`, 14, 32);
+      doc.text(`Khoảng thời gian báo cáo: ${reportPeriod}`, 14, 40);
+      
+      // Thống kê tổng quan
+      doc.setFontSize(14);
+      doc.text('THỐNG KÊ TỔNG QUAN', 14, 52);
+      
+      // Tạo bảng thống kê tổng quan
+      const overviewData = [
+        ['Tổng số lịch hẹn đã hoàn thành', statistics.totalAppointments || 0],
+        ['Tổng số xét nghiệm đã thực hiện', statistics.totalTestResults || 0],
+        ['Tổng số phác đồ điều trị', statistics.totalRegimens || 0],
+        ['Tổng số bệnh nhân', statistics.totalPatients || 0],
+        ['Tổng số ca dương tính HIV', statistics.totalPositiveHIV || 0],
+        ['Tổng số ca âm tính HIV', statistics.totalNegativeHIV || 0],
+      ];
+      
+      autoTable(doc, {
+        startY: 56,
+        head: [['Chỉ số', 'Giá trị']],
+        body: overviewData,
+        theme: 'grid',
+        styles: {
+          fontSize: 10,
+          cellPadding: 3,
+        },
+        headStyles: {
+          fillColor: [41, 128, 185],
+          textColor: 255,
+          fontStyle: 'bold'
+        }
+      });
+      
+      // Thêm thống kê HIV nếu có dữ liệu
+      if (statistics.hivTrends && statistics.hivTrends.length > 0) {
+        const finalY = doc.lastAutoTable.finalY || 150;
+        
+        doc.setFontSize(14);
+        doc.text('THỐNG KÊ HIV THEO THÁNG', 14, finalY + 10);
+        
+        const hivData = statistics.hivTrends.map(trend => [
+          trend.month,
+          trend.positive,
+          trend.negative,
+          trend.unknown,
+          trend.total,
+          `${Math.round((trend.positive / (trend.positive + trend.negative || 1)) * 100)}%`
+        ]);
+        
+        autoTable(doc, {
+          startY: finalY + 14,
+          head: [['Tháng', 'Dương tính', 'Âm tính', 'Không xác định', 'Tổng số', 'Tỷ lệ dương tính']],
+          body: hivData,
+          theme: 'grid',
+          styles: {
+            fontSize: 8,
+            cellPadding: 2,
+          },
+          headStyles: {
+            fillColor: [41, 128, 185],
+            textColor: 255,
+            fontStyle: 'bold'
+          }
+        });
+      }
+      
+      // Lưu file PDF
+      const pdfFileName = `BaoCaoYTe_${dayjs().format('YYYYMMDD_HHmmss')}.pdf`;
+      doc.save(pdfFileName);
+      
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+      onError?.(new Error('Không thể xuất báo cáo PDF. Vui lòng thử lại sau.'));
       onError?.(error);
     } finally {
       setExportLoading(false);
@@ -377,6 +546,7 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
                 Tỷ lệ dương tính HIV chiếm <Text strong>{Math.round((statistics.totalPositiveHIV / (statistics.totalPositiveHIV + statistics.totalNegativeHIV || 1)) * 100)}%</Text> tổng số ca xét nghiệm.
               </p>
               {/* Đã loại bỏ phần hiển thị xu hướng gần đây để giảm độ phức tạp khi phân tích */}
+              {/* Đã loại bỏ phần hiển thị xu hướng gần đây để giảm độ phức tạp khi phân tích */}
             </Card>
           </Col>
         </Row>
@@ -433,6 +603,7 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
             
             <Divider />
             
+            {/* Đã loại bỏ phần Phân tích chi tiết theo yêu cầu */}
             {/* Đã loại bỏ phần Phân tích chi tiết theo yêu cầu */}
           </div>
         </Card>
@@ -498,6 +669,7 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
         <Card title="Khuyến nghị" style={{ marginTop: 16 }}>
           <div className="recommendation-content">
             {/* Đã loại bỏ khung cảnh báo theo yêu cầu */}
+            {/* Đã loại bỏ khung cảnh báo theo yêu cầu */}
             
             <p>
               <Text strong>Khuyến nghị hành động:</Text>
@@ -516,6 +688,7 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
 
   // Render Patient Appointments Tab
   const renderPatientAppointmentsTab = () => {
+    if (!patientList.length) {
     if (!patientList.length) {
       return <Empty description="Không có dữ liệu lịch sử bệnh nhân" />;
     }
@@ -551,6 +724,9 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
             >
               <Descriptions column={{ xxl: 3, xl: 3, lg: 3, md: 2, sm: 1, xs: 1 }}>
                 <Descriptions.Item label="Mã bệnh nhân">{item.patient.id || 'N/A'}</Descriptions.Item>
+                {/* Đã loại bỏ thông tin số điện thoại */}
+                {/* Đã loại bỏ thông tin email */}
+                {/* Đã loại bỏ thông tin địa chỉ */}
                 {/* Đã loại bỏ thông tin số điện thoại */}
                 {/* Đã loại bỏ thông tin email */}
                 {/* Đã loại bỏ thông tin địa chỉ */}
@@ -690,6 +866,13 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
             loading={exportLoading}
               >
                 Xuất Excel
+              </Button>
+              <Button
+            icon={<FilePdfOutlined />}
+            onClick={handleExportPDF}
+            loading={exportLoading}
+          >
+            Xuất PDF
               </Button>
               <Button
             icon={<FilePdfOutlined />}
