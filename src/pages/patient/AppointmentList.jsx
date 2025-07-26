@@ -249,7 +249,6 @@ const AppointmentList = () => {
                                     </Button>
                                 </Popover>
                             </>
-
                         )
                     }
                 } else if (record.status === 'Thanh toán thất bại') {
