@@ -2,7 +2,8 @@ import {
     Layout, message, Spin, Table, Button, Popconfirm, Card, Typography,
     DatePicker, notification, Tabs, Tag, Space, ConfigProvider,
     Tooltip,
-    Modal
+    Modal,
+    Popover
 } from "antd";
 import {
     ClockCircleOutlined,
@@ -229,11 +230,25 @@ const AppointmentList = () => {
                         );
                     } else {
                         return (
-                            <Tooltip title='Chỉ được huỷ trước 24 giờ'>
-                                <Button className="custom-delete-btn" icon={<DeleteOutlined />} disabled >
-                                    Huỷ
-                                </Button>
-                            </Tooltip>
+                            <>
+                                <Popover
+                                    content={
+                                        <div style={{ minWidth: 180 }}>
+                                            <b>Không thể huỷ lịch</b>
+                                            <div style={{ color: '#888', marginTop: 4 }}>
+                                                Chỉ được huỷ trước 24 giờ so với giờ hẹn.
+                                            </div>
+                                        </div>
+                                    }
+                                    title={null}
+                                    placement="top"
+                                    trigger="hover"
+                                >
+                                    <Button className="custom-delete-btn" icon={<DeleteOutlined />} disabled >
+                                        Huỷ
+                                    </Button>
+                                </Popover>
+                            </>
                         )
                     }
                 } else if (record.status === 'Thanh toán thất bại') {

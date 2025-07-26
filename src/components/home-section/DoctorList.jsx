@@ -31,9 +31,6 @@ const DoctorList = () => {
       setDoctorAccounts(doctors);
       setDoctorProfiles(profiles);
 
-      console.log(doctors)
-      console.log(profiles)
-
       const merged = doctors.map(account => {
         const profile = profiles.find(p => p.doctor.id === account.id);
         return {
@@ -90,7 +87,9 @@ const DoctorList = () => {
                   </p>
                   <p>{mergedDoctors.qualifications}</p>
                   <Link to={`/booking?doctorId=${mergedDoctors.id}`} >
-                    <button className="btn-primary">Đặt lịch</button>
+                    <button className="btn-primary" onClick={() => {
+                      window.scrollTo({ top: 0, behavior: 'smooth' })
+                    }}>Đặt lịch</button>
                   </Link>
                 </div>
               </div>
