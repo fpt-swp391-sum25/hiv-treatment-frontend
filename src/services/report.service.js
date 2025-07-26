@@ -662,67 +662,53 @@ import {
 // Tổng hợp dữ liệu y tế (báo cáo toàn diện)
 export const getMedicalReportData = async (filters = {}) => {
   try {
-    console.log('===== BẮT ĐẦU LẤY DỮ LIỆU BÁO CÁO Y TẾ =====', filters);
-    
     // 1. Lấy tất cả phác đồ điều trị - Endpoint chính xác: /api/regimen
-    console.log('1. Đang gọi API lấy phác đồ điều trị...');
     const regimensResponse = await fetchAllRegimensAPI();
     const regimens = regimensResponse?.data || [];
-    console.log(`Đã lấy ${regimens.length} phác đồ điều trị`);
     
     // 2. Lấy danh sách lịch hẹn - Endpoint chính xác: /api/schedule/list
-    console.log('2. Đang gọi API lấy danh sách lịch hẹn...');
     let schedules = [];
     
     try {
       // Lấy tất cả lịch hẹn một lần duy nhất
       const schedulesResponse = await getAllSchedulesAPI();
       schedules = schedulesResponse?.data || [];
-      console.log(`Đã lấy ${schedules.length} lịch hẹn`);
     } catch (error) {
       console.error('Lỗi khi lấy lịch hẹn:', error);
       schedules = [];
     }
     
     // 2.1 Lấy danh sách bệnh nhân từ API
-    console.log('2.1 Đang lấy danh sách bệnh nhân...');
     let patients = [];
     try {
       const patientsResponse = await fetchUsersByRoleAPI('PATIENT');
       patients = patientsResponse?.data || [];
-      console.log(`Đã lấy ${patients.length} bệnh nhân từ API`);
     } catch (error) {
       console.error('Lỗi khi lấy danh sách bệnh nhân:', error);
       patients = [];
     }
     
     // 3. Lấy health records cho tất cả lịch hẹn
-    console.log('3. Đang lấy health records...');
-    
     // Chỉ lấy health records cho các lịch hẹn đã được tạo
     const validScheduleIds = schedules.filter(s => s && s.id).map(s => s.id);
-    console.log(`Số lượng lịch hẹn hợp lệ: ${validScheduleIds.length}`);
     
-    // Tăng số lượng health records lấy về, không giới hạn
-    // const maxRecordsToFetch = 50;
-    // const recentScheduleIds = validScheduleIds.slice(0, maxRecordsToFetch);
-    const recentScheduleIds = validScheduleIds; // Lấy tất cả lịch hẹn
+    // Lấy tất cả lịch hẹn
+    const recentScheduleIds = validScheduleIds;
     
+    // Sử dụng Promise.allSettled thay vì Promise.all để tránh lỗi nếu một promise bị reject
     const healthRecordsPromises = recentScheduleIds.map(scheduleId => {
       return fetchHealthRecordByScheduleIdAPI(scheduleId)
         .then(response => response?.data)
         .catch(() => null);
     });
     
-    const healthRecordsResults = await Promise.all(healthRecordsPromises);
-    const healthRecords = healthRecordsResults.filter(record => record !== null);
-    console.log(`Đã lấy ${healthRecords.length} health records hợp lệ`);
+    const healthRecordsResults = await Promise.allSettled(healthRecordsPromises);
+    const healthRecords = healthRecordsResults
+      .filter(result => result.status === 'fulfilled' && result.value !== null)
+      .map(result => result.value);
     
     // 4. Lấy test results cho các health records
-    console.log('4. Đang lấy kết quả xét nghiệm...');
-    
     const validHealthRecordIds = healthRecords.filter(hr => hr && hr.id).map(hr => hr.id);
-    console.log(`Số lượng health records hợp lệ để lấy test results: ${validHealthRecordIds.length}`);
     
     const testResultsPromises = validHealthRecordIds.map(healthRecordId => {
       return fetchTestResultByHealthRecordIdAPI(healthRecordId)
@@ -730,13 +716,12 @@ export const getMedicalReportData = async (filters = {}) => {
         .catch(() => []);
     });
     
-    const testResultsArrays = await Promise.all(testResultsPromises);
-    const allTestResults = testResultsArrays.flat();
-    console.log(`Tổng số kết quả xét nghiệm: ${allTestResults.length}`);
+    const testResultsArrays = await Promise.allSettled(testResultsPromises);
+    const allTestResults = testResultsArrays
+      .filter(result => result.status === 'fulfilled')
+      .flatMap(result => result.value);
     
     // 5. Tính toán các số liệu thống kê
-    console.log('5. Tính toán thống kê...');
-    
     // Đếm số lịch hẹn có treatmentStatus = "Đã khám"
     const completedAppointments = healthRecords.filter(record => {
       const status = record.treatmentStatus || record.treatment_status;
@@ -816,15 +801,6 @@ export const getMedicalReportData = async (filters = {}) => {
     // 10. Tính toán xu hướng HIV theo thời gian
     const hivTrends = calculateHIVTrends(healthRecords);
     
-    console.log('===== THỐNG KÊ BÁO CÁO Y TẾ =====', {
-      totalAppointments: completedAppointments,
-      totalTestResults: testsPerformed,
-      totalRegimens,
-      totalPatients,
-      totalPositiveHIV,
-      totalNegativeHIV
-    });
-    
     return {
       reports: filteredReports,
       statistics: {
@@ -839,7 +815,7 @@ export const getMedicalReportData = async (filters = {}) => {
       }
     };
   } catch (error) {
-    console.error('LỖI NGHIÊM TRỌNG KHI TẠO BÁO CÁO Y TẾ:', error);
+    console.error('Lỗi khi tạo báo cáo y tế:', error);
     return {
       reports: [],
       statistics: {

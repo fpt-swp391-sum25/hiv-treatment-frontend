@@ -30,8 +30,8 @@ const Reports = () => {
         }
         // Validate date range
         const [start, end] = dates;
-        if (end.diff(start, 'days') > 90) {
-            setError('Khoảng thời gian không được vượt quá 90 ngày');
+        if (end.diff(start, 'days') > 3650) { // Thay đổi từ 90 ngày thành 10 năm (3650 ngày)
+            setError('Khoảng thời gian không được vượt quá 10 năm');
             return;
         }
         setDateRange(dates);
@@ -154,7 +154,7 @@ const Reports = () => {
                     Báo cáo nhân sự
                 </span>
             ),
-            children: <StaffReport dateRange={dateRange} onError={handleError} />
+            children: <StaffReport dateRange={dateRange} onError={handleError} onDateRangeChange={handleDateRangeChange} />
         },
         {
             key: 'financial',
@@ -164,7 +164,7 @@ const Reports = () => {
                     Báo cáo tài chính
                 </span>
             ),
-            children: <FinancialReport dateRange={dateRange} onError={handleError} />
+            children: <FinancialReport dateRange={dateRange} onError={handleError} onDateRangeChange={handleDateRangeChange} />
         },
         {
             key: 'medical',
