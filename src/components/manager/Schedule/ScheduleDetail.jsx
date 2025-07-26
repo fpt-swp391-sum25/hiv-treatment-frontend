@@ -208,6 +208,19 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
 
     // Hiển thị xác nhận xóa
     const showDeleteConfirmation = () => {
+        // Kiểm tra xem lịch có bệnh nhân đặt không
+        const currentPatients = formData.currentPatients || 0;
+        if (currentPatients > 0) {
+            console.log('Cannot delete schedule with patients:', currentPatients);
+            notification.warning({
+                message: 'Không thể xóa lịch',
+                description: `Lịch này đã có ${currentPatients} bệnh nhân đặt. Không thể xóa lịch đã có bệnh nhân.`,
+                placement: 'topRight',
+                duration: 5
+            });
+            return;
+        }
+        
         setConfirmDelete(true);
     };
 
@@ -228,6 +241,21 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                     placement: 'topRight',
                     duration: 3
                 });
+                return;
+            }
+            
+            // Kiểm tra xem lịch có bệnh nhân đặt không
+            const currentPatients = formData.currentPatients || 0;
+            if (currentPatients > 0) {
+                console.log('Cannot delete schedule with patients:', currentPatients);
+                notification.warning({
+                    message: 'Không thể xóa lịch',
+                    description: `Lịch này đã có ${currentPatients} bệnh nhân đặt. Không thể xóa lịch đã có bệnh nhân.`,
+                    placement: 'topRight',
+                    duration: 5
+                });
+                setDeleting(false);
+                setConfirmDelete(false);
                 return;
             }
             
