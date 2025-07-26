@@ -8,6 +8,9 @@ export const SCHEDULE_STATUS = {
   BOOKED: 'Đã đặt',           // ✅ Theo BE: "Đã đặt"
   COMPLETED: 'Hoàn thành',    // ✅ Theo BE: "Hoàn thành"
   CANCELLED: 'Hủy',           // ✅ Theo BE: "Hủy"
+  WAITING: 'Đang chờ',        // Trạng thái đang chờ khám
+  ABSENT: 'Không đến',        // Trạng thái không đến
+  CONSULTATION: 'Tư vấn',     // Trạng thái tư vấn
   // Legacy support (để backward compatibility)
   ACTIVE: 'Đã đặt'           // Map to BOOKED
 };
@@ -45,6 +48,9 @@ export const isScheduleCompleted = (status) => status === SCHEDULE_STATUS.COMPLE
 export const isScheduleCancelled = (status) => status === SCHEDULE_STATUS.CANCELLED || status === 'Hủy' || status === 'Đã hủy';
 export const isScheduleBooked = (status) => status === 'Đang hoạt động' || status === SCHEDULE_STATUS.BOOKED || status === 'Đã đặt';
 export const isScheduleActive = (status) => status === 'Đang hoạt động' || status === SCHEDULE_STATUS.BOOKED || status === 'Đã đặt';
+export const isScheduleWaiting = (status) => status === SCHEDULE_STATUS.WAITING || status === 'Đang chờ' || status === 'Chờ khám' || status === 'WAITING' || status === 'PENDING';
+export const isScheduleAbsent = (status) => status === SCHEDULE_STATUS.ABSENT || status === 'Không đến' || status === 'Vắng mặt' || status === 'ABSENT' || status === 'NO_SHOW';
+export const isScheduleConsultation = (status) => status === SCHEDULE_STATUS.CONSULTATION || status === 'Tư vấn' || status === 'CONSULTATION' || status === 'Tư vấn trực tuyến';
 export const isAccountActive = (status) => status === ACCOUNT_STATUS.ACTIVE;
 export const isAccountInactive = (status) => status === ACCOUNT_STATUS.INACTIVE;
 

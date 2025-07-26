@@ -573,183 +573,6 @@ const getSchedulesWithFiltersAPI = (filters = {}) => {
     return axios.get(URL_BACKEND);
 };
 
-// API mới để lấy dữ liệu thống kê cho Dashboard
-const fetchDashboardStatisticsAPI = (filters = {}) => {
-    console.log('Fetching dashboard statistics with filters:', filters);
-
-    // Sử dụng Promise.all để gọi nhiều API song song
-    return Promise.all([
-        getAllSchedulesAPI(),
-        fetchAllDoctorsAPI(),
-        fetchUsersByRoleAPI('LAB_TECHNICIAN'),
-        fetchUsersByRoleAPI('PATIENT')
-    ])
-        .then(([schedulesRes, doctorsRes, labTechsRes, patientsRes]) => {
-            // Lấy dữ liệu từ các API
-            const schedules = schedulesRes.data || [];
-            const doctors = doctorsRes.data || [];
-            const labTechnicians = labTechsRes.data || [];
-            const patients = patientsRes.data || [];
-
-            // Tính toán các chỉ số thống kê
-            const currentDate = new Date();
-            const lastMonthDate = new Date();
-            lastMonthDate.setMonth(lastMonthDate.getMonth() - 1);
-
-            // Lọc dữ liệu theo filters nếu có
-            let filteredSchedules = schedules;
-            if (filters.startDate && filters.endDate) {
-                const startDate = new Date(filters.startDate);
-                const endDate = new Date(filters.endDate);
-                filteredSchedules = schedules.filter(schedule => {
-                    const scheduleDate = new Date(schedule.date);
-                    return scheduleDate >= startDate && scheduleDate <= endDate;
-                });
-            }
-
-            if (filters.doctorId) {
-                filteredSchedules = filteredSchedules.filter(schedule =>
-                    schedule.doctorId === parseInt(filters.doctorId));
-            }
-
-            // Tính toán các chỉ số cho tháng hiện tại và tháng trước
-            const currentMonthSchedules = schedules.filter(schedule => {
-                const scheduleDate = new Date(schedule.date);
-                return scheduleDate.getMonth() === currentDate.getMonth() &&
-                    scheduleDate.getFullYear() === currentDate.getFullYear();
-            });
-
-            const lastMonthSchedules = schedules.filter(schedule => {
-                const scheduleDate = new Date(schedule.date);
-                return scheduleDate.getMonth() === lastMonthDate.getMonth() &&
-                    scheduleDate.getFullYear() === lastMonthDate.getFullYear();
-            });
-
-            // Đếm các lịch hẹn theo trạng thái
-            const completedSchedules = currentMonthSchedules.filter(schedule =>
-                schedule.status === 'Hoàn thành' || schedule.status === 'COMPLETED');
-
-            const cancelledSchedules = currentMonthSchedules.filter(schedule =>
-                schedule.status === 'Đã hủy' || schedule.status === 'CANCELLED');
-
-            const pendingSchedules = currentMonthSchedules.filter(schedule =>
-                schedule.status === 'Đang hoạt động' || schedule.status === 'ACTIVE');
-
-            const lastMonthCompletedSchedules = lastMonthSchedules.filter(schedule =>
-                schedule.status === 'Hoàn thành' || schedule.status === 'COMPLETED');
-
-            const lastMonthCancelledSchedules = lastMonthSchedules.filter(schedule =>
-                schedule.status === 'Đã hủy' || schedule.status === 'CANCELLED');
-
-            // Tính toán tỷ lệ và sự thay đổi
-            const completionRate = currentMonthSchedules.length > 0 ?
-                (completedSchedules.length / currentMonthSchedules.length) * 100 : 0;
-
-            const lastMonthCompletionRate = lastMonthSchedules.length > 0 ?
-                (lastMonthCompletedSchedules.length / lastMonthSchedules.length) * 100 : 0;
-
-            const completionRateChange = completionRate - lastMonthCompletionRate;
-
-            const cancellationRate = currentMonthSchedules.length > 0 ?
-                (cancelledSchedules.length / currentMonthSchedules.length) * 100 : 0;
-
-            const lastMonthCancellationRate = lastMonthSchedules.length > 0 ?
-                (lastMonthCancelledSchedules.length / lastMonthSchedules.length) * 100 : 0;
-
-            const cancellationRateChange = cancellationRate - lastMonthCancellationRate;
-
-            // Tính toán số bệnh nhân mới trong tháng hiện tại
-            const newPatients = patients.filter(patient => {
-                if (!patient.createdAt) return false;
-                const createdDate = new Date(patient.createdAt);
-                return createdDate.getMonth() === currentDate.getMonth() &&
-                    createdDate.getFullYear() === currentDate.getFullYear();
-            });
-
-            // Tính toán số bệnh nhân mới trong tháng trước
-            const lastMonthNewPatients = patients.filter(patient => {
-                if (!patient.createdAt) return false;
-                const createdDate = new Date(patient.createdAt);
-                return createdDate.getMonth() === lastMonthDate.getMonth() &&
-                    createdDate.getFullYear() === lastMonthDate.getFullYear();
-            });
-
-            // Tính toán tỷ lệ tăng trưởng bệnh nhân
-            const patientGrowthRate = lastMonthNewPatients.length > 0 ?
-                ((newPatients.length - lastMonthNewPatients.length) / lastMonthNewPatients.length) * 100 :
-                (newPatients.length > 0 ? 100 : 0);
-
-            // Tính toán doanh thu từ bảng payment
-            // Giả định mỗi lịch hẹn hoàn thành có giá trị trung bình 350,000 VND
-            const averageAppointmentCost = 350000;
-            const monthlyRevenue = completedSchedules.length * averageAppointmentCost;
-            const lastMonthRevenue = lastMonthCompletedSchedules.length * averageAppointmentCost;
-            const revenueGrowth = lastMonthRevenue > 0 ?
-                ((monthlyRevenue - lastMonthRevenue) / lastMonthRevenue) * 100 :
-                (monthlyRevenue > 0 ? 100 : 0);
-
-            // Tổng hợp dữ liệu thống kê
-            return {
-                data: {
-                    staff: {
-                        totalDoctors: doctors.length,
-                        totalLabTechnicians: labTechnicians.length,
-                        activeStaff: doctors.filter(d => d.accountStatus === 'ACTIVE').length +
-                            labTechnicians.filter(l => l.accountStatus === 'ACTIVE').length,
-                        doctorUtilization: doctors.length > 0 ?
-                            Math.round((schedules.filter(s => doctors.some(d => d.id === s.doctorId)).length / doctors.length) * 100) : 0,
-                        labTechnicianUtilization: 75 // Giả định
-                    },
-                    patients: {
-                        totalPatients: patients.length,
-                        newPatients: newPatients.length,
-                        returningPatients: patients.length - newPatients.length,
-                        activePatients: patients.filter(p => p.accountStatus === 'ACTIVE').length,
-                        inactivePatients: patients.filter(p => p.accountStatus !== 'ACTIVE').length,
-                        growthRate: Math.round(patientGrowthRate * 10) / 10,
-                        newPatientGrowth: lastMonthNewPatients.length > 0 ?
-                            Math.round(((newPatients.length - lastMonthNewPatients.length) / lastMonthNewPatients.length) * 100) :
-                            (newPatients.length > 0 ? 100 : 0)
-                    },
-                    appointments: {
-                        totalAppointments: currentMonthSchedules.length,
-                        completedAppointments: completedSchedules.length,
-                        cancelledAppointments: cancelledSchedules.length,
-                        pendingAppointments: pendingSchedules.length,
-                        completionRate: Math.round(completionRate),
-                        cancellationRate: Math.round(cancellationRate),
-                        completionRateChange: Math.round(completionRateChange * 10) / 10,
-                        cancellationRateChange: Math.round(cancellationRateChange * 10) / 10,
-                        averageWaitTime: 12, // Giả định
-                        appointmentGrowth: lastMonthSchedules.length > 0 ?
-                            Math.round(((currentMonthSchedules.length - lastMonthSchedules.length) / lastMonthSchedules.length) * 100) :
-                            (currentMonthSchedules.length > 0 ? 100 : 0)
-                    },
-                    treatments: {
-                        ongoingTreatments: pendingSchedules.length,
-                        successfulTreatments: completedSchedules.length,
-                        averageTreatmentDuration: 6, // Giả định
-                        successRate: completedSchedules.length > 0 && (completedSchedules.length + cancelledSchedules.length) > 0 ?
-                            Math.round((completedSchedules.length / (completedSchedules.length + cancelledSchedules.length)) * 100) : 0,
-                        adherenceRate: 87, // Giả định
-                        successRateChange: 4.7 // Giả định
-                    },
-                    finances: {
-                        monthlyRevenue: monthlyRevenue,
-                        averageCostPerPatient: patients.length > 0 ?
-                            Math.round(monthlyRevenue / patients.length) : averageAppointmentCost,
-                        revenueGrowth: Math.round(revenueGrowth * 10) / 10,
-                        costReduction: 3.2 // Giả định
-                    }
-                }
-            };
-        })
-        .catch(error => {
-            console.error('Error fetching dashboard statistics:', error);
-            return { data: {} };
-        });
-};
-
 // API để lấy thống kê nhân sự
 const fetchStaffStatisticsAPI = (filters = {}) => {
     console.log('Fetching staff statistics with filters:', filters);
@@ -839,104 +662,6 @@ const fetchStaffStatisticsAPI = (filters = {}) => {
         })
         .catch(error => {
             console.error('Error fetching staff statistics:', error);
-            return { data: {} };
-        });
-};
-
-// API để lấy thống kê bệnh nhân
-const fetchPatientStatisticsAPI = (filters = {}) => {
-    console.log('Fetching patient statistics with filters:', filters);
-
-    return Promise.all([
-        fetchUsersByRoleAPI('PATIENT'),
-        getAllSchedulesAPI(),
-        fetchAllRegimensAPI()
-    ])
-        .then(([patientsRes, schedulesRes, regimensRes]) => {
-            const patients = patientsRes.data || [];
-            const schedules = schedulesRes.data || [];
-            const regimens = regimensRes.data || [];
-
-            const currentDate = new Date();
-            const lastMonthDate = new Date();
-            lastMonthDate.setMonth(lastMonthDate.getMonth() - 1);
-
-            // Lọc dữ liệu theo filters nếu có
-            let filteredSchedules = schedules;
-            if (filters.startDate && filters.endDate) {
-                const startDate = new Date(filters.startDate);
-                const endDate = new Date(filters.endDate);
-                filteredSchedules = schedules.filter(schedule => {
-                    const scheduleDate = new Date(schedule.date);
-                    return scheduleDate >= startDate && scheduleDate <= endDate;
-                });
-            }
-
-            // Tính toán số bệnh nhân mới trong tháng hiện tại
-            const newPatients = patients.filter(patient => {
-                if (!patient.createdAt) return false;
-                const createdDate = new Date(patient.createdAt);
-                return createdDate.getMonth() === currentDate.getMonth() &&
-                    createdDate.getFullYear() === currentDate.getFullYear();
-            });
-
-            // Tính toán số bệnh nhân mới trong tháng trước
-            const lastMonthNewPatients = patients.filter(patient => {
-                if (!patient.createdAt) return false;
-                const createdDate = new Date(patient.createdAt);
-                return createdDate.getMonth() === lastMonthDate.getMonth() &&
-                    createdDate.getFullYear() === lastMonthDate.getFullYear();
-            });
-
-            // Tính toán tỷ lệ tăng trưởng bệnh nhân mới
-            const newPatientGrowthRate = lastMonthNewPatients.length > 0 ?
-                ((newPatients.length - lastMonthNewPatients.length) / lastMonthNewPatients.length) * 100 :
-                (newPatients.length > 0 ? 100 : 0);
-
-            // Tính toán số bệnh nhân có lịch hẹn trong tháng hiện tại
-            const activePatientIds = new Set(
-                filteredSchedules
-                    .filter(schedule => schedule.patientId)
-                    .map(schedule => schedule.patientId)
-            );
-
-            const activePatients = patients.filter(patient =>
-                patient.accountStatus === 'ACTIVE' || activePatientIds.has(patient.id)
-            );
-
-            // Phân loại bệnh nhân theo giới tính
-            const malePatients = patients.filter(p => p.gender === 'MALE').length;
-            const femalePatients = patients.filter(p => p.gender === 'FEMALE').length;
-            const otherGenderPatients = patients.filter(p => p.gender !== 'MALE' && p.gender !== 'FEMALE').length;
-
-            // Tổng hợp dữ liệu thống kê bệnh nhân
-            return {
-                data: {
-                    totalPatients: patients.length,
-                    newPatients: newPatients.length,
-                    returningPatients: patients.length - newPatients.length,
-                    activePatients: activePatients.length,
-                    inactivePatients: patients.length - activePatients.length,
-                    growthRate: Math.round(newPatientGrowthRate * 10) / 10,
-                    newPatientGrowth: Math.round(newPatientGrowthRate * 10) / 10,
-                    patientsByGender: {
-                        male: malePatients,
-                        female: femalePatients,
-                        other: otherGenderPatients
-                    },
-                    patientsByStatus: {
-                        active: patients.filter(p => p.accountStatus === 'ACTIVE').length,
-                        inactive: patients.filter(p => p.accountStatus !== 'ACTIVE').length
-                    },
-                    patientAppointments: {
-                        withAppointments: activePatientIds.size,
-                        withoutAppointments: patients.length - activePatientIds.size
-                    }
-                }
-            };
-        })
-        .catch(error => {
-            console.error('Error fetching patient statistics:', error);
             return { data: {} };
         });
 };
@@ -1176,6 +901,25 @@ const getSlotCountsAPI = (doctorId, date) => {
         });
 };
 
+// services/api.service.js
+const getHealthRecordByDoctorIdAPI = async (doctorId, filterType, selectedDate) => {
+  const params = {};
+
+  if (filterType) params.filterType = filterType;
+  if (selectedDate) params.selectedDate = selectedDate;
+
+  try {
+    const response = await axios.get(`/api/health-record/doctor-id/${doctorId}`, {
+      params
+    });
+    return response;
+  } catch (error) {
+    console.error('Lỗi gọi API getHealthRecordByDoctorIdAPI:', error);
+    throw error;
+  }
+};
+
+
 // Export tất cả các hàm API
 export {
     loginAPI,
@@ -1238,9 +982,7 @@ export {
     fetchDoctorProfileByDoctorIdAPI,
     createDoctorProfileAPI,
     checkAvailableSlotsAPI,
-    fetchDashboardStatisticsAPI,
     fetchStaffStatisticsAPI,
-    fetchPatientStatisticsAPI,
     fetchAppointmentStatisticsAPI,
     checkBackendConnection,
     fetchSystemConfigurationsAPI,
@@ -1248,5 +990,6 @@ export {
     createSystemConfigurationAPI,
     deleteSystemConfigurationAPI,
     fetchHealthRecordsAPI,
-    getSlotCountsAPI
+    getSlotCountsAPI,
+    getHealthRecordByDoctorIdAPI,
 }
