@@ -26,6 +26,10 @@ import './Dashboard.css';
 import KPICard from './KPICard';
 import DashboardFilters from './DashboardFilters';
 import dayjs from 'dayjs';
+import isBetween from 'dayjs/plugin/isBetween';
+
+// Đăng ký plugin
+dayjs.extend(isBetween);
 
 // Import các biểu đồ cần thiết
 import AppointmentStatusChart from './AppointmentStatusChart';
@@ -364,6 +368,25 @@ const Dashboard = () => {
       const schedules = schedulesResponse?.data || [];
       
       console.log("Dữ liệu lịch hẹn từ API (xu hướng):", schedules);
+      console.log("Current filters:", filters);
+      
+      // Lấy khoảng thời gian từ filters
+      const { selectedDate, period: filterType } = filters;
+      let filteredSchedules = schedules;
+      
+      // Nếu có selectedDate, filter dữ liệu theo khoảng thời gian
+      if (selectedDate) {
+        const { startDate, endDate } = getDateRangeFromFilter(selectedDate, filterType);
+        console.log("Filtering schedules from", startDate, "to", endDate);
+        
+        filteredSchedules = schedules.filter(schedule => {
+          if (!schedule.date) return false;
+          const scheduleDate = dayjs(schedule.date);
+          return scheduleDate.isBetween(startDate, endDate, 'day', '[]');
+        });
+        
+        console.log("Filtered schedules:", filteredSchedules.length, "out of", schedules.length);
+      }
       
       // Khởi tạo mảng dữ liệu cho 12 tháng
       const monthlyData = Array(12).fill().map(() => ({
@@ -391,8 +414,8 @@ const Dashboard = () => {
         consultation: 0     // Tư vấn
       }));
       
-      // Phân loại lịch hẹn theo tháng và loại
-      schedules.forEach(schedule => {
+      // Phân loại lịch hẹn theo tháng và loại - sử dụng filteredSchedules
+      filteredSchedules.forEach(schedule => {
         if (!schedule.date) return;
         
         const date = new Date(schedule.date);
@@ -473,8 +496,9 @@ const Dashboard = () => {
   };
 
 
-  // Gọi API tương ứng dựa vào tab đang active
+  // Gọi API tương ứng dựa vào tab đang active và filters
   useEffect(() => {
+    console.log('Effect triggered - activeTab:', activeTab, 'filters:', filters);
     switch (activeTab) {
       case 'staff':
         fetchStaffStatistics();
@@ -488,6 +512,7 @@ const Dashboard = () => {
     }
   }, [
     activeTab, 
+    filters, // Thêm filters vào dependency để refresh data khi filter thay đổi
     fetchStaffStatistics, 
     fetchAppointmentStatistics,
     fetchDoctorPerformanceStatistics,
@@ -495,8 +520,12 @@ const Dashboard = () => {
 
   // Xử lý thay đổi bộ lọc
   const handleFilterChange = useCallback((newFilters) => {
+    console.log('Filters changed:', newFilters);
     setFilters(prevFilters => ({
       ...prevFilters,
+      // Map filterType từ DashboardFilters sang period để đồng bộ
+      period: newFilters.filterType || prevFilters.period,
+      selectedDate: newFilters.selectedDate,
       ...newFilters
     }));
   }, []);
@@ -702,7 +731,10 @@ const Dashboard = () => {
       <DashboardFilters
         onFilterChange={handleFilterChange}
         doctors={doctors}
-        initialFilters={filters}
+        initialFilters={{
+          filterType: filters.period, // Map period sang filterType
+          selectedDate: filters.selectedDate
+        }}
       />
       
       <Tabs 
