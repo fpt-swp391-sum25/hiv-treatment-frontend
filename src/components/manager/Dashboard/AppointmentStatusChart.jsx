@@ -83,7 +83,7 @@ const AppointmentStatusChart = ({ data }) => {
         </span>
       </div>
       <div style={{ height: 280, position: 'relative' }}>
-        <Pie data={chartData} options={options} />
+      <Pie data={chartData} options={options} />
       </div>
     </div>
   );

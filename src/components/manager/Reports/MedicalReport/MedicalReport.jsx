@@ -7,7 +7,6 @@ import {
 import {
   FileSearchOutlined, ExperimentOutlined, MedicineBoxOutlined, TeamOutlined,
   FilterOutlined, FileExcelOutlined, FilePdfOutlined, UserOutlined, CalendarOutlined, UpOutlined, DownOutlined
-
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { getMedicalReportData, exportMedicalReportToExcel } from '../../../../services/report.service';
@@ -24,7 +23,6 @@ const HIV_COLORS = {
 };
 
 const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
-
   const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(false);
   const [exportLoading, setExportLoading] = useState(false);
@@ -60,8 +58,6 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
       positiveRate
     };
   }, [reportData.statistics]);
-
-
 
   // Memoized patient list
   const patientList = useMemo(() => {
@@ -127,9 +123,6 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
     if (onDateRangeChange) {
       onDateRangeChange(dates);
     }
-    if (onDateRangeChange) {
-      onDateRangeChange(dates);
-    }
   };
 
   const loadReportData = useCallback(async () => {
@@ -147,12 +140,10 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
     } catch (error) {
       console.error('Error loading medical report data:', error);
       onError?.(error);
-      onError?.(error);
     } finally {
       setLoading(false);
     }
   }, [dateRange, onError]);
- 
 
   const handleExportExcel = async () => {
     setExportLoading(true);
@@ -266,13 +257,10 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
     } catch (error) {
       console.error('Error exporting PDF:', error);
       onError?.(new Error('Không thể xuất báo cáo PDF. Vui lòng thử lại sau.'));
-      onError?.(error);
     } finally {
       setExportLoading(false);
     }
   };
-
-  
 
   const toggleFilters = () => {
     setShowFilters(!showFilters);
@@ -389,7 +377,6 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
                 Tỷ lệ dương tính HIV chiếm <Text strong>{Math.round((statistics.totalPositiveHIV / (statistics.totalPositiveHIV + statistics.totalNegativeHIV || 1)) * 100)}%</Text> tổng số ca xét nghiệm.
               </p>
               {/* Đã loại bỏ phần hiển thị xu hướng gần đây để giảm độ phức tạp khi phân tích */}
-              {/* Đã loại bỏ phần hiển thị xu hướng gần đây để giảm độ phức tạp khi phân tích */}
             </Card>
           </Col>
         </Row>
@@ -446,7 +433,6 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
             
             <Divider />
             
-            {/* Đã loại bỏ phần Phân tích chi tiết theo yêu cầu */}
             {/* Đã loại bỏ phần Phân tích chi tiết theo yêu cầu */}
           </div>
         </Card>
@@ -512,7 +498,6 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
         <Card title="Khuyến nghị" style={{ marginTop: 16 }}>
           <div className="recommendation-content">
             {/* Đã loại bỏ khung cảnh báo theo yêu cầu */}
-            {/* Đã loại bỏ khung cảnh báo theo yêu cầu */}
             
             <p>
               <Text strong>Khuyến nghị hành động:</Text>
@@ -532,7 +517,6 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
   // Render Patient Appointments Tab
   const renderPatientAppointmentsTab = () => {
     if (!patientList.length) {
-
       return <Empty description="Không có dữ liệu lịch sử bệnh nhân" />;
     }
     
@@ -567,9 +551,6 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
             >
               <Descriptions column={{ xxl: 3, xl: 3, lg: 3, md: 2, sm: 1, xs: 1 }}>
                 <Descriptions.Item label="Mã bệnh nhân">{item.patient.id || 'N/A'}</Descriptions.Item>
-                {/* Đã loại bỏ thông tin số điện thoại */}
-                {/* Đã loại bỏ thông tin email */}
-                {/* Đã loại bỏ thông tin địa chỉ */}
                 {/* Đã loại bỏ thông tin số điện thoại */}
                 {/* Đã loại bỏ thông tin email */}
                 {/* Đã loại bỏ thông tin địa chỉ */}
@@ -717,13 +698,6 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
           >
             Xuất PDF
               </Button>
-              <Button
-            icon={<FilePdfOutlined />}
-            onClick={handleExportPDF}
-            loading={exportLoading}
-          >
-            Xuất PDF
-              </Button>
         </Space>
       </div>
 
@@ -775,4 +749,4 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
   );
 };
 
-export default MedicalReport;
+export default MedicalReport; 
