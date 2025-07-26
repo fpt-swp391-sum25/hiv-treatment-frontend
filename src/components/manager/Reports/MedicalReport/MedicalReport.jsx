@@ -482,7 +482,7 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
                 {
                   title: 'Tỷ lệ dương tính',
                   key: 'positiveRate',
-                  render: (_, record) => {
+        render: (_, record) => {
                     // Tính tổng số ca bao gồm cả ca chưa xác định
                     const total = record.positive + record.negative + record.unknown;
                     const rate = total > 0 ? Math.round((record.positive / total) * 100) : 0;

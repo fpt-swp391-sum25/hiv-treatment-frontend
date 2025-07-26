@@ -58,11 +58,11 @@ const DashboardFilters = ({ onFilterChange, initialFilters = {} }) => {
 
   return (
     <Card className="dashboard-filters-card mb-4">
-      <Row gutter={[16, 16]} align="middle">
-        <Col xs={24} sm={24} md={10} lg={6}>
+      <Row gutter={[24, 16]} align="middle" justify="center">
+        <Col xs={24} sm={12} md={8} lg={6} xl={5}>
           <div className="filter-item">
             <div className="filter-label">Loại thời gian</div>
-            <Radio.Group value={filterType} onChange={handleFilterTypeChange}>
+            <Radio.Group value={filterType} onChange={handleFilterTypeChange} className="filter-radio-group">
               <Radio.Button value="month">Tháng</Radio.Button>
               <Radio.Button value="quarter">Quý</Radio.Button>
               <Radio.Button value="year">Năm</Radio.Button>
@@ -70,7 +70,7 @@ const DashboardFilters = ({ onFilterChange, initialFilters = {} }) => {
           </div>
         </Col>
 
-        <Col xs={24} sm={24} md={8} lg={6}>
+        <Col xs={24} sm={12} md={8} lg={6} xl={5}>
           <div className="filter-item">
             <div className="filter-label">Thời điểm</div>
             <DatePicker
@@ -90,12 +90,14 @@ const DashboardFilters = ({ onFilterChange, initialFilters = {} }) => {
           </div>
         </Col>
 
-        <Col xs={24} sm={24} md={6} lg={8} style={{ textAlign: 'right' }}>
-          <Space>
-            <Button icon={<ReloadOutlined />} onClick={handleReset}>
-              Đặt lại
-            </Button>
-          </Space>
+        <Col xs={24} sm={24} md={8} lg={6} xl={5} style={{ textAlign: 'center' }}>
+          <Button 
+            icon={<ReloadOutlined />} 
+            onClick={handleReset}
+            className="filter-reset-button"
+          >
+            Đặt lại
+          </Button>
         </Col>
       </Row>
     </Card>

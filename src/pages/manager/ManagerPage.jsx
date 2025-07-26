@@ -6,7 +6,6 @@ import ManagerHeader from '../../components/manager/Layout/ManagerHeader';
 import { AuthContext } from '../../components/context/AuthContext';
 import { fetchAccountAPI } from '../../services/api.service';
 import './ManagerPage.css';
-import { HomeOutlined } from '@ant-design/icons';
 
 const { Content } = Layout;
 
@@ -45,10 +44,6 @@ const ManagerPage = () => {
   }
 
   const breadcrumbItems = [
-    {
-      title: <Link to='/manager'><HomeOutlined /></Link>,
-      key: 'home'
-    },
     ...pathSnippets.map((_, idx) => {
       const url = `/${pathSnippets.slice(0, idx + 1).join('/')}`
       if (url === '/manager') return null
