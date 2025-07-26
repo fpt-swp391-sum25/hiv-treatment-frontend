@@ -1,7 +1,7 @@
 import React from 'react';
 import { UserOutlined, ScheduleOutlined, UnorderedListOutlined, FileTextOutlined } from '@ant-design/icons';
 import { Layout, Menu, theme, Typography } from 'antd';
-import { Link, Outlet } from 'react-router-dom';
+import { Link, Outlet, useLocation } from 'react-router-dom';
 
 
 const { Header, Content, Sider } = Layout;
@@ -23,6 +23,15 @@ const DoctorPageSideBar = () => {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
+
+  const location = useLocation()
+  const getSelectedKey = () => {
+    const sortedPaths = [...paths].sort((a, b) => b.length - a.length);
+    const matchIndex = sortedPaths.findIndex(path => location.pathname.startsWith(path));
+    if (matchIndex === -1) return ['1'];
+    const realIndex = paths.findIndex(path => path === sortedPaths[matchIndex]);
+    return [String(realIndex + 1)];
+  };
   return (
     <Sider
       width={13 + 'vw'}
@@ -31,7 +40,7 @@ const DoctorPageSideBar = () => {
       style={{ background: "white" }}
     >
       <Menu theme="light" mode="inline" defaultSelectedKeys={['4']} items={items}
-        selectedKeys={[location.pathname]} style={{ minHeight: '100vh' }} />
+        selectedKeys={getSelectedKey()} style={{ minHeight: '100vh' }} />
     </Sider>
   );
 };

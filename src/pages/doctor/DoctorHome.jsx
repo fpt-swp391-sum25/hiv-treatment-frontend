@@ -69,9 +69,9 @@ const DoctorHome = () => {
 
     return (
         <Layout style={{ minHeight: "100vh" }}>
-            <Header style={{ background: "#fff", padding: 0 }}>
-                <AdminHeader />
-            </Header>
+
+            <AdminHeader />
+
             <Layout>
                 <DoctorPageSideBar />
                 <Layout style={{ padding: "16px" }}>

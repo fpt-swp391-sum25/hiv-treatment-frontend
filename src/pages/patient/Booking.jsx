@@ -1,3 +1,4 @@
+// Booking.jsx
 import { useContext, useEffect, useState } from 'react';
 import {
     Form,
@@ -12,6 +13,7 @@ import {
     Descriptions,
     Card,
     Divider,
+    Tag
 } from 'antd';
 import {
     ArrowLeftOutlined,
@@ -22,29 +24,60 @@ import {
     ClockCircleOutlined,
     ExclamationCircleOutlined,
 } from '@ant-design/icons';
-import moment from 'moment';
-import { useNavigate } from 'react-router-dom';
+import dayjs from 'dayjs';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
     fetchAllDoctorsAPI,
     fetchAllScheduleAPI,
     fetchScheduleByDateAPI,
     initiatePaymentAPI,
     registerScheduleAPI,
-    createHealthRecordAPI,
     fetchSystemConfigurationsAPI,
 } from '../../services/api.service';
 import { AuthContext } from '../../components/context/AuthContext';
-import dayjs from 'dayjs';
 import { fetchServicePrices } from '../../services/systemConfiguration.service';
+import '../../styles/patient/Booking.css'
 
 const { Link } = Typography;
 const { Option } = Select;
 const { Content } = Layout;
 const dateFormat = 'DD-MM-YYYY';
 
+const SlotSelector = ({ slots, selected, onSelect, loading }) => (
+    <div className="slot-grid-modern">
+        {Object.keys(slots).length === 0 && !loading && (
+            <div style={{ color: '#bbb', padding: 20, textAlign: 'center' }}>
+                Vui lòng chọn ngày để xem khung giờ
+            </div>
+        )}
+        {Object.keys(slots).map((startTime) => {
+            const slot = slots[startTime].slots[0];
+            return (
+                <Button
+                    key={startTime}
+                    shape="round"
+                    style={{
+                        margin: 8,
+                        width: 110,
+                        fontWeight: selected === slot.slot ? 700 : 400,
+                        background: selected === slot.slot ? '#e6f7ff' : '#fff'
+                    }}
+                    type={selected === slot.slot ? "primary" : "default"}
+                    onClick={() => onSelect(slot.slot)}
+                >
+                    {dayjs(startTime, 'HH:mm:ss').format('HH:mm')}
+                </Button>
+            );
+        })}
+    </div>
+);
+
+
 const Booking = () => {
     const [form] = Form.useForm();
     const { user } = useContext(AuthContext);
+    const [searchParams] = useSearchParams()
+    const doctorIdParam = searchParams.get('doctorId')
     const [doctors, setDoctors] = useState([]);
     const [availableSchedules, setAvailableSchedules] = useState([]);
     const [groupedSlots, setGroupedSlots] = useState({});
@@ -53,7 +86,6 @@ const Booking = () => {
     const [loading, setLoading] = useState(false);
     const [servicePrices, setServicePrices] = useState({});
     const [config, setConfig] = useState({});
-
     const doctorId = Form.useWatch('doctor', form);
     const date = Form.useWatch('date', form);
     const slot = Form.useWatch('slot', form);
@@ -64,9 +96,8 @@ const Booking = () => {
     useEffect(() => {
         loadDoctors();
         loadSystemPrices();
-        loadConfigs()
+        loadConfigs();
     }, []);
-
     useEffect(() => {
         if (date) {
             loadSchedules();
@@ -78,11 +109,25 @@ const Booking = () => {
     }, [doctorId, date]);
 
     useEffect(() => {
+        if (doctorIdParam && doctors.length > 0) {
+            const exists = doctors.find(doc => doc.id === Number(doctorIdParam));
+            if (exists && !form.getFieldValue('doctor')) {
+                form.setFieldValue('doctor', exists.id);
+            }
+        }
+
+    }, [doctorIdParam, doctors, form])
+
+    useEffect(() => {
+        const doctorId = form.getFieldValue('doctor');
+        console.log('>>>>>>>>check schedule', availableSchedules)
         if (slot) {
             const schedule = availableSchedules.find(
-                (s) => s.slot === slot && (!doctorId || s.doctorId === doctorId)
+                (s) => s.slot === slot && (!doctorId || s.doctor.id === doctorId)
             );
             setSelectedSchedule(schedule);
+
+
         } else {
             setSelectedSchedule(null);
         }
@@ -95,7 +140,7 @@ const Booking = () => {
         } else {
             setSelectedAmount(null);
         }
-    }, [slot, type, availableSchedules, doctorId, servicePrices]);
+    }, [slot, type, availableSchedules, servicePrices]);
 
     const loadConfigs = async () => {
         try {
@@ -116,9 +161,7 @@ const Booking = () => {
         setLoading(true);
         try {
             const response = await fetchAllDoctorsAPI();
-            if (response.data) {
-                setDoctors(response.data);
-            }
+            if (response.data) setDoctors(response.data);
         } catch (error) {
             message.error('Không thể tải danh sách bác sĩ');
         } finally {
@@ -180,6 +223,7 @@ const Booking = () => {
 
     const onFinish = async (values) => {
         try {
+            setLoading(true);
             const selectedSchedules = availableSchedules.filter(
                 (schedule) => schedule.slot === values.slot
             );
@@ -203,7 +247,6 @@ const Booking = () => {
                 type: values.type,
             });
 
-
             const paymentResponse = await initiatePaymentAPI({
                 scheduleId: schedule.id,
                 amount: selectedAmount,
@@ -212,17 +255,19 @@ const Booking = () => {
             window.location.href = paymentResponse.data;
         } catch (error) {
             message.error(error.message || 'Đặt lịch thất bại');
+        } finally {
+            setLoading(false);
         }
     };
 
     const disabledDate = (current) => {
-        const isBeforeToday = current && current < moment().startOf('day');
+        const isBeforeToday = current && current < dayjs().startOf('day');
         const isSunday = current && current.day() === 0;
         return isBeforeToday || isSunday;
     };
 
     const normalizeString = (str) => {
-        return str
+        return (str || '')
             .toLowerCase()
             .normalize('NFD')
             .replace(/[\u0300-\u036f]/g, '')
@@ -231,63 +276,68 @@ const Booking = () => {
     };
 
     return (
-        <Layout>
-            <Content style={{ padding: '20px 40px', minHeight: '600px', margin: '20px' }}>
-                <Row gutter={24}>
-                    {/* FORM booking chiếm nhiều diện tích */}
-                    <Col xs={24} md={17}>
+        <Layout style={{ background: '#fafcff' }}>
+            <Content style={{ padding: 0, maxWidth: 1300, margin: '0 auto' }}>
+                <Row gutter={[16, 16]} style={{ padding: '16px 8px' }}>
+                    <Col xs={24} md={15} style={{ minWidth: 320 }}>
                         <Card
+                            variant={false}
+                            style={{
+                                minHeight: 520,
+                                borderRadius: 18,
+                                boxShadow: '0 6px 32px rgba(44,62,80,0.09)',
+                                background: '#fff',
+                                marginBottom: 24,
+                            }}
+                            bodyStyle={{
+                                padding: window.innerWidth >= 768 ? '32px 32px 24px 32px' : '24px 8px'
+                            }}
                             title={
                                 <Link href="/" className="link">
                                     <ArrowLeftOutlined /> Về trang chủ
                                 </Link>
-
                             }
-                            bordered={false}
-                            style={{ borderRadius: 12, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                            extra={
+                                selectedSchedule ? (
+                                    <Tag color="blue" style={{ fontSize: 16 }}>
+                                        Đã chọn: {dayjs(date).format('DD/MM/YYYY')} {selectedSchedule?.slot?.slice(0, 5)}
+                                    </Tag>
+                                ) : null
+                            }
                         >
-                            <span style={{ fontSize: 18, fontWeight: 600 }}>
-                                <CalendarOutlined style={{ marginRight: 8 }} />
-                                Đặt lịch khám
-                            </span>
-                            <p style={{ marginTop: 16 }}>Vui lòng điền thông tin bên dưới để đặt lịch khám HIV</p>
-
-                            <Form form={form} layout="vertical" onFinish={onFinish}>
+                            <Typography.Title level={3} style={{ fontWeight: 800, marginBottom: 0 }}>Đặt lịch khám</Typography.Title>
+                            <Typography.Text type="secondary">Hãy điền thông tin để đặt lịch nhanh chóng</Typography.Text>
+                            <Divider />
+                            <Form form={form} layout="vertical" onFinish={onFinish} requiredMark="optional" size="large">
                                 <Form.Item
                                     name="type"
-                                    label="Loại dịch vụ"
+                                    label="Chọn loại dịch vụ"
                                     rules={[{ required: true, message: 'Vui lòng chọn loại dịch vụ' }]}
                                 >
-                                    <Select placeholder="Chọn loại dịch vụ">
+                                    <Select placeholder="Loại dịch vụ...">
                                         <Option value="Khám">Khám</Option>
                                         <Option value="Tái khám">Tái khám</Option>
                                         <Option value="Tư vấn">Tư vấn</Option>
                                     </Select>
                                 </Form.Item>
-
-                                <Form.Item name="doctor" label="Bác sĩ">
+                                <Form.Item name="doctor" label="Chọn bác sĩ (tùy chọn)">
                                     <Select
-                                        showSearch
-                                        placeholder="Chọn bác sĩ (tùy chọn)"
-                                        allowClear
+                                        showSearch allowClear placeholder="Lọc bác sĩ (gõ tên)"
                                         filterOption={(input, option) =>
                                             normalizeString(option.children).includes(normalizeString(input))
                                         }
                                     >
                                         {doctors.map((doctor) => (
-                                            <Option key={doctor.id} value={doctor.id}>
-                                                {doctor.fullName}
-                                            </Option>
+                                            <Option key={doctor.id} value={doctor.id}>{doctor.fullName}</Option>
                                         ))}
                                     </Select>
                                 </Form.Item>
-
                                 <Row gutter={16}>
-                                    <Col span={12}>
+                                    <Col xs={24} sm={12}>
                                         <Form.Item
                                             name="date"
-                                            label="Ngày khám"
-                                            rules={[{ required: true, message: 'Vui lòng chọn ngày khám' }]}
+                                            label="Chọn ngày"
+                                            rules={[{ required: true, message: 'Chọn ngày khám' }]}
                                         >
                                             <DatePicker
                                                 disabledDate={disabledDate}
@@ -297,76 +347,78 @@ const Booking = () => {
                                             />
                                         </Form.Item>
                                     </Col>
-                                    <Col span={12}>
+                                    <Col xs={24} sm={12}>
                                         <Form.Item
                                             name="slot"
                                             label="Khung giờ"
-                                            rules={[{ required: true, message: 'Vui lòng chọn khung giờ' }]}
+                                            rules={[{ required: true, message: 'Chọn khung giờ' }]}
                                         >
-                                            <Select
-                                                placeholder="Chọn khung giờ"
-                                                disabled={!date || !Object.keys(groupedSlots).length}
-                                            >
-                                                {Object.keys(groupedSlots).map((startTime) => (
-                                                    <Option key={startTime} value={groupedSlots[startTime].slots[0].slot}>
-                                                        {dayjs(startTime, 'HH:mm:ss').format('HH:mm')}
-                                                    </Option>
-                                                ))}
-                                            </Select>
+                                            <SlotSelector
+                                                slots={groupedSlots}
+                                                selected={slot}
+                                                onSelect={s => form.setFieldsValue({ slot: s })}
+                                                loading={loading}
+                                            />
                                         </Form.Item>
                                     </Col>
                                 </Row>
-
                                 {selectedSchedule && (
-                                    <Descriptions bordered size="small" style={{ marginBottom: 16 }}>
-                                        <Descriptions.Item label="Loại lịch hẹn">{type}</Descriptions.Item>
-                                        <Descriptions.Item label="Giá tiền">
-                                            {selectedAmount ? selectedAmount.toLocaleString('vi-VN') : '0'} VND
+                                    <Descriptions
+                                        bordered
+                                        size="small"
+                                        layout="vertical"
+                                        style={{ margin: '18px 0', borderRadius: 8, background: '#f8fafc' }}
+                                    >
+                                        <Descriptions.Item label="Loại hẹn">{type}</Descriptions.Item>
+                                        <Descriptions.Item label="Ngày khám">{dayjs(date).format('DD-MM-YYYY')}</Descriptions.Item>
+                                        <Descriptions.Item label="Khung giờ">{selectedSchedule.slot?.slice(0, 5)}</Descriptions.Item>
+                                        <Descriptions.Item label="Giá">
+                                            <span style={{ fontWeight: 700, color: '#1677ff', fontSize: 18 }}>
+                                                {selectedAmount ? selectedAmount.toLocaleString('vi-VN') : '--'} VND
+                                            </span>
                                         </Descriptions.Item>
                                     </Descriptions>
                                 )}
-
-                                <Form.Item style={{ textAlign: 'right' }}>
-                                    <Button type="primary" htmlType="submit" loading={loading}>
+                                <Form.Item>
+                                    <Button block type="primary" size="large" htmlType="submit" loading={loading} style={{ fontSize: 18, borderRadius: 8, height: 48 }}>
                                         Xác nhận đặt lịch
                                     </Button>
                                 </Form.Item>
                             </Form>
                         </Card>
                     </Col>
-
-                    {/* Hỗ trợ 30% */}
-                    <Col xs={24} md={7}>
+                    <Col xs={24} md={9} style={{ minWidth: 250 }}>
                         <Card
-                            title={
-                                <span style={{ fontSize: 16 }}>
-                                    <InfoCircleOutlined style={{ marginRight: 8 }} />
-                                    Hỗ trợ
-                                </span>
-                            }
-                            bordered={false}
-                            style={{ borderRadius: 12, background: '#fafafa', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}
+                            variant={false}
+                            style={{
+                                borderRadius: 18,
+                                background: 'linear-gradient(135deg, #e0f0ff 60%, #fff 100%)',
+                                boxShadow: '0 0 0 0 transparent',
+                                minHeight: 520
+                            }}
+                            bodyStyle={{ padding: 28, fontSize: 16 }}
+                            title={<span><InfoCircleOutlined /> Hỗ trợ đặt khám</span>}
                         >
-                            <p>
-                                <ClockCircleOutlined /> <strong>Giờ làm việc:</strong><br />
-                                {config['Thời gian làm việc']}
-                            </p>
-                            <p>
-                                <PhoneOutlined /> <strong>Hotline:</strong> {config['Đường dây nóng']}
-                            </p>
-                            <p>
-                                <MailOutlined /> <strong>Email:</strong> {config['Email hỗ trợ']}
-                            </p>
+                            <div style={{ fontSize: 16, marginBottom: 18 }}>
+                                <ClockCircleOutlined /> <b>Giờ làm việc:</b><br />{config['Thời gian làm việc']}
+                            </div>
+                            <div style={{ fontSize: 16, marginBottom: 10 }}>
+                                <PhoneOutlined /> <b>Hotline:</b> {config['Đường dây nóng']}
+                            </div>
+                            <div style={{ fontSize: 16, marginBottom: 10 }}>
+                                <MailOutlined /> <b>Email:</b> {config['Email hỗ trợ']}
+                            </div>
                             <Divider />
-                            <h3>
-                                <ExclamationCircleOutlined style={{ marginRight: 8 }} />
-                                Lưu ý
-                            </h3>
-                            <ul style={{ paddingLeft: 20 }}>
-                                <li>Vui lòng đến trước giờ hẹn 15 phút</li>
-                                <li>Mang theo giấy tờ tùy thân và thẻ BHYT (nếu có)</li>
-                                <li>Cập nhật thông tin sức khỏe gần nhất</li>
+                            <Typography.Title level={5}><ExclamationCircleOutlined /> Lưu ý khi đặt lịch</Typography.Title>
+                            <ul style={{ paddingLeft: 20, marginBottom: 0 }}>
+                                <li>Đến sớm ít nhất 15 phút trước giờ hẹn</li>
+                                <li>Mang theo giấy tờ tùy thân, thẻ BHYT (nếu có)</li>
+                                <li>Điền thông tin sức khỏe chính xác, trung thực</li>
                             </ul>
+                            <Divider />
+                            <div style={{ textAlign: 'center', opacity: 0.8 }}>
+                                {/* <img src="/img/booking-support-modern.png" width={110} alt="Support" /> */}
+                            </div>
                         </Card>
                     </Col>
                 </Row>
