@@ -3,10 +3,9 @@ import { Modal, Button, Form, Row, Col, Spinner, Badge } from 'react-bootstrap';
 import { notification } from 'antd';
 import { ScheduleStatus, SlotTimes, StatusMapping } from '../../../types/schedule.types';
 import moment from 'moment';
-import { deleteScheduleAPI, updateScheduleAPI, cancelBookingAPI } from '../../../services/api.service';
-import axios from '../../../services/axios.customize';
 import './ScheduleDetail.css';
-import { BsCalendarWeek, BsClock, BsDoorOpen, BsPerson, BsBriefcase, BsPersonPlus, BsPersonDash, BsList } from 'react-icons/bs';
+import { BsCalendarWeek, BsClock, BsDoorOpen, BsPerson, BsBriefcase, BsPersonPlus } from 'react-icons/bs';
+import { deleteScheduleAPI, updateScheduleAPI } from '../../../services/schedule.service';
 
 const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToast, onRefreshData }) => {
     const [formData, setFormData] = useState({
@@ -41,20 +40,20 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
 
     // Sử dụng SlotTimes từ schedule.types.js
     const timeSlots = SlotTimes;
-    
+
     // Định nghĩa ca sáng và ca chiều
-    const morningShiftSlots = timeSlots.filter(slot => 
+    const morningShiftSlots = timeSlots.filter(slot =>
         ['08:00:00', '09:00:00', '10:00:00', '11:00:00'].includes(slot.value)
     );
-    
-    const afternoonShiftSlots = timeSlots.filter(slot => 
+
+    const afternoonShiftSlots = timeSlots.filter(slot =>
         ['13:00:00', '14:00:00', '15:00:00', '16:00:00'].includes(slot.value)
     );
 
     useEffect(() => {
         if (schedule) {
             console.log('ScheduleDetail: Received schedule data:', schedule);
-            
+
             // Xác định shiftType từ trường type (theo phản hồi từ BE)
             let shiftTypeValue = null;
             if (schedule.type === 'morning' || schedule.type === 'afternoon') {
@@ -62,7 +61,7 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
             } else if (schedule.shiftType) {
                 shiftTypeValue = schedule.shiftType;
             }
-            
+
             setFormData({
                 id: schedule.id,
                 doctorId: schedule.doctorId,
@@ -78,7 +77,7 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                 maxPatients: schedule.maxPatients || 5 // Lấy số bệnh nhân tối đa
             });
         }
-        
+
         // Reset confirmDelete state when modal is shown
         setConfirmDelete(false);
     }, [schedule, show]);
@@ -88,9 +87,9 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
         if (formData.slot && !formData.shiftType) {
             // Kiểm tra xem slot thuộc ca sáng hay ca chiều
             if (morningShiftSlots.some(item => item.value === formData.slot)) {
-                setFormData(prev => ({...prev, shiftType: 'morning'}));
+                setFormData(prev => ({ ...prev, shiftType: 'morning' }));
             } else if (afternoonShiftSlots.some(item => item.value === formData.slot)) {
-                setFormData(prev => ({...prev, shiftType: 'afternoon'}));
+                setFormData(prev => ({ ...prev, shiftType: 'afternoon' }));
             }
         }
     }, [formData.slot, formData.shiftType]);
@@ -98,25 +97,25 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
         console.log(`Field changed: ${name}, new value: ${value}`);
-        
+
         // Xử lý đặc biệt cho trường roomCode
         let updatedValue = type === 'checkbox' ? checked : value;
         if (name === 'roomCode') {
             // Chỉ cho phép nhập số
             updatedValue = value.replace(/[^0-9]/g, '');
-            
+
             // Giới hạn độ dài
             if (updatedValue.length > 3) {
                 updatedValue = updatedValue.slice(0, 3);
             }
         }
-        
+
         // Tạo bản sao của formData để cập nhật
         const updatedFormData = {
             ...formData,
             [name]: updatedValue
         };
-        
+
         // Nếu thay đổi ca làm việc, cập nhật slot giờ tương ứng
         if (name === 'shiftType') {
             if (value === 'morning') {
@@ -127,7 +126,7 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                 updatedFormData.slot = '13:00:00';
             }
         }
-        
+
         // Nếu thay đổi slot giờ, tự động cập nhật ca làm việc tương ứng
         if (name === 'slot') {
             if (morningShiftSlots.some(slot => slot.value === value)) {
@@ -138,23 +137,23 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                 updatedFormData.shiftType = '';
             }
         }
-        
+
         setFormData(updatedFormData);
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         // DEBUG: Log dữ liệu form trước khi xử lý
         console.log('=== BẮT ĐẦU CẬP NHẬT LỊCH ===');
         console.log('1. Dữ liệu form:', formData);
         console.log('2. ID lịch cần cập nhật:', formData.id);
-        
+
         if (!formData.slot && formData.status === "available") {
             onShowToast('Vui lòng chọn khung giờ làm việc', 'danger');
             return;
         }
-        
+
         // Kiểm tra số phòng
         if (!formData.roomCode || formData.roomCode.trim() === '') {
             onShowToast('Vui lòng nhập số phòng', 'danger');
@@ -167,35 +166,35 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
             if (!formData.roomCode) {
                 formData.roomCode = '101'; // Giá trị mặc định nếu không có
             }
-            
+
             // DEBUG: Log thông tin quan trọng
             console.log('3. Thông tin phòng:', formData.roomCode);
             console.log('4. Ca làm việc:', formData.shiftType);
             console.log('5. Trạng thái:', formData.status);
-            
+
             // Giữ nguyên trạng thái hiện tại
             const beStatus = formData.original_status || StatusMapping[formData.status] || formData.status;
             console.log('6. Trạng thái gửi lên server:', beStatus);
-            
+
             // Cập nhật title dựa trên trạng thái
             let title = `${formData.doctorName} - ${formData.slot.substring(0, 5)} - P.${formData.roomCode}`;
-            
+
             // Thêm thông tin ca làm việc vào title nếu có
             if (formData.shiftType) {
                 const shiftName = formData.shiftType === 'morning' ? 'Ca sáng' : 'Ca chiều';
                 title = `${formData.doctorName} - ${shiftName} - ${formData.slot.substring(0, 5)} - P.${formData.roomCode}`;
             }
-            
+
             const updatedSchedule = {
                 ...formData,
                 title: title,
                 original_status: beStatus,
                 type: formData.shiftType
             };
-            
+
             // DEBUG: Log dữ liệu cuối cùng trước khi gửi
             console.log('7. Dữ liệu cuối cùng sẽ gửi đi:', updatedSchedule);
-            
+
             // Sử dụng setTimeout để tránh FlushSync error
             setTimeout(() => {
                 try {
@@ -227,8 +226,6 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
             showSubSlotsModal();
             return;
         }
-        
-        // Nếu không có bệnh nhân, hiển thị xác nhận xóa bình thường
         setConfirmDelete(true);
     };
 
@@ -240,7 +237,7 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
     const handleDelete = async () => {
         try {
             setDeleting(true);
-            
+
             if (!schedule || !schedule.id) {
                 console.error('Invalid schedule ID:', schedule);
                 notification.error({
@@ -251,7 +248,7 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                 });
                 return;
             }
-            
+
             // Kiểm tra xem lịch có bệnh nhân đặt không
             const currentPatients = formData.currentPatients || 0;
             if (currentPatients > 0) {
@@ -266,32 +263,32 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                 setConfirmDelete(false);
                 return;
             }
-            
+
             // Gọi API để xóa lịch
             console.log('Deleting schedule:', schedule.id);
-            
+
             try {
-            const response = await deleteScheduleAPI(schedule.id);
-            console.log('Delete response:', response);
-            
+                const response = await deleteScheduleAPI(schedule.id);
+                console.log('Delete response:', response);
+
                 // Đóng modal trước
                 onHide();
-                
+
                 // Sau đó thông báo cho component cha về việc xóa thành công
                 // để component cha có thể cập nhật UI và làm mới dữ liệu
                 onDelete(schedule.id);
-                
+
             } catch (apiError) {
                 console.error('API error when deleting schedule:', apiError);
-                
+
                 // Kiểm tra nếu lỗi 404 (không tìm thấy) - có thể lịch đã bị xóa trước đó
                 if (apiError.response && apiError.response.status === 404) {
                     console.log('Schedule not found, may have been deleted already');
-                onHide();
+                    onHide();
                     onDelete(schedule.id); // Vẫn gọi onDelete để cập nhật UI
                     return;
                 }
-                
+
                 // Các lỗi khác
                 notification.error({
                     message: 'Lỗi',
@@ -821,7 +818,7 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
     // Hàm chuyển đổi thứ sang tiếng Việt
     const formatVietnameseDay = (date) => {
         const weekdays = [
-            'Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 
+            'Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư',
             'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'
         ];
         const dayOfWeek = moment(date).day(); // 0 = Chủ nhật, 1 = Thứ hai, ...
@@ -833,7 +830,7 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
         const slot = timeSlots.find(slot => slot.value === timeString);
         return slot ? slot.label : timeString.substring(0, 5);
     };
-    
+
     // Lấy tên ca làm việc
     const getShiftName = (shiftType) => {
         if (!shiftType) return null;
@@ -853,7 +850,7 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
 
             console.log('Bắt đầu cập nhật lịch:', selectedSchedule.id);
             const updatedSchedules = await updateScheduleAPI(selectedSchedule.id, updatedScheduleData);
-            
+
             // Cập nhật state với danh sách lịch mới
             if (updatedSchedules?.data) {
                 setSchedules(updatedSchedules.data);
@@ -908,7 +905,7 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                         {/* Thông tin cơ bản */}
                         <div className="schedule-info-section mb-4 p-3 border rounded bg-light">
                             <h5 className="mb-3">Thông tin chung</h5>
-                            
+
                             <Row className="mb-3">
                                 <Col md={6} className="d-flex align-items-center mb-2">
                                     <BsPerson className="text-primary me-2" size={20} />
@@ -917,7 +914,7 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                                         <strong>{formData.doctorName}</strong>
                                     </div>
                                 </Col>
-                                
+
                                 <Col md={6} className="d-flex align-items-center mb-2">
                                     <BsDoorOpen className="text-success me-2" size={20} />
                                     <div>
@@ -926,21 +923,21 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                                     </div>
                                 </Col>
                             </Row>
-                            
+
                             <Row>
                                 <Col md={6} className="d-flex align-items-center">
                                     <BsCalendarWeek className="text-info me-2" size={20} />
                                     <div>
                                         <div className="text-muted small">Ngày</div>
                                         <div className="schedule-date-value">
-                                            <strong>{formatDate(formData.date)}</strong> 
+                                            <strong>{formatDate(formData.date)}</strong>
                                             <span className="ms-2 text-muted small">
                                                 ({formatVietnameseDay(formData.date)})
                                             </span>
                                         </div>
                                     </div>
                                 </Col>
-                                
+
                                 <Col md={6} className="d-flex align-items-center">
                                     <BsClock className="text-warning me-2" size={20} />
                                     <div>
@@ -949,7 +946,7 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                                     </div>
                                 </Col>
                             </Row>
-                            
+
                             {/* Hiển thị thông tin ca làm việc */}
                             <Row className="mt-3">
                                 <Col md={12} className="d-flex align-items-center">
@@ -957,7 +954,7 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                                     <div>
                                         <div className="text-muted small">Ca làm việc</div>
                                         {formData.shiftType ? (
-                                            <Badge 
+                                            <Badge
                                                 bg={formData.shiftType === 'morning' ? 'info' : 'warning'}
                                                 className="p-2"
                                             >
@@ -969,16 +966,16 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                                     </div>
                                 </Col>
                             </Row>
-                            
+
                             {/* Hiển thị thông tin số lượng bệnh nhân */}
                             <Row className="mt-3">
                                 <Col md={6} className="d-flex align-items-center">
                                     <BsPersonPlus className="text-success me-2" size={20} />
                                     <div>
                                         <div className="text-muted small">Số bệnh nhân</div>
-                                        <Badge 
-                                            bg={formData.currentPatients >= formData.maxPatients ? 'danger' : 
-                                               formData.currentPatients > 0 ? 'warning' : 'success'}
+                                        <Badge
+                                            bg={formData.currentPatients >= formData.maxPatients ? 'danger' :
+                                                formData.currentPatients > 0 ? 'warning' : 'success'}
                                             className="p-2"
                                         >
                                             {formData.currentPatients} / {formData.maxPatients}
@@ -1003,11 +1000,11 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                                 </Col>
                             </Row>
                         </div>
-                        
+
                         {/* Thông tin cập nhật */}
                         <div className="update-section mb-3 p-3 border rounded">
                             <h5 className="mb-3">Cập nhật thông tin</h5>
-                            
+
                             {/* Thông tin ca làm việc */}
                             <Form.Group className="mb-3">
                                 <Form.Label>Ca làm việc</Form.Label>
@@ -1024,7 +1021,7 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                                     Đánh dấu lịch này thuộc ca làm việc nào
                                 </Form.Text>
                             </Form.Group>
-                            
+
                             {/* Khung giờ cụ thể */}
                             <Form.Group className="mb-3">
                                 <Form.Label>Khung giờ cụ thể</Form.Label>
@@ -1043,7 +1040,7 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                                     Thiết lập thời gian làm việc cụ thể cho bác sĩ
                                 </Form.Text>
                             </Form.Group>
-                            
+
                             {/* Thêm phần cập nhật phòng làm việc */}
                             <Form.Group className="mb-3">
                                 <Form.Label>Phòng làm việc</Form.Label>
@@ -1060,7 +1057,7 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                                 </div>
                             </Form.Group>
                         </div>
-                        
+
                         {/* Thông tin hệ thống */}
                         <div className="system-info p-2 border-top mt-3">
                             <small className="d-block text-muted mb-1">ID lịch: {formData.id}</small>
@@ -1072,9 +1069,9 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
             <Modal.Footer>
                 <div className="button-container">
                     {!confirmDelete ? (
-                        <Button 
-                            variant="outline-danger" 
-                            onClick={showDeleteConfirmation} 
+                        <Button
+                            variant="outline-danger"
+                            onClick={showDeleteConfirmation}
                             disabled={deleting}
                             className="btn-action"
                         >
@@ -1089,17 +1086,17 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                         </Button>
                     ) : (
                         <>
-                            <Button 
-                                variant="secondary" 
-                                onClick={cancelDelete} 
+                            <Button
+                                variant="secondary"
+                                onClick={cancelDelete}
                                 className="btn-action"
                                 disabled={deleting}
                             >
                                 Hủy xóa
                             </Button>
-                            <Button 
-                                variant="danger" 
-                                onClick={handleDelete} 
+                            <Button
+                                variant="danger"
+                                onClick={handleDelete}
                                 disabled={deleting}
                                 className="btn-action"
                             >
@@ -1114,19 +1111,19 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                             </Button>
                         </>
                     )}
-                    
+
                     <div className="action-buttons">
-                        <Button 
-                            variant="outline-secondary" 
-                            onClick={handleClose} 
+                        <Button
+                            variant="outline-secondary"
+                            onClick={handleClose}
                             className="btn-action"
                         >
                             Đóng
                         </Button>
                         {!confirmDelete && (
-                            <Button 
-                                variant="outline-primary" 
-                                onClick={handleSubmit} 
+                            <Button
+                                variant="outline-primary"
+                                onClick={handleSubmit}
                                 disabled={loading}
                                 className="btn-action"
                             >

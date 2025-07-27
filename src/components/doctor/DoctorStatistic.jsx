@@ -6,9 +6,8 @@ import dayjs from 'dayjs';
 import quarterOfYear from 'dayjs/plugin/quarterOfYear';
 import '../../styles/doctor/Statistics.css';
 import { AuthContext } from '../context/AuthContext';
-import { fetchScheduleByDoctorIdAPI } from '../../services/api.service';
-
 import { Select } from 'antd';
+import { fetchScheduleByDoctorIdAPI } from '../../services/schedule.service';
 
 
 // Register ChartJS components
@@ -229,7 +228,7 @@ const Statistic = () => {
     },
   };
 
-  if (loading) return <div style={{textAlign:'center',marginTop:40}}><Spinner animation="border" /></div>;
+  if (loading) return <div style={{ textAlign: 'center', marginTop: 40 }}><Spinner animation="border" /></div>;
 
   return (
     <div className="statistic-section">

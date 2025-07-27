@@ -7,7 +7,7 @@ import {
 } from '@ant-design/icons';
 import '../../styles/client/AppFooter.css';
 import { useEffect, useState } from 'react';
-import { fetchSystemConfigurationsAPI } from '../../services/api.service';
+import { fetchSystemConfigurationsAPI } from '../../services/systemConfiguration.service';
 
 const { Footer } = Layout;
 

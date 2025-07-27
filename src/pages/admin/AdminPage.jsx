@@ -4,8 +4,8 @@ import AdminSidebar from '../../components/admin/AdminSideBar';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useContext, useEffect } from 'react';
 import { AuthContext } from '../../components/context/AuthContext';
-import { fetchAccountAPI } from '../../services/api.service';
 import { HomeOutlined } from '@ant-design/icons';
+import { fetchAccountAPI } from '../../services/auth.service';
 const { Content } = Layout;
 
 const Admin = () => {

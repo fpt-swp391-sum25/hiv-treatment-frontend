@@ -1,15 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Space, Button, message, Tag, Row, Col, Card, Statistic, Select, Input, Alert } from 'antd';
 import { UserOutlined, CalendarOutlined, FileTextOutlined } from '@ant-design/icons';
-import {
-    fetchAllDoctorsAPI,
-    fetchDoctorByIdAPI,
-    fetchDoctorProfileByDoctorIdAPI
-} from '../../../services/api.service';
 import UpdateDoctorModal from './UpdateDoctorModal';
 import DoctorProfileDetail from './DoctorProfileDetail';
 import UpdateDoctorProfileModal from './UpdateDoctorProfileModal';
 import './DoctorManagement.css';
+import { fetchAllDoctorsAPI } from '../../../services/user.service';
+import { fetchDoctorByIdAPI, fetchDoctorProfileByDoctorIdAPI } from '../../../services/doctorProfile.service';
 
 const DoctorManagement = () => {
     const [doctors, setDoctors] = useState([]);

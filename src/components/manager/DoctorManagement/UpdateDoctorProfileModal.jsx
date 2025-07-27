@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Form, Input, Button, message, InputNumber, Spin } from 'antd';
-import { updateDoctorProfileAPI, createDoctorProfileAPI } from '../../../services/api.service';
+import { createDoctorProfileAPI, updateDoctorProfileAPI } from '../../../services/doctorProfile.service';
 
 const UpdateDoctorProfileModal = ({ visible, doctor, onCancel, onSuccess }) => {
     const [form] = Form.useForm();
@@ -11,10 +11,10 @@ const UpdateDoctorProfileModal = ({ visible, doctor, onCancel, onSuccess }) => {
     useEffect(() => {
         if (visible && doctor) {
             console.log('UpdateDoctorProfileModal received doctor data:', doctor);
-            
+
             // Kiểm tra xem bác sĩ đã có profile hay chưa
             setIsNewProfile(!doctor.doctorProfileId);
-            
+
             // Set các giá trị form từ dữ liệu doctor nhận được
             form.setFieldsValue({
                 licenseNumber: doctor.licenseNumber || '',
@@ -23,7 +23,7 @@ const UpdateDoctorProfileModal = ({ visible, doctor, onCancel, onSuccess }) => {
                 biography: doctor.biography || '',
                 background: doctor.background || '',
             });
-            
+
             console.log('Form values set:', form.getFieldsValue());
         }
     }, [visible, doctor, form]);
@@ -32,22 +32,22 @@ const UpdateDoctorProfileModal = ({ visible, doctor, onCancel, onSuccess }) => {
         try {
             const values = await form.validateFields();
             setLoading(true);
-            
+
             // Lấy doctorId
             const doctorId = doctor.doctor?.id || doctor.id;
-            
+
             console.log('Doctor ID:', doctorId);
             console.log('Is new profile:', isNewProfile);
             console.log('Form data:', values);
-            
+
             // Tạo dữ liệu để gửi lên server
             const profileData = {
                 ...values,
                 doctorId: doctorId, // Luôn gửi kèm doctorId
             };
-            
+
             let response;
-            
+
             if (isNewProfile) {
                 // Tạo mới profile nếu chưa có
                 console.log('Creating new doctor profile with data:', profileData);
@@ -60,15 +60,15 @@ const UpdateDoctorProfileModal = ({ visible, doctor, onCancel, onSuccess }) => {
                 response = await updateDoctorProfileAPI(doctorProfileId, profileData);
                 message.success('Cập nhật thông tin chuyên môn thành công');
             }
-            
+
             console.log('API response:', response);
-            
+
             if (onSuccess) {
                 onSuccess(response);
             }
         } catch (error) {
             console.error('Error updating doctor profile:', error);
-            
+
             // Xử lý thông báo lỗi cụ thể
             if (error.response) {
                 const status = error.response.status;
@@ -96,10 +96,10 @@ const UpdateDoctorProfileModal = ({ visible, doctor, onCancel, onSuccess }) => {
                 <Button key="back" onClick={onCancel} disabled={loading}>
                     Hủy
                 </Button>,
-                <Button 
-                    key="submit" 
-                    type="primary" 
-                    loading={loading} 
+                <Button
+                    key="submit"
+                    type="primary"
+                    loading={loading}
                     onClick={handleSubmit}
                 >
                     {isNewProfile ? "Tạo mới" : "Cập nhật"}
@@ -129,8 +129,8 @@ const UpdateDoctorProfileModal = ({ visible, doctor, onCancel, onSuccess }) => {
                         name="startYear"
                         label="Năm bắt đầu hành nghề"
                     >
-                        <Input 
-                            placeholder="Nhập năm bắt đầu hành nghề (ví dụ: 2010)" 
+                        <Input
+                            placeholder="Nhập năm bắt đầu hành nghề (ví dụ: 2010)"
                         />
                     </Form.Item>
 
@@ -138,9 +138,9 @@ const UpdateDoctorProfileModal = ({ visible, doctor, onCancel, onSuccess }) => {
                         name="qualifications"
                         label="Bằng cấp/Chứng chỉ"
                     >
-                        <Input.TextArea 
-                            rows={3} 
-                            placeholder="Nhập thông tin về bằng cấp, chứng chỉ chuyên môn" 
+                        <Input.TextArea
+                            rows={3}
+                            placeholder="Nhập thông tin về bằng cấp, chứng chỉ chuyên môn"
                         />
                     </Form.Item>
 
@@ -148,9 +148,9 @@ const UpdateDoctorProfileModal = ({ visible, doctor, onCancel, onSuccess }) => {
                         name="background"
                         label="Nền tảng chuyên môn"
                     >
-                        <Input.TextArea 
-                            rows={3} 
-                            placeholder="Nhập thông tin về nền tảng chuyên môn, đào tạo" 
+                        <Input.TextArea
+                            rows={3}
+                            placeholder="Nhập thông tin về nền tảng chuyên môn, đào tạo"
                         />
                     </Form.Item>
 
@@ -158,9 +158,9 @@ const UpdateDoctorProfileModal = ({ visible, doctor, onCancel, onSuccess }) => {
                         name="biography"
                         label="Tiểu sử"
                     >
-                        <Input.TextArea 
-                            rows={4} 
-                            placeholder="Nhập thông tin tiểu sử, kinh nghiệm làm việc" 
+                        <Input.TextArea
+                            rows={4}
+                            placeholder="Nhập thông tin tiểu sử, kinh nghiệm làm việc"
                         />
                     </Form.Item>
                 </Form>

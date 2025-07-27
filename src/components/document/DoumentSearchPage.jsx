@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, message, Spin } from 'antd';
-import { fetchAllDocumentsAPI } from '../../services/api.service';
-import { getDocumentImagesByDocumentId } from '../../services/document.service';
+import { fetchAllDocumentsAPI, getDocumentImagesByDocumentId } from '../../services/document.service';
 import { FileImageOutlined } from '@ant-design/icons';
 import '../../styles/document/DocumentSearchPage.css';
 

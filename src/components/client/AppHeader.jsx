@@ -26,11 +26,12 @@ import { useState, useEffect, useContext } from 'react';
 import appLogo from '../../assets/appLogo.png';
 import '../../styles/client/AppHeader.css';
 import { AuthContext } from '../context/AuthContext';
-import { logoutAPI } from '../../services/api.service';
+
 import {
   getNotificationsByUserId,
   updateNotification
 } from '../../services/notification.service';
+import { logoutAPI } from '../../services/auth.service';
 
 const { Header } = Layout;
 const { Text } = Typography;

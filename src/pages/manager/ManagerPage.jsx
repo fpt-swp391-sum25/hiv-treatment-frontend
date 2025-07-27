@@ -4,9 +4,9 @@ import { useContext, useEffect } from 'react';
 import ManagerSidebar from '../../components/manager/Layout/ManagerSidebar';
 import ManagerHeader from '../../components/manager/Layout/ManagerHeader';
 import { AuthContext } from '../../components/context/AuthContext';
-import { fetchAccountAPI } from '../../services/api.service';
 import './ManagerPage.css';
 import { HomeOutlined } from '@ant-design/icons';
+import { fetchAccountAPI } from '../../services/auth.service';
 
 const { Content } = Layout;
 

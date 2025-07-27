@@ -1,7 +1,6 @@
 
 import { createContext, useEffect, useState } from 'react'
-import { fetchAccountAPI, fetchUserInfoAPI } from '../../services/api.service'
-
+import { fetchAccountAPI } from '../../services/auth.service'
 export const AuthContext = createContext({
     email: '',
     phone: '',

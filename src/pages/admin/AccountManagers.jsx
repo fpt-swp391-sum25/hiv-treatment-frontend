@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Button, Input, Modal, notification, Popconfirm, Select, Space, Spin, Table, Tag } from 'antd';
-import { createAccountAPI, deleteAccountAPI, fetchAccountByRoleAPI } from '../../services/api.service';
+
 import { DeleteOutlined, EditOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import UpdateUserModal from '../../components/admin/UpdateUserModal';
+import { createAccountAPI, deleteAccountAPI, fetchAccountByRoleAPI } from '../../services/user.service';
 
 const AccountManagers = () => {
 

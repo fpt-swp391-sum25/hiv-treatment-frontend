@@ -12,12 +12,9 @@ import {
 import {
   SaveOutlined,
 } from "@ant-design/icons";
-import {
-  fetchSystemConfigurationsAPI,
-  updateSystemConfigurationAPI,
-} from "../../services/api.service";
 
 import "../../styles/admin/AdminDashboard.css";
+import { fetchSystemConfigurationsAPI, updateSystemConfigurationAPI } from "../../services/systemConfiguration.service";
 
 const AdminSystemConfig = () => {
   const [configs, setConfigs] = useState([]);

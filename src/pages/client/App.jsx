@@ -2,10 +2,10 @@ import '../../styles/global.css'
 import { Outlet } from "react-router-dom"
 import AppFooter from "../../components/client/AppFooter"
 import AppHeader from "../../components/client/AppHeader"
-import { fetchAccountAPI } from "../../services/api.service"
 import { useContext, useEffect } from "react"
 import { AuthContext } from "../../components/context/AuthContext"
 import { Layout, Spin, message } from "antd"
+import { fetchAccountAPI } from '../../services/auth.service'
 
 
 const App = () => {

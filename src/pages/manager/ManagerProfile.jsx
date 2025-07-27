@@ -18,8 +18,9 @@ import {
 import { MailOutlined, PhoneOutlined, UserOutlined, CrownOutlined, EditOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { AuthContext } from '../../components/context/AuthContext';
-import { updateUserAPI, fetchAccountAPI } from '../../services/api.service';
 import { validateField } from '../../utils/validate';
+import { fetchAccountAPI } from '../../services/auth.service';
+import { updateUserAPI } from '../../services/user.service';
 
 const { Title, Text } = Typography;
 const { Option } = Select;

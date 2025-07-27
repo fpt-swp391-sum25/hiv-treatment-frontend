@@ -20,14 +20,11 @@ import 'dayjs/locale/vi';
 import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../components/context/AuthContext";
-import {
-    cancelBookingAPI,
-    fetchAllPatientScheduleAPI,
-    fetchHealthRecordByScheduleIdAPI,
-    retryPaymentAPI
-} from "../../services/api.service";
 import PatientAppointmentHistory from "./PatientAppointmentHistory";
 import { fetchServicePrices } from "../../services/systemConfiguration.service";
+import { cancelBookingAPI, retryPaymentAPI } from "../../services/appointment.service";
+import { fetchAllPatientScheduleAPI } from "../../services/schedule.service";
+import { fetchHealthRecordByScheduleIdAPI } from "../../services/health-record.service";
 
 
 const { Content } = Layout;
@@ -215,7 +212,7 @@ const AppointmentList = () => {
                 const canCancel = appointmentDateTime.diff(now, 'hour') >= 24
                 console.log('>>>>>>>>check can cancel ', canCancel)
 
-                if (['Đã thanh toán', 'Đang chờ thanh toán', 'Đang hoạt động'].includes(record.status)) {
+                if (['Đã thanh toán', 'Đang chờ thanh toán', 'Đang hoạt động'].includes(record.status)) {
                     if (canCancel) {
 
 

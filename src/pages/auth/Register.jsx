@@ -13,7 +13,7 @@ import {
 } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { registerAPI } from '../../services/api.service';
+import { registerAPI } from '../../services/auth.service';
 import { useState } from 'react';
 import { validateField } from '../../utils/validate';
 

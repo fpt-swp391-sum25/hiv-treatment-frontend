@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react"
 import { Form, Input, Modal, notification } from "antd"
-import { updateRegimenAPI } from '../../services/api.service'
-
+import { updateRegimenAPI } from "../../services/regimen.service"
 const UpdateRegimenModal = (props) => {
     const [id, setId] = useState("")
     const [components, setComponents] = useState('')

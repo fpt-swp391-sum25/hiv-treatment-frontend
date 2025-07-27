@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from './axios.customize';
 
 export async function fetchServicePrices() {
   try {
@@ -12,4 +12,29 @@ export async function fetchServicePrices() {
   } catch (error) {
     throw error;
   }
-} 
+}
+
+const fetchSystemConfigurationsAPI = () => {
+  const URL_BACKEND = '/api/system-configuration'
+  return axios.get(URL_BACKEND)
+};
+{ }
+const updateSystemConfigurationAPI = (id, dataUpdate) => {
+  axios.put(`/api/system-configuration/${id}`, dataUpdate);
+}
+
+const createSystemConfigurationAPI = (createData) => {
+  axios.post("/api/system-configurations", createData);
+}
+
+
+const deleteSystemConfigurationAPI = (id) => {
+  axios.delete(`/api/system-configuration/${id}`);
+}
+
+export {
+  fetchSystemConfigurationsAPI,
+  updateSystemConfigurationAPI,
+  createSystemConfigurationAPI,
+  deleteSystemConfigurationAPI,
+}

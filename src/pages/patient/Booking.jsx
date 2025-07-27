@@ -26,17 +26,13 @@ import {
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import {
-    fetchAllDoctorsAPI,
-    fetchAllScheduleAPI,
-    fetchScheduleByDateAPI,
-    initiatePaymentAPI,
-    registerScheduleAPI,
-    fetchSystemConfigurationsAPI,
-} from '../../services/api.service';
 import { AuthContext } from '../../components/context/AuthContext';
-import { fetchServicePrices } from '../../services/systemConfiguration.service';
+import { fetchServicePrices, fetchSystemConfigurationsAPI } from '../../services/systemConfiguration.service';
 import '../../styles/patient/Booking.css'
+import { initiatePaymentAPI } from '../../services/appointment.service';
+import { fetchAllDoctorsAPI } from '../../services/user.service';
+import { fetchAllScheduleAPI, fetchScheduleByDateAPI, registerScheduleAPI } from '../../services/schedule.service';
+
 
 const { Link } = Typography;
 const { Option } = Select;

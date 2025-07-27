@@ -2,11 +2,11 @@ import { Layout, Button, Avatar, Typography, message, theme, Popover, Tooltip, P
 import { UserOutlined, LogoutOutlined, BellOutlined } from "@ant-design/icons";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
-import { logoutAPI } from "../../services/api.service";
 import { useNavigate } from "react-router-dom";
 import appLogo from '../../assets/appLogo.png'
 import '../manager/Layout/ManagerHeader.css'
 import { getNotificationsByUserId, updateNotification } from "../../services/notification.service";
+import { logoutAPI } from "../../services/auth.service";
 
 const { Header } = Layout
 const { Text } = Typography
