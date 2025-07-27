@@ -38,6 +38,7 @@ import {
 } from "../../components/context/AuthContext";
 import PatientAppointmentHistory from "./PatientAppointmentHistory";
 import { 
+    fetchSystemConfigurationsAPI,
     fetchServicePrices 
 } from "../../services/systemConfiguration.service";
 import { 
@@ -62,10 +63,11 @@ const AppointmentList = () => {
     const [activeTab, setActiveTab] = useState('appointment');
     const [monthFilter, setMonthFilter] = useState(null);
     const [servicePrices, setServicePrices] = useState({});
+    const [minCancelHour, setMinCancelHour] = useState(24); 
 
     useEffect(() => {
         loadAllSchedule();
-        loadSystemPrices();
+        loadSystemConfig();
     }, []);
 
     const loadAllSchedule = async () => {
@@ -104,14 +106,25 @@ const AppointmentList = () => {
             setLoading(false);
         }
     };
-    const loadSystemPrices = async () => {
+
+    const loadSystemConfig = async () => {
         try {
             const prices = await fetchServicePrices();
             setServicePrices(prices);
+
+            const configRes = await fetchSystemConfigurationsAPI();
+            const minCancelConfig = configRes?.data?.find(
+                (item) => item.name === "Thời gian tối thiểu nếu hủy lịch (tiếng)"
+            );
+            const value = Number(minCancelConfig?.value);
+            if (!isNaN(value) && value > 0) {
+                setMinCancelHour(value);
+            }
         } catch {
-            message.error('Không thể tải giá dịch vụ');
+            message.error('Không thể tải cấu hình hệ thống');
         }
     };
+
 
     const handleRetryPayment = async (scheduleId) => {
         const retrySchedule = schedule.find(item => item.id === scheduleId);
@@ -230,11 +243,10 @@ const AppointmentList = () => {
             render: (_, record) => {
                 const appointmentDateTime = dayjs(`${record.date} ${record.slot}`, 'DD-MM-YYYY HH:mm')
                 const now = dayjs()
-                const canCancel = appointmentDateTime.diff(now, 'hour') >= 24
+                const canCancel = appointmentDateTime.diff(now, 'hour') >= minCancelHour;
 
                 if (['Đã thanh toán', 'Đang chờ thanh toán', 'Đang hoạt động'].includes(record.status)) {
                     if (canCancel) {
-
 
                         return (
                             <Button
@@ -253,7 +265,7 @@ const AppointmentList = () => {
                                         <div style={{ minWidth: 180 }}>
                                             <b>Không thể huỷ lịch</b>
                                             <div style={{ color: '#888', marginTop: 4 }}>
-                                                Chỉ được huỷ trước 24 giờ so với giờ hẹn.
+                                                Chỉ được huỷ trước {minCancelHour} giờ so với giờ hẹn.
                                             </div>
                                         </div>
                                     }

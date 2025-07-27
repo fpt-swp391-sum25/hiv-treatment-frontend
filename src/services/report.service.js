@@ -4,7 +4,19 @@ import * as XLSX from 'xlsx';
 import dayjs from 'dayjs';
 import quarterOfYear from 'dayjs/plugin/quarterOfYear';
 import isBetween from 'dayjs/plugin/isBetween';
-import { fetchAllRegimensAPI } from './regimen.service';
+import { 
+  fetchAllRegimensAPI 
+} from './regimen.service';
+import { 
+  getAllSchedulesAPI 
+} from './schedule.service';
+import { 
+  fetchUsersByRoleAPI 
+} from './user.service';
+import { 
+  fetchHealthRecordByScheduleIdAPI,
+  fetchTestResultByHealthRecordIdAPI
+ } from './health-record.service';
 
 dayjs.extend(quarterOfYear);
 dayjs.extend(isBetween);

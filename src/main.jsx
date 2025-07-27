@@ -65,6 +65,9 @@ import PatientAppointmentHistory from './pages/patient/PatientAppointmentHistory
 import AppointmentList from './pages/patient/AppointmentList';
 import ResetPassword from './pages/auth/ResetPassword';
 
+// Import for mail verification
+import VerifyEmail from './pages/auth/VerifyEmail';
+
 const router = createBrowserRouter([
   {
     // Path for home pages
@@ -370,6 +373,10 @@ const router = createBrowserRouter([
         errorElement: <Errors />
       }
     ]
+  },
+  {
+    path: '/verify',
+    element: (<VerifyEmail />)
   }
 ]);
 

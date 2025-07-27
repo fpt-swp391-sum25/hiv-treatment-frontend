@@ -10,7 +10,8 @@ import {
     Badge, 
     List, 
     Spin, 
-    notification
+    notification,
+    message
 } from "antd";
 import { 
     UserOutlined, 
@@ -71,7 +72,7 @@ const PageHeader = () => {
                     setNotifications(latest);
                 }
             } catch (error) {
-                console.error("Lỗi khi polling:", error);
+                message.error("Lỗi khi tải thông báo:", error);
             }
         };
 
