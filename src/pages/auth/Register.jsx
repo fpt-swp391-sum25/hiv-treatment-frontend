@@ -87,7 +87,8 @@ const Register = () => {
                 onFinishFailed={onFinishFailed}
             >
                 <Form.Item
-                    label="Họ và tên"
+                    label={<span>Họ và tên <span 
+                    style={{ color: 'red' }}>*</span></span>}
                     name="fullname"
                     rules={[
                         {

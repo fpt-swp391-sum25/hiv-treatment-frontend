@@ -132,8 +132,7 @@ const DoctorPersonalProfile = ({ validateField }) => {
           description: 'Không thể tải thông tin bác sĩ',
         });
       }
-    } catch (error) {
-      console.error(error);
+    } catch {
       notification.error({
         message: 'Hệ thống',
         showProgress: true,
@@ -199,8 +198,7 @@ const DoctorPersonalProfile = ({ validateField }) => {
           description: 'Cập nhật thông tin không thành công',
         });
       }
-    } catch (error) {
-      console.error(error);
+    } catch {
       message.error('Cập nhật thất bại');
     }
   };

@@ -216,7 +216,7 @@ const PatientList = () => {
                         value={selectedYear}
                         onChange={value => setSelectedYear(value)}
                     >
-                        {Array.from({ length: 6 }, (_, i) => 2025 + i).map(year => (
+                        {Array.from({ length: 60 }, (_, i) => dayjs().year() - 20 + i).map(year => (
                             <Select.Option key={year} value={year}>
                                 {year}
                             </Select.Option>

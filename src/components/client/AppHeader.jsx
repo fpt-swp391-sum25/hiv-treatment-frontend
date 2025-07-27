@@ -112,7 +112,7 @@ const AppHeader = () => {
           setNotifications(latest);
         }
       } catch (error) {
-        console.error("Lỗi khi cập nhật thông báo:", error);
+        message.error("Lỗi khi cập nhật thông báo:", error);
       }
     };
 

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { DatePicker, Button, Row, Col, Space, Card, Radio, message } from 'antd';
-import { FilterOutlined, ReloadOutlined } from '@ant-design/icons';
+import { useState, useEffect } from 'react';
+import { DatePicker, Button, Row, Col, Space, Card, Radio } from 'antd';
+import { ReloadOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import './Dashboard.css';
 
@@ -8,7 +8,6 @@ const DashboardFilters = ({ onFilterChange, initialFilters = {} }) => {
   const [filterType, setFilterType] = useState(initialFilters.filterType || 'month'); // month | quarter | year
   const [selectedDate, setSelectedDate] = useState(initialFilters.selectedDate ? dayjs(initialFilters.selectedDate) : null);
 
-  // Chuyển selectedDate thành định dạng 'YYYY-MM-DD' phù hợp API
   const formatSelectedDateForAPI = (date, type) => {
     if (!date) return null;
 
@@ -28,11 +27,13 @@ const DashboardFilters = ({ onFilterChange, initialFilters = {} }) => {
   const handleFilterTypeChange = (e) => {
     const newType = e.target.value;
     setFilterType(newType);
-    setSelectedDate(null);
+    const today = dayjs();
+    const formattedDate = formatSelectedDateForAPI(today, newType);
 
+    setSelectedDate(today);
     onFilterChange({
       filterType: newType,
-      selectedDate: null,
+      selectedDate: formattedDate,
     });
   };
 
@@ -55,6 +56,18 @@ const DashboardFilters = ({ onFilterChange, initialFilters = {} }) => {
       selectedDate: null,
     });
   };
+
+  useEffect(() => {
+    if (!initialFilters.selectedDate) {
+      const today = dayjs();
+      const formattedDate = formatSelectedDateForAPI(today, filterType);
+      setSelectedDate(today);
+      onFilterChange({
+        filterType,
+        selectedDate: formattedDate,
+      });
+    }
+  }, []);
 
   return (
     <Card className="dashboard-filters-card mb-4">
@@ -103,5 +116,4 @@ const DashboardFilters = ({ onFilterChange, initialFilters = {} }) => {
     </Card>
   );
 };
-
 export default DashboardFilters;

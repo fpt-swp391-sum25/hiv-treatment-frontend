@@ -95,7 +95,7 @@ const ScheduleCalendar = () => {
           onChange={setSelectedYear}
           style={{ width: 120 }}
         >
-          {[2025, 2026, 2027, 2028, 2029, 2030].map((year) => (
+          {Array.from({ length: 2065 - 2005 }, (_, i) => 2005 + i).map((year) => (
             <Option key={year} value={year}>{year}</Option>
           ))}
         </Select>
