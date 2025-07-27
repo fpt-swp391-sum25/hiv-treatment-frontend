@@ -126,8 +126,6 @@ const Dashboard = () => {
 
             const formattedDate = selectedDate ? dayjs(selectedDate).format('YYYY-MM-DD') : null;
 
-            console.log(`Gọi API cho bác sĩ ${name} - doctorId: ${doctorId}, filterType: ${filterType}, selectedDate: ${formattedDate}`);
-
             const healthRecordRes = await getHealthRecordByDoctorIdAPI(
               doctorId,
               filterType,
@@ -141,7 +139,6 @@ const Dashboard = () => {
             const stats = records.reduce((acc, record) => {
               const status = record.treatmentStatus || 'Không rõ';
               acc[status] = (acc[status] || 0) + 1;
-              console.log('Record for doctor', name, ':', record);
               return acc;
             }, {});
 
@@ -153,7 +150,6 @@ const Dashboard = () => {
               absentSchedules: stats['Không đến'] || 0,
             };
           } catch (err) {
-            console.error(`Lỗi khi lấy health record của ${name}:`, err);
             return {
               name,
               waitingSchedules: 0,
@@ -177,7 +173,6 @@ const Dashboard = () => {
         }
       }));
     } catch (err) {
-      console.error('Lỗi khi fetch hiệu suất bác sĩ:', err);
       message.error('Không thể tải dữ liệu hiệu suất bác sĩ');
     } finally {
       setLoading(false);
@@ -189,7 +184,6 @@ const Dashboard = () => {
     const loadDoctors = async () => {
       try {
         const response = await fetchAllDoctorsAPI();
-        console.log('Doctors API response:', response);
         
         if (response && response.data) {
           // Chuẩn hóa dữ liệu bác sĩ
@@ -202,7 +196,6 @@ const Dashboard = () => {
           setDoctors(doctorsList);
         }
       } catch (error) {
-        console.error('Error fetching doctors:', error);
         message.error('Không thể tải danh sách bác sĩ');
       }
     };
@@ -215,7 +208,6 @@ const Dashboard = () => {
     const fetchMedicalStats = async () => {
       try {
         const response = await getMedicalReportData();
-        console.log('Medical report data:', response);
         if (response && response.statistics) {
           setMedicalStats({
             totalAppointments: response.statistics.totalAppointments || 0,
@@ -233,7 +225,7 @@ const Dashboard = () => {
   // Fetch thống kê nhân viên
   const fetchStaffStatistics = useCallback(async () => {
     if (activeTab !== 'staff') return;
-    
+
     setLoading(true);
     try {
       const { startDate, endDate } = getDateRangeFromFilter(filters.selectedDate, filters.period);
@@ -246,7 +238,6 @@ const Dashboard = () => {
 
       setStatistics(prev => ({ ...prev, staff: data }));
     } catch (error) {
-      console.error('Error fetching staff statistics:', error);
       message.error('Không thể tải dữ liệu thống kê nhân viên');
     } finally {
       setLoading(false);
@@ -258,7 +249,7 @@ const Dashboard = () => {
   // Fetch thống kê lịch hẹn
   const fetchAppointmentStatistics = useCallback(async () => {
     if (activeTab !== 'appointments') return;
-    
+
     setLoading(true);
     try {
       const { startDate, endDate } = getDateRangeFromFilter(filters.selectedDate, filters.period);
@@ -276,13 +267,15 @@ const Dashboard = () => {
 
       setStatistics(prev => ({ ...prev, appointments: data }));
     } catch (error) {
-      console.error('Error fetching appointment statistics:', error);
       message.error('Không thể tải dữ liệu thống kê lịch hẹn');
     } finally {
       setLoading(false);
     }
   }, [filters, activeTab]);
 
+
+
+  // Gọi API tương ứng dựa vào tab đang active
   // Xử lý dữ liệu cho biểu đồ trạng thái lịch hẹn
   const fetchAppointmentStatusData = async (data) => {
     try {
