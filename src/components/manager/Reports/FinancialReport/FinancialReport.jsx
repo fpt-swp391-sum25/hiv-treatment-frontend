@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, Table, Button, Select, Space, Typography, Spin, Empty, Statistic, Tag, Alert, Input, Tooltip, Divider, DatePicker, Switch } from 'antd';
-import { DownloadOutlined, PrinterOutlined, FileExcelOutlined, DollarCircleOutlined, CheckCircleOutlined, ClockCircleOutlined, ExceptionOutlined, FilterOutlined, ReloadOutlined } from '@ant-design/icons';
+import { DownloadOutlined, FilePdfOutlined, FileExcelOutlined, DollarCircleOutlined, CheckCircleOutlined, ClockCircleOutlined, ExceptionOutlined, FilterOutlined, ReloadOutlined } from '@ant-design/icons';
 import { getPaymentStats, calculateTotalRevenue, formatPaymentDataForExport, exportToExcel, groupPaymentsByType } from '../../../../services/report.service';
 import dayjs from 'dayjs';
 import { PAYMENT_STATUS } from '../../../../types/report.types';
@@ -131,8 +131,72 @@ const FinancialReport = ({ dateRange, onError, onDateRangeChange }) => {
         exportToExcel(formattedData, 'BaoCaoTaiChinh');
     };
 
-    const handlePrint = () => {
-        window.print();
+    // Xuất PDF
+    const handleExportPDF = async () => {
+        try {
+            if (!Array.isArray(paymentData.completed) || paymentData.completed.length === 0) {
+                onError?.(new Error('Không có dữ liệu để xuất báo cáo'));
+                return;
+            }
+            
+            // Import động jsPDF và jsPDF-autotable để tránh lỗi khi khởi tạo ứng dụng
+            const { default: jsPDF } = await import('jspdf');
+            const { default: autoTable } = await import('jspdf-autotable');
+            
+            const doc = new jsPDF();
+            
+            // Tiêu đề báo cáo
+            const title = 'BÁO CÁO TÀI CHÍNH';
+            doc.setFontSize(18);
+            doc.text(title, 14, 22);
+            
+            // Thông tin báo cáo
+            const reportDate = dayjs().format('DD/MM/YYYY HH:mm');
+            const reportPeriod = dateRange && dateRange.length === 2 
+                ? `${dateRange[0].format('DD/MM/YYYY')} - ${dateRange[1].format('DD/MM/YYYY')}`
+                : 'Tất cả thời gian';
+                
+            doc.setFontSize(12);
+            doc.text(`Thời gian xuất báo cáo: ${reportDate}`, 14, 32);
+            doc.text(`Khoảng thời gian báo cáo: ${reportPeriod}`, 14, 40);
+            doc.text(`Tổng doanh thu: ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(statistics.totalRevenue)}`, 14, 48);
+            
+            // Chuẩn bị dữ liệu cho bảng
+            const formattedData = formatPaymentDataForExport(paymentData.completed);
+            
+            // Tạo bảng dữ liệu
+            const headers = Object.keys(formattedData[0]);
+            const data = formattedData.map(item => Object.values(item));
+            
+            autoTable(doc, {
+                startY: 56,
+                head: [headers],
+                body: data,
+                theme: 'grid',
+                styles: {
+                    fontSize: 8,
+                    cellPadding: 2,
+                    lineColor: [0, 0, 0],
+                    lineWidth: 0.1,
+                },
+                headStyles: {
+                    fillColor: [41, 128, 185],
+                    textColor: 255,
+                    fontStyle: 'bold'
+                },
+                alternateRowStyles: {
+                    fillColor: [245, 245, 245]
+                }
+            });
+            
+            // Lưu file PDF
+            const pdfFileName = `BaoCaoTaiChinh_${dayjs().format('YYYYMMDD_HHmmss')}.pdf`;
+            doc.save(pdfFileName);
+            
+        } catch (error) {
+            console.error('Error exporting PDF:', error);
+            onError?.(new Error('Không thể xuất báo cáo PDF. Vui lòng thử lại sau.'));
+        }
     };
 
     // Tính toán thống kê - CHỈ TÍNH CÁC GIAO DỊCH ĐÃ THANH TOÁN
@@ -440,10 +504,10 @@ const FinancialReport = ({ dateRange, onError, onDateRangeChange }) => {
                                 Xuất Excel
                             </Button>
                             <Button 
-                                icon={<PrinterOutlined />}
-                                onClick={handlePrint}
+                                icon={<FilePdfOutlined />}
+                                onClick={handleExportPDF}
                             >
-                                In báo cáo
+                                Xuất PDF
                             </Button>
                             <Button
                                 icon={<FilterOutlined />}

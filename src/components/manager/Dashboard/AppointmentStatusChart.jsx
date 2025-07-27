@@ -7,33 +7,45 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 
 /**
  * Biểu đồ hiển thị trạng thái lịch hẹn dạng pie chart
+ * Đồng bộ với dữ liệu từ bảng hiệu suất làm việc của bác sĩ
  */
 const AppointmentStatusChart = ({ data }) => {
   // Mặc định hoặc xử lý dữ liệu không hợp lệ
   const appointmentData = data || {
-    completed: 0,
-    pending: 0,
-    cancelled: 0
+    active: 0,        // Đang chờ khám
+    examined: 0,      // Đã khám
+    consulted: 0,     // Đã tư vấn
+    absent: 0         // Không đến
   };
 
-  // Cấu hình dữ liệu cho biểu đồ (không bao gồm "Trống")
+  // Tính tổng số lịch hẹn
+  const totalAppointments = 
+    (appointmentData.active || 0) + 
+    (appointmentData.examined || 0) + 
+    (appointmentData.consulted || 0) + 
+    (appointmentData.absent || 0);
+
+  // Cấu hình dữ liệu cho biểu đồ - đảm bảo thứ tự trùng khớp với bảng hiệu suất
   const chartData = {
-    labels: ['Hoàn thành', 'Đang hoạt động', 'Đã hủy'],
+    labels: ['Đang chờ khám', 'Đã khám', 'Tư vấn', 'Không đến'],
     datasets: [
       {
         data: [
-          appointmentData.completed || 0,    // Hoàn thành
-          appointmentData.active || 0,       // Đang hoạt động (thay vì pending)
-          appointmentData.cancelled || 0     // Đã hủy
+          appointmentData.active || 0,      // Đang chờ khám
+          appointmentData.examined || 0,     // Đã khám
+          appointmentData.consulted || 0,    // Đã tư vấn
+          appointmentData.absent || 0        // Không đến
         ],
         backgroundColor: [
-          'rgba(82, 196, 26, 0.8)',   // xanh lá - hoàn thành
-          'rgba(250, 173, 20, 0.8)',  // vàng cam - đang hoạt động
-          'rgba(245, 34, 45, 0.8)'    // đỏ - đã hủy
+          'rgba(250, 173, 20, 0.8)',  // vàng cam - đang chờ khám
+          'rgba(82, 196, 26, 0.8)',   // xanh lá - đã khám
+          'rgba(24, 144, 255, 0.8)',  // xanh dương - tư vấn
+          'rgba(245, 34, 45, 0.8)'    // đỏ - không đến
         ],
         borderColor: [
-          'rgba(82, 196, 26, 1)',
           'rgba(250, 173, 20, 1)',
+          'rgba(82, 196, 26, 1)',
+          'rgba(24, 144, 255, 1)',
           'rgba(245, 34, 45, 1)'
         ],
         borderWidth: 1,
@@ -64,8 +76,15 @@ const AppointmentStatusChart = ({ data }) => {
   };
 
   return (
-    <div style={{ height: 300, position: 'relative' }}>
+    <div>
+      <div className="total-appointments" style={{ textAlign: 'center', marginBottom: '15px' }}>
+        <span style={{ fontSize: '16px', fontWeight: 'bold' }}>
+          Tổng số lịch hẹn: {totalAppointments}
+        </span>
+      </div>
+      <div style={{ height: 280, position: 'relative' }}>
       <Pie data={chartData} options={options} />
+      </div>
     </div>
   );
 };

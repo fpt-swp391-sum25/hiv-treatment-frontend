@@ -6,17 +6,25 @@
 }
 
 .dashboard-title {
-  font-size: 24px;
-  font-weight: 600;
-  color: #333;
+  font-size: 28px;
+  font-weight: 700;
+  color: #1890ff;
   margin-bottom: 24px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #e8e8e8;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #1890ff;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 /* Styles cho tabs */
 .dashboard-tabs .ant-tabs-nav {
   margin-bottom: 20px;
+  justify-content: center;
+}
+
+.dashboard-tabs .ant-tabs-nav-wrap {
+  justify-content: center;
 }
 
 .dashboard-tabs .ant-tabs-tab {
@@ -29,12 +37,19 @@
   font-weight: 500;
 }
 
+.dashboard-tabs .ant-tabs-ink-bar {
+  background-color: #1890ff;
+  height: 3px;
+}
+
 /* Styles cho KPI cards */
 .kpi-card {
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
   height: 100%;
+  border: 1px solid #f0f0f0;
+  overflow: hidden;
 }
 
 .kpi-card:hover {
@@ -90,34 +105,65 @@
 
 /* Styles cho các variant của KPI cards */
 .kpi-card-success {
-  border-left: 4px solid #52c41a;
+  border-left: 4px solid #1890ff;
 }
 
 .kpi-card-warning {
-  border-left: 4px solid #faad14;
+  border-left: 4px solid #1890ff;
 }
 
 .kpi-card-danger {
-  border-left: 4px solid #f5222d;
+  border-left: 4px solid #1890ff;
 }
 
 .kpi-card-info {
   border-left: 4px solid #1890ff;
 }
 
+.kpi-card-primary {
+  border-left: 4px solid #1890ff;
+}
+
 /* Styles cho bộ lọc */
 .dashboard-filters-card {
-  margin-bottom: 20px;
+  margin-bottom: 30px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.dashboard-filters-card .ant-card-body {
+  padding: 24px;
 }
 
 .filter-item {
   margin-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .filter-label {
   font-size: 14px;
   color: #8c8c8c;
   margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.filter-radio-group {
+  width: 100%;
+  display: flex;
+}
+
+.filter-radio-group .ant-radio-button-wrapper {
+  flex: 1;
+  text-align: center;
+}
+
+.filter-reset-button {
+  margin-top: 24px;
+  height: 38px;
+  padding: 0 20px;
+  border-radius: 4px;
 }
 
 /* Styles cho charts */
@@ -137,7 +183,9 @@
 /* Responsive styles */
 @media (max-width: 768px) {
   .dashboard-title {
-    font-size: 20px;
+    font-size: 22px;
+    padding-bottom: 12px;
+    margin-bottom: 16px;
   }
 
   .kpi-value {
@@ -147,6 +195,11 @@
   .dashboard-tabs .ant-tabs-tab {
     padding: 8px 12px;
     font-size: 14px;
+  }
+  
+  .filter-reset-button {
+    margin-top: 8px;
+    width: 100%;
   }
 }
 
