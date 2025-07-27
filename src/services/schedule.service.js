@@ -248,6 +248,50 @@ const getSlotCountsAPI = (doctorId, date) => {
                 });
         });
 };
+
+const updateScheduleAPI = async (scheduleId, scheduleData) => {
+    console.log('=== BẮT ĐẦU QUY TRÌNH CẬP NHẬT LỊCH ===');
+    console.log('1. Thông tin cập nhật:', { scheduleId, ...scheduleData });
+
+    try {
+        // 1. Xóa lịch cũ
+        console.log('2. Tiến hành xóa lịch cũ:', scheduleId);
+        await deleteScheduleAPI(scheduleId);
+        console.log('3. Đã xóa lịch cũ thành công');
+
+        // 2. Tạo lịch mới với thông tin đã cập nhật
+        const createData = {
+            date: scheduleData.date,
+            slot: scheduleData.slot,
+            roomCode: scheduleData.roomCode || '101',
+            status: scheduleData.status === 'available' ? 'Trống' : scheduleData.status,
+            doctorId: parseInt(scheduleData.doctorId),
+            type: null
+        };
+
+        console.log('4. Tạo lịch mới với dữ liệu:', createData);
+        const createResponse = await createScheduleAPI(createData);
+        console.log('5. Tạo lịch mới thành công:', createResponse.data);
+
+        // 3. Refresh danh sách lịch
+        console.log('6. Lấy danh sách lịch mới nhất');
+        const updatedList = await getAllSchedulesAPI();
+        console.log('7. Hoàn tất cập nhật');
+
+        return updatedList;
+    } catch (error) {
+        console.error('=== LỖI TRONG QUÁ TRÌNH CẬP NHẬT ===');
+        if (error.response) {
+            console.error('Mã lỗi:', error.response.status);
+            console.error('Thông báo từ server:', error.response.data);
+        } else if (error.request) {
+            console.error('Không nhận được phản hồi từ server');
+        } else {
+            console.error('Lỗi:', error.message);
+        }
+        throw error;
+    }
+};
 export {
     fetchAllPatientScheduleAPI,
     fetchAllScheduleAPI,
@@ -267,4 +311,5 @@ export {
     deleteScheduleAPI,
     getSlotCountsAPI,
     checkBackendConnection,
+    updateScheduleAPI
 }

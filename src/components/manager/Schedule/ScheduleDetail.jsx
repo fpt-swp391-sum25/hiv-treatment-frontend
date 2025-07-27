@@ -5,7 +5,7 @@ import { ScheduleStatus, SlotTimes, StatusMapping } from '../../../types/schedul
 import moment from 'moment';
 import './ScheduleDetail.css';
 import { BsCalendarWeek, BsClock, BsDoorOpen, BsPerson, BsBriefcase, BsPersonPlus } from 'react-icons/bs';
-import { deleteScheduleAPI } from '../../../services/schedule.service';
+import { deleteScheduleAPI, updateScheduleAPI } from '../../../services/schedule.service';
 
 const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToast }) => {
     const [formData, setFormData] = useState({
