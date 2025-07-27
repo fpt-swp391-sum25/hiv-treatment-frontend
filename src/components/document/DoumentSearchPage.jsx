@@ -29,12 +29,19 @@ const ResourceSearchPage = () => {
         setLoading(true);
         const response = await fetchAllDocumentsAPI();
         if (response && response.data) {
-          setDocuments(response.data);
-          setFilteredDocs(response.data);
+          // Sort documents by creation date (newest first)
+          const sortedDocuments = response.data.sort((a, b) => {
+            const dateA = new Date(a.createdAt || a.created_at || 0);
+            const dateB = new Date(b.createdAt || b.created_at || 0);
+            return dateB - dateA; // newest first
+          });
+          
+          setDocuments(sortedDocuments);
+          setFilteredDocs(sortedDocuments);
           // Get picture for document
           const imagesMap = {};
           await Promise.all(
-            response.data.map(async (doc) => {
+            sortedDocuments.map(async (doc) => {
               try {
                 const imgRes = await getDocumentImagesByDocumentId(doc.id);
                 imagesMap[doc.id] = imgRes.data;
@@ -52,8 +59,14 @@ const ResourceSearchPage = () => {
         fetch('/api/documents.json')
           .then((res) => res.json())
           .then((data) => {
-            setDocuments(data);
-            setFilteredDocs(data);
+            // Sort fallback data by creation date (newest first)
+            const sortedData = data.sort((a, b) => {
+              const dateA = new Date(a.createdAt || a.created_at || 0);
+              const dateB = new Date(b.createdAt || b.created_at || 0);
+              return dateB - dateA; // newest first
+            });
+            setDocuments(sortedData);
+            setFilteredDocs(sortedData);
           })
           .catch((err) => console.error('Lỗi tải dữ liệu:', err));
       } finally {
@@ -74,7 +87,13 @@ const ResourceSearchPage = () => {
         normalizeString(doc.author ? doc.author : '').toLowerCase().includes(term) ||
         normalizeString(doc.content ? doc.content : '').toLowerCase().includes(term)
     );
-    setFilteredDocs(filtered);
+    // Maintain sort order (newest first) when searching
+    const sortedFiltered = filtered.sort((a, b) => {
+      const dateA = new Date(a.createdAt || a.created_at || 0);
+      const dateB = new Date(b.createdAt || b.created_at || 0);
+      return dateB - dateA; // newest first
+    });
+    setFilteredDocs(sortedFiltered);
   };
 
   // Convert search string to Unaccented Vietnamese to avoid different context format
