@@ -1,7 +1,18 @@
 import {
-    Layout, message, Spin, Table, Button, Popconfirm, Card, Typography,
-    DatePicker, notification, Tabs, Tag, Space, ConfigProvider,
-    Tooltip,
+    Layout,
+    message,
+    Spin,
+    Table,
+    Button,
+    Popconfirm,
+    Card,
+    Typography,
+    DatePicker,
+    notification,
+    Tabs,
+    Tag,
+    Space,
+    ConfigProvider,
     Modal,
     Popover
 } from "antd";
@@ -17,17 +28,29 @@ import {
 import dayjs from "dayjs";
 import viVN from 'antd/es/locale/vi_VN';
 import 'dayjs/locale/vi';
-import { useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../../components/context/AuthContext";
+import {
+    useContext,
+    useEffect,
+    useState
+} from "react";
+import {
+    AuthContext
+} from "../../components/context/AuthContext";
 import PatientAppointmentHistory from "./PatientAppointmentHistory";
-import { fetchServicePrices } from "../../services/systemConfiguration.service";
-import { cancelBookingAPI, retryPaymentAPI } from "../../services/appointment.service";
-import { fetchAllPatientScheduleAPI } from "../../services/schedule.service";
-import { fetchHealthRecordByScheduleIdAPI } from "../../services/health-record.service";
+import {
+    fetchServicePrices
+} from "../../services/systemConfiguration.service";
+import {
+    cancelBookingAPI,
+    retryPaymentAPI
+} from "../../services/appointment.service";
+import {
+    fetchAllPatientScheduleAPI
+} from "../../services/schedule.service";
+import {
+    fetchHealthRecordByScheduleIdAPI
+} from "../../services/health-record.service";
 
-
-const { Content } = Layout;
 const { Text, Title } = Typography;
 
 dayjs.locale('vi');
@@ -39,7 +62,6 @@ const AppointmentList = () => {
     const [activeTab, setActiveTab] = useState('appointment');
     const [monthFilter, setMonthFilter] = useState(null);
     const [servicePrices, setServicePrices] = useState({});
-    const navigate = useNavigate();
 
     useEffect(() => {
         loadAllSchedule();
@@ -75,7 +97,8 @@ const AppointmentList = () => {
 
             }))
             const filtered = withHealthStatus.filter(item => item.healthRecordStatus !== 'Đã khám')
-            setSchedule(filtered);
+            const filteredStatus = filtered.filter(item => item.healthRecordStatus !== 'Đã tư vấn')
+            setSchedule(filteredStatus);
         } catch (error) {
             message.error(error.message || 'Lỗi khi tải lịch hẹn');
         } finally {
@@ -86,7 +109,7 @@ const AppointmentList = () => {
         try {
             const prices = await fetchServicePrices();
             setServicePrices(prices);
-        } catch (error) {
+        } catch {
             message.error('Không thể tải giá dịch vụ');
         }
     };
@@ -107,10 +130,9 @@ const AppointmentList = () => {
             if (response.data) {
                 window.location.href = response.data;
             }
-        } catch (error) {
+        } catch {
             message.error("Lỗi khi tạo URL thanh toán.");
         }
-
     }
 
     const handleCancelSchedule = async (scheduleId) => {
@@ -210,7 +232,6 @@ const AppointmentList = () => {
                 const appointmentDateTime = dayjs(`${record.date} ${record.slot}`, 'DD-MM-YYYY HH:mm')
                 const now = dayjs()
                 const canCancel = appointmentDateTime.diff(now, 'hour') >= 24
-                console.log('>>>>>>>>check can cancel ', canCancel)
 
                 if (['Đã thanh toán', 'Đang chờ thanh toán', 'Đang hoạt động'].includes(record.status)) {
                     if (canCancel) {

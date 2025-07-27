@@ -81,3 +81,438 @@
 .manager-layout-content::-webkit-scrollbar-thumb:hover {
   background: #999;
 }
+
+/* Modal Management CSS */
+.schedule-detail-modal .modal-dialog {
+  z-index: 1050;
+}
+
+.sub-slots-modal .modal-dialog {
+  z-index: 1060;
+}
+
+.sub-slots-modal .modal-backdrop {
+  z-index: 1055;
+}
+
+/* Đảm bảo modal không bị overlap */
+.modal-backdrop.show {
+  opacity: 0.5;
+}
+
+/* Animation mượt mà cho modal */
+.modal.fade .modal-dialog {
+  transition: transform 0.3s ease-out;
+}
+
+/* Sub-slot confirmation styling - Thiết kế chuyên nghiệp và mềm mại */
+.sub-slots-modal .modal-body {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+/* Confirmation overlay - Backdrop mềm mại */
+.confirmation-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  animation: fadeInSoft 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Confirmation card - Card rộng rãi và thoáng đãng hơn */
+.confirmation-card {
+  background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%);
+  border-radius: 20px;
+  box-shadow: 
+    0 25px 80px rgba(0, 0, 0, 0.12),
+    0 12px 32px rgba(0, 0, 0, 0.08),
+    0 4px 12px rgba(0, 0, 0, 0.06);
+  max-width: 520px;
+  width: 95%;
+  margin: 20px;
+  animation: slideInSoft 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  overflow: hidden;
+  position: relative;
+  min-height: 280px;
+}
+
+.confirmation-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #ff9500, #ff7b00, #ff9500);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Header với icon và title rộng rãi hơn */
+.confirmation-header {
+  padding: 40px 32px 24px 32px;
+  text-align: center;
+  position: relative;
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.confirmation-icon {
+  width: 72px;
+  height: 72px;
+  background: linear-gradient(135deg, #ff9500 0%, #ff7b00 50%, #ff6200 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px auto;
+  color: white;
+  box-shadow: 
+    0 12px 32px rgba(255, 149, 0, 0.3),
+    0 6px 16px rgba(255, 149, 0, 0.2);
+  position: relative;
+  animation: pulseIcon 2s ease-in-out infinite;
+}
+
+.confirmation-icon::after {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  right: -6px;
+  bottom: -6px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ff9500, #ff7b00);
+  opacity: 0.2;
+  z-index: -1;
+  animation: ripple 2.5s ease-out infinite;
+}
+
+.confirmation-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  color: #1e293b;
+  letter-spacing: -0.4px;
+  line-height: 1.3;
+}
+
+/* Body với thông tin rộng rãi và thoáng đãng */
+.confirmation-body {
+  padding: 24px 32px 16px 32px;
+  text-align: center;
+}
+
+.confirmation-question {
+  font-size: 16px;
+  color: #475569;
+  margin-bottom: 20px;
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+.patient-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin: 24px 0;
+  padding: 24px 20px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.patient-info::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #ff9500, transparent);
+}
+
+.patient-info strong {
+  font-size: 18px;
+  color: #0f172a;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  text-align: center;
+}
+
+.slot-badge {
+  background: linear-gradient(135deg, #ff9500 0%, #ff7b00 100%);
+  color: white;
+  padding: 8px 20px;
+  border-radius: 50px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  box-shadow: 
+    0 6px 16px rgba(255, 149, 0, 0.3),
+    0 3px 8px rgba(255, 149, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.confirmation-warning {
+  font-size: 14px;
+  color: #64748b;
+  margin: 20px 0 0 0;
+  font-style: italic;
+  opacity: 0.9;
+  line-height: 1.4;
+}
+
+/* Actions buttons rộng rãi và thoải mái hơn */
+.confirmation-actions {
+  padding: 24px 32px 32px 32px;
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  background: linear-gradient(135deg, #fafbfc 0%, #ffffff 100%);
+  border-top: 1px solid #f1f5f9;
+}
+
+.btn-cancel-action {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  padding: 14px 28px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 120px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.btn-cancel-action::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+  transition: left 0.5s;
+}
+
+.btn-cancel-action:hover:not(:disabled) {
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  border-color: #cbd5e1;
+  color: #334155;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.btn-cancel-action:hover:not(:disabled)::before {
+  left: 100%;
+}
+
+.btn-confirm-action {
+  background: linear-gradient(135deg, #ff9500 0%, #ff7b00 50%, #ff6200 100%);
+  border: none;
+  color: white;
+  padding: 14px 32px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 
+    0 8px 24px rgba(255, 149, 0, 0.35),
+    0 4px 12px rgba(255, 149, 0, 0.25);
+}
+
+.btn-confirm-action::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.6s;
+}
+
+.btn-confirm-action:hover:not(:disabled) {
+  background: linear-gradient(135deg, #e6850e 0%, #e66b00 50%, #cc5500 100%);
+  transform: translateY(-3px);
+  box-shadow: 
+    0 12px 36px rgba(255, 149, 0, 0.4),
+    0 8px 20px rgba(255, 149, 0, 0.3);
+}
+
+.btn-confirm-action:hover:not(:disabled)::before {
+  left: 100%;
+}
+
+.btn-confirm-action:active:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 
+    0 8px 24px rgba(255, 149, 0, 0.35),
+    0 4px 12px rgba(255, 149, 0, 0.25);
+}
+
+.btn-cancel-action:disabled,
+.btn-confirm-action:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.btn-confirm-action:disabled {
+  background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
+}
+
+/* Animations mềm mại và chuyên nghiệp */
+@keyframes fadeInSoft {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(2px);
+  }
+}
+
+@keyframes slideInSoft {
+  from {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes pulseIcon {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.1;
+  }
+  100% {
+    transform: scale(1.2);
+    opacity: 0;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Responsive rộng rãi hơn */
+@media (max-width: 480px) {
+  .confirmation-card {
+    margin: 12px;
+    width: calc(100% - 24px);
+    max-width: none;
+    min-height: 320px;
+  }
+  
+  .confirmation-header {
+    padding: 32px 24px 20px 24px;
+  }
+  
+  .confirmation-icon {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 20px;
+  }
+  
+  .confirmation-title {
+    font-size: 20px;
+  }
+  
+  .confirmation-body {
+    padding: 20px 24px 16px 24px;
+  }
+  
+  .confirmation-question {
+    font-size: 15px;
+  }
+  
+  .patient-info {
+    padding: 20px 16px;
+  }
+  
+  .patient-info strong {
+    font-size: 17px;
+  }
+  
+  .confirmation-actions {
+    flex-direction: column;
+    padding: 20px 24px 28px 24px;
+    gap: 12px;
+  }
+  
+  .btn-cancel-action,
+  .btn-confirm-action {
+    width: 100%;
+    min-width: auto;
+    padding: 16px 24px;
+  }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  .confirmation-overlay,
+  .confirmation-card,
+  .confirmation-icon,
+  .btn-cancel-action,
+  .btn-confirm-action {
+    animation: none;
+    transition: none;
+  }
+  
+  .confirmation-card::before {
+    animation: none;
+  }
+  
+  .confirmation-icon::after {
+    animation: none;
+  }
+}

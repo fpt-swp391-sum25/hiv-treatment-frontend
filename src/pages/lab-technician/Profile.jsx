@@ -1,4 +1,8 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, {
+  useState,
+  useContext,
+  useEffect
+} from 'react'
 import {
   Card,
   Row,
@@ -12,26 +16,34 @@ import {
   Select,
   DatePicker,
 } from 'antd';
-import { MailOutlined, PhoneOutlined, UserOutlined } from '@ant-design/icons';
+import {
+  MailOutlined,
+  PhoneOutlined,
+  UserOutlined
+} from '@ant-design/icons';
 import dayjs from 'dayjs';
-import { AuthContext } from '../../components/context/AuthContext';
-import { validateField } from '../../utils/validate';
-import { updateUserAPI } from '../../services/user.service';
-import { fetchAccountAPI } from '../../services/auth.service';
+import {
+  AuthContext
+} from '../../components/context/AuthContext';
+import {
+  validateField
+} from '../../utils/validate';
+import {
+  updateUserAPI
+} from '../../services/user.service';
+import {
+  fetchAccountAPI
+} from '../../services/auth.service';
 
-const { Title, Text } = Typography;
-const { Option } = Select;
+const { Title, Text } = Typography
+const { Option } = Select
 
 const LabTechnicianProfile = () => {
-  const { user, setUser } = useContext(AuthContext);
-  const [avatarUrl, setAvatarUrl] = useState('');
-  const fileInputRef = React.useRef('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState(null)
-  const [errors, setErrors] = useState({});
-
-  const [loading, setLoading] = useState(false);
-
+  const { user, setUser } = useContext(AuthContext)
+  const [avatarUrl, setAvatarUrl] = useState('')
+  const fileInputRef = React.useRef('')
+  const [errors, setErrors] = useState({})
+  const [loading, setLoading] = useState(false)
   const [editableUser, setEditableUser] = useState({
     fullName: '',
     email: '',
@@ -42,7 +54,7 @@ const LabTechnicianProfile = () => {
     password: '',
     confirmPassword: '',
     avatar: '',
-  });
+  })
 
   useEffect(() => {
     if (user?.id) {
@@ -53,96 +65,87 @@ const LabTechnicianProfile = () => {
         address: user.address || '',
         gender: user.gender || '',
         dateOfBirth: user.dateOfBirth || '',
-      });
-      setAvatarUrl(user.avatar || '');
+      })
+      setAvatarUrl(user.avatar || '')
     }
-    console.log(user.avatar);
-  }, [user]);
-
+  }, [user])
 
   const handleChange = (field, value) => {
     const updatedUser = {
       ...editableUser,
       [field]: value,
-    };
+    }
 
-    let newErrors = { ...errors };
+    let newErrors = { ...errors }
 
     if (field === "password") {
-      // Chỉ validate password
-      newErrors.password = validateField("newPassword", value);
-      // KHÔNG validate confirmPassword ở đây
+      newErrors.password = validateField("newPassword", value)
     } else if (field === "confirmPassword") {
-      // Khi người dùng bắt đầu nhập confirmPassword, validate khớp với password
       newErrors.confirmPassword = validateField("confirmPassword", value, {
         newPassword: updatedUser.password,
-      });
+      })
     } else {
-      // Các field khác
-      const error = validateField(field, value, updatedUser);
-      newErrors[field] = error;
+      const error = validateField(field, value, updatedUser)
+      newErrors[field] = error
     }
 
-    setEditableUser(updatedUser);
-    setErrors(newErrors);
-  };
-
-
-
-
+    setEditableUser(updatedUser)
+    setErrors(newErrors)
+  }
 
   const handleUpdate = async () => {
-    if (editableUser.password && editableUser.password !== editableUser.confirmPassword) {
-      message.error('Mật khẩu xác nhận không khớp!');
-      return;
+    if (editableUser.password && editableUser.password
+      !== editableUser.confirmPassword) {
+      message.error('Mật khẩu xác nhận không khớp!')
+      return
     }
 
-    setLoading(true);
+    setLoading(true)
     try {
       const payload = {
         ...editableUser,
         dateOfBirth: editableUser.dateOfBirth
           ? dayjs(editableUser.dateOfBirth).format('YYYY-MM-DD')
           : '',
-      };
+      }
 
-      const res = await updateUserAPI(user.id, payload);
+      const res = await updateUserAPI(user.id, payload)
 
       if (res.data) {
-        const updatedUserRes = await fetchAccountAPI();
+        const updatedUserRes = await fetchAccountAPI()
         if (updatedUserRes.data) {
-          setUser(updatedUserRes.data);
+          setUser(updatedUserRes.data)
           if (updatedUserRes.data.avatar) {
-            setAvatarUrl(updatedUserRes.data.avatar);
+            setAvatarUrl(updatedUserRes.data.avatar)
           }
         }
-        message.success('Cập nhật thông tin thành công!');
+        message.success('Cập nhật thông tin thành công!')
       } else {
-        message.error('Cập nhật không thành công!');
+        message.error('Cập nhật không thành công!')
       }
-    } catch (error) {
-      message.error('Cập nhật thất bại!');
+    } catch {
+      message.error('Cập nhật thất bại!')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const handleAvatarChange = (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
+    const file = event.target.files[0]
+    if (!file) return
 
-    const reader = new FileReader();
+    const reader = new FileReader()
     reader.onload = (e) => {
-      const base64String = e.target.result;
+      const base64String = e.target.result
 
-      setAvatarUrl(base64String);
+      setAvatarUrl(base64String)
       setEditableUser((prev) => ({
         ...prev,
         avatar: base64String,
-      }));
-    };
-    reader.readAsDataURL(file);
-  };
+      }))
+    }
+    reader.readAsDataURL(file)
+  }
 
   return (
     <div style={{ padding: '24px' }}>
@@ -170,11 +173,11 @@ const LabTechnicianProfile = () => {
                   type="link"
                   style={{ marginTop: 8 }}
                   onClick={() => {
-                    setAvatarUrl('');
+                    setAvatarUrl('')
                     setEditableUser((prev) => ({
                       ...prev,
                       avatar: '',
-                    }));
+                    }))
                   }}
                 >
                   Xóa ảnh
@@ -293,7 +296,6 @@ const LabTechnicianProfile = () => {
             />
           </Form.Item>
 
-
           <Form.Item>
             <Button type="primary" onClick={handleUpdate} loading={loading}>
               Cập nhật
@@ -303,7 +305,6 @@ const LabTechnicianProfile = () => {
       </Card>
 
     </div>
-  );
-};
-
-export default LabTechnicianProfile;
+  )
+}
+export default LabTechnicianProfile

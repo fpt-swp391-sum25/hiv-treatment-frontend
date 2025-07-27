@@ -1,28 +1,60 @@
-import { Layout, Button, Avatar, Typography, message, theme, Popover, Tooltip, Popconfirm, Badge, List, Spin } from "antd";
-import { UserOutlined, LogoutOutlined, BellOutlined } from "@ant-design/icons";
-import { useContext, useEffect, useState } from "react";
-import { AuthContext } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import {
+    Layout,
+    Button,
+    Avatar,
+    Typography,
+    theme,
+    Popover,
+    Tooltip,
+    Popconfirm,
+    Badge,
+    List,
+    Spin,
+    notification
+} from "antd";
+import {
+    UserOutlined,
+    LogoutOutlined,
+    BellOutlined
+} from "@ant-design/icons";
+import {
+    useContext,
+    useEffect,
+    useState
+} from "react";
+import {
+    AuthContext
+} from "../context/AuthContext";
+import {
+    logoutAPI
+} from "../../services/auth.service";
+import {
+    useNavigate
+} from "react-router-dom";
 import appLogo from '../../assets/appLogo.png'
 import '../manager/Layout/ManagerHeader.css'
-import { getNotificationsByUserId, updateNotification } from "../../services/notification.service";
-import { logoutAPI } from "../../services/auth.service";
+import {
+    getNotificationsByUserId,
+    updateNotification
+} from "../../services/notification.service";
+
 
 const { Header } = Layout
 const { Text } = Typography
 
 const PageHeader = () => {
-
     const { user, setUser } = useContext(AuthContext)
     const navigate = useNavigate()
-    // Notification state
+
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(false);
     const [popoverOpen, setPopoverOpen] = useState(false);
     const unreadCount = notifications.filter(n => !n.isRead).length;
+
     useEffect(() => {
         let intervalId;
 
+        // Poll notifications every 5 second
         const pollNotifications = async () => {
             try {
                 const res = await getNotificationsByUserId(user.id);
@@ -44,11 +76,12 @@ const PageHeader = () => {
         };
 
         if (user?.id) {
-            intervalId = setInterval(pollNotifications, 1000); // 1s
+            intervalId = setInterval(pollNotifications, 5000);
         }
 
-        return () => clearInterval(intervalId); // cleanup
+        return () => clearInterval(intervalId);
     }, [user?.id, notifications]);
+
     const loadNotifications = async () => {
         if (!user?.id) return;
         setLoading(true);
@@ -56,7 +89,7 @@ const PageHeader = () => {
             const res = await getNotificationsByUserId(user.id);
             setNotifications((res.data || []).map(n => ({
                 ...n,
-                isRead: n.read  // Chuyển `read` → `isRead` để dùng thống nhất
+                isRead: n.read
             })));
         } finally {
             setLoading(false);
@@ -68,11 +101,10 @@ const PageHeader = () => {
         if (open) loadNotifications();
     };
 
+    // Change notification display when it's clicked
     const handleNotificationClick = async (notification) => {
         if (!notification.isRead) {
             await updateNotification(notification.id, { ...notification, isRead: true });
-            // Cập nhật trực tiếp notification đã click thành isRead: true
-            console.log(notification)
             setNotifications(prev =>
                 prev.map(n =>
                     n.id === notification.id ? { ...n, isRead: true } : n
@@ -81,7 +113,6 @@ const PageHeader = () => {
             loadNotifications()
         }
     };
-
 
     const handleLogout = async () => {
         const response = await logoutAPI()
@@ -123,8 +154,9 @@ const PageHeader = () => {
     }
 
     const {
-        token: { colorBgContainer, borderRadiusLG },
+        token: { colorBgContainer },
     } = theme.useToken();
+
     return (
         <Header
             style={{
@@ -148,7 +180,6 @@ const PageHeader = () => {
                 />
             </div>
             <div className="header-right" style={{ cursor: 'pointer' }}>
-                {/* Bell notification icon */}
                 <Popover
                     content={
                         <Spin spinning={loading}>
@@ -200,8 +231,6 @@ const PageHeader = () => {
                     okText="Có"
                     cancelText="Không"
                     placement="left">
-
-
                     <Button
                         type="primary"
                         icon={<LogoutOutlined />}
@@ -214,5 +243,4 @@ const PageHeader = () => {
         </Header>
     )
 }
-
 export default PageHeader

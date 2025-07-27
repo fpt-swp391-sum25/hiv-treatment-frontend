@@ -1,37 +1,56 @@
-import React, { useState, Suspense, useContext, useRef } from 'react';
-import { Card, Row, Col, Tabs, Skeleton, Avatar, Typography, Tooltip } from 'antd';
-import { MailOutlined, PhoneOutlined, CameraOutlined } from '@ant-design/icons';
-import DoctorPersonalProfile from '../../components/doctor/DoctorPersonalProfile';
-import DoctorStatistic from '../../components/doctor/DoctorStatistic';
-import doctorProfileImage from '../../assets/doctor.png';
-import { useOutletContext } from 'react-router-dom';
-import { AuthContext } from '../../components/context/AuthContext';
-import { validateField } from '../../utils/validate';
+import { 
+  useState, 
+  Suspense, 
+  useContext, 
+  useRef 
+} from 'react'
+import { 
+  Card, 
+  Row, 
+  Col, 
+  Tabs, 
+  Skeleton, 
+  Avatar, 
+  Typography, 
+  Tooltip 
+} from 'antd'
+import { 
+  MailOutlined, 
+  PhoneOutlined, 
+  CameraOutlined 
+} from '@ant-design/icons'
+import DoctorPersonalProfile from '../../components/doctor/DoctorPersonalProfile'
+import DoctorStatistic from '../../components/doctor/DoctorStatistic'
+import doctorProfileImage from '../../assets/doctor.png'
+import { 
+  AuthContext 
+} from '../../components/context/AuthContext'
+import { 
+  validateField 
+} from '../../utils/validate'
 
-const { Title, Text } = Typography;
-const { TabPane } = Tabs;
+const { Title, Text } = Typography
 
 const TabContentSkeleton = () => (
   <Skeleton active paragraph={{ rows: 6 }} />
-);
+)
 
 const DoctorProfile = () => {
-  const [activeTab, setActiveTab] = useState('personal-info');
-  const { user, setUser } = useContext(AuthContext);
-  const [hover, setHover] = useState(false);
-  const fileInputRef = useRef(null);
+  const [activeTab, setActiveTab] = useState('personal-info')
+  const { user, setUser } = useContext(AuthContext)
+  const [hover, setHover] = useState(false)
+  const fileInputRef = useRef(null)
 
-  // Đổi avatar
   const handleAvatarChange = (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
+    const file = event.target.files[0]
+    if (!file) return
+    const reader = new FileReader()
     reader.onload = (e) => {
-      const base64String = e.target.result;
-      setUser({ ...user, avatar: base64String });
-    };
-    reader.readAsDataURL(file);
-  };
+      const base64String = e.target.result
+      setUser({ ...user, avatar: base64String })
+    }
+    reader.readAsDataURL(file)
+  }
 
   return (
     <div style={{ padding: '24px' }}>
@@ -121,7 +140,6 @@ const DoctorProfile = () => {
         />
       </Card>
     </div>
-  );
-};
-
-export default DoctorProfile;
+  )
+}
+export default DoctorProfile

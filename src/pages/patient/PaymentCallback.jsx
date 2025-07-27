@@ -1,9 +1,20 @@
-import React, { useEffect } from 'react';
-import { Result, Button } from 'antd';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { handlePaymentCallbackAPI } from '../../services/appointment.service';
-import { createHealthRecordAPI } from '../../services/health-record.service';
-
+import {
+    useEffect
+} from 'react';
+import {
+    Result,
+    Button
+} from 'antd';
+import {
+    useLocation,
+    useNavigate
+} from 'react-router-dom';
+import {
+    handlePaymentCallbackAPI
+} from '../../services/appointment.service';
+import {
+    createHealthRecordAPI
+} from '../../services/health-record.service';
 
 const PaymentCallback = () => {
     const location = useLocation();
@@ -46,5 +57,4 @@ const PaymentCallback = () => {
         />
     );
 };
-
 export default PaymentCallback;

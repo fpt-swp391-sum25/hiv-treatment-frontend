@@ -1,4 +1,4 @@
-import '@ant-design/v5-patch-for-react-19';
+import '@ant-design/v5-patch-for-react-19'
 import {
     Form,
     Input,
@@ -11,49 +11,52 @@ import {
     Alert,
     notification,
 } from 'antd';
-import { ArrowLeftOutlined } from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
-import { registerAPI } from '../../services/auth.service';
-import { useState } from 'react';
-import { validateField } from '../../utils/validate';
+import {
+    ArrowLeftOutlined
+} from '@ant-design/icons';
+import {
+    registerAPI
+} from '../../services/auth.service';
+import {
+    useState
+} from 'react';
+import {
+    validateField
+} from '../../utils/validate';
 
-const { Option } = Select;
-const { Link, Text } = Typography;
-const dateFormat = 'DD-MM-YYYY';
+const { Option } = Select
+const { Link, Text } = Typography
+const dateFormat = 'DD-MM-YYYY'
 
 const Register = () => {
-    const [form] = Form.useForm();
-    const navigate = useNavigate();
-    const [loading, setLoading] = useState(false);
-    const [successMessage, setSuccessMessage] = useState('');
-    const [errors, setErrors] = useState({});
-    const [newPassword, setNewPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState(null)
+    const [form] = Form.useForm()
+    const [loading, setLoading] = useState(false)
+    const [successMessage, setSuccessMessage] = useState('')
 
     const onFinish = async (values) => {
-        setLoading(true);
+        setLoading(true)
         try {
-            const response = await registerAPI(values);
+            const response = await registerAPI(values)
             if (response.data) {
                 setSuccessMessage(
                     'Đăng kí thành công, vui lòng xác minh email trước khi đăng nhập!'
-                );
-                form.resetFields();
+                )
+                form.resetFields()
             } else if (response.message.includes('USERNAME')) {
                 notification.error({
                     message: "Hệ thống",
                     description: "Tên người dùng đã tồn tại",
-                });
+                })
             }
-        } catch (error) {
-            antdMessage.error('Đăng ký thất bại, vui lòng thử lại.');
+        } catch {
+            antdMessage.error('Đăng ký thất bại, vui lòng thử lại.')
         }
-        setLoading(false);
-    };
+        setLoading(false)
+    }
 
     const onFinishFailed = () => {
-        antdMessage.error('Vui lòng kiểm tra lại thông tin.');
-    };
+        antdMessage.error('Vui lòng kiểm tra lại thông tin.')
+    }
 
     return (
         <div
@@ -89,9 +92,9 @@ const Register = () => {
                     rules={[
                         {
                             validator: (_, value) => {
-                                const error = validateField('fullname', value);
-                                if (error) return Promise.reject(error);
-                                return Promise.resolve();
+                                const error = validateField('fullname', value)
+                                if (error) return Promise.reject(error)
+                                return Promise.resolve()
                             },
                         },
                     ]}
@@ -105,9 +108,9 @@ const Register = () => {
                     rules={[
                         {
                             validator: (_, value) => {
-                                const error = validateField('gender', value);
-                                if (error) return Promise.reject(error);
-                                return Promise.resolve();
+                                const error = validateField('gender', value)
+                                if (error) return Promise.reject(error)
+                                return Promise.resolve()
                             },
                         },
                     ]}
@@ -125,9 +128,9 @@ const Register = () => {
                     rules={[
                         {
                             validator: (_, value) => {
-                                const error = validateField('dob', value);
-                                if (error) return Promise.reject(error);
-                                return Promise.resolve();
+                                const error = validateField('dob', value)
+                                if (error) return Promise.reject(error)
+                                return Promise.resolve()
                             },
                         },
                     ]}
@@ -145,9 +148,9 @@ const Register = () => {
                     rules={[
                         {
                             validator: (_, value) => {
-                                const error = validateField('email', value);
-                                if (error) return Promise.reject(error);
-                                return Promise.resolve();
+                                const error = validateField('email', value)
+                                if (error) return Promise.reject(error)
+                                return Promise.resolve()
                             },
                         },
                     ]}
@@ -161,9 +164,9 @@ const Register = () => {
                     rules={[
                         {
                             validator: (_, value) => {
-                                const error = validateField('phoneNumber', value);
-                                if (error) return Promise.reject(error);
-                                return Promise.resolve();
+                                const error = validateField('phoneNumber', value)
+                                if (error) return Promise.reject(error)
+                                return Promise.resolve()
                             },
                         },
                     ]}
@@ -177,9 +180,9 @@ const Register = () => {
                     rules={[
                         {
                             validator: (_, value) => {
-                                const error = validateField('address', value);
-                                if (error) return Promise.reject(error);
-                                return Promise.resolve();
+                                const error = validateField('address', value)
+                                if (error) return Promise.reject(error)
+                                return Promise.resolve()
                             },
                         },
                     ]}
@@ -196,9 +199,9 @@ const Register = () => {
                     rules={[
                         {
                             validator: (_, value) => {
-                                const error = validateField('username', value);
-                                if (error) return Promise.reject(error);
-                                return Promise.resolve();
+                                const error = validateField('username', value)
+                                if (error) return Promise.reject(error)
+                                return Promise.resolve()
                             },
                         },
                     ]}
@@ -212,9 +215,9 @@ const Register = () => {
                     rules={[
                         {
                             validator: (_, value) => {
-                                const error = validateField('newPassword', value);
-                                if (error) return Promise.reject(error);
-                                return Promise.resolve();
+                                const error = validateField('newPassword', value)
+                                if (error) return Promise.reject(error)
+                                return Promise.resolve()
                             },
                         },
                     ]}
@@ -223,9 +226,6 @@ const Register = () => {
                     <Input.Password
                         placeholder="Mật khẩu"
                         autoComplete="new-password"
-                        onChange={(e) => {
-                            setNewPassword(e.target.value);
-                        }}
                     />
                 </Form.Item>
 
@@ -237,11 +237,11 @@ const Register = () => {
                     rules={[
                         {
                             validator: (_, value) => {
-                                const password = form.getFieldValue('newPassword');
-                                if (!value) return Promise.resolve();
-                                const error = validateField('confirmPassword', value, { newPassword: password });
-                                if (error) return Promise.reject(error);
-                                return Promise.resolve();
+                                const password = form.getFieldValue('newPassword')
+                                if (!value) return Promise.resolve()
+                                const error = validateField('confirmPassword', value, { newPassword: password })
+                                if (error) return Promise.reject(error)
+                                return Promise.resolve()
                             },
                         },
                     ]}
@@ -249,12 +249,8 @@ const Register = () => {
                     <Input.Password
                         placeholder="Xác nhận mật khẩu"
                         autoComplete="new-password"
-                        onChange={(e) => {
-                            setConfirmPassword(e.target.value);
-                        }}
                     />
                 </Form.Item>
-
 
                 <Form.Item>
                     <Button
@@ -278,7 +274,6 @@ const Register = () => {
                 </div>
             </Form>
         </div>
-    );
-};
-
-export default Register;
+    )
+}
+export default Register

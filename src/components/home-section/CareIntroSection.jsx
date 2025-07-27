@@ -1,10 +1,11 @@
 import '../../styles/home-section/CareIntroSection.css';
-import { Link } from 'react-router-dom';
+import { 
+  Link 
+} from 'react-router-dom';
 
 function CareIntroSection() {
   return (<section className="care-intro-section" id="care-section">
     <div className="care-grid">
-      {/* Cột trái */}
       <div className="care-left">
         <h1>
           Chăm sóc và điều trị <span className="highlight-hiv">HIV</span> an toàn, hiệu quả
@@ -39,7 +40,6 @@ function CareIntroSection() {
 
       </div>
 
-      {/* Cột phải */}
       <div className="care-right">
         <div className="service-box">
           <div className="service-header">
@@ -64,12 +64,10 @@ function CareIntroSection() {
             </li>
           </ul>
           <Link to="/register" onClick={() => window.scrollTo(0, 0)}><button className="register-btn">Đăng ký tài khoản miễn phí</button></Link>
-
         </div>
       </div>
     </div>
   </section>
   );
 }
-
 export default CareIntroSection;

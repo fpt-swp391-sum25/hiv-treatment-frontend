@@ -1,4 +1,3 @@
-import React from 'react';
 import '../../styles/doctor-profile/DoctorProfileBanner.css';
 
 const DoctorsBanner = () => {
@@ -15,5 +14,4 @@ const DoctorsBanner = () => {
     </div>
   );
 };
-
 export default DoctorsBanner;

@@ -1,9 +1,22 @@
-import { Button, Card, Descriptions, Layout, Spin } from "antd";
+import {
+    Button,
+    Card,
+    Descriptions,
+    Layout,
+    Spin
+} from "antd";
 import dayjs from "dayjs";
-import { useContext, useEffect, useState } from "react";
-import { AuthContext } from "../../components/context/AuthContext";
-import { useNavigate, useParams } from "react-router-dom";
-import { fetchHealthRecordByScheduleIdAPI } from "../../services/health-record.service";
+import {
+    useEffect,
+    useState
+} from "react";
+import {
+    useNavigate,
+    useParams
+} from "react-router-dom";
+import {
+    fetchHealthRecordByScheduleIdAPI
+} from "../../services/health-record.service";
 
 const { Content } = Layout
 
@@ -13,8 +26,6 @@ const AppointmentResult = () => {
     const navigate = useNavigate();
     const [result, setResult] = useState([]);
     const [loading, setLoading] = useState(false);
-    const { user } = useContext(AuthContext)
-
 
     useEffect(() => {
         loadResultDetail()
@@ -26,16 +37,6 @@ const AppointmentResult = () => {
         CONSULTATION: 'Tư vấn',
         null: 'Chưa xác định',
         'Khám': 'Khám',
-    };
-
-    const statusMapping = {
-        PENDING: 'Chờ thanh toán',
-        PENDING_PAYMENT_CONFIRMED: 'Chờ xác nhận',
-        CONFIRMED: 'Đã xác nhận',
-        AVAILABLE: 'Hủy',
-        FAILED: 'Thanh toán thất bại',
-        null: 'Chưa xác định',
-        'Đang hoạt động': 'Đang hoạt động',
     };
 
     const loadResultDetail = async () => {
@@ -59,7 +60,6 @@ const AppointmentResult = () => {
                     }}>
                         <Spin tip="Đang tải..." />
                     </div>
-
                 ) : (
                     <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
                         <h2 style={{ marginBottom: '20px', fontSize: '24px', fontWeight: '600' }}>Chi tiết kết quả lịch hẹn</h2>
@@ -75,8 +75,6 @@ const AppointmentResult = () => {
                                                 ? `${dayjs(result.schedule.slot, 'HH:mm:ss').format('HH:mm')} - ${dayjs(result.schedule.slot, 'HH:mm:ss').add(30, 'minutes').format('HH:mm')}`
                                                 : 'Chưa có'}
                                         </Descriptions.Item>
-                                        {/* <Descriptions.Item label="Trạng thái">{statusMapping[result.schedule?.status] || 'Chưa có'}</Descriptions.Item>
-                                        <Descriptions.Item label="Giá">{result.schedule?.amount ? `${result.schedule.amount.toLocaleString('vi-VN')} VND` : 'N/A'}</Descriptions.Item> */}
                                     </Descriptions>
                                     <Descriptions title="Kết quả khám" column={{ xs: 1, sm: 2 }} bordered style={{ marginTop: '20px' }}>
                                         <Descriptions.Item label="Mã phòng khám">{result.roomCode || 'Chưa có'}</Descriptions.Item>
@@ -125,8 +123,6 @@ const AppointmentResult = () => {
             </Content>
         </Layout>
 
-    );
-
+    )
 }
-
 export default AppointmentResult

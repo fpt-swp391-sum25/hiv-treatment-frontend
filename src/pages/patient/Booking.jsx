@@ -1,5 +1,8 @@
-// Booking.jsx
-import { useContext, useEffect, useState } from 'react';
+import {
+    useContext,
+    useEffect,
+    useState
+} from 'react';
 import {
     Form,
     Select,
@@ -17,7 +20,6 @@ import {
 } from 'antd';
 import {
     ArrowLeftOutlined,
-    CalendarOutlined,
     InfoCircleOutlined,
     PhoneOutlined,
     MailOutlined,
@@ -25,13 +27,28 @@ import {
     ExclamationCircleOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { AuthContext } from '../../components/context/AuthContext';
-import { fetchServicePrices, fetchSystemConfigurationsAPI } from '../../services/systemConfiguration.service';
+import {
+    useSearchParams
+} from 'react-router-dom';
+import {
+    AuthContext
+} from '../../components/context/AuthContext';
+import {
+    fetchServicePrices,
+    fetchSystemConfigurationsAPI
+} from '../../services/systemConfiguration.service';
 import '../../styles/patient/Booking.css'
-import { initiatePaymentAPI } from '../../services/appointment.service';
-import { fetchAllDoctorsAPI } from '../../services/user.service';
-import { fetchAllScheduleAPI, fetchScheduleByDateAPI, registerScheduleAPI } from '../../services/schedule.service';
+import {
+    initiatePaymentAPI
+} from '../../services/appointment.service';
+import {
+    fetchAllDoctorsAPI
+} from '../../services/user.service';
+import {
+    fetchAllScheduleAPI,
+    fetchScheduleByDateAPI,
+    registerScheduleAPI
+} from '../../services/schedule.service';
 
 
 const { Link } = Typography;
@@ -68,7 +85,6 @@ const SlotSelector = ({ slots, selected, onSelect, loading }) => (
     </div>
 );
 
-
 const Booking = () => {
     const [form] = Form.useForm();
     const { user } = useContext(AuthContext);
@@ -86,8 +102,6 @@ const Booking = () => {
     const date = Form.useWatch('date', form);
     const slot = Form.useWatch('slot', form);
     const type = Form.useWatch('type', form);
-
-    const navigate = useNavigate();
 
     useEffect(() => {
         loadDoctors();
@@ -158,7 +172,7 @@ const Booking = () => {
         try {
             const response = await fetchAllDoctorsAPI();
             if (response.data) setDoctors(response.data);
-        } catch (error) {
+        } catch {
             message.error('Không thể tải danh sách bác sĩ');
         } finally {
             setLoading(false);
@@ -174,10 +188,8 @@ const Booking = () => {
             if (response.data) {
                 setAvailableSchedules(response.data);
 
-                // Nhóm slot theo startTime (HH:mm)
                 const grouped = response.data.reduce((acc, schedule) => {
-                    const key = schedule.slot; // ví dụ "08:00-09:00"
-                    const startTime = schedule.slot.split('-')[0]; // "08:00"
+                    const startTime = schedule.slot.split('-')[0];
                     if (!acc[startTime]) {
                         acc[startTime] = {
                             startTime,
@@ -201,7 +213,7 @@ const Booking = () => {
                 setAvailableSchedules([]);
                 setGroupedSlots({});
             }
-        } catch (error) {
+        } catch {
             message.error('Không thể tải danh sách khung giờ');
         } finally {
             setLoading(false);
@@ -212,7 +224,7 @@ const Booking = () => {
         try {
             const prices = await fetchServicePrices();
             setServicePrices(prices);
-        } catch (error) {
+        } catch {
             message.error('Không thể tải giá dịch vụ');
         }
     };
@@ -412,9 +424,6 @@ const Booking = () => {
                                 <li>Điền thông tin sức khỏe chính xác, trung thực</li>
                             </ul>
                             <Divider />
-                            <div style={{ textAlign: 'center', opacity: 0.8 }}>
-                                {/* <img src="/img/booking-support-modern.png" width={110} alt="Support" /> */}
-                            </div>
                         </Card>
                     </Col>
                 </Row>
@@ -422,5 +431,4 @@ const Booking = () => {
         </Layout>
     );
 };
-
 export default Booking;

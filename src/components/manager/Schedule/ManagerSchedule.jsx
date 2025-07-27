@@ -75,12 +75,12 @@ const ManagerSchedule = () => {
 
     const fetchSchedules = async () => {
         setLoading(true);
-        console.log('🔄 Bắt đầu tải dữ liệu lịch...');
-
+        console.log('🔄 [fetchSchedules] Bắt đầu tải dữ liệu lịch...');
+        console.log('🔄 [fetchSchedules] Called by:', new Error().stack.split('\n')[2]); // Log caller
         try {
-            console.log('📡 Gọi API getAllSchedulesAPI...');
+            console.log('📡 [fetchSchedules] Gọi API getAllSchedulesAPI...');
             const response = await getAllSchedulesAPI();
-            console.log('✅ Nhận được phản hồi từ API:', response);
+            console.log('✅ [fetchSchedules] Nhận được phản hồi từ API:', response);
 
             // Kiểm tra cấu trúc response để xác định nơi chứa dữ liệu
             let schedulesData = [];
@@ -775,6 +775,7 @@ const ManagerSchedule = () => {
                 onUpdate={handleScheduleUpdate}
                 onDelete={handleScheduleDelete}
                 onShowToast={showNotification}
+                onRefreshData={fetchSchedules}
             />
         </div>
     );

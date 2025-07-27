@@ -1,7 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { Modal, message, Spin } from 'antd';
-import { fetchAllDocumentsAPI, getDocumentImagesByDocumentId } from '../../services/document.service';
-import { FileImageOutlined } from '@ant-design/icons';
+import {
+  useState,
+  useEffect
+} from 'react';
+import {
+  Modal,
+  message,
+  Spin
+} from 'antd';
+import {
+  fetchAllDocumentsAPI,
+  getDocumentImagesByDocumentId
+} from '../../services/document.service';
+import {
+  FileImageOutlined
+} from '@ant-design/icons';
 import '../../styles/document/DocumentSearchPage.css';
 
 const ResourceSearchPage = () => {
@@ -11,7 +23,7 @@ const ResourceSearchPage = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [documentImages, setDocumentImages] = useState({}); // { [documentId]: [array of images] }
+  const [documentImages, setDocumentImages] = useState({});
 
   useEffect(() => {
     const fetchDocuments = async () => {
@@ -21,7 +33,7 @@ const ResourceSearchPage = () => {
         if (response && response.data) {
           setDocuments(response.data);
           setFilteredDocs(response.data);
-          // Lấy ảnh cho từng document
+          // Get picture for document
           const imagesMap = {};
           await Promise.all(
             response.data.map(async (doc) => {
@@ -45,7 +57,7 @@ const ResourceSearchPage = () => {
             setDocuments(data);
             setFilteredDocs(data);
           })
-          .catch((err) => console.error('Lỗi tải dữ liệu local:', err));
+          .catch((err) => console.error('Lỗi tải dữ liệu:', err));
       } finally {
         setLoading(false);
       }
@@ -67,6 +79,7 @@ const ResourceSearchPage = () => {
     setFilteredDocs(filtered);
   };
 
+  // Convert search string to Unaccented Vietnamese to avoid different context format
   const normalizeString = (str) => {
     return str
       .toLowerCase()
@@ -102,7 +115,6 @@ const ResourceSearchPage = () => {
         onChange={handleSearch}
         className="search-input"
       />
-
       {loading ? (
         <div className="loading-container">
           <Spin size="large" />
@@ -155,7 +167,7 @@ const ResourceSearchPage = () => {
       >
         {selectedDoc && (
           <div className="modal-content">
-            {/* Hiển thị hình ảnh của document nếu có */}
+            {/* Display document image if exists */}
             <div style={{ marginBottom: 16, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
               {(documentImages[selectedDoc.id] && documentImages[selectedDoc.id].length > 0) ? (
                 documentImages[selectedDoc.id].map(img => (
@@ -183,5 +195,4 @@ const ResourceSearchPage = () => {
     </section>
   );
 };
-
 export default ResourceSearchPage;
