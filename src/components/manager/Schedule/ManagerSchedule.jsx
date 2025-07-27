@@ -10,7 +10,7 @@ import moment from 'moment';
 import './CustomButtons.css';
 import './Schedule.css';
 import { ScheduleStatus, StatusMapping } from '../../../types/schedule.types';
-import { checkBackendConnection, updateScheduleAPI } from '../../../services/schedule.service';
+import { checkBackendConnection, createScheduleAPI, deleteScheduleAPI, getAllSchedulesAPI, updateScheduleAPI } from '../../../services/schedule.service';
 
 const ManagerSchedule = () => {
     const [showForm, setShowForm] = useState(false);

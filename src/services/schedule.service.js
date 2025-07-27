@@ -41,6 +41,21 @@ const fetchScheduleByDoctorIdAPI = (doctorId) => {
     return axios.get(URL_BACKEND)
 }
 
+const debugRequest = (endpoint, method, data) => {
+    const debugInfo = {
+        endpoint,
+        method,
+        data: data ? JSON.stringify(data) : null,
+        timestamp: new Date().toISOString()
+    };
+
+    console.log(`%c🔍 API Request: ${method} ${endpoint}`, 'color: blue; font-weight: bold');
+    console.table(debugInfo);
+    if (data) console.log('Request Payload:', data);
+
+    return debugInfo;
+};
+
 const createScheduleAPI = (scheduleData) => {
     const URL_BACKEND = '/api/schedule';
 

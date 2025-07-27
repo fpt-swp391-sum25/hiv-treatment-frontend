@@ -20,6 +20,7 @@ import dayjs from 'dayjs';
 import { AuthContext } from '../../components/context/AuthContext';
 import { validateField } from '../../utils/validate';
 import { fetchAccountAPI } from '../../services/auth.service';
+import { updateUserAPI } from '../../services/user.service';
 
 const { Title, Text } = Typography;
 const { Option } = Select;

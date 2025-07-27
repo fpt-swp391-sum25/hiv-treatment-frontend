@@ -44,12 +44,10 @@ const AccountDoctors = () => {
                 });
                 resetAndClose();
                 await loadAccounts();
-            } else {
-                notification.error({
-                    message: 'Hệ thống',
-                    description: 'Tạo tài khoản thất bại',
-                });
             }
+            resetAndClose()
+            await loadAccounts()
+            setLoading(false)
         } catch (error) {
             notification.error({
                 message: 'Hệ thống',

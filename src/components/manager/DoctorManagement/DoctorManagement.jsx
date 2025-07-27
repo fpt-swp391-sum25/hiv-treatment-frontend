@@ -6,6 +6,7 @@ import DoctorProfileDetail from './DoctorProfileDetail';
 import UpdateDoctorProfileModal from './UpdateDoctorProfileModal';
 import './DoctorManagement.css';
 import { fetchAllDoctorsAPI } from '../../../services/user.service';
+import { fetchDoctorByIdAPI, fetchDoctorProfileByDoctorIdAPI } from '../../../services/doctorProfile.service';
 
 const DoctorManagement = () => {
     const [doctors, setDoctors] = useState([]);
