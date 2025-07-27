@@ -60,10 +60,16 @@ const DoctorDocumentList = () => {
     try {
       const res = await getAllDocuments()
       const myDocs = (res.data || []).filter(doc => doc.doctor?.id === user?.id)
-      setDocuments(myDocs)
-      setAllDocuments(myDocs)
+      // Sort from newest to oldest by creation date
+      const sortedDocs = myDocs.sort((a, b) => {
+        const dateA = new Date(a.createdAt || 0)
+        const dateB = new Date(b.createdAt || 0)
+        return dateB - dateA // newest first
+      })
+      setDocuments(sortedDocs)
+      setAllDocuments(sortedDocs)
     } catch {
-      message.error('Lỗi khi tải danh sách document')
+      message.error('Error loading document list')
     }
     setLoading(false)
   }
@@ -84,7 +90,13 @@ const DoctorDocumentList = () => {
         (doc.title && doc.title.toLowerCase().includes(term)) ||
         (doc.doctor && doc.doctor.fullName && doc.doctor.fullName.toLowerCase().includes(term))
       )
-      setDocuments(filtered)
+      // Maintain sort order from newest to oldest when searching
+      const sortedFiltered = filtered.sort((a, b) => {
+        const dateA = new Date(a.createdAt || 0)
+        const dateB = new Date(b.createdAt || 0)
+        return dateB - dateA // newest first
+      })
+      setDocuments(sortedFiltered)
     }
   }
 
@@ -128,7 +140,7 @@ const DoctorDocumentList = () => {
       if (!imageList.some(img => img.image === base64)) {
         setImageList([...imageList, { image: base64 }])
       } else {
-        message.warning('Ảnh này đã tồn tại trong danh sách!')
+        message.warning('This image already exists in the list!')
       }
     }
     reader.readAsDataURL(file)
@@ -146,12 +158,12 @@ const DoctorDocumentList = () => {
         const reader = new FileReader()
         reader.onload = () => {
           const base64 = reader.result
-          if (!imageList.some(img => img.image === base64)) {
-            setImageList(prev => [...prev, { image: base64 }])
-            message.success('Đã dán ảnh từ clipboard!')
-          } else {
-            message.warning('Ảnh này đã tồn tại trong danh sách!')
-          }
+                  if (!imageList.some(img => img.image === base64)) {
+          setImageList(prev => [...prev, { image: base64 }])
+          message.success('Image pasted from clipboard!')
+        } else {
+          message.warning('This image already exists in the list!')
+        }
         }
         reader.readAsDataURL(file)
         break
@@ -170,21 +182,58 @@ const DoctorDocumentList = () => {
         message.error('Lỗi khi xóa ảnh')
       }
     } else {
-      // Delete image that has not been save to database
+      // Delete image that has not been saved to database
       setImageList(imageList.filter(i => i.image !== img.image))
     }
+  }
+
+  // Function to clean HTML content from CKEditor
+  const cleanHtmlContent = (htmlContent) => {
+    if (!htmlContent) return ''
+    
+    // delete <p></p> empty or only contain whitespace
+    let cleaned = htmlContent.replace(/<p>\s*<\/p>/g, '')
+    
+    // delete <p> and </p> if the content is only text
+    // Check if it's just simple text
+    const tempDiv = document.createElement('div')
+    tempDiv.innerHTML = cleaned
+    
+    // if there is only one p tag and no other html tags
+    if (tempDiv.children.length === 1 && tempDiv.children[0].tagName === 'P') {
+      const pContent = tempDiv.children[0].innerHTML
+      // if the content in p does not contain other html tags
+      if (!/<[^>]*>/g.test(pContent)) {
+        return pContent.trim()
+      }
+    }
+    
+    // delete empty <p> tags
+    cleaned = cleaned.replace(/<p>\s*<\/p>/g, '')
+    
+    // delete <br> at the end
+    cleaned = cleaned.replace(/<br\s*\/?>\s*$/g, '')
+    
+    return cleaned.trim()
   }
 
   const handleModalOk = async () => {
     try {
       setModalLoading(true)
       const values = await form.validateFields()
+      
+      // Clean HTML content before saving
+      const cleanedValues = {
+        ...values,
+        content: cleanHtmlContent(values.content)
+      }
+      
       let documentId = editId
       if (editId) {
-        await updateDocument(editId, values)
-        message.success('Cập nhật document thành công')
+        await updateDocument(editId, cleanedValues)
+        message.success('Document updated successfully')
       } else {
-        const res = await createDocument(values, user?.id)
+        const res = await createDocument(cleanedValues, user?.id)
         documentId = res.data?.id || null
         message.success('Tạo mới document thành công')
         if (!documentId) {
@@ -318,6 +367,32 @@ const DoctorDocumentList = () => {
             <CKEditor
               editor={ClassicEditor}
               data={form.getFieldValue('content')}
+              config={{
+                // Cấu hình để giảm thiểu HTML không cần thiết
+                enterMode: 2, // BR tags thay vì P tags
+                shiftEnterMode: 1, // P tags cho Shift+Enter
+                autoParagraph: false, // Không tự động tạo P tags
+                fillEmptyBlocks: false, // Không fill empty blocks
+                removeEmptyElements: true, // Loại bỏ elements rỗng
+                // Cấu hình toolbar đơn giản hơn
+                toolbar: [
+                  'heading',
+                  '|',
+                  'bold',
+                  'italic',
+                  'underline',
+                  'strikethrough',
+                  '|',
+                  'bulletedList',
+                  'numberedList',
+                  '|',
+                  'link',
+                  'blockQuote',
+                  '|',
+                  'undo',
+                  'redo'
+                ]
+              }}
               onChange={(event, editor) => {
                 const data = editor.getData()
                 form.setFieldValue('content', data)
