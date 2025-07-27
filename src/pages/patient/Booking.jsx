@@ -32,6 +32,10 @@ import '../../styles/patient/Booking.css'
 import { initiatePaymentAPI } from '../../services/appointment.service';
 import { fetchAllDoctorsAPI } from '../../services/user.service';
 import { fetchAllScheduleAPI, fetchScheduleByDateAPI, registerScheduleAPI } from '../../services/schedule.service';
+import { AuthContext } from '../../components/context/AuthContext';
+import { fetchServicePrices } from '../../services/systemConfiguration.service';
+import '../../styles/patient/Booking.css'
+
 
 const { Link } = Typography;
 const { Option } = Select;
