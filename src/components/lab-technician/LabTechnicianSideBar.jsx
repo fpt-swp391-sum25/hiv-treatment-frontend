@@ -1,10 +1,18 @@
-import React from 'react';
-import { UnorderedListOutlined, UserOutlined } from '@ant-design/icons';
-import { Layout, Menu } from 'antd';
-import { Link, useLocation } from 'react-router-dom';
+import React from 'react'
+import { 
+  UnorderedListOutlined, 
+  UserOutlined 
+} from '@ant-design/icons'
+import {
+  Layout, 
+  Menu 
+} from 'antd'
+import { 
+  Link, 
+  useLocation 
+} from 'react-router-dom'
 
-const { Sider } = Layout;
-
+const { Sider } = Layout
 const icons = [UnorderedListOutlined, UserOutlined];
 const labels = ['Danh sách bệnh nhân', 'Hồ sơ cá nhân'];
 const paths = ['/lab-technician', '/lab-technician/profile'];
@@ -12,7 +20,7 @@ const items = icons.map((icon, index) => ({
   key: paths[index],
   icon: React.createElement(icon),
   label: <Link to={paths[index]}>{labels[index]}</Link>,
-}));
+}))
 
 const LabTechnicianSideBar = () => {
   const location = useLocation();
@@ -36,7 +44,6 @@ const LabTechnicianSideBar = () => {
         style={{ minHeight: '100vh' }}
       />
     </Sider>
-  );
-};
-
-export default LabTechnicianSideBar; 
+  )
+}
+export default LabTechnicianSideBar

@@ -1,18 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Spin, message, Modal } from 'antd';
-import { fetchAllDocumentsAPI, getDocumentImagesByDocumentId } from '../../services/document.service';
-import { FileImageOutlined } from '@ant-design/icons';
+import { 
+  useState, 
+  useEffect 
+} from 'react';
+import { 
+  Link 
+} from 'react-router-dom';
+import { 
+  Spin, 
+  message, 
+  Modal 
+} from 'antd';
+import { 
+  fetchAllDocumentsAPI, 
+  getDocumentImagesByDocumentId 
+} from '../../services/document.service';
+import { 
+  FileImageOutlined 
+} from '@ant-design/icons';
 import '../../styles/home-section/DocumentList.css';
 
 const Document = () => {
   const [documents, setDocuments] = useState([]);
   const [showAll] = useState(false);
-  const [expandedId, setExpandedId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedDoc, setSelectedDoc] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [documentImages, setDocumentImages] = useState({}); // { [documentId]: [array of images] }
+  const [documentImages, setDocumentImages] = useState({}); 
 
   useEffect(() => {
     const fetchDocuments = async () => {
@@ -21,7 +34,6 @@ const Document = () => {
         const response = await fetchAllDocumentsAPI();
         if (response && response.data) {
           setDocuments(response.data);
-          // Lấy ảnh cho từng document
           const imagesMap = {};
           await Promise.all(
             response.data.map(async (doc) => {
@@ -47,16 +59,11 @@ const Document = () => {
         setLoading(false);
       }
     };
-
     fetchDocuments();
   }, []);
 
-  // Chỉ hiện thị 4 tài liệu đầu tiên nếu không ở chế độ xem tất cả
+  // Display the first 4 documents in list
   const visibleDocuments = showAll ? documents : documents.slice(0, 4);
-
-  const toggleExpand = (id) => {
-    setExpandedId(expandedId === id ? null : id);
-  };
 
   const showModal = (doc) => {
     setSelectedDoc(doc);
@@ -66,13 +73,14 @@ const Document = () => {
   const handleCancel = () => {
     setModalVisible(false);
   };
+
+  // Display a small brief 70% information of the document
   const getSnippet = (html, maxLength = 70) => {
     const tmp = document.createElement('div');
     tmp.innerHTML = html || '';
     const text = tmp.textContent || tmp.innerText || '';
     return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
   };
-
 
   return (
     <section className="document-section" id="document-section">
@@ -121,7 +129,7 @@ const Document = () => {
                     📖 Đọc bài viết
                   </button>
                 </div>
-              );
+              )
             })}
           </div>
 
@@ -152,7 +160,6 @@ const Document = () => {
       >
         {selectedDoc && (
           <div className="modal-content">
-            {/* Hiển thị hình ảnh của document nếu có */}
             <div style={{ marginBottom: 16, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
               {(documentImages[selectedDoc.id] && documentImages[selectedDoc.id].length > 0) ? (
                 documentImages[selectedDoc.id].map(img => (
@@ -179,7 +186,6 @@ const Document = () => {
         )}
       </Modal>
     </section>
-  );
-};
-
-export default Document;
+  )
+}
+export default Document

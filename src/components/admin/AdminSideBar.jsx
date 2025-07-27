@@ -1,16 +1,22 @@
-import React from 'react';
-import { Link, NavLink, useLocation } from 'react-router-dom';
+import { 
+  NavLink, 
+  useLocation 
+} from 'react-router-dom';
 import '../../styles/admin/AdminSideBar.css';
-import { Layout, Menu, theme } from 'antd';
-import { BarChartOutlined, TeamOutlined, SettingOutlined } from '@ant-design/icons';
+import { 
+  Layout, 
+  Menu, 
+  theme 
+} from 'antd';
+import { 
+  BarChartOutlined, 
+  TeamOutlined, 
+  SettingOutlined 
+} from '@ant-design/icons';
 
 const { Sider } = Layout
 
-
-
 const AdminSidebar = () => {
-
-
   const location = useLocation();
   const items = [
     {
@@ -53,9 +59,9 @@ const AdminSidebar = () => {
       icon: < SettingOutlined />,
       path: '/admin/system-config'
     },
-
   ];
 
+  // Function to keep the chosen sidebar option stay active
   const findActiveMenu = () => {
     const activeItem = items.find(item =>
       location.pathname === item.path
@@ -75,10 +81,11 @@ const AdminSidebar = () => {
 
   const selectedKeys = findActiveMenu();
 
-
+  // Set basic white theme for the sidebar
   const {
-    token: { colorBgContainer, borderRadiusLG },
+    token: { colorBgContainer },
   } = theme.useToken();
+
   return (
     <Sider width={250} style={{ background: colorBgContainer, padding: '10px' }}>
       <Menu
@@ -91,5 +98,4 @@ const AdminSidebar = () => {
     </Sider>
   )
 }
-
 export default AdminSidebar

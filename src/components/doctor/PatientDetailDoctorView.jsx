@@ -1,32 +1,64 @@
-import { useParams, useNavigate } from "react-router-dom";
-import { useState, useEffect, useContext } from "react";
+import { 
+  useParams, 
+  useNavigate 
+} from "react-router-dom";
+import { 
+  useState, 
+  useEffect, 
+  useContext 
+} from "react";
 import {
-  Typography, Space, Button, Card, Form, Row,
-  Col, Divider, notification, Modal,
-  Select, Input
+  Typography, 
+  Space,
+  Button, 
+  Card, 
+  Form, 
+  Row,
+  Col, 
+  Divider, 
+  notification, 
+  Modal,
+  Select, 
+  Input
 } from 'antd';
 import '../../styles/ReturnButton.css'
-import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
+import { 
+  DeleteOutlined, 
+  PlusOutlined 
+} from '@ant-design/icons';
 import dayjs from 'dayjs';
-import { Popconfirm } from 'antd';
-import { createNotification } from "../../services/notification.service";
-import { AuthContext } from "../context/AuthContext.jsx";
-import { fetchHealthRecordByScheduleIdAPI, fetchTestResultByHealthRecordIdAPI, updateHealthRecordAPI } from "../../services/health-record.service.js";
-import { fetchRegimensByDoctorIdAPI } from "../../services/regimen.service.js";
-import { fetchUsersByRoleAPI } from "../../services/user.service.js";
-import { createTestResultAPI, deleteTestResultAPI } from "../../services/testResult.service.js";
+import { 
+  Popconfirm 
+} from 'antd';
+import { 
+  createNotification 
+} from "../../services/notification.service";
+import {
+   AuthContext 
+  } from "../context/AuthContext.jsx";
+import { 
+  fetchHealthRecordByScheduleIdAPI, 
+  fetchTestResultByHealthRecordIdAPI, 
+  updateHealthRecordAPI 
+} from "../../services/health-record.service.js";
+import { 
+  fetchRegimensByDoctorIdAPI 
+} from "../../services/regimen.service.js";
+import { 
+  fetchUsersByRoleAPI 
+} from "../../services/user.service.js";
+import { 
+  createTestResultAPI, 
+  deleteTestResultAPI
+} from "../../services/testResult.service.js";
 
-const ViewOnlyPatientDetail = () => {
+const PatientDetailDoctorView = () => {
   const [healthRecordData, setHealthRecordData] = useState({});
   const [testResultData, setTestResultData] = useState([]);
   const [isIndiateRegimenModalOpen, setIsIndiateRegimenModalOpen] = useState(false);
   const [regimenOptions, setRegimenOptions] = useState([]);
   const [selectedRegimenId, setSelectedRegimenId] = useState(null);
   const [isCreateTestResultModalOpen, setIsCreateTestResultModalOpen] = useState(false);
-  const [type, setType] = useState("");
-  const [note, setNote] = useState("");
-  const [expectedResultTime, setExpectedResultTime] = useState("");
-  const [dataUpdate, setDataUpdate] = useState({});
   const [newTestTypes, setNewTestTypes] = useState([]);
   const [currentTestType, setCurrentTestType] = useState("");
   const [height, setHeight] = useState("");
@@ -80,7 +112,7 @@ const ViewOnlyPatientDetail = () => {
       } else {
         throw new Error("Không có dữ liệu trả về");
       }
-    } catch (error) {
+    } catch {
       notification.error({
         message: "Hệ thống",
         description: "Cập nhật thông tin sức khỏe thất bại"
@@ -120,7 +152,6 @@ const ViewOnlyPatientDetail = () => {
     setIsCreateTestResultModalOpen(false);
     setCurrentTestType("");
     setNewTestTypes([]);
-    setDataUpdate({});
   };
 
   const handleCreateTestResultsBatch = async () => {
@@ -159,7 +190,7 @@ const ViewOnlyPatientDetail = () => {
 
       resetAndClose();
       await loadData();
-    } catch (error) {
+    } catch {
       notification.error({
         message: 'Lỗi',
         description: 'Không thể tạo kết quả xét nghiệm'
@@ -177,7 +208,7 @@ const ViewOnlyPatientDetail = () => {
         });
         await loadData();
       }
-    } catch (error) {
+    } catch {
       notification.error({
         message: 'Lỗi',
         description: 'Không thể xóa kết quả xét nghiệm'
@@ -269,7 +300,6 @@ const ViewOnlyPatientDetail = () => {
         Tạo mới
       </Button>
 
-      {/* Modal tạo mới */}
       <Modal
         title="Tạo kết quả xét nghiệm"
         open={isCreateTestResultModalOpen}
@@ -324,8 +354,7 @@ const ViewOnlyPatientDetail = () => {
           </Form.Item>
         </Form>
       </Modal>
-
-      {/* Danh sách kết quả xét nghiệm */}
+      
       {testResultData.map((test) => (
         <Card key={test.id} style={{ marginTop: 16 }}>
           <Row gutter={5 + "vw"} align="middle">
@@ -380,7 +409,7 @@ const ViewOnlyPatientDetail = () => {
         </Card>
       ))}
 
-      {/* Display regimen */}
+      {/* Display regimens */}
       <Divider orientation="center" style={{ marginTop: 10 + 'vh' }}>Phác đồ điều trị</Divider>
 
       {!healthRecordData.regimen ? (
@@ -408,7 +437,9 @@ const ViewOnlyPatientDetail = () => {
       )}
 
       <div style={{ textAlign: "right", marginBottom: 15 }}>
-        <Button type='primary' onClick={() => setIsIndiateRegimenModalOpen(true)}>
+        <Button 
+          type='primary' 
+          onClick={() => setIsIndiateRegimenModalOpen(true)}>
           Cập nhật phác đồ
         </Button>
       </div>
@@ -491,5 +522,4 @@ const ViewOnlyPatientDetail = () => {
     </div>
   );
 };
-
-export default ViewOnlyPatientDetail;
+export default PatientDetailDoctorView;

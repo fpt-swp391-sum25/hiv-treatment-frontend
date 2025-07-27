@@ -1,29 +1,49 @@
-import { Button, Table, Typography, Input, Select, Row, Col, Tabs } from "antd";
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { DatePicker } from "antd";
+import { 
+    Button, 
+    Table, 
+    Typography, 
+    Input, 
+    Select, 
+    Row, 
+    Col, 
+    Tabs 
+} from "antd";
+import { 
+    useState, 
+    useEffect 
+} from "react";
+import { 
+    useNavigate 
+} from "react-router-dom";
+import { 
+    DatePicker 
+} from "antd";
 import viVN from 'antd/es/date-picker/locale/vi_VN';
 import dayjs from 'dayjs';
-import { fetchScheduleAPI } from "../../services/schedule.service";
-import { fetchUsersAPI } from "../../services/user.service";
+import { 
+    fetchScheduleAPI 
+} from "../../services/schedule.service";
+import { 
+    fetchUsersAPI 
+} from "../../services/user.service";
 
-const { Title } = Typography;
-const { Option } = Select;
-const { TabPane } = Tabs;
+const { Title } = Typography
+const { Option } = Select
+const { TabPane } = Tabs
 
 const LabTechnicianPatientList = () => {
     const [data, setData] = useState([])
-    // Bộ lọc cho tab Đang chờ xử lý
-    const [pendingSearchName, setPendingSearchName] = useState('');
-    const [pendingSlotFilter, setPendingSlotFilter] = useState('');
-    const [pendingDateFilter, setPendingDateFilter] = useState(null);
-    // Bộ lọc cho tab Lịch sử
-    const [historySearchName, setHistorySearchName] = useState('');
-    const [historySlotFilter, setHistorySlotFilter] = useState('');
-    const [historyDateFilter, setHistoryDateFilter] = useState(null);
-    const [pendingFiltered, setPendingFiltered] = useState([]);
-    const [historyFiltered, setHistoryFiltered] = useState([]);
-    const navigate = useNavigate();
+    // Filter for "Đang chờ xử lý"
+    const [pendingSearchName, setPendingSearchName] = useState('')
+    const [pendingSlotFilter, setPendingSlotFilter] = useState('')
+    const [pendingDateFilter, setPendingDateFilter] = useState(null)
+    // Filter for "Lịch sử"
+    const [historySearchName, setHistorySearchName] = useState('')
+    const [historySlotFilter, setHistorySlotFilter] = useState('')
+    const [historyDateFilter, setHistoryDateFilter] = useState(null)
+    const [pendingFiltered, setPendingFiltered] = useState([])
+    const [historyFiltered, setHistoryFiltered] = useState([])
+    const navigate = useNavigate()
 
     useEffect(() => {
         loadData()
@@ -34,94 +54,94 @@ const LabTechnicianPatientList = () => {
             const [scheduleRes, patientRes] = await Promise.all([
                 fetchScheduleAPI(),
                 fetchUsersAPI(),
-            ]);
+            ])
 
-            const scheduleList = scheduleRes?.data || [];
-            const patientList = patientRes?.data || [];
+            const scheduleList = scheduleRes?.data || []
+            const patientList = patientRes?.data || []
 
             const mergedData = scheduleList.map((item) => {
-                const patientId = item.patient?.id;
-                const matchedPatient = patientList.find(p => p.id === patientId);
+                const patientId = item.patient?.id
+                const matchedPatient = patientList.find(p => p.id === patientId)
                 return {
                     id: item.id,
                     ...item,
                     patientCode: matchedPatient?.displayId || 'N/A',
                     avatar: matchedPatient?.avatar || '',
                     fullName: matchedPatient?.fullName || 'Chưa rõ tên',
-                };
-            }).filter(item => item.patientCode !== 'N/A' && item.fullName !== 'Chưa rõ tên' && item.date && item.slot);
+                }
+            }).filter(item => item.patientCode !== 'N/A' && item.fullName !== 'Chưa rõ tên' && item.date && item.slot)
 
-            setData(mergedData);
+            setData(mergedData)
         } catch (error) {
-            console.error("Lỗi khi tải dữ liệu:", error);
+            console.error("Lỗi khi tải dữ liệu:", error)
         }
-    };
+    }
 
-    // chia thành 2 mảng: pending (hôm nay hoặc tương lai), history (trước hôm nay)
-    const today = dayjs().startOf('day');
+    // Split into 2 arrays: pending (now or future), history (before today)
+    const today = dayjs().startOf('day')
     const pendingList = data.filter(item => {
-        const itemDate = item.date ? dayjs(item.date).startOf('day') : null;
-        return itemDate && (itemDate.isSame(today) || itemDate.isAfter(today));
-    });
+        const itemDate = item.date ? dayjs(item.date).startOf('day') : null
+        return itemDate && (itemDate.isSame(today) || itemDate.isAfter(today))
+    })
     const historyList = data.filter(item => {
-        const itemDate = item.date ? dayjs(item.date).startOf('day') : null;
-        return itemDate && itemDate.isBefore(today);
-    });
+        const itemDate = item.date ? dayjs(item.date).startOf('day') : null
+        return itemDate && itemDate.isBefore(today)
+    })
 
-    // Lọc cho từng tab
+    // Filter for each tab
     useEffect(() => {
-        let filtered = pendingList;
+        let filtered = pendingList
         if (pendingSearchName) {
             filtered = filtered.filter(item =>
                 item.fullName.toLowerCase().includes(pendingSearchName.toLowerCase())
-            );
+            )
         }
         if (pendingSlotFilter) {
-            filtered = filtered.filter(item => item.slot === pendingSlotFilter);
+            filtered = filtered.filter(item => item.slot === pendingSlotFilter)
         }
         if (pendingDateFilter) {
             filtered = filtered.filter(item => {
-                return item.date && item.date.slice(0, 10) === pendingDateFilter.format('YYYY-MM-DD');
-            });
+                return item.date && item.date.slice(0, 10) === pendingDateFilter.format('YYYY-MM-DD')
+            })
         }
         filtered = filtered.slice().sort((a, b) => {
-            const dateTimeA = a.date && a.slot ? `${a.date} ${a.slot}` : a.date || '';
-            const dateTimeB = b.date && b.slot ? `${b.date} ${b.slot}` : b.date || '';
-            return dateTimeB.localeCompare(dateTimeA);
-        });
-        setPendingFiltered(filtered);
-    }, [pendingSearchName, pendingSlotFilter, pendingDateFilter, data]);
+            const dateTimeA = a.date && a.slot ? `${a.date} ${a.slot}` : a.date || ''
+            const dateTimeB = b.date && b.slot ? `${b.date} ${b.slot}` : b.date || ''
+            return dateTimeB.localeCompare(dateTimeA)
+        })
+        setPendingFiltered(filtered)
+    }, [pendingSearchName, pendingSlotFilter, pendingDateFilter, data])
 
     useEffect(() => {
-        let filtered = historyList;
+        let filtered = historyList
         if (historySearchName) {
             filtered = filtered.filter(item =>
                 item.fullName.toLowerCase().includes(historySearchName.toLowerCase())
-            );
+            )
         }
         if (historySlotFilter) {
-            filtered = filtered.filter(item => item.slot === historySlotFilter);
+            filtered = filtered.filter(item => item.slot === historySlotFilter)
         }
         if (historyDateFilter) {
             filtered = filtered.filter(item => {
-                return item.date && item.date.slice(0, 10) === historyDateFilter.format('YYYY-MM-DD');
-            });
+                return item.date && item.date.slice(0, 10) === historyDateFilter.format('YYYY-MM-DD')
+            })
         }
         filtered = filtered.slice().sort((a, b) => {
-            const dateTimeA = a.date && a.slot ? `${a.date} ${a.slot}` : a.date || '';
-            const dateTimeB = b.date && b.slot ? `${b.date} ${b.slot}` : b.date || '';
-            return dateTimeB.localeCompare(dateTimeA);
-        });
-        setHistoryFiltered(filtered);
-    }, [historySearchName, historySlotFilter, historyDateFilter, data]);
+            const dateTimeA = a.date && a.slot ? `${a.date} ${a.slot}` : a.date || ''
+            const dateTimeB = b.date && b.slot ? `${b.date} ${b.slot}` : b.date || ''
+            return dateTimeB.localeCompare(dateTimeA)
+        })
+        setHistoryFiltered(filtered)
+    }, [historySearchName, historySlotFilter, historyDateFilter, data])
 
-    // Lấy danh sách ca khám duy nhất cho từng tab
-    const pendingSlotOptions = Array.from(new Set(pendingList.map(item => item.slot))).filter(Boolean);
-    const historySlotOptions = Array.from(new Set(historyList.map(item => item.slot))).filter(Boolean);
+    // Get list for each tab
+    const pendingSlotOptions = Array.from(new Set(pendingList.map(item => item.slot))).filter(Boolean)
+    const historySlotOptions = Array.from(new Set(historyList.map(item => item.slot))).filter(Boolean)
 
     const handleViewDetail = (record) => {
-        navigate(`/lab-technician/patient-detail/${record.id}`);
-    };
+        navigate(`/lab-technician/patient-detail/${record.id}`)
+    }
 
     const normalizeString = (str) => {
         return str
@@ -129,8 +149,8 @@ const LabTechnicianPatientList = () => {
             .normalize('NFD')
             .replace(/[\u0300-\u036f]/g, '')
             .replace(/\s+/g, ' ')
-            .trim();
-    };
+            .trim()
+    }
 
     const columns = [
         {
@@ -148,7 +168,7 @@ const LabTechnicianPatientList = () => {
                         src={
                             avatar.startsWith('data:image')
                                 ? avatar
-                                : `data:image/jpeg;base64,${avatar}`
+                                : `data:image/jpegbase64,${avatar}`
                         }
                         alt="avatar"
                         style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }}
@@ -271,4 +291,4 @@ const LabTechnicianPatientList = () => {
         </>
     )
 }
-export default LabTechnicianPatientList; 
+export default LabTechnicianPatientList 

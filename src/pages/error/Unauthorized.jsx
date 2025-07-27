@@ -1,11 +1,16 @@
+import { 
+    Card, 
+    Typography, 
+    Button 
+} from 'antd'
+import { 
+    useNavigate 
+} from 'react-router-dom'
 
-import { Card, Typography, Button } from 'antd';
-import { useNavigate } from 'react-router-dom';
-
-const { Title, Paragraph } = Typography;
+const { Title, Paragraph } = Typography
 
 const Unauthorized = () => {
-    const navigate = useNavigate();
+    const navigate = useNavigate()
 
     return (
         <div style={{ maxWidth: 600, margin: '50px auto' }}>
@@ -19,7 +24,6 @@ const Unauthorized = () => {
                 </Button>
             </Card>
         </div>
-    );
-};
-
-export default Unauthorized;
+    )
+}
+export default Unauthorized

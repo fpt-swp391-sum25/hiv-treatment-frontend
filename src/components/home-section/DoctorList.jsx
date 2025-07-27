@@ -1,16 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { message, Spin } from 'antd';
+import { 
+  useState, 
+  useEffect 
+} from 'react';
+import { 
+  Link 
+} from 'react-router-dom';
+import { 
+  Spin 
+} from 'antd';
 import '../../styles/home-section/DoctorList.css';
-
-// Dùng ảnh từ thư mục public
 import defaultDoctorImage from '../../assets/doctor.png';
-import { fetchAccountByRoleAPI } from '../../services/user.service';
-import { fetchDoctorProfileAPI } from '../../services/doctorProfile.service';
+import { 
+  fetchAccountByRoleAPI 
+} from '../../services/user.service';
+import { 
+  fetchDoctorProfileAPI 
+} from '../../services/doctorProfile.service';
 
 const DoctorList = () => {
-  const [doctorAccounts, setDoctorAccounts] = useState([]);
-  const [doctorProfiles, setDoctorProfiles] = useState([]);
   const [mergedDoctors, setMergedDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -28,9 +35,6 @@ const DoctorList = () => {
 
       const doctors = accountRes?.data || [];
       const profiles = profileRes?.data || [];
-
-      setDoctorAccounts(doctors);
-      setDoctorProfiles(profiles);
 
       const merged = doctors.map(account => {
         const profile = profiles.find(p => p.doctor.id === account.id);
@@ -51,7 +55,7 @@ const DoctorList = () => {
       setLoading(false);
     }
   };
-  // Chỉ hiển thị 4 bác sĩ đầu tiên
+  // Display the first 4 doctor in list
   const visibleDoctors = mergedDoctors.slice(0, 4);
 
   return (
@@ -108,11 +112,9 @@ const DoctorList = () => {
               Xem tất cả bác sĩ
             </Link>
           </div>
-
         </>
       )}
     </section>
   )
 }
-
 export default DoctorList;

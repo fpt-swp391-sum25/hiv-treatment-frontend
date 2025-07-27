@@ -44,7 +44,7 @@ import ManagerProfile from './pages/manager/ManagerProfile';
 import DoctorHome from './pages/doctor/DoctorHome';
 import DoctorProfile from './pages/doctor/DoctorProfile';
 import DoctorSchedule from './pages/doctor/DoctorSchedule';
-import ViewOnlyPatientDetail from './components/doctor/ViewOnlyPatientDetail';
+import PatientDetailDoctorView from './components/doctor/PatientDetailDoctorView';
 import PatientList from './pages/doctor/PatientList';
 import RegimenList from './pages/doctor/RegimenList';
 import UpdateRegimenModal from './pages/doctor/RegimenList';
@@ -157,7 +157,7 @@ const router = createBrowserRouter([
       },
       {
         path: '/doctor/patient-list/:id',
-        element: <ViewOnlyPatientDetail />,
+        element: <PatientDetailDoctorView />,
         errorElement: <Errors />
       },
       {
@@ -234,7 +234,7 @@ const router = createBrowserRouter([
       {
         path: 'patients/:id',
         element: (
-          <PrivateRoute children={<ViewOnlyPatientDetail />} requiredRole={['DOCTOR']} />
+          <PrivateRoute children={<PatientDetailDoctorView />} requiredRole={['DOCTOR']} />
         ),
         errorElement: <Errors />
       },

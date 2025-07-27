@@ -1,4 +1,8 @@
-import React, { useState, useEffect, useContext } from 'react';
+import { 
+  useState, 
+  useEffect, 
+  useContext 
+} from 'react';
 import {
   Button,
   Form,
@@ -13,23 +17,28 @@ import {
   Avatar,
   Tooltip,
 } from 'antd';
-import { SaveOutlined, UserOutlined, CameraOutlined } from '@ant-design/icons';
-import { useOutletContext } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext';
-import { fetchDoctorByIdAPI, updateDoctorProfileAPI } from '../../services/doctorProfile.service';
-import { updateUserAPI } from '../../services/user.service';
+import { 
+  SaveOutlined
+} from '@ant-design/icons';
+import {
+  fetchDoctorByIdAPI,
+  updateDoctorProfileAPI,
+} from '../../services/doctorProfile.service';
+import {
+    fetchAccountAPI,
+} from '../../services/auth.service';
+import {
+  updateUserAPI
+} from '../../services/user.service';
+import { 
+  AuthContext 
+} from '../context/AuthContext';
 
 const { Title } = Typography;
 
 const DoctorPersonalProfile = ({ validateField }) => {
   const { user, setUser } = useContext(AuthContext);
-
-  const [avatarUrl, setAvatarUrl] = useState(null);
-  const fileInputRef = React.useRef(null);
-  const [hover, setHover] = useState(false);
   const [errors, setErrors] = useState({});
-
-
   const [doctorProfile, setDoctorProfile] = useState({
     id: '',
     startYear: '',
@@ -39,7 +48,6 @@ const DoctorPersonalProfile = ({ validateField }) => {
     qualifications: '',
     doctorId: ''
   });
-
   const [editableUser, setEditableUser] = useState({
     id: '',
     fullName: '',
@@ -77,7 +85,6 @@ const DoctorPersonalProfile = ({ validateField }) => {
         isVerified: user.isVerified || false,
         role: user.role?.name || '',
       });
-      setAvatarUrl(user.avatar || null);
       loadDoctorProfile(user.id);
     }
   }, [user]);
@@ -102,23 +109,6 @@ const DoctorPersonalProfile = ({ validateField }) => {
 
     setEditableUser(updatedUser);
     setErrors(newErrors);
-  };
-
-
-  // Xử lý chọn file avatar
-  const handleAvatarChange = (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const base64String = e.target.result;
-      setAvatarUrl(base64String);
-      setEditableUser((prev) => ({
-        ...prev,
-        avatar: base64String,
-      }));
-    };
-    reader.readAsDataURL(file);
   };
 
   const loadDoctorProfile = async (doctorId) => {
@@ -156,7 +146,6 @@ const DoctorPersonalProfile = ({ validateField }) => {
   const handleUpdate = async () => {
     try {
       const isChangingPassword = editableUser.password.trim().length > 0;
-
       if (isChangingPassword && editableUser.password !== editableUser.confirmPassword) {
         message.error('Mật khẩu xác nhận không khớp');
         return;
@@ -236,7 +225,6 @@ const DoctorPersonalProfile = ({ validateField }) => {
         }
       >
         <Form layout="vertical">
-          {/* Đã xóa avatar khỏi form, chỉ giữ lại các trường thông tin cá nhân */}
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
@@ -292,7 +280,6 @@ const DoctorPersonalProfile = ({ validateField }) => {
                   placeholder="Chỉ nhập nếu muốn thay đổi"
                 />
               </Form.Item>
-
             </Col>
           </Row>
 
@@ -322,7 +309,6 @@ const DoctorPersonalProfile = ({ validateField }) => {
                   placeholder="Nhập lại mật khẩu"
                 />
               </Form.Item>
-
             </Col>
           </Row>
 
@@ -342,6 +328,7 @@ const DoctorPersonalProfile = ({ validateField }) => {
                 />
               </Form.Item>
             </Col>
+
             <Col span={12}>
               <Form.Item label="Trình độ chuyên môn">
                 <Input
@@ -373,6 +360,7 @@ const DoctorPersonalProfile = ({ validateField }) => {
                 />
               </Form.Item>
             </Col>
+
             <Col span={12}>
               <Form.Item label="Bằng cấp chuyên môn">
                 <Input
@@ -406,5 +394,4 @@ const DoctorPersonalProfile = ({ validateField }) => {
     </div>
   );
 };
-
 export default DoctorPersonalProfile;

@@ -1,6 +1,13 @@
-import { Input, Modal, DatePicker } from "antd";
-import { useEffect, useState } from "react";
-import dayjs from "dayjs";
+import { 
+  Input, 
+  Modal, 
+  DatePicker 
+} from "antd"
+import {
+  useEffect, 
+  useState 
+} from "react"
+import dayjs from "dayjs"
 
 const UpdateTestResultModal = (props) => {
   const {
@@ -8,27 +15,27 @@ const UpdateTestResultModal = (props) => {
     setIsUpdateTestResultModalOpen,
     dataUpdate,
     onPreviewUpdate,
-  } = props;
+  } = props
 
-  const [id, setId] = useState("");
-  const [type, setType] = useState("");
-  const [result, setResult] = useState("");
-  const [unit, setUnit] = useState("");
-  const [note, setNote] = useState("");
-  const [expectedResultTime, setExpectedResultTime] = useState(null);
-  const [actualResultTime, setActualResultTime] = useState(null);
+  const [id, setId] = useState("")
+  const [type, setType] = useState("")
+  const [result, setResult] = useState("")
+  const [unit, setUnit] = useState("")
+  const [note, setNote] = useState("")
+  const [expectedResultTime, setExpectedResultTime] = useState(null)
+  const [actualResultTime, setActualResultTime] = useState(null)
 
   useEffect(() => {
     if (dataUpdate) {
-      setId(dataUpdate.id ?? "");
-      setType(dataUpdate.type ?? "");
-      setResult(dataUpdate.result ?? "");
-      setUnit(dataUpdate.unit ?? "");
-      setNote(dataUpdate.note ?? "");
-      setExpectedResultTime(dataUpdate.expectedResultTime ? dayjs(dataUpdate.expectedResultTime) : null);
-      setActualResultTime(dataUpdate.actualResultTime ? dayjs(dataUpdate.actualResultTime) : null);
+      setId(dataUpdate.id ?? "")
+      setType(dataUpdate.type ?? "")
+      setResult(dataUpdate.result ?? "")
+      setUnit(dataUpdate.unit ?? "")
+      setNote(dataUpdate.note ?? "")
+      setExpectedResultTime(dataUpdate.expectedResultTime ? dayjs(dataUpdate.expectedResultTime) : null)
+      setActualResultTime(dataUpdate.actualResultTime ? dayjs(dataUpdate.actualResultTime) : null)
     }
-  }, [dataUpdate]);
+  }, [dataUpdate])
 
   const handleUpdate = () => {
     const updatedData = {
@@ -39,18 +46,18 @@ const UpdateTestResultModal = (props) => {
       note,
       expectedResultTime: expectedResultTime ? expectedResultTime.toISOString() : null,
       actualResultTime: actualResultTime ? actualResultTime.toISOString() : null,
-    };
-
-    if (typeof onPreviewUpdate === "function") {
-      onPreviewUpdate(updatedData); 
     }
 
-    resetAndClose();
-  };
+    if (typeof onPreviewUpdate === "function") {
+      onPreviewUpdate(updatedData) 
+    }
+
+    resetAndClose()
+  }
 
   const resetAndClose = () => {
-    setIsUpdateTestResultModalOpen(false);
-  };
+    setIsUpdateTestResultModalOpen(false)
+  }
 
   return (
     <Modal
@@ -92,7 +99,6 @@ const UpdateTestResultModal = (props) => {
         />
       </div>
     </Modal>
-  );
-};
-
-export default UpdateTestResultModal;
+  )
+}
+export default UpdateTestResultModal

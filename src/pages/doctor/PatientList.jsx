@@ -1,56 +1,76 @@
 import {
-    Layout, Button, Table, Typography, Input,
-    DatePicker, Select, Row, Col, Tabs
+    Layout, 
+    Button, 
+    Table, 
+    Typography, 
+    Input,
+    DatePicker, 
+    Select, 
+    Row, 
+    Col, 
+    Tabs
 } from "antd";
-import { useState, useEffect, useContext } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { 
+    useState, 
+    useEffect, 
+    useContext 
+} from "react";
+import { 
+    Outlet, 
+    useNavigate 
+} from "react-router-dom";
 import dayjs from 'dayjs';
 import 'dayjs/locale/vi';
 import viVN from 'antd/es/date-picker/locale/vi_VN';
-import { AuthContext } from "../../components/context/AuthContext";
-import { fetchScheduleByDoctorIdAPI } from "../../services/schedule.service";
-import { fetchUsersAPI } from "../../services/user.service";
-import { fetchHealthRecordByScheduleIdAPI } from "../../services/health-record.service";
+import { 
+    AuthContext 
+} from "../../components/context/AuthContext";
+import { 
+    fetchScheduleByDoctorIdAPI 
+} from "../../services/schedule.service";
+import { 
+    fetchUsersAPI 
+} from "../../services/user.service";
+import { 
+    fetchHealthRecordByScheduleIdAPI 
+} from "../../services/health-record.service";
 dayjs.locale('vi');
 
-const { Content } = Layout;
-const { Title } = Typography;
-const { TabPane } = Tabs;
+dayjs.locale('vi')
+
+const { Content } = Layout
+const { Title } = Typography
+const { TabPane } = Tabs
 
 const PatientList = () => {
-    const { user } = useContext(AuthContext);
+    const { user } = useContext(AuthContext)
     const [data, setData] = useState([])
-    const [searchText, setSearchText] = useState('');
-    const [selectedYear, setSelectedYear] = useState(null);
-    const [selectedMonth, setSelectedMonth] = useState(null);
-    const [selectedDate, setSelectedDate] = useState(null);
-    const [filteredData, setFilteredData] = useState([]);
+    const [searchText, setSearchText] = useState('')
+    const [selectedYear, setSelectedYear] = useState(null)
+    const [selectedMonth, setSelectedMonth] = useState(null)
+    const [selectedDate, setSelectedDate] = useState(null)
+    const [filteredData, setFilteredData] = useState([])
 
-
-
-    const navigate = useNavigate();
+    const navigate = useNavigate()
 
     useEffect(() => {
         const filtered = data.filter(item => {
             const matchesText =
                 normalizeString(item.fullName).includes(normalizeString(searchText)) ||
-                normalizeString(item.patientCode).includes(normalizeString(searchText));
+                normalizeString(item.patientCode).includes(normalizeString(searchText))
+            const dateObj = dayjs(item.date)
+            const matchesYear = selectedYear ? dateObj.year() === selectedYear : true
+            const matchesMonth = selectedMonth ? dateObj.month() === selectedMonth.month() && dateObj.year() === selectedMonth.year() : true
+            const matchesDate = selectedDate ? dateObj.isSame(selectedDate, 'day') : true
 
-            const dateObj = dayjs(item.date);
-            const matchesYear = selectedYear ? dateObj.year() === selectedYear : true;
-            const matchesMonth = selectedMonth ? dateObj.month() === selectedMonth.month() && dateObj.year() === selectedMonth.year() : true;
-            const matchesDate = selectedDate ? dateObj.isSame(selectedDate, 'day') : true;
-
-            return matchesText && matchesYear && matchesMonth && matchesDate;
-        });
-
-        setFilteredData(filtered);
-    }, [searchText, selectedYear, selectedMonth, selectedDate, data]);
+            return matchesText && matchesYear && matchesMonth && matchesDate
+        })
+        setFilteredData(filtered)
+    }, [searchText, selectedYear, selectedMonth, selectedDate, data])
 
     useEffect(() => {
-        loadData();
-        console.log(">>>> check filter data", filteredData)
-    }, []);
+        loadData()
+    }, [])
 
     const loadData = async () => {
         console.log(">>>>>>>>>>check user", user)
@@ -58,26 +78,23 @@ const PatientList = () => {
             const [scheduleRes, patientRes] = await Promise.all([
                 fetchScheduleByDoctorIdAPI(user.id),
                 fetchUsersAPI(),
-            ]);
+            ])
 
-            const scheduleList = scheduleRes?.data || [];
-            const patientList = patientRes?.data || [];
+            const scheduleList = scheduleRes?.data || []
+            const patientList = patientRes?.data || []
 
             const healthRecordPromises = scheduleList.map(item =>
                 fetchHealthRecordByScheduleIdAPI(item.id).then(
-                    res => ({ scheduleId: item.id, data: res.data }),
-                    err => ({ scheduleId: item.id, data: null })
+                    res => ({ scheduleId: item.id, data: res.data })
                 )
-            );
+            )
 
-            const healthRecords = await Promise.all(healthRecordPromises);
+            const healthRecords = await Promise.all(healthRecordPromises)
 
             const mergedData = scheduleList.map((item) => {
-                console.log("check schedule", scheduleList)
-                if (!item?.patient?.id) return null;
-                const matchedPatient = patientList.find(p => p.id === item.patient.id);
-                const matchedHealthRecord = healthRecords.find(hr => hr.scheduleId === item.id);
-                console.log(">>>>>>>>>>>> check matched patient", matchedPatient)
+                if (!item?.patient?.id) return null
+                const matchedPatient = patientList.find(p => p.id === item.patient.id)
+                const matchedHealthRecord = healthRecords.find(hr => hr.scheduleId === item.id)
                 return {
                     id: item.id,
                     ...item,
@@ -85,18 +102,18 @@ const PatientList = () => {
                     avatar: matchedPatient?.avatar || '',
                     fullName: matchedPatient?.fullName || 'Chưa rõ tên',
                     treatmentStatus: matchedHealthRecord?.data?.treatmentStatus || 'Chưa cập nhật',
-                };
-            }).filter(item => item !== null);
+                }
+            }).filter(item => item !== null)
 
-            setData(mergedData);
+            setData(mergedData)
         } catch (error) {
-            console.error("Lỗi khi tải dữ liệu:", error);
+            message.error("Lỗi khi tải dữ liệu:", error)
         }
-    };
+    }
 
     const handleViewDetail = (record) => {
-        navigate(`/doctor/patients/${record.id}`);
-    };
+        navigate(`/doctor/patients/${record.id}`)
+    }
 
     const normalizeString = (str) => {
         return str
@@ -104,8 +121,8 @@ const PatientList = () => {
             .normalize('NFD')
             .replace(/[\u0300-\u036f]/g, '')
             .replace(/\s+/g, ' ')
-            .trim();
-    };
+            .trim()
+    }
 
     const columns = [
         {
@@ -123,7 +140,7 @@ const PatientList = () => {
                         src={
                             avatar.startsWith('data:image')
                                 ? avatar
-                                : `data:image/jpeg;base64,${avatar}`
+                                : `data:image/jpegbase64,${avatar}`
                         }
                         alt="avatar"
                         style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }}
@@ -153,15 +170,15 @@ const PatientList = () => {
             render: (status) => {
                 switch (status) {
                     case 'Đang chờ khám':
-                        return <span style={{ color: '#faad14' }}>{status}</span>;
+                        return <span style={{ color: '#faad14' }}>{status}</span>
                     case 'Đã khám':
-                        return <span style={{ color: '#52c41a' }}>{status}</span>;
+                        return <span style={{ color: '#52c41a' }}>{status}</span>
                     case 'Đã tư vấn':
-                        return <span style={{ color: '#237804' }}>{status}</span>;
+                        return <span style={{ color: '#237804' }}>{status}</span>
                     case 'Không đến':
-                        return <span style={{ color: '#f5222d' }}>{status}</span>;
+                        return <span style={{ color: '#f5222d' }}>{status}</span>
                     default:
-                        return <span style={{ color: 'gray' }}>{status || 'Chưa cập nhật'}</span>;
+                        return <span style={{ color: 'gray' }}>{status || 'Chưa cập nhật'}</span>
                 }
             }
         },
@@ -175,11 +192,11 @@ const PatientList = () => {
         },
     ]
 
-    // Tạo 4 danh sách theo trạng thái điều trị
-    const waitingList = filteredData.filter(item => item.treatmentStatus === 'Đang chờ khám');
-    const examinedList = filteredData.filter(item => item.treatmentStatus === 'Đã khám');
-    const consultedList = filteredData.filter(item => item.treatmentStatus === 'Đã tư vấn');
-    const absentList = filteredData.filter(item => item.treatmentStatus === 'Không đến');
+    // Create 4 lists for each appointment status
+    const waitingList = filteredData.filter(item => item.treatmentStatus === 'Đang chờ khám')
+    const examinedList = filteredData.filter(item => item.treatmentStatus === 'Đã khám')
+    const consultedList = filteredData.filter(item => item.treatmentStatus === 'Đã tư vấn')
+    const absentList = filteredData.filter(item => item.treatmentStatus === 'Không đến')
 
     return (
         <Layout>
@@ -271,4 +288,4 @@ const PatientList = () => {
         </Layout>
     )
 }
-export default PatientList;
+export default PatientList
