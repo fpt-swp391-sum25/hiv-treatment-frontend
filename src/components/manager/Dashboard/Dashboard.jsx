@@ -177,7 +177,7 @@ const Dashboard = () => {
     const loadDoctors = async () => {
       try {
         const response = await fetchAllDoctorsAPI();
-
+        console.log('Doctors API response:', response);
         if (response && response.data) {
           // Chuẩn hóa dữ liệu bác sĩ
           const doctorsList = response.data.map(doctor => {

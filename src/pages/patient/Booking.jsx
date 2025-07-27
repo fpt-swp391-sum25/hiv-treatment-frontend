@@ -33,6 +33,7 @@ import { initiatePaymentAPI } from '../../services/appointment.service';
 import { fetchAllDoctorsAPI } from '../../services/user.service';
 import { fetchAllScheduleAPI, fetchScheduleByDateAPI, registerScheduleAPI } from '../../services/schedule.service';
 
+
 const { Link } = Typography;
 const { Option } = Select;
 const { Content } = Layout;
