@@ -99,7 +99,9 @@ const PatientDetail = () => {
         )
 
         if (
-          (healthRecordData.hivStatus === "Dương tính" || healthRecordData.hivStatus === "Âm tính") &&
+          (healthRecordData.hivStatus === "Dương tính" 
+            || healthRecordData.hivStatus === "Âm tính"
+            || healthRecordData.hivStatus === "Chưa xác định") &&
           allResultsFilled
         ) {
           const doctorId = healthRecordData.schedule?.doctor?.id;
@@ -142,6 +144,8 @@ const PatientDetail = () => {
         </Title>
       </Space>
 
+      <Button type="primary" onClick={handleUpdateHealthRecord}>Cập nhật hồ sơ bệnh nhân</Button>
+
       <Card title="Thông tin sức khỏe" style={{ marginTop: '5vh' }}>
         <Form layout="vertical">
           <Row gutter={16}>
@@ -164,7 +168,6 @@ const PatientDetail = () => {
               </Form.Item>
             </Col>
           </Row>
-          <Button type="primary" onClick={handleUpdateHealthRecord}>Cập nhật hồ sơ bệnh nhân</Button>
         </Form>
       </Card>
 

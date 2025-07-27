@@ -11,8 +11,18 @@
 .calendar-cell {
   flex: 1;
   border: 1px solid #eee;
-  padding: 8px;
+  padding: 4px;
   min-height: 80px;
+  height: auto; /* ✅ Tự mở rộng theo nội dung */
+  box-sizing: border-box;
+  overflow: visible; /* ✅ Cho phép tràn nội dung theo chiều dọc */
+}
+
+.calendar-cell .ant-card {
+  margin-bottom: 4px;
+  font-size: 12px;
+  white-space: normal; /* ✅ Cho phép nội dung xuống dòng */
+  overflow: visible;
 }
 
 .day-header {
@@ -26,4 +36,16 @@
   width: 80px;
   background: #fafafa;
   text-align: center;
+  flex-shrink: 0;
+}
+
+.calendar-cell .ant-card {
+  width: 9vw;
+  max-width: 100%;
+  margin-bottom: 4px;
+  font-size: 0.8vw;
+  white-space: normal;
+  box-sizing: border-box;
+  white-space: normal;
+  word-break: break-word;
 }
