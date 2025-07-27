@@ -11,14 +11,12 @@ import {
     useState 
 } from "react";
 import { 
-    AuthContext 
-} from "../../components/context/AuthContext";
+    useNavigate, 
+    useParams 
+} from "react-router-dom";
 import { 
     fetchHealthRecordByScheduleIdAPI 
-} from "../../services/api.service";
-import { 
-    useNavigate, useParams 
-} from "react-router-dom";
+} from "../../services/health-record.service";
 
 const { Content } = Layout
 

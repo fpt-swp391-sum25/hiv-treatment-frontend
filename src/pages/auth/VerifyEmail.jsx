@@ -7,10 +7,6 @@ import {
     useLocation 
 } from "react-router-dom"
 import { 
-    resendVerifyEmailAPI, 
-    verifyEmailAPI 
-} from "../../services/api.service"
-import { 
     Input, 
     Result, 
     Typography, 
@@ -22,6 +18,10 @@ import {
     Col 
 } from "antd"
 import '../../styles/global.css'
+import { 
+    resendVerifyEmailAPI, 
+    verifyEmailAPI 
+} from "../../services/auth.service"
 
 const { Text } = Typography
 

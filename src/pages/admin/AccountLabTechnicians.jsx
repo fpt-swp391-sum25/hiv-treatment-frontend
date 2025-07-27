@@ -1,7 +1,6 @@
 import { 
-    useEffect, 
-    useState 
-} from 'react'
+    useEffect, useState 
+} from 'react';
 import { 
     Button, 
     Input, 
@@ -11,15 +10,18 @@ import {
     Spin, 
     Table, 
     Tag 
-} from 'antd'
-import { createAccountAPI, 
+} from 'antd';
+import { 
+    DeleteOutlined, 
+    EditOutlined, 
+    PlusCircleOutlined 
+} from '@ant-design/icons';
+import UpdateUserModal from '../../components/admin/UpdateUserModal';
+import { 
+    createAccountAPI, 
     deleteAccountAPI, 
     fetchAccountByRoleAPI 
-} from '../../services/api.service'
-import { DeleteOutlined, 
-    EditOutlined, 
-    PlusCircleOutlined } from '@ant-design/icons'
-import UpdateUserModal from '../../components/admin/UpdateUserModal'
+} from '../../services/user.service';
 
 const AccountLabTechnicians = () => {
     const [data, setData] = useState([])

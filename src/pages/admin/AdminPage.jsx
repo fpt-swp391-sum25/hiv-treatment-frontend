@@ -2,30 +2,26 @@ import {
     Breadcrumb, 
     Layout, 
     message, 
-    theme 
-} from 'antd'
-import PageHeader from '../../components/client/PageHeader'
-import AdminSidebar from '../../components/admin/AdminSideBar'
+    theme } from 'antd';
+import PageHeader from '../../components/client/PageHeader';
+import AdminSidebar from '../../components/admin/AdminSideBar';
 import { 
     Link, 
-    Outlet, 
-    useLocation 
-} from 'react-router-dom'
+    Outlet,
+    useLocation } from 'react-router-dom';
 import { 
     useContext, 
-    useEffect 
-} from 'react'
+    useEffect } from 'react';
 import { 
     AuthContext 
-} from '../../components/context/AuthContext'
+} from '../../components/context/AuthContext';
+import { 
+    HomeOutlined 
+} from '@ant-design/icons';
 import { 
     fetchAccountAPI 
-} from '../../services/api.service'
-import {
-    HomeOutlined 
-} from '@ant-design/icons'
-
-const { Content } = Layout
+} from '../../services/auth.service';
+const { Content } = Layout;
 
 const Admin = () => {
     const { token: { colorBgContainer, borderRadiusLG },

@@ -15,7 +15,7 @@ import {
 } from 'react';
 import { 
   fetchSystemConfigurationsAPI 
-} from '../../services/api.service';
+} from '../../services/systemConfiguration.service';
 
 const { Footer } = Layout;
 

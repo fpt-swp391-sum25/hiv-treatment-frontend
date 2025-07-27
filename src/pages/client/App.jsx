@@ -4,9 +4,6 @@ import {
 import AppFooter from "../../components/client/AppFooter"
 import AppHeader from "../../components/client/AppHeader"
 import { 
-    fetchAccountAPI 
-} from "../../services/api.service"
-import { 
     useContext, 
     useEffect 
 } from "react"
@@ -18,7 +15,10 @@ import {
     Spin, 
     message 
 } from "antd"
-import '../../styles/global.css'
+import { 
+    fetchAccountAPI 
+} from '../../services/auth.service'
+
 
 const App = () => {
     const { setUser, isAppLoading, setIsAppLoading } = useContext(AuthContext)

@@ -1,8 +1,29 @@
-import { useEffect, useState } from 'react'
-import { Button, Form, Input, Modal, notification, Popconfirm, Space, Spin, Table, Tag } from 'antd'
-import { createAccountAPI, deleteAccountAPI, fetchAccountByRoleAPI } from '../../services/api.service'
-import { DeleteOutlined, EditOutlined, PlusCircleOutlined } from '@ant-design/icons'
-import UpdateUserModal from '../../components/admin/UpdateUserModal'
+import { 
+    useEffect, 
+    useState 
+} from 'react';
+import { 
+    Button, 
+    Form, 
+    Input, 
+    Modal, 
+    notification, 
+    Space, 
+    Spin, 
+    Table, 
+    Tag 
+} from 'antd';
+import { 
+    DeleteOutlined, 
+    EditOutlined, 
+    PlusCircleOutlined 
+} from '@ant-design/icons';
+import UpdateUserModal from '../../components/admin/UpdateUserModal';
+import { 
+    createAccountAPI, 
+    deleteAccountAPI, 
+    fetchAccountByRoleAPI 
+} from '../../services/user.service';
 
 const AccountPatients = () => {
     const [form] = Form.useForm()

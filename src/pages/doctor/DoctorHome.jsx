@@ -1,28 +1,26 @@
 import { 
     Link, 
     Outlet, 
-    useLocation 
-} from "react-router-dom"
-import AdminHeader from "../../components/client/PageHeader"
-import DoctorPageSideBar from "../../components/doctor/DoctorPageSideBar"
+    useLocation } from "react-router-dom";
+import AdminHeader from "../../components/client/PageHeader";
+import DoctorPageSideBar from "../../components/doctor/DoctorPageSideBar";
 import { 
     Breadcrumb, 
     Layout, 
     message 
-} from "antd"
+} from "antd";
 import { 
-    useContext, 
-    useEffect 
-} from "react"
-import { 
-    fetchAccountAPI 
-} from "../../services/api.service"
+    useContext, useEffect 
+} from "react";
 import { 
     AuthContext 
-} from "../../components/context/AuthContext"
+} from "../../components/context/AuthContext";
 import { 
     HomeOutlined 
-} from "@ant-design/icons"
+} from "@ant-design/icons";
+import { 
+    fetchAccountAPI 
+} from "../../services/auth.service";
 
 const { Content } = Layout
 

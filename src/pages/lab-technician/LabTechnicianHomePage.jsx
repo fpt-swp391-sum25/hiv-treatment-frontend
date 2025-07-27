@@ -2,27 +2,27 @@ import {
     Breadcrumb, 
     Layout, 
     message 
-} from "antd"
+} from "antd";
 import { 
     Link, 
     Outlet, 
     useLocation 
-} from 'react-router-dom'
-import AdminHeader from "../../components/client/PageHeader"
-import LabTechnicianSideBar from '../../components/lab-technician/LabTechnicianSideBar'
+} from 'react-router-dom';
+import AdminHeader from "../../components/client/PageHeader";
+import LabTechnicianSideBar from '../../components/lab-technician/LabTechnicianSideBar';
 import { 
     AuthContext 
-} from "../../components/context/AuthContext"
+} from "../../components/context/AuthContext";
 import { 
     useContext, 
     useEffect 
-} from "react"
+} from "react";
 import { 
-    fetchAccountAPI
-} from "../../services/api.service"
-import {
     HomeOutlined 
-} from "@ant-design/icons"
+} from "@ant-design/icons";
+import { 
+    fetchAccountAPI 
+} from "../../services/auth.service";
 
 const { Content } = Layout
 

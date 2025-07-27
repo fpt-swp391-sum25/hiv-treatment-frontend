@@ -13,12 +13,12 @@ import {
 } from "antd"
 import {
   SaveOutlined,
-} from "@ant-design/icons"
-import {
-  fetchSystemConfigurationsAPI,
-  updateSystemConfigurationAPI,
-} from "../../services/api.service"
-import "../../styles/admin/AdminDashboard.css"
+} from "@ant-design/icons";
+import { 
+  fetchSystemConfigurationsAPI, 
+  updateSystemConfigurationAPI 
+} from "../../services/systemConfiguration.service";
+import "../../styles/admin/AdminDashboard.css";
 
 const AdminSystemConfig = () => {
   const [configs, setConfigs] = useState([])

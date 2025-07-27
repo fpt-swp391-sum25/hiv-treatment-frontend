@@ -15,23 +15,24 @@ import {
   message,
   Select,
   DatePicker,
-} from 'antd'
-import { 
-  MailOutlined, 
+} from 'antd';
+import { MailOutlined, 
   PhoneOutlined, 
   UserOutlined 
-} from '@ant-design/icons'
-import dayjs from 'dayjs'
+} from '@ant-design/icons';
+import dayjs from 'dayjs';
 import { 
   AuthContext 
-} from '../../components/context/AuthContext'
-import { 
-  updateUserAPI, 
-  fetchAccountAPI 
-} from '../../services/api.service'
+} from '../../components/context/AuthContext';
 import { 
   validateField 
-} from '../../utils/validate'
+} from '../../utils/validate';
+import { 
+  updateUserAPI 
+} from '../../services/user.service';
+import { 
+  fetchAccountAPI 
+} from '../../services/auth.service';
 
 const { Title, Text } = Typography
 const { Option } = Select

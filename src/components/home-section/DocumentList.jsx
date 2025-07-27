@@ -11,9 +11,7 @@ import {
   Modal 
 } from 'antd';
 import { 
-  fetchAllDocumentsAPI 
-} from '../../services/api.service';
-import { 
+  fetchAllDocumentsAPI, 
   getDocumentImagesByDocumentId 
 } from '../../services/document.service';
 import { 

@@ -1,7 +1,7 @@
 import { 
     useEffect, 
     useState 
-} from 'react'
+} from 'react';
 import { 
     Button, 
     Input, 
@@ -11,18 +11,18 @@ import {
     Spin, 
     Table, 
     Tag 
-} from 'antd'
-import { 
-    createAccountAPI, 
-    deleteAccountAPI, 
-    fetchAccountByRoleAPI 
-} from '../../services/api.service'
+} from 'antd';
 import { 
     DeleteOutlined, 
     EditOutlined, 
     PlusCircleOutlined 
-} from '@ant-design/icons'
-import UpdateUserModal from '../../components/admin/UpdateUserModal'
+} from '@ant-design/icons';
+import UpdateUserModal from '../../components/admin/UpdateUserModal';
+import { 
+    createAccountAPI, 
+    deleteAccountAPI, 
+    fetchAccountByRoleAPI 
+} from '../../services/user.service';
 
 const AccountDoctors = () => {
     const [data, setData] = useState([])
@@ -61,15 +61,13 @@ const AccountDoctors = () => {
                 notification.success({
                     message: 'Hệ thống',
                     description: 'Tạo tài khoản thành công',
-                })
-                resetAndClose()
-                await loadAccounts()
-            } else {
-                notification.error({
-                    message: 'Hệ thống',
-                    description: 'Tạo tài khoản thất bại',
-                })
+                });
+                resetAndClose();
+                await loadAccounts();
             }
+            resetAndClose()
+            await loadAccounts()
+            setLoading(false)
         } catch (error) {
             notification.error({
                 message: 'Hệ thống',

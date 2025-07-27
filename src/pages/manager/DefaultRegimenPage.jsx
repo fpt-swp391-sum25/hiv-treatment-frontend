@@ -8,13 +8,9 @@ import {
   Input,
   notification,
 } from 'antd';
-import {
-  fetchAllRegimensAPI, 
-  createRegimenAPI,
-  deleteRegimenAPI,
-} from '../../services/api.service';
 import UpdateRegimenModal from '../../components/doctor/UpdateRegimenModal';
 import DefaultRegimenCard from '../../components/manager/DefaultRegimenCard';
+import { createRegimenAPI, deleteRegimenAPI, fetchAllRegimensAPI } from '../../services/regimen.service';
 
 const DefaultRegimenPage = () => {
   const [regimens, setRegimens] = useState([]);
@@ -35,7 +31,7 @@ const DefaultRegimenPage = () => {
 
   const loadRegimens = async () => {
     try {
-      const response = await fetchAllRegimensAPI(); 
+      const response = await fetchAllRegimensAPI();
       const defaultRegimens = response.data.filter(r => r.doctor === null);
       setRegimens(defaultRegimens);
       setFilteredRegimens(defaultRegimens);
@@ -52,7 +48,7 @@ const DefaultRegimenPage = () => {
         description,
         indications,
         contraindications,
-        null 
+        null
       );
 
       if (response.data) {
@@ -65,27 +61,27 @@ const DefaultRegimenPage = () => {
     }
   };
 
-    const handleDeleteRegimen = async (id) => {
-        const response = await deleteRegimenAPI(id);
+  const handleDeleteRegimen = async (id) => {
+    const response = await deleteRegimenAPI(id);
 
-        const statusCode = response.status;
-        const message = response.message;
+    const statusCode = response.status;
+    const message = response.message;
 
-        if (response.status === 200) {
-            notification.success({ message: 'Xóa phác đồ thành công' });
-            await loadRegimens();
-        } else if (statusCode === 409) {
-            notification.warning({
-            message: 'Không thể xóa phác đồ',
-            description: message,
-            });
-        } else {
-            notification.error({
-            message: 'Lỗi khi xóa phác đồ',
-            description: message,
-            });
-        }
-    };
+    if (response.status === 200) {
+      notification.success({ message: 'Xóa phác đồ thành công' });
+      await loadRegimens();
+    } else if (statusCode === 409) {
+      notification.warning({
+        message: 'Không thể xóa phác đồ',
+        description: message,
+      });
+    } else {
+      notification.error({
+        message: 'Lỗi khi xóa phác đồ',
+        description: message,
+      });
+    }
+  };
 
   const resetAndClose = () => {
     setRegimenName('');

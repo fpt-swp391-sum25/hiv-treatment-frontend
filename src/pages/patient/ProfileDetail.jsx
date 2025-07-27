@@ -30,11 +30,11 @@ import {
     UserOutlined 
 } from "@ant-design/icons";
 import { 
-    updateProfileAPI 
-} from "../../services/api.service";
-import { 
     validateField 
 } from "../../utils/validate";
+import { 
+    updateProfileAPI 
+} from "../../services/user.service";
 
 const { Content } = Layout;
 

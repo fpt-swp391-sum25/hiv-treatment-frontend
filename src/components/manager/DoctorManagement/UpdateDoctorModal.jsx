@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Form, Input, Select, Button, message } from 'antd';
-import { updateUserAPI } from '../../../services/api.service';
+import { updateUserAPI } from '../../../services/user.service';
 
 const UpdateDoctorModal = ({ visible, doctor, onCancel, onSuccess }) => {
     const [form] = Form.useForm();
@@ -22,10 +22,10 @@ const UpdateDoctorModal = ({ visible, doctor, onCancel, onSuccess }) => {
         try {
             const values = await form.validateFields();
             setLoading(true);
-            
+
             console.log('Updating doctor with ID:', doctor.id);
             console.log('Update data:', values);
-            
+
             // Chuyển đổi dữ liệu để phù hợp với API
             const updateData = {
                 fullName: values.fullName,
@@ -34,10 +34,10 @@ const UpdateDoctorModal = ({ visible, doctor, onCancel, onSuccess }) => {
                 gender: values.gender,
                 address: values.address
             };
-            
+
             const response = await updateUserAPI(doctor.id, updateData);
             console.log('Update response:', response);
-            
+
             if (onSuccess) {
                 onSuccess();
             }
@@ -63,10 +63,10 @@ const UpdateDoctorModal = ({ visible, doctor, onCancel, onSuccess }) => {
                 <Button key="back" onClick={onCancel}>
                     Hủy
                 </Button>,
-                <Button 
-                    key="submit" 
-                    type="primary" 
-                    loading={loading} 
+                <Button
+                    key="submit"
+                    type="primary"
+                    loading={loading}
                     onClick={handleSubmit}
                 >
                     Cập nhật

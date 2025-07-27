@@ -9,14 +9,6 @@ import {
 } from '@ant-design/icons';
 import axios from '../../../services/axios.customize';
 import {
-  fetchStaffStatisticsAPI,
-  fetchAppointmentStatisticsAPI,
-  fetchAllDoctorsAPI,
-  fetchAccountByRoleAPI,
-  getHealthRecordByDoctorIdAPI,
-  getAllSchedulesAPI
-} from '../../../services/api.service';
-import {
   getStaffStatistics,
   getAppointmentStatistics
 } from '../../../services/statistics.service';
@@ -34,6 +26,7 @@ dayjs.extend(isBetween);
 // Import các biểu đồ cần thiết
 import AppointmentStatusChart from './AppointmentStatusChart';
 import MonthlyTrendChart from './MonthlyTrendChart';
+import { fetchAccountByRoleAPI, fetchAllDoctorsAPI } from '../../../services/user.service';
 
 const { TabPane } = Tabs;
 
@@ -48,13 +41,13 @@ const Dashboard = () => {
     staff: null,
     appointments: null
   });
-  
+
   // State cho dữ liệu báo cáo y tế
   const [medicalStats, setMedicalStats] = useState({
     totalAppointments: 0,
     totalTestResults: 0
   });
-  
+
   // State cho bộ lọc
   const [filters, setFilters] = useState({
     dateRange: [null, null],
@@ -184,7 +177,7 @@ const Dashboard = () => {
     const loadDoctors = async () => {
       try {
         const response = await fetchAllDoctorsAPI();
-        
+        console.log('Doctors API response:', response);
         if (response && response.data) {
           // Chuẩn hóa dữ liệu bác sĩ
           const doctorsList = response.data.map(doctor => {
@@ -214,9 +207,9 @@ const Dashboard = () => {
             totalTestResults: response.statistics.totalTestResults || 0
           });
         }
-    } catch (error) {
+      } catch (error) {
         console.error('Error fetching medical statistics:', error);
-    }
+      }
     };
 
     fetchMedicalStats();
@@ -288,14 +281,14 @@ const Dashboard = () => {
       try {
         const doctorResponse = await fetchAccountByRoleAPI('DOCTOR');
         const doctors = doctorResponse?.data || [];
-        
+
         // Lấy dữ liệu health record cho mỗi bác sĩ
         const allRecords = await Promise.all(
           doctors.map(async (doctor) => {
             const doctorId = doctor.id || doctor.user_id || doctor.userId;
             const { selectedDate, period: filterType } = filters;
             const formattedDate = selectedDate ? dayjs(selectedDate).format('YYYY-MM-DD') : null;
-            
+
             try {
               const healthRecordRes = await getHealthRecordByDoctorIdAPI(
                 doctorId,
@@ -309,7 +302,7 @@ const Dashboard = () => {
             }
           })
         );
-        
+
         // Tính tổng các trạng thái từ tất cả các bản ghi
         const allHealthRecords = allRecords.flat();
         allHealthRecords.forEach(record => {
@@ -321,17 +314,17 @@ const Dashboard = () => {
         });
       } catch (error) {
         console.error('Lỗi khi lấy dữ liệu health record:', error);
-        
+
         // Fallback: Sử dụng dữ liệu từ API appointments nếu không lấy được dữ liệu health record
         totalWaiting = data.activeSchedules || data.appointmentsByStatus?.active || 0;
         totalCompleted = data.completedSchedules || data.appointmentsByStatus?.completed || 0;
-        
+
         // Phân chia hoàn thành thành "đã khám" và "đã tư vấn" nếu không có dữ liệu chi tiết
         if (totalCompleted > 0 && !totalConsultation) {
           totalConsultation = Math.floor(totalCompleted * 0.3);
           totalCompleted = totalCompleted - totalConsultation;
         }
-        
+
         // Ước tính số không đến nếu không có dữ liệu
         if (!totalAbsent) {
           totalAbsent = Math.floor(totalWaiting * 0.1);
@@ -359,28 +352,28 @@ const Dashboard = () => {
       // Gọi API để lấy tất cả lịch hẹn
       const schedulesResponse = await getAllSchedulesAPI();
       const schedules = schedulesResponse?.data || [];
-      
+
       console.log("Dữ liệu lịch hẹn từ API (xu hướng):", schedules);
       console.log("Current filters:", filters);
-      
+
       // Lấy khoảng thời gian từ filters
       const { selectedDate, period: filterType } = filters;
       let filteredSchedules = schedules;
-      
+
       // Nếu có selectedDate, filter dữ liệu theo khoảng thời gian
       if (selectedDate) {
         const { startDate, endDate } = getDateRangeFromFilter(selectedDate, filterType);
         console.log("Filtering schedules from", startDate, "to", endDate);
-        
+
         filteredSchedules = schedules.filter(schedule => {
           if (!schedule.date) return false;
           const scheduleDate = dayjs(schedule.date);
           return scheduleDate.isBetween(startDate, endDate, 'day', '[]');
         });
-        
+
         console.log("Filtered schedules:", filteredSchedules.length, "out of", schedules.length);
       }
-      
+
       // Khởi tạo mảng dữ liệu cho 12 tháng
       const monthlyData = Array(12).fill().map(() => ({
         total: 0,
@@ -388,7 +381,7 @@ const Dashboard = () => {
         reExamination: 0,   // Tái khám
         consultation: 0     // Tư vấn
       }));
-      
+
       // Khởi tạo dữ liệu cho 4 quý
       const quarterlyData = Array(4).fill().map(() => ({
         total: 0,
@@ -396,7 +389,7 @@ const Dashboard = () => {
         reExamination: 0,   // Tái khám
         consultation: 0     // Tư vấn
       }));
-      
+
       // Khởi tạo dữ liệu cho 6 năm gần nhất
       const currentYear = new Date().getFullYear();
       const yearlyData = Array(6).fill().map((_, i) => ({
@@ -406,23 +399,23 @@ const Dashboard = () => {
         reExamination: 0,   // Tái khám
         consultation: 0     // Tư vấn
       }));
-      
+
       // Phân loại lịch hẹn theo tháng và loại - sử dụng filteredSchedules
       filteredSchedules.forEach(schedule => {
         if (!schedule.date) return;
-        
+
         const date = new Date(schedule.date);
         const month = date.getMonth(); // 0-11
         const quarter = Math.floor(month / 3); // 0-3
         const year = date.getFullYear();
         const type = schedule.type || '';
-        
+
         // Chỉ xử lý các lịch hẹn có trạng thái hợp lệ
         if (!schedule.status) return;
-        
+
         // Tính dữ liệu theo tháng
         monthlyData[month].total++;
-        
+
         if (type === 'Khám') {
           monthlyData[month].examination++;
         } else if (type === 'Tái khám') {
@@ -430,10 +423,10 @@ const Dashboard = () => {
         } else if (type === 'Tư vấn') {
           monthlyData[month].consultation++;
         }
-        
+
         // Tính dữ liệu theo quý
         quarterlyData[quarter].total++;
-        
+
         if (type === 'Khám') {
           quarterlyData[quarter].examination++;
         } else if (type === 'Tái khám') {
@@ -441,13 +434,13 @@ const Dashboard = () => {
         } else if (type === 'Tư vấn') {
           quarterlyData[quarter].consultation++;
         }
-        
+
         // Tính dữ liệu theo năm
         // Chỉ tính cho 6 năm gần nhất
         const yearIndex = year - (currentYear - 5);
         if (yearIndex >= 0 && yearIndex < 6) {
           yearlyData[yearIndex].total++;
-          
+
           if (type === 'Khám') {
             yearlyData[yearIndex].examination++;
           } else if (type === 'Tái khám') {
@@ -457,7 +450,7 @@ const Dashboard = () => {
           }
         }
       });
-      
+
       // Cập nhật dữ liệu xu hướng theo loại thời gian đang chọn
       switch (filters.period) {
         case 'quarter':
@@ -471,11 +464,11 @@ const Dashboard = () => {
           data.monthlyTrend = monthlyData;
           break;
       }
-      
+
       console.log(`Dữ liệu xu hướng theo ${filters.period}:`, data.monthlyTrend);
     } catch (error) {
       console.error('Lỗi khi xử lý dữ liệu xu hướng lịch hẹn:', error);
-      
+
       // Fallback: Sử dụng dữ liệu mẫu nếu không lấy được dữ liệu thật
       if (data && data.monthlyTrend) {
         data.monthlyTrend = data.monthlyTrend.map(month => ({
@@ -504,9 +497,9 @@ const Dashboard = () => {
         break;
     }
   }, [
-    activeTab, 
+    activeTab,
     filters, // Thêm filters vào dependency để refresh data khi filter thay đổi
-    fetchStaffStatistics, 
+    fetchStaffStatistics,
     fetchAppointmentStatistics,
     fetchDoctorPerformanceStatistics,
   ]);
@@ -543,10 +536,10 @@ const Dashboard = () => {
   // Hiển thị nội dung tab Hiệu suất làm việc
   const renderPerformanceTab = () => {
     const stats = {
-      doctors: statistics.staff?.doctors|| {},
+      doctors: statistics.staff?.doctors || {},
       labTechnicians: statistics.staff?.labTechnicians || {},
     };
-    
+
     return (
       <>
         <Row gutter={[16, 16]} justify="center" style={{ marginBottom: '32px' }}>
@@ -567,9 +560,9 @@ const Dashboard = () => {
             />
           </Col>
         </Row>
-        
+
         <Row gutter={[16, 16]} justify="center">
-        <Col xs={24} sm={12} md={12} lg={12}>
+          <Col xs={24} sm={12} md={12} lg={12}>
             <KPICard
               title="Tổng số kĩ thuật viên"
               value={stats.labTechnicians?.total || 0}
@@ -586,19 +579,19 @@ const Dashboard = () => {
             />
           </Col>
         </Row>
-        
+
         <Row gutter={[16, 16]} style={{ marginTop: '24px' }}>
           <Col xs={24}>
             <Card title="Hiệu suất làm việc của bác sĩ">
               <div className="chart-container" style={{ height: '300px' }}>
                 {stats.doctors?.schedulesPerDoctor && stats.doctors.schedulesPerDoctor.length > 0 ? (
                   <div style={{ height: '100%', overflowY: 'auto', padding: '8px' }}>
-                    <Table 
+                    <Table
                       dataSource={stats.doctors.schedulesPerDoctor.map((doctor, index) => ({
                         ...doctor,
                         key: index,
                         rank: index + 1,
-                      }))} 
+                      }))}
                       columns={[
                         {
                           title: 'STT',
@@ -674,14 +667,14 @@ const Dashboard = () => {
             </Card>
           </Col>
         </Row>
-        
+
         <Row gutter={[16, 16]} style={{ marginTop: '24px' }}>
           <Col xs={24}>
             <Card title="Xu hướng lịch hẹn theo thời gian">
               <div className="chart-container">
                 {stats.monthlyTrend ? (
-                  <MonthlyTrendChart 
-                    data={stats.monthlyTrend} 
+                  <MonthlyTrendChart
+                    data={stats.monthlyTrend}
                     timeFilter={filters.period || 'month'}
                   />
                 ) : (
@@ -729,9 +722,9 @@ const Dashboard = () => {
           selectedDate: filters.selectedDate
         }}
       />
-      
-      <Tabs 
-        defaultActiveKey="staff" 
+
+      <Tabs
+        defaultActiveKey="staff"
         className="dashboard-tabs"
         activeKey={activeTab}
         onChange={handleTabChange}
@@ -739,7 +732,7 @@ const Dashboard = () => {
         <TabPane tab="Hiệu suất làm việc" key="staff">
           {renderTabContent()}
         </TabPane>
-        
+
         <TabPane tab="Lịch hẹn" key="appointments">
           {renderTabContent()}
         </TabPane>

@@ -10,19 +10,19 @@ import {
     Typography,
     Alert,
     notification,
-} from 'antd'
+} from 'antd';
 import { 
     ArrowLeftOutlined 
-} from '@ant-design/icons'
+} from '@ant-design/icons';
 import { 
     registerAPI 
-} from '../../services/api.service'
+} from '../../services/auth.service';
 import { 
     useState 
-} from 'react'
+} from 'react';
 import { 
     validateField 
-} from '../../utils/validate'
+} from '../../utils/validate';
 
 const { Option } = Select
 const { Link, Text } = Typography

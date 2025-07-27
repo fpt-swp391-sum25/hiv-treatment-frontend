@@ -12,3 +12,57 @@ export const healthRecordService = {
         }
     }
 };
+
+const fetchHealthRecordsAPI = () => {
+    const URL_BACKEND = '/api/health-record';
+    console.log('Fetching all health records');
+    return axios.get(URL_BACKEND);
+};
+
+const getHealthRecordByDoctorIdAPI = async (doctorId, filterType, selectedDate) => {
+    const params = {};
+
+    if (filterType) params.filterType = filterType;
+    if (selectedDate) params.selectedDate = selectedDate;
+
+    try {
+        const response = await axios.get(`/api/health-record/doctor-id/${doctorId}`, {
+            params
+        });
+        return response;
+    } catch (error) {
+        console.error('Lỗi gọi API getHealthRecordByDoctorIdAPI:', error);
+        throw error;
+    }
+};
+
+const fetchHealthRecordByScheduleIdAPI = (scheduleId) => {
+    const URL_BACKEND = `/api/health-record/schedule-id/${scheduleId}`
+    return axios.get(URL_BACKEND)
+}
+
+const createHealthRecordAPI = (paymentRef) => {
+    const URL_BACKEND = '/api/health-record'
+    const data = {
+        paymentRef: paymentRef
+    }
+    return axios.post(URL_BACKEND, data)
+}
+
+const fetchTestResultByHealthRecordIdAPI = (healthRecordId) => {
+    const URL_BACKEND = `/api/test-result/health-record-id/${healthRecordId}`
+    return axios.get(URL_BACKEND)
+}
+
+const updateHealthRecordAPI = (healthRecordId, healthRecordData) => {
+    const URL_BACKEND = `/api/health-record/${healthRecordId}`
+    return axios.put(URL_BACKEND, healthRecordData)
+}
+export {
+    fetchHealthRecordByScheduleIdAPI,
+    createHealthRecordAPI,
+    fetchHealthRecordsAPI,
+    fetchTestResultByHealthRecordIdAPI,
+    updateHealthRecordAPI,
+    getHealthRecordByDoctorIdAPI,
+}

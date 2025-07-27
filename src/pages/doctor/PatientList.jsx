@@ -8,29 +8,33 @@ import {
     Select, 
     Row, 
     Col, 
-    Tabs,
-    message
-} from "antd"
+    Tabs
+} from "antd";
 import { 
     useState, 
     useEffect, 
     useContext 
-} from "react"
-import {
-    fetchUsersAPI,
-    fetchScheduleByDoctorIdAPI,
-    fetchHealthRecordByScheduleIdAPI
-} from "../../services/api.service"
+} from "react";
 import { 
     Outlet, 
     useNavigate 
-} from "react-router-dom"
-import dayjs from 'dayjs'
-import 'dayjs/locale/vi'
-import viVN from 'antd/es/date-picker/locale/vi_VN'
+} from "react-router-dom";
+import dayjs from 'dayjs';
+import 'dayjs/locale/vi';
+import viVN from 'antd/es/date-picker/locale/vi_VN';
 import { 
     AuthContext 
-} from "../../components/context/AuthContext"
+} from "../../components/context/AuthContext";
+import { 
+    fetchScheduleByDoctorIdAPI 
+} from "../../services/schedule.service";
+import { 
+    fetchUsersAPI 
+} from "../../services/user.service";
+import { 
+    fetchHealthRecordByScheduleIdAPI 
+} from "../../services/health-record.service";
+dayjs.locale('vi');
 
 dayjs.locale('vi')
 

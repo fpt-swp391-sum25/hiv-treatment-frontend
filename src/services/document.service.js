@@ -85,4 +85,9 @@ export const deleteDocumentImage = async (id) => {
  */
 export const getDocumentImagesByDocumentId = async (documentId) => {
   return axios.get(`/api/document-image/document-id/${documentId}`);
-}; 
+};
+
+export const fetchAllDocumentsAPI = () => {
+  const URL_BACKEND = '/api/document'
+  return axios.get(URL_BACKEND)
+}

@@ -1,16 +1,12 @@
 import { 
   useState, 
-  useEffect 
-} from 'react';
+  useEffect } from 'react';
 import { 
   Modal, 
   message, 
-  Spin 
-} from 'antd';
+  Spin } from 'antd';
 import { 
-  fetchAllDocumentsAPI 
-} from '../../services/api.service';
-import { 
+  fetchAllDocumentsAPI, 
   getDocumentImagesByDocumentId 
 } from '../../services/document.service';
 import { 

@@ -10,9 +10,11 @@ import {
     useNavigate 
 } from 'react-router-dom';
 import { 
-    createHealthRecordAPI, 
     handlePaymentCallbackAPI 
-} from '../../services/api.service';
+} from '../../services/appointment.service';
+import { 
+    createHealthRecordAPI 
+} from '../../services/health-record.service';
 
 const PaymentCallback = () => {
     const location = useLocation();

@@ -1,21 +1,15 @@
 import { 
     Card, 
     Col, 
-    notification, 
     Row, 
     Spin 
-} from "antd"
+} from "antd";
 import { 
-    useEffect, 
-    useState 
-} from "react"
-import { 
-    fetchAccountByRoleAPI, 
-    fetchScheduleAPI 
-} from '../../services/api.service'
+    useEffect, useState } from "react";
+import '../../styles/admin/AdminDashboard.css';
 import { 
     Pie 
-} from 'react-chartjs-2'
+} from 'react-chartjs-2';
 import { 
     Chart as ChartJS, 
     CategoryScale, 
@@ -26,10 +20,15 @@ import {
     Title, 
     Tooltip, 
     Legend 
-} from 'chart.js'
-import '../../styles/admin/AdminDashboard.css'
+} from 'chart.js';
+import { 
+    fetchAccountByRoleAPI 
+} from "../../services/user.service";
+import { 
+    fetchScheduleAPI 
+} from "../../services/schedule.service";
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Title, Tooltip, Legend)
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Title, Tooltip, Legend);
 
 function getCurrentMonth() {
     const now = new Date()
@@ -86,8 +85,8 @@ const AdminDashboard = () => {
                     newPatientsThisMonth,
                     schedulesByStatus,
                     totalUser: doctors.data?.length
-                    + labTechs.data?.length + managers.data?.length
-                    + patients.data?.length || 0
+                        + labTechs.data?.length + managers.data?.length
+                        + patients.data?.length || 0
 
                 })
             } catch {
@@ -113,7 +112,7 @@ const AdminDashboard = () => {
                     <Card title="Tổng số người dùng hệ thống" className="admin-dashboard-card">
                         <div className="dashboard-number">{counts.totalUser}</div>
                     </Card>
-                    
+
                     <Card title="Phân loại nhân viên" className="pie-chart-dashboard-card">
                         <Pie
                             data={{

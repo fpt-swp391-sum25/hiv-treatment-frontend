@@ -1,21 +1,21 @@
 import { 
-  useContext, 
+  useContext,
   useEffect, 
   useState 
-} from 'react'
+} from 'react';
 import { 
   Select, 
   Card 
-} from 'antd'
-import dayjs from 'dayjs'
-import isoWeek from 'dayjs/plugin/isoWeek'
-import '../../styles/doctor/Schedule.css'
-import { 
-  fetchScheduleByDoctorIdAPI 
-} from '../../services/api.service'
+} from 'antd';
+import dayjs from 'dayjs';
+import isoWeek from 'dayjs/plugin/isoWeek';
+import '../../styles/doctor/Schedule.css';
 import { 
   AuthContext 
-} from '../../components/context/AuthContext'
+} from '../../components/context/AuthContext';
+import { 
+  fetchScheduleByDoctorIdAPI 
+} from '../../services/schedule.service';
 
 dayjs.extend(isoWeek)
 

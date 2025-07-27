@@ -21,11 +21,15 @@ import {
   SaveOutlined
 } from '@ant-design/icons';
 import {
-  fetchAccountAPI,
   fetchDoctorByIdAPI,
   updateDoctorProfileAPI,
-  updateUserAPI,
-} from '../../services/api.service';
+} from '../../services/doctorProfile.service';
+import {
+    fetchAccountAPI,
+} from '../../services/auth.service';
+import {
+  updateUserAPI
+} from '../../services/user.service';
 import { 
   AuthContext 
 } from '../context/AuthContext';

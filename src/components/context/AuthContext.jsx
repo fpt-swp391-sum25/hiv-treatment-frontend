@@ -5,7 +5,7 @@ import {
 } from 'react'
 import { 
     fetchAccountAPI 
-} from '../../services/api.service'
+} from '../../services/auth.service'
 
 export const AuthContext = createContext({
     email: '',

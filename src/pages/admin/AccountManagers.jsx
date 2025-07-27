@@ -1,27 +1,28 @@
 import { 
     useEffect, 
     useState 
-} from 'react'
+} from 'react';
 import { 
     Button, 
     Input, 
     Modal, 
-    notification,
+    notification, 
     Space, 
     Spin, 
     Table, 
     Tag 
-} from 'antd'
+} from 'antd';
+import { 
+    DeleteOutlined, 
+    EditOutlined, 
+    PlusCircleOutlined 
+} from '@ant-design/icons';
+import UpdateUserModal from '../../components/admin/UpdateUserModal';
 import { 
     createAccountAPI, 
     deleteAccountAPI, 
     fetchAccountByRoleAPI 
-} from '../../services/api.service'
-import { 
-    DeleteOutlined, 
-    EditOutlined, 
-    PlusCircleOutlined } from '@ant-design/icons'
-import UpdateUserModal from '../../components/admin/UpdateUserModal'
+} from '../../services/user.service';
 
 const AccountManagers = () => {
     const [data, setData] = useState([])

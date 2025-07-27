@@ -8,17 +8,8 @@ import {
   useContext 
 } from "react";
 import {
-  fetchHealthRecordByScheduleIdAPI,
-  fetchTestResultByHealthRecordIdAPI,
-  fetchRegimensByDoctorIdAPI,
-  updateHealthRecordAPI,
-  createTestResultAPI,
-  deleteTestResultAPI,
-  fetchUsersByRoleAPI,
-} from "../../services/api.service.js";
-import {
   Typography, 
-  Space, 
+  Space,
   Button, 
   Card, 
   Form, 
@@ -28,8 +19,7 @@ import {
   notification, 
   Modal,
   Select, 
-  Input,
-  Popconfirm
+  Input
 } from 'antd';
 import '../../styles/ReturnButton.css'
 import { 
@@ -38,11 +28,29 @@ import {
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { 
-  createNotification 
-} from "../../services/notification.service.js";
+  Popconfirm 
+} from 'antd';
 import { 
-  AuthContext 
-} from "../context/AuthContext.jsx";
+  createNotification 
+} from "../../services/notification.service";
+import {
+   AuthContext 
+  } from "../context/AuthContext.jsx";
+import { 
+  fetchHealthRecordByScheduleIdAPI, 
+  fetchTestResultByHealthRecordIdAPI, 
+  updateHealthRecordAPI 
+} from "../../services/health-record.service.js";
+import { 
+  fetchRegimensByDoctorIdAPI 
+} from "../../services/regimen.service.js";
+import { 
+  fetchUsersByRoleAPI 
+} from "../../services/user.service.js";
+import { 
+  createTestResultAPI, 
+  deleteTestResultAPI
+} from "../../services/testResult.service.js";
 
 const PatientDetailDoctorView = () => {
   const [healthRecordData, setHealthRecordData] = useState({});
@@ -248,25 +256,25 @@ const PatientDetailDoctorView = () => {
                   value={treatmentStatus}
                   onChange={setTreatmentStatus}
                 >
-                  <Select.Option 
-                    value="Đang chờ khám" 
+                  <Select.Option
+                    value="Đang chờ khám"
                     label={<span style={{ color: "#faad14" }}>Đang chờ khám</span>}
                   >
                     <span style={{ color: "#faad14" }}>Đang chờ khám</span>
                   </Select.Option>
-                  <Select.Option 
+                  <Select.Option
                     value="Đã khám"
                     label={<span style={{ color: "#52c41a" }}>Đã khám</span>}
                   >
                     <span style={{ color: "#52c41a" }}>Đã khám</span>
                   </Select.Option>
-                  <Select.Option 
+                  <Select.Option
                     value="Đã tư vấn"
                     label={<span style={{ color: "#237804" }}>Đã tư vấn</span>}
                   >
                     <span style={{ color: "#237804" }}>Đã tư vấn</span>
                   </Select.Option>
-                  <Select.Option 
+                  <Select.Option
                     value="Không đến"
                     label={<span style={{ color: "#f5222d" }}>Không đến</span>}
                   >

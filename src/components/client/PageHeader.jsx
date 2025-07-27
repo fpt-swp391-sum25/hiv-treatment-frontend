@@ -27,7 +27,7 @@ import {
 } from "../context/AuthContext";
 import { 
     logoutAPI 
-} from "../../services/api.service";
+} from "../../services/auth.service";
 import {
     useNavigate 
 } from "react-router-dom";
@@ -37,6 +37,7 @@ import {
     getNotificationsByUserId, 
     updateNotification 
 } from "../../services/notification.service";
+
 
 const { Header } = Layout
 const { Text } = Typography

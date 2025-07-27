@@ -2,8 +2,8 @@ import {
     useContext, 
     useEffect, 
     useState 
-} from 'react'
-import '@ant-design/v5-patch-for-react-19'
+} from 'react';
+import '@ant-design/v5-patch-for-react-19';
 import { 
     Form, 
     Input, 
@@ -11,34 +11,32 @@ import {
     Alert, 
     Typography, 
     Divider, 
-    notification
-} from 'antd'
+    notification, 
+} from 'antd';
 import { 
     useGoogleLogin 
-} from '@react-oauth/google'
+} from '@react-oauth/google';
 import { 
     GoogleOutlined, 
-    ArrowLeftOutlined 
-} from '@ant-design/icons'
+    ArrowLeftOutlined } from '@ant-design/icons';
 import { 
     useNavigate 
-} from 'react-router-dom'
-import { 
-    googleLoginAPI, 
-    loginAPI 
-} from '../../services/api.service'
+} from 'react-router-dom';
 import { 
     useForm 
-} from 'antd/es/form/Form'
+} from 'antd/es/form/Form';
 import { 
     AuthContext 
-} from '../../components/context/AuthContext'
+} from '../../components/context/AuthContext';
 import { 
     validateField 
-} from '../../utils/validate'
+} from '../../utils/validate';
 import { 
+    googleLoginAPI, 
+    loginAPI, 
+    resendVerifyEmailAPI, 
     sendResetPasswordAPI 
-} from '../../services/auth.service'
+} from '../../services/auth.service';
 
 const { Link, Text } = Typography
 

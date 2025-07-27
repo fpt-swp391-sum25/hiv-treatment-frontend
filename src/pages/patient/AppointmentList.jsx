@@ -36,16 +36,20 @@ import {
 import { 
     AuthContext 
 } from "../../components/context/AuthContext";
-import {
-    cancelBookingAPI,
-    fetchAllPatientScheduleAPI,
-    fetchHealthRecordByScheduleIdAPI,
-    retryPaymentAPI
-} from "../../services/api.service";
 import PatientAppointmentHistory from "./PatientAppointmentHistory";
 import { 
     fetchServicePrices 
 } from "../../services/systemConfiguration.service";
+import { 
+    cancelBookingAPI, 
+    retryPaymentAPI 
+} from "../../services/appointment.service";
+import { 
+    fetchAllPatientScheduleAPI 
+} from "../../services/schedule.service";
+import { 
+    fetchHealthRecordByScheduleIdAPI 
+} from "../../services/health-record.service";
 
 const { Text, Title } = Typography;
 
@@ -228,7 +232,7 @@ const AppointmentList = () => {
                 const now = dayjs()
                 const canCancel = appointmentDateTime.diff(now, 'hour') >= 24
 
-                if (['Đã thanh toán', 'Đang chờ thanh toán', 'Đang hoạt động'].includes(record.status)) {
+                if (['Đã thanh toán', 'Đang chờ thanh toán', 'Đang hoạt động'].includes(record.status)) {
                     if (canCancel) {
 
 

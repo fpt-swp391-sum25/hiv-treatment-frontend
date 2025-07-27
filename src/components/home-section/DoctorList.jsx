@@ -8,12 +8,14 @@ import {
 import { 
   Spin 
 } from 'antd';
-import { 
-  fetchDoctorProfileAPI, 
-  fetchAccountByRoleAPI 
-} from '../../services/api.service';
 import '../../styles/home-section/DoctorList.css';
 import defaultDoctorImage from '../../assets/doctor.png';
+import { 
+  fetchAccountByRoleAPI 
+} from '../../services/user.service';
+import { 
+  fetchDoctorProfileAPI 
+} from '../../services/doctorProfile.service';
 
 const DoctorList = () => {
   const [mergedDoctors, setMergedDoctors] = useState([]);

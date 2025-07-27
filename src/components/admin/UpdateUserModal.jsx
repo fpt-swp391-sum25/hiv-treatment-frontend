@@ -1,7 +1,18 @@
-import { Button, DatePicker, Input, Modal, notification, Popconfirm, Select } from "antd"
-import { useEffect, useState } from "react"
-import { updateProfileAPI } from "../../services/api.service"
+import { 
+    Button, 
+    DatePicker, 
+    Input, 
+    Modal, 
+    notification, 
+    Popconfirm, 
+    Select } from "antd"
+import { 
+    useEffect, 
+    useState } from "react"
 import dayjs from "dayjs"
+import { 
+    updateProfileAPI 
+} from "../../services/user.service"
 
 const UpdateUserModal = (props) => {
     const [id, setId] = useState("")
