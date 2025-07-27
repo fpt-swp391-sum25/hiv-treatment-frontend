@@ -18,6 +18,10 @@ import './Dashboard.css';
 import KPICard from './KPICard';
 import DashboardFilters from './DashboardFilters';
 import dayjs from 'dayjs';
+import isBetween from 'dayjs/plugin/isBetween';
+
+// Đăng ký plugin
+dayjs.extend(isBetween);
 
 // Import các biểu đồ cần thiết
 import AppointmentStatusChart from './AppointmentStatusChart';
@@ -115,8 +119,6 @@ const Dashboard = () => {
 
             const formattedDate = selectedDate ? dayjs(selectedDate).format('YYYY-MM-DD') : null;
 
-            console.log(`Gọi API cho bác sĩ ${name} - doctorId: ${doctorId}, filterType: ${filterType}, selectedDate: ${formattedDate}`);
-
             const healthRecordRes = await getHealthRecordByDoctorIdAPI(
               doctorId,
               filterType,
@@ -130,7 +132,6 @@ const Dashboard = () => {
             const stats = records.reduce((acc, record) => {
               const status = record.treatmentStatus || 'Không rõ';
               acc[status] = (acc[status] || 0) + 1;
-              console.log('Record for doctor', name, ':', record);
               return acc;
             }, {});
 
@@ -142,7 +143,6 @@ const Dashboard = () => {
               absentSchedules: stats['Không đến'] || 0,
             };
           } catch (err) {
-            console.error(`Lỗi khi lấy health record của ${name}:`, err);
             return {
               name,
               waitingSchedules: 0,
@@ -166,7 +166,6 @@ const Dashboard = () => {
         }
       }));
     } catch (err) {
-      console.error('Lỗi khi fetch hiệu suất bác sĩ:', err);
       message.error('Không thể tải dữ liệu hiệu suất bác sĩ');
     } finally {
       setLoading(false);
@@ -178,7 +177,6 @@ const Dashboard = () => {
     const loadDoctors = async () => {
       try {
         const response = await fetchAllDoctorsAPI();
-        console.log('Doctors API response:', response);
 
         if (response && response.data) {
           // Chuẩn hóa dữ liệu bác sĩ
@@ -191,7 +189,6 @@ const Dashboard = () => {
           setDoctors(doctorsList);
         }
       } catch (error) {
-        console.error('Error fetching doctors:', error);
         message.error('Không thể tải danh sách bác sĩ');
       }
     };
@@ -204,7 +201,6 @@ const Dashboard = () => {
     const fetchMedicalStats = async () => {
       try {
         const response = await getMedicalReportData();
-        console.log('Medical report data:', response);
         if (response && response.statistics) {
           setMedicalStats({
             totalAppointments: response.statistics.totalAppointments || 0,
@@ -235,7 +231,6 @@ const Dashboard = () => {
 
       setStatistics(prev => ({ ...prev, staff: data }));
     } catch (error) {
-      console.error('Error fetching staff statistics:', error);
       message.error('Không thể tải dữ liệu thống kê nhân viên');
     } finally {
       setLoading(false);
@@ -265,13 +260,15 @@ const Dashboard = () => {
 
       setStatistics(prev => ({ ...prev, appointments: data }));
     } catch (error) {
-      console.error('Error fetching appointment statistics:', error);
       message.error('Không thể tải dữ liệu thống kê lịch hẹn');
     } finally {
       setLoading(false);
     }
   }, [filters, activeTab]);
 
+
+
+  // Gọi API tương ứng dựa vào tab đang active
   // Xử lý dữ liệu cho biểu đồ trạng thái lịch hẹn
   const fetchAppointmentStatusData = async (data) => {
     try {
@@ -357,6 +354,25 @@ const Dashboard = () => {
       const schedules = schedulesResponse?.data || [];
 
       console.log("Dữ liệu lịch hẹn từ API (xu hướng):", schedules);
+      console.log("Current filters:", filters);
+
+      // Lấy khoảng thời gian từ filters
+      const { selectedDate, period: filterType } = filters;
+      let filteredSchedules = schedules;
+
+      // Nếu có selectedDate, filter dữ liệu theo khoảng thời gian
+      if (selectedDate) {
+        const { startDate, endDate } = getDateRangeFromFilter(selectedDate, filterType);
+        console.log("Filtering schedules from", startDate, "to", endDate);
+
+        filteredSchedules = schedules.filter(schedule => {
+          if (!schedule.date) return false;
+          const scheduleDate = dayjs(schedule.date);
+          return scheduleDate.isBetween(startDate, endDate, 'day', '[]');
+        });
+
+        console.log("Filtered schedules:", filteredSchedules.length, "out of", schedules.length);
+      }
 
       // Khởi tạo mảng dữ liệu cho 12 tháng
       const monthlyData = Array(12).fill().map(() => ({
@@ -384,8 +400,8 @@ const Dashboard = () => {
         consultation: 0     // Tư vấn
       }));
 
-      // Phân loại lịch hẹn theo tháng và loại
-      schedules.forEach(schedule => {
+      // Phân loại lịch hẹn theo tháng và loại - sử dụng filteredSchedules
+      filteredSchedules.forEach(schedule => {
         if (!schedule.date) return;
 
         const date = new Date(schedule.date);
@@ -466,8 +482,9 @@ const Dashboard = () => {
   };
 
 
-  // Gọi API tương ứng dựa vào tab đang active
+  // Gọi API tương ứng dựa vào tab đang active và filters
   useEffect(() => {
+    console.log('Effect triggered - activeTab:', activeTab, 'filters:', filters);
     switch (activeTab) {
       case 'staff':
         fetchStaffStatistics();
@@ -481,6 +498,7 @@ const Dashboard = () => {
     }
   }, [
     activeTab,
+    filters, // Thêm filters vào dependency để refresh data khi filter thay đổi
     fetchStaffStatistics,
     fetchAppointmentStatistics,
     fetchDoctorPerformanceStatistics,
@@ -488,8 +506,12 @@ const Dashboard = () => {
 
   // Xử lý thay đổi bộ lọc
   const handleFilterChange = useCallback((newFilters) => {
+    console.log('Filters changed:', newFilters);
     setFilters(prevFilters => ({
       ...prevFilters,
+      // Map filterType từ DashboardFilters sang period để đồng bộ
+      period: newFilters.filterType || prevFilters.period,
+      selectedDate: newFilters.selectedDate,
       ...newFilters
     }));
   }, []);
@@ -695,7 +717,10 @@ const Dashboard = () => {
       <DashboardFilters
         onFilterChange={handleFilterChange}
         doctors={doctors}
-        initialFilters={filters}
+        initialFilters={{
+          filterType: filters.period, // Map period sang filterType
+          selectedDate: filters.selectedDate
+        }}
       />
 
       <Tabs
