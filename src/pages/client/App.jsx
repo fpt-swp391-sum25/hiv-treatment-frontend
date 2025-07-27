@@ -1,15 +1,26 @@
-import '../../styles/global.css'
-import { Outlet } from "react-router-dom"
+import { 
+    Outlet 
+} from "react-router-dom"
 import AppFooter from "../../components/client/AppFooter"
 import AppHeader from "../../components/client/AppHeader"
-import { fetchAccountAPI } from "../../services/api.service"
-import { useContext, useEffect } from "react"
-import { AuthContext } from "../../components/context/AuthContext"
-import { Layout, Spin, message } from "antd"
-
+import { 
+    fetchAccountAPI 
+} from "../../services/api.service"
+import { 
+    useContext, 
+    useEffect 
+} from "react"
+import { 
+    AuthContext 
+} from "../../components/context/AuthContext"
+import { 
+    Layout, 
+    Spin, 
+    message 
+} from "antd"
+import '../../styles/global.css'
 
 const App = () => {
-
     const { setUser, isAppLoading, setIsAppLoading } = useContext(AuthContext)
 
     useEffect(() => {
@@ -26,7 +37,7 @@ const App = () => {
         } catch (error) {
             if (error.response?.status === 401 && error.response?.data?.message === 'JWT token has expired') {
                 setUser({})
-                localStorage.removeItem('token');
+                localStorage.removeItem('token')
                 message.error("Phiên đăng nhập hết hạn! Vui lòng đăng nhập lại.")
             }
         }
@@ -43,7 +54,6 @@ const App = () => {
                 }}>
                     < Spin />
                 </div>
-
                 :
                 <>
                     <Layout>
@@ -53,11 +63,8 @@ const App = () => {
                     </Layout>
 
                 </>
-
             }
-
         </>
     )
 }
-
 export default App

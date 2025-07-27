@@ -1,11 +1,29 @@
-import { useEffect, useState } from 'react';
-import { Button, Input, Modal, notification, Popconfirm, Select, Space, Spin, Table, Tag } from 'antd';
-import { createAccountAPI, deleteAccountAPI, fetchAccountByRoleAPI } from '../../services/api.service';
-import { DeleteOutlined, EditOutlined, PlusCircleOutlined } from '@ant-design/icons';
-import UpdateUserModal from '../../components/admin/UpdateUserModal';
+import { 
+    useEffect, 
+    useState 
+} from 'react'
+import { 
+    Button, 
+    Input, 
+    Modal, 
+    notification,
+    Space, 
+    Spin, 
+    Table, 
+    Tag 
+} from 'antd'
+import { 
+    createAccountAPI, 
+    deleteAccountAPI, 
+    fetchAccountByRoleAPI 
+} from '../../services/api.service'
+import { 
+    DeleteOutlined, 
+    EditOutlined, 
+    PlusCircleOutlined } from '@ant-design/icons'
+import UpdateUserModal from '../../components/admin/UpdateUserModal'
 
 const AccountManagers = () => {
-
     const [data, setData] = useState([])
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
@@ -24,13 +42,13 @@ const AccountManagers = () => {
     const loadAccounts = async () => {
         setLoading(true)
         try {
-            const response = await fetchAccountByRoleAPI(role);
-            setData(response.data);
+            const response = await fetchAccountByRoleAPI(role)
+            setData(response.data)
         } catch (error) {
             notification.error({
                 message: 'Hệ thống',
                 description: error?.message || 'Lỗi khi tải dữ liệu',
-            });
+            })
         }
         setLoading(false)
     }
@@ -50,6 +68,7 @@ const AccountManagers = () => {
         await loadAccounts()
         setLoading(false)
     }
+
     const showDeleteModal = (record) => {
         Modal.confirm({
             title: "Xoá người dùng",
@@ -68,8 +87,8 @@ const AccountManagers = () => {
             cancelText: "Không",
             okButtonProps: { loading: loading },
             onOk: () => handleDelete(record.id),
-        });
-    };
+        })
+    }
 
     const handleDelete = async (id) => {
         setLoading(true)
@@ -118,14 +137,12 @@ const AccountManagers = () => {
             key: 'status',
             dataIndex: 'accountStatus',
             render: (_, { accountStatus }) => {
-
-                let color = accountStatus === 'Đang hoạt động' ? 'green' : 'volcano';
-
+                let color = accountStatus === 'Đang hoạt động' ? 'green' : 'volcano'
                 return (
                     <Tag color={color} key={accountStatus}>
                         {accountStatus}
                     </Tag>
-                );
+                )
 
             },
         },
@@ -134,17 +151,22 @@ const AccountManagers = () => {
             key: 'action',
             render: (_, record) => (
                 <Space size="large">
-                    <EditOutlined onClick={() => {
-                        setIsUpdateModalOpen(true);
-                        setDataUpdate(record)
+                    <EditOutlined 
+                        onClick={() => {
+                            setIsUpdateModalOpen(true)
+                            setDataUpdate(record)
+                        }} 
+                        style={{ color: 'orange' }} 
+                    />
 
-                    }} style={{ color: 'orange' }} />
-
-                    <DeleteOutlined style={{ color: 'red' }} onClick={() => showDeleteModal(record)} />
+                    <DeleteOutlined 
+                        style={{ color: 'red' }} 
+                        onClick={() => showDeleteModal(record)} 
+                        />
                 </Space>
             ),
         },
-    ];
+    ]
 
     return (
         <>
@@ -193,7 +215,6 @@ const AccountManagers = () => {
                                 <span>Mật khẩu</span>
                                 <Input.Password value={password} onChange={(event) => { setPassword(event.target.value) }} />
                             </div>
-
                         </div>
                     </Modal>
                 </>
@@ -201,4 +222,4 @@ const AccountManagers = () => {
         </>
     )
 }
-export default AccountManagers;
+export default AccountManagers

@@ -1,63 +1,83 @@
-import { useEffect, useState } from 'react';
-import { Button, Input, Modal, notification, Popconfirm, Space, Spin, Table, Tag } from 'antd';
-import { createAccountAPI, deleteAccountAPI, fetchAccountByRoleAPI } from '../../services/api.service';
-import { DeleteOutlined, EditOutlined, PlusCircleOutlined } from '@ant-design/icons';
-import UpdateUserModal from '../../components/admin/UpdateUserModal';
+import { 
+    useEffect, 
+    useState 
+} from 'react'
+import { 
+    Button, 
+    Input, 
+    Modal, 
+    notification, 
+    Space, 
+    Spin, 
+    Table, 
+    Tag 
+} from 'antd'
+import { 
+    createAccountAPI, 
+    deleteAccountAPI, 
+    fetchAccountByRoleAPI 
+} from '../../services/api.service'
+import { 
+    DeleteOutlined, 
+    EditOutlined, 
+    PlusCircleOutlined 
+} from '@ant-design/icons'
+import UpdateUserModal from '../../components/admin/UpdateUserModal'
 
 const AccountDoctors = () => {
-    const [data, setData] = useState([]);
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
-    const [email, setEmail] = useState("");
-    const [role, setRole] = useState("DOCTOR");
-    const [dataUpdate, setDataUpdate] = useState({});
-    const [loading, setLoading] = useState(false);
-    const [isOpenModal, setIsOpenModal] = useState(false);
-    const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+    const [data, setData] = useState([])
+    const [username, setUsername] = useState("")
+    const [password, setPassword] = useState("")
+    const [email, setEmail] = useState("")
+    const [role, setRole] = useState("DOCTOR")
+    const [dataUpdate, setDataUpdate] = useState({})
+    const [loading, setLoading] = useState(false)
+    const [isOpenModal, setIsOpenModal] = useState(false)
+    const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false)
 
     useEffect(() => {
-        loadAccounts();
-    }, []);
+        loadAccounts()
+    }, [])
 
     const loadAccounts = async () => {
         setLoading(true)
         try {
-            const response = await fetchAccountByRoleAPI(role);
-            setData(response.data);
+            const response = await fetchAccountByRoleAPI(role)
+            setData(response.data)
         } catch (error) {
             notification.error({
                 message: 'Hệ thống',
                 description: error?.message || 'Lỗi khi tải dữ liệu',
-            });
+            })
         }
         setLoading(false)
-    };
+    }
 
     const handleCreate = async () => {
-        setLoading(true);
+        setLoading(true)
         try {
-            const response = await createAccountAPI(username, password, email, role);
+            const response = await createAccountAPI(username, password, email, role)
             if (response.data) {
                 notification.success({
                     message: 'Hệ thống',
                     description: 'Tạo tài khoản thành công',
-                });
-                resetAndClose();
-                await loadAccounts();
+                })
+                resetAndClose()
+                await loadAccounts()
             } else {
                 notification.error({
                     message: 'Hệ thống',
                     description: 'Tạo tài khoản thất bại',
-                });
+                })
             }
         } catch (error) {
             notification.error({
                 message: 'Hệ thống',
                 description: error?.message || 'Lỗi khi tạo tài khoản',
-            });
+            })
         }
-        setLoading(false);
-    };
+        setLoading(false)
+    }
 
     const showDeleteModal = (record) => {
         Modal.confirm({
@@ -77,41 +97,41 @@ const AccountDoctors = () => {
             cancelText: "Không",
             okButtonProps: { loading: loading },
             onOk: () => handleDelete(record.id),
-        });
-    };
+        })
+    }
 
     const handleDelete = async (id) => {
-        setLoading(true);
+        setLoading(true)
         try {
-            const response = await deleteAccountAPI(id);
+            const response = await deleteAccountAPI(id)
             if (response.data) {
                 notification.success({
                     message: 'Hệ thống',
                     description: 'Xoá tài khoản thành công',
-                });
-                await loadAccounts();
+                })
+                await loadAccounts()
             } else {
                 notification.error({
                     message: 'Hệ thống',
                     description: 'Xoá tài khoản thất bại',
-                });
+                })
             }
         } catch (error) {
             notification.error({
                 message: 'Hệ thống',
                 description: error?.message || 'Lỗi khi xoá tài khoản',
-            });
+            })
         }
-        setLoading(false);
-    };
+        setLoading(false)
+    }
 
     const resetAndClose = () => {
-        setIsOpenModal(false);
-        setUsername("");
-        setEmail("");
-        setPassword("");
-        setRole("DOCTOR");
-    };
+        setIsOpenModal(false)
+        setUsername("")
+        setEmail("")
+        setPassword("")
+        setRole("DOCTOR")
+    }
 
     const columns = [
         {
@@ -137,12 +157,12 @@ const AccountDoctors = () => {
             key: 'status',
             dataIndex: 'accountStatus',
             render: (_, { accountStatus }) => {
-                let color = accountStatus === 'Đang hoạt động' ? 'green' : 'volcano';
+                let color = accountStatus === 'Đang hoạt động' ? 'green' : 'volcano'
                 return (
                     <Tag color={color} key={accountStatus}>
                         {accountStatus}
                     </Tag>
-                );
+                )
             },
         },
         {
@@ -152,18 +172,20 @@ const AccountDoctors = () => {
                 <Space size="large">
                     <EditOutlined
                         onClick={() => {
-                            setIsUpdateModalOpen(true);
-                            setDataUpdate(record);
+                            setIsUpdateModalOpen(true)
+                            setDataUpdate(record)
                         }}
                         style={{ color: 'orange' }}
                     />
 
-                    <DeleteOutlined style={{ color: 'red' }} onClick={() => showDeleteModal(record)} />
-
+                    <DeleteOutlined 
+                        style={{ color: 'red' }} 
+                        onClick={() => showDeleteModal(record)} 
+                    />
                 </Space>
             ),
         },
-    ];
+    ]
 
     return (
         <>
@@ -233,7 +255,6 @@ const AccountDoctors = () => {
                 </>
             }
         </>
-    );
-};
-
-export default AccountDoctors;
+    )
+}
+export default AccountDoctors

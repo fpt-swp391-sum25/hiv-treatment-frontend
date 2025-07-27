@@ -1,18 +1,34 @@
-import { useEffect, useState } from "react"
-import { Link, useLocation } from "react-router-dom"
-import { resendVerifyEmailAPI, verifyEmailAPI } from "../../services/api.service"
-import { Input, Result, Typography, Form, notification, Spin, Button, Card, Row, Col } from "antd"
+import { 
+    useEffect, 
+    useState 
+} from "react"
+import { 
+    Link, 
+    useLocation 
+} from "react-router-dom"
+import { 
+    resendVerifyEmailAPI, 
+    verifyEmailAPI 
+} from "../../services/api.service"
+import { 
+    Input, 
+    Result, 
+    Typography, 
+    Form, 
+    notification, 
+    Spin, 
+    Button, 
+    Row, 
+    Col 
+} from "antd"
 import '../../styles/global.css'
-
 
 const { Text } = Typography
 
-
 const VerifyEmail = () => {
-
-    const location = useLocation();
-    const queryParams = new URLSearchParams(location.search);
-    const token = queryParams.get('token');
+    const location = useLocation()
+    const queryParams = new URLSearchParams(location.search)
+    const token = queryParams.get('token')
 
     const [form] = Form.useForm()
     const [loading, setLoading] = useState(false)
@@ -54,7 +70,7 @@ const VerifyEmail = () => {
                 showProgress: true,
                 pauseOnHover: true,
                 description: 'Lỗi khi gửi email xác minh'
-            });
+            })
         }
     }
 
@@ -130,7 +146,5 @@ const VerifyEmail = () => {
             )}
         </>
     )
-
 }
-
 export default VerifyEmail

@@ -1,18 +1,36 @@
-import { Breadcrumb, Layout, message, theme } from 'antd';
-import PageHeader from '../../components/client/PageHeader';
-import AdminSidebar from '../../components/admin/AdminSideBar';
-import { Link, Outlet, useLocation } from 'react-router-dom';
-import { useContext, useEffect } from 'react';
-import { AuthContext } from '../../components/context/AuthContext';
-import { fetchAccountAPI } from '../../services/api.service';
-import { HomeOutlined } from '@ant-design/icons';
-const { Content } = Layout;
+import { 
+    Breadcrumb, 
+    Layout, 
+    message, 
+    theme 
+} from 'antd'
+import PageHeader from '../../components/client/PageHeader'
+import AdminSidebar from '../../components/admin/AdminSideBar'
+import { 
+    Link, 
+    Outlet, 
+    useLocation 
+} from 'react-router-dom'
+import { 
+    useContext, 
+    useEffect 
+} from 'react'
+import { 
+    AuthContext 
+} from '../../components/context/AuthContext'
+import { 
+    fetchAccountAPI 
+} from '../../services/api.service'
+import {
+    HomeOutlined 
+} from '@ant-design/icons'
+
+const { Content } = Layout
 
 const Admin = () => {
     const { token: { colorBgContainer, borderRadiusLG },
-    } = theme.useToken();
-
-    const { setUser, setAuthUser, isAppLoading, setIsAppLoading } = useContext(AuthContext)
+    } = theme.useToken()
+    const { setUser, setAuthUser, setIsAppLoading } = useContext(AuthContext)
 
     useEffect(() => {
         fetchUserInfo()
@@ -28,22 +46,21 @@ const Admin = () => {
             }
         } catch (error) {
             if (error.response?.status === 401 && error.response?.data?.message === 'JWT token has expired') {
-                localStorage.removeItem('token');
+                localStorage.removeItem('token')
                 message.error("Phiên đăng nhập hết hạn! Vui lòng đăng nhập lại.")
             }
         }
     }
 
-    const location = useLocation();
-    const pathSnippets = location.pathname.split('/').filter(i => i);
-
+    const location = useLocation()
+    const pathSnippets = location.pathname.split('/').filter(i => i)
     const breadcrumbNameMap = {
         '/admin/managers': 'Quản lí',
         '/admin/doctors': 'Bác sĩ',
         '/admin/lab-technicians': 'Kỹ thuật viên',
         '/admin/patients': 'Bệnh nhân',
         '/admin/system-config': 'Cài đặt hệ thống',
-    };
+    }
 
     const breadcrumbItems = [
         {
@@ -51,14 +68,14 @@ const Admin = () => {
             key: 'home',
         },
         ...pathSnippets.map((_, idx) => {
-            const url = `/${pathSnippets.slice(0, idx + 1).join('/')}`;
-            if (url === '/admin') return null; // avoid duplicating Home
+            const url = `/${pathSnippets.slice(0, idx + 1).join('/')}`
+            if (url === '/admin') return null // avoid duplicating Home
             return {
                 title: <Link to={url}>{breadcrumbNameMap[url]}</Link>,
                 key: url,
-            };
+            }
         }).filter(Boolean),
-    ];
+    ]
 
     return (
         <Layout>
@@ -85,6 +102,6 @@ const Admin = () => {
                 </Layout>
             </Layout>
         </Layout>
-    );
-};
-export default Admin;
+    )
+}
+export default Admin

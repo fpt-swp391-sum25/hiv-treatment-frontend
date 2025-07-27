@@ -1,18 +1,45 @@
-import React, { useState, useEffect, useContext } from 'react';
+import { 
+  useState, 
+  useEffect, 
+  useContext 
+} from 'react';
 import {
-  Card, Table, Tag, Modal, Descriptions, Divider, Spin, message,
-  Input, Select, Button, Space, Row, Col, Typography
+  Card, 
+  Table, 
+  Tag, 
+  Modal, 
+  Descriptions, 
+  Divider, 
+  Spin, 
+  message,
+  Input, 
+  Select, 
+  Button, 
+  Space, 
+  Row, 
+  Col, 
+  Typography
 } from 'antd';
 import {
-  CalendarOutlined, ClockCircleOutlined, UserOutlined,
-  FileTextOutlined, SearchOutlined, MedicineBoxOutlined,
+  CalendarOutlined, 
+  ClockCircleOutlined, 
+  UserOutlined,
+  FileTextOutlined,
+  MedicineBoxOutlined,
   FileDoneOutlined,
   ScheduleOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import { getSchedulesByPatientAPI, fetchTestResultByHealthRecordIdAPI } from '../../services/api.service';
-import { healthRecordService } from '../../services/health-record.service';
-import { AuthContext } from '../../components/context/AuthContext';
+import { 
+  getSchedulesByPatientAPI, 
+  fetchTestResultByHealthRecordIdAPI 
+} from '../../services/api.service';
+import { 
+  healthRecordService 
+} from '../../services/health-record.service';
+import { 
+  AuthContext 
+} from '../../components/context/AuthContext';
 
 const { Search } = Input;
 const { Option } = Select;
@@ -42,7 +69,7 @@ export default function PatientAppointmentHistory() {
           return dateB - dateA;
         });
         setRecords(sorted);
-      } catch (err) {
+      } catch {
         message.error('Không thể tải lịch sử khám.');
       } finally {
         setLoading(false);
@@ -59,7 +86,7 @@ export default function PatientAppointmentHistory() {
       setHealthRecord(data);
       const testRes = data?.id ? await fetchTestResultByHealthRecordIdAPI(data.id) : { data: [] };
       setTestResults(testRes.data || []);
-    } catch (err) {
+    } catch {
       message.error('Không thể tải hồ sơ khám.');
       setHealthRecord(null);
       setTestResults([]);

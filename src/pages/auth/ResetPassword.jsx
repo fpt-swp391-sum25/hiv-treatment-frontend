@@ -1,33 +1,50 @@
-import React, { useState } from "react";
-import { Form, Input, Button, Typography, message, Alert, notification, Result } from "antd";
-import { useSearchParams, useNavigate, Link } from "react-router-dom";
-import { validateField } from "../../utils/validate";
-import { resetPasswordAPI } from "../../services/auth.service";
-import Paragraph from "antd/es/skeleton/Paragraph";
-import { CheckCircleFilled } from "@ant-design/icons";
+import { 
+    useState 
+} from "react"
+import { 
+    Form, 
+    Input,
+    Button, 
+    Typography, 
+    notification, 
+    Result 
+} from "antd"
+import { 
+    useSearchParams, 
+    Link 
+} from "react-router-dom"
+import { 
+    validateField 
+} from "../../utils/validate"
+import { 
+    resetPasswordAPI 
+} from "../../services/auth.service"
+import Paragraph from "antd/es/skeleton/Paragraph"
+import { 
+    CheckCircleFilled 
+} from "@ant-design/icons"
 
-const { Title } = Typography;
+const { Title } = Typography
 
 const ResetPassword = () => {
     const [formData, setFormData] = useState({
         newPassword: "",
         confirmPassword: "",
-    });
+    })
 
-    const [errors, setErrors] = useState({});
-    const [loading, setLoading] = useState(false);
+    const [errors, setErrors] = useState({})
+    const [loading, setLoading] = useState(false)
     const [success, setSuccess] = useState(false)
 
-    const [searchParams] = useSearchParams();
-    const token = searchParams.get("token");
-    const navigate = useNavigate();
+    const [searchParams] = useSearchParams()
+    const token = searchParams.get("token")
 
     const handleChange = (field, value) => {
-        const updatedForm = { ...formData, [field]: value };
-        setFormData(updatedForm);
-        const error = validateField(field, value, updatedForm);
-        setErrors((prev) => ({ ...prev, [field]: error }));
-    };
+        const updatedForm = { ...formData, [field]: value }
+        setFormData(updatedForm)
+        const error = validateField(field, value, updatedForm)
+        setErrors((prev) => ({ ...prev, [field]: error }))
+    }
 
     const handleSubmit = async () => {
         setLoading(true)
@@ -39,11 +56,11 @@ const ResetPassword = () => {
                 message: "Lỗi",
                 showProgress: true,
                 pauseOnHover: true,
-                description: error.response?.data?.message || 'Đổi mật khẩu thất bại'
-            });
+                description: errors.response?.data?.message || 'Đổi mật khẩu thất bại'
+            })
         }
         setLoading(false)
-    };
+    }
 
     return (
         <div style={{ maxWidth: 1000, margin: "0 auto", padding: 24 }}>
@@ -121,9 +138,7 @@ const ResetPassword = () => {
                     </Form>
                 </div>
             )}
-
         </div>
-    );
-};
-
-export default ResetPassword;
+    )
+}
+export default ResetPassword

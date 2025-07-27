@@ -1,6 +1,17 @@
-import { useState } from 'react';
-import { Card, Tag, Button, Space, Popconfirm } from 'antd';
-import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { 
+  useState 
+} from 'react';
+import { 
+  Card, 
+  Tag, 
+  Button, 
+  Space, 
+  Popconfirm 
+} from 'antd';
+import { 
+  EditOutlined, 
+  DeleteOutlined 
+} from '@ant-design/icons';
 
 const RegimenCard = ({ regimen, onEdit, onDelete }) => {
   const [expanded, setExpanded] = useState(false);
@@ -58,7 +69,7 @@ const RegimenCard = ({ regimen, onEdit, onDelete }) => {
         </div>
       </div>
 
-      { /* Update and delete regimen if not default */}
+      { /* Update and delete regimen if it's not default */}
       <Space style={{ marginTop: '1vh' }}>
         {regimen.doctor && (
           <>
@@ -79,5 +90,4 @@ const RegimenCard = ({ regimen, onEdit, onDelete }) => {
     </Card>
   );
 };
-
 export default RegimenCard;

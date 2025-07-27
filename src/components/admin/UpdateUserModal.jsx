@@ -1,6 +1,6 @@
 import { Button, DatePicker, Input, Modal, notification, Popconfirm, Select } from "antd"
 import { useEffect, useState } from "react"
-import { updateAccountAPI, updateProfileAPI } from "../../services/api.service"
+import { updateProfileAPI } from "../../services/api.service"
 import dayjs from "dayjs"
 
 const UpdateUserModal = (props) => {
@@ -12,7 +12,6 @@ const UpdateUserModal = (props) => {
     const [phoneNumber, setPhoneNumber] = useState("")
     const [dateOfBirth, setDateOfBirth] = useState("")
     const [accountStatus, setAccountStatus] = useState("")
-    const [role, setRole] = useState("")
 
     const { isUpdateModalOpen, setIsUpdateModalOpen, dataUpdate,
         setDataUpdate, loadAccounts } = props
@@ -22,7 +21,6 @@ const UpdateUserModal = (props) => {
             setId(dataUpdate.id)
             setUsername(dataUpdate.username)
             setEmail(dataUpdate.email)
-            setRole(dataUpdate.role)
             setFullName(dataUpdate.fullName)
             setAddress(dataUpdate.address)
             setPhoneNumber(dataUpdate.phoneNumber)
@@ -59,9 +57,9 @@ const UpdateUserModal = (props) => {
         setIsUpdateModalOpen(false)
         setUsername('')
         setEmail('')
-        setRole('')
         setDataUpdate({})
     }
+    
     return (
         <Modal
             title="Cập nhật tài khoản"
@@ -125,5 +123,4 @@ const UpdateUserModal = (props) => {
         </Modal>
     )
 }
-
 export default UpdateUserModal

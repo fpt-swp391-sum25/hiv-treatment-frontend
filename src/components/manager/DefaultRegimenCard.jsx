@@ -1,22 +1,36 @@
-import { useState } from 'react';
-import { Card, Tag, Button, Space, Popconfirm } from 'antd';
-import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { 
+  useState 
+} from 'react'
+import { 
+  Card, 
+  Tag, 
+  Button, 
+  Space, 
+  Popconfirm 
+} from 'antd'
+import { 
+  EditOutlined, 
+  DeleteOutlined 
+} from '@ant-design/icons'
 
 const DefaultRegimenCard = ({ regimen, onEdit, onDelete }) => {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(false)
 
   const getTypeTag = (user) => {
     return user == null ? (
       <Tag color='blue'>Default</Tag>
     ) : (
       <Tag color='green'>Customize</Tag>
-    );
-  };
+    )
+  }
 
   return (
     <Card
       title={
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div 
+          style={{ display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center' }}>
           <span>{regimen?.regimenName || 'Không tên'}</span>
           {getTypeTag(regimen.doctor)}
         </div>
@@ -58,7 +72,6 @@ const DefaultRegimenCard = ({ regimen, onEdit, onDelete }) => {
         </div>
       </div>
 
-      { /* Cho phép sửa và xóa mọi phác đồ */ }
       <Space style={{ marginTop: '1vh' }}>
         <EditOutlined onClick={() => onEdit(regimen)} />
         <Popconfirm
@@ -73,7 +86,6 @@ const DefaultRegimenCard = ({ regimen, onEdit, onDelete }) => {
         </Popconfirm>
       </Space>
     </Card>
-  );
-};
-
-export default DefaultRegimenCard;
+  )
+}
+export default DefaultRegimenCard

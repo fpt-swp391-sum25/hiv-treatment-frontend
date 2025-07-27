@@ -1,7 +1,3 @@
-// src/components/banner.jsx
-import React from 'react';
-import { Button } from 'antd';
-import { BookOutlined } from '@ant-design/icons';
 import '../../styles/document/DocumentBanner.css';
 
 const ResourcesBanner = () => {
@@ -16,5 +12,4 @@ const ResourcesBanner = () => {
     </section>
   );
 };
-
 export default ResourcesBanner;

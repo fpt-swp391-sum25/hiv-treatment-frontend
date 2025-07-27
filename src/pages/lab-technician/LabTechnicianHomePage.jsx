@@ -1,16 +1,33 @@
-import { Breadcrumb, Layout, message } from "antd";
-import { Link, Outlet, useLocation } from 'react-router-dom';
-import AdminHeader from "../../components/client/PageHeader";
-import LabTechnicianSideBar from '../../components/lab-technician/LabTechnicianSideBar';
-import { AuthContext } from "../../components/context/AuthContext";
-import { useContext, useEffect } from "react";
-import { fetchAccountAPI, fetchUserInfoAPI } from "../../services/api.service";
-import { HomeOutlined } from "@ant-design/icons";
+import { 
+    Breadcrumb, 
+    Layout, 
+    message 
+} from "antd"
+import { 
+    Link, 
+    Outlet, 
+    useLocation 
+} from 'react-router-dom'
+import AdminHeader from "../../components/client/PageHeader"
+import LabTechnicianSideBar from '../../components/lab-technician/LabTechnicianSideBar'
+import { 
+    AuthContext 
+} from "../../components/context/AuthContext"
+import { 
+    useContext, 
+    useEffect 
+} from "react"
+import { 
+    fetchAccountAPI
+} from "../../services/api.service"
+import {
+    HomeOutlined 
+} from "@ant-design/icons"
 
-const { Content } = Layout;
+const { Content } = Layout
 
 const LabTechnicianHomePage = () => {
-    const { setUser, isAppLoading, setIsAppLoading } = useContext(AuthContext)
+    const { setUser, setIsAppLoading } = useContext(AuthContext)
     const location = useLocation()
     const pathSnippets = location.pathname.split('/').filter(i => i)
     useEffect(() => {
@@ -26,7 +43,7 @@ const LabTechnicianHomePage = () => {
             }
         } catch (error) {
             if (error.response?.status === 401 && error.response?.data?.message === 'JWT token has expired') {
-                localStorage.removeItem('token');
+                localStorage.removeItem('token')
                 message.error("Phiên đăng nhập hết hạn! Vui lòng đăng nhập lại.")
             }
         }
@@ -78,4 +95,4 @@ const LabTechnicianHomePage = () => {
         </Layout>
     )
 }
-export default LabTechnicianHomePage;
+export default LabTechnicianHomePage

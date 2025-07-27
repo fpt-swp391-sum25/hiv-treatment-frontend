@@ -1,18 +1,23 @@
-import { useContext, useEffect, useState } from 'react';
-import { Navigate } from 'react-router-dom';
-
-import { Button, Result, message } from 'antd';
-import { AuthContext } from '../../components/context/AuthContext';
+import { 
+    useContext
+} from 'react'
+import { 
+    Navigate 
+} from 'react-router-dom'
+import { 
+    Button, 
+    Result 
+} from 'antd'
+import { 
+    AuthContext 
+} from '../../components/context/AuthContext'
 
 const PrivateRoute = ({ children, requiredRole }) => {
-    const { user, authUser } = useContext(AuthContext);
-
+    const { user } = useContext(AuthContext)
 
     if (!user.id && !localStorage.getItem('access_token')) {
-        // localStorage.setItem('auth_error', 'Vui lòng đăng nhập');
-        return <Navigate to="/login" replace />;
+        return <Navigate to="/login" replace />
     }
-
 
     if (requiredRole && !requiredRole.includes(user.role)) {
         return (
@@ -26,10 +31,8 @@ const PrivateRoute = ({ children, requiredRole }) => {
                     </Button>
                 }
             />
-        );
+        )
     }
-
-    return children;
-};
-
-export default PrivateRoute;
+    return children
+}
+export default PrivateRoute

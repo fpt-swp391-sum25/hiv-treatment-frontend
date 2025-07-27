@@ -1,15 +1,22 @@
-import { Layout, theme } from 'antd';
-import { Outlet } from 'react-router-dom';
-import AppFooter from '../../components/client/AppFooter';
-import AppHeader from '../../components/client/AppHeader';
-import DoumentBanner from '../../components/document/DoumentBanner';
-import DoumentSearchPage from '../../components/document/DoumentSearchPage';
-const { Content } = Layout;
+import { 
+    Layout, 
+    theme 
+} from 'antd'
+import { 
+    Outlet 
+} from 'react-router-dom'
+import AppFooter from '../../components/client/AppFooter'
+import AppHeader from '../../components/client/AppHeader'
+import DoumentBanner from '../../components/document/DoumentBanner'
+import DoumentSearchPage from '../../components/document/DoumentSearchPage'
+
+const { Content } = Layout
 
 const Resources = () => { 
     const {
         token: { colorBgContainer, borderRadiusLG },
-    } = theme.useToken();
+    } = theme.useToken()
+    
     return (
         <Layout>
             <AppHeader />
@@ -29,6 +36,6 @@ const Resources = () => {
             </Content>
             <AppFooter />         
         </Layout>
-    );
-};
-export default Resources;
+    )
+}
+export default Resources

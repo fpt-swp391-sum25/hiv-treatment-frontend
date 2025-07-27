@@ -1,6 +1,9 @@
-import React, { useContext, useState, useRef } from "react";
+import { 
+    useContext, 
+    useState, 
+    useRef 
+} from "react";
 import {
-
     Layout,
     message,
     Card,
@@ -15,15 +18,23 @@ import {
     Descriptions,
     notification,
     Spin,
-
 } from "antd";
 import dayjs from "dayjs";
-import { AuthContext } from "../../components/context/AuthContext";
-import { DeleteOutlined, SaveOutlined, UploadOutlined, UserOutlined } from "@ant-design/icons";
-import { updateProfileAPI } from "../../services/api.service";
-
-import { validateField } from "../../utils/validate";
-
+import { 
+    AuthContext 
+} from "../../components/context/AuthContext";
+import { 
+    DeleteOutlined, 
+    SaveOutlined, 
+    UploadOutlined, 
+    UserOutlined 
+} from "@ant-design/icons";
+import { 
+    updateProfileAPI 
+} from "../../services/api.service";
+import { 
+    validateField 
+} from "../../utils/validate";
 
 const { Content } = Layout;
 
@@ -110,7 +121,6 @@ const ProfileDetail = () => {
                         style={{ borderRadius: 12, boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }}
                     >
                         <Row gutter={32}>
-                            {/* Avatar + Chọn/Xoá ảnh */}
                             <Col xs={24} md={6} style={{ textAlign: "center" }}>
                                 <Avatar
                                     size={128}
@@ -265,7 +275,6 @@ const ProfileDetail = () => {
 
                                 <hr style={{ margin: "24px 0" }} />
 
-                                {/* Thông tin hệ thống */}
                                 <Descriptions
                                     title=""
                                     column={1}
@@ -306,5 +315,4 @@ const ProfileDetail = () => {
         </Layout >
     );
 };
-
 export default ProfileDetail;

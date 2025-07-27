@@ -1,83 +1,91 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { Select, Card } from 'antd';
-import dayjs from 'dayjs';
-import isoWeek from 'dayjs/plugin/isoWeek';
-import '../../styles/doctor/Schedule.css';
-import { fetchScheduleByDoctorIdAPI } from '../../services/api.service';
-import { useOutletContext } from "react-router-dom";
-import { AuthContext } from '../../components/context/AuthContext';
+import { 
+  useContext, 
+  useEffect, 
+  useState 
+} from 'react'
+import { 
+  Select, 
+  Card 
+} from 'antd'
+import dayjs from 'dayjs'
+import isoWeek from 'dayjs/plugin/isoWeek'
+import '../../styles/doctor/Schedule.css'
+import { 
+  fetchScheduleByDoctorIdAPI 
+} from '../../services/api.service'
+import { 
+  AuthContext 
+} from '../../components/context/AuthContext'
 
-dayjs.extend(isoWeek);
+dayjs.extend(isoWeek)
 
-const { Option } = Select;
+const { Option } = Select
 
-const daysOfWeek = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ Nhật'];
+const daysOfWeek = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ Nhật']
 const timeSlots = [
   '07:00', '08:00', '09:00', '10:00', '11:00',
   '13:00', '14:00', '15:00', '16:00', '17:00',
-];
+]
 
 const getDayIndex = (dateStr) => {
-  const date = new Date(dateStr);
-  const day = date.getDay();
-  return day === 0 ? 6 : day - 1;
-};
+  const date = new Date(dateStr)
+  const day = date.getDay()
+  return day === 0 ? 6 : day - 1
+}
 
 const ScheduleCalendar = () => {
-  const today = dayjs();
-  const [schedule, setSchedule] = useState([]);
-  const [selectedYear, setSelectedYear] = useState(today.year());
-  const [selectedMonth, setSelectedMonth] = useState(today.month());
-  const [selectedWeek, setSelectedWeek] = useState(today.isoWeek());
+  const today = dayjs()
+  const [schedule, setSchedule] = useState([])
+  const [selectedYear, setSelectedYear] = useState(today.year())
+  const [selectedMonth, setSelectedMonth] = useState(today.month())
+  const [selectedWeek, setSelectedWeek] = useState(today.isoWeek())
 
-  const { user } = useContext(AuthContext);
+  const { user } = useContext(AuthContext)
 
   useEffect(() => {
     if (user?.id) {
-      loadData();
+      loadData()
     }
-  }, [user?.id]);
+  }, [user?.id])
 
   const loadData = async () => {
     try {
-      const response = await fetchScheduleByDoctorIdAPI(user.id);
-      setSchedule(response.data);
+      const response = await fetchScheduleByDoctorIdAPI(user.id)
+      setSchedule(response.data)
     } catch (error) {
-      setSchedule([]);
-      console.error(error);
+      setSchedule([])
+      console.error(error)
     }
-  };
+  }
 
   const getWeeksInMonth = (year, month) => {
-    const start = dayjs().year(year).month(month).startOf('month').startOf('isoWeek');
-    const end = dayjs().year(year).month(month).endOf('month').endOf('isoWeek');
-    const weeks = [];
-    let current = start;
+    const start = dayjs().year(year).month(month).startOf('month').startOf('isoWeek')
+    const end = dayjs().year(year).month(month).endOf('month').endOf('isoWeek')
+    const weeks = []
+    let current = start
     while (current.isBefore(end)) {
-      weeks.push(current.isoWeek());
-      current = current.add(1, 'week');
+      weeks.push(current.isoWeek())
+      current = current.add(1, 'week')
     }
-    return [...new Set(weeks)];
-  };
+    return [...new Set(weeks)]
+  }
 
-  const weekStart = dayjs().year(selectedYear).isoWeek(selectedWeek).startOf('isoWeek');
-  const weekEnd = weekStart.add(6, 'day');
+  const weekStart = dayjs().year(selectedYear).isoWeek(selectedWeek).startOf('isoWeek')
+  const weekEnd = weekStart.add(6, 'day')
 
   const calendar = Array(timeSlots.length).fill(null).map(() =>
     Array(7).fill(null).map(() => [])
-  );
-
-  (schedule || []).forEach((item) => {
-    const itemDate = dayjs(item.date);
+  ); (schedule || []).forEach((item) => {
+    const itemDate = dayjs(item.date)
     if (itemDate.isAfter(weekStart.subtract(1, 'day')) && itemDate.isBefore(weekEnd.add(1, 'day'))) {
-      const time = item.slot.substring(0, 5);
-      const row = timeSlots.findIndex((t) => t === time);
-      const col = getDayIndex(item.date);
+      const time = item.slot.substring(0, 5)
+      const row = timeSlots.findIndex((t) => t === time)
+      const col = getDayIndex(item.date)
       if (row !== -1 && col !== -1) {
-        calendar[row][col].push(item);
+        calendar[row][col].push(item)
       }
     }
-  });
+  })
 
   return (
     <div className="calendar-wrapper">
@@ -108,13 +116,13 @@ const ScheduleCalendar = () => {
           style={{ width: 160 }}
         >
           {getWeeksInMonth(selectedYear, selectedMonth).map((weekNum) => {
-            const start = dayjs().year(selectedYear).isoWeek(weekNum).startOf('isoWeek');
-            const end = start.add(6, 'day');
+            const start = dayjs().year(selectedYear).isoWeek(weekNum).startOf('isoWeek')
+            const end = start.add(6, 'day')
             return (
               <Option key={weekNum} value={weekNum}>
                 {`${start.format('DD/MM')} - ${end.format('DD/MM')}`}
               </Option>
-            );
+            )
           })}
         </Select>
       </div>
@@ -154,7 +162,6 @@ const ScheduleCalendar = () => {
         ))}
       </div>
     </div>
-  );
-};
-
-export default ScheduleCalendar;
+  )
+} 
+export default ScheduleCalendar

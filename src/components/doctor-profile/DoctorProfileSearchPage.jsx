@@ -1,16 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { message } from 'antd';
+import { 
+  useState, 
+  useEffect 
+} from 'react';
+import { 
+  Link 
+} from 'react-router-dom';
 import '../../styles/doctor-profile/DoctorProfileSearchPage.css';
-import { fetchAccountByRoleAPI, fetchDoctorProfileAPI } from '../../services/api.service';
-
-// Dùng ảnh từ thư mục public
+import { 
+  fetchAccountByRoleAPI, 
+  fetchDoctorProfileAPI 
+} from '../../services/api.service';
 import defaultDoctorImage from '../../assets/doctor.png';
 
 const DoctorsSearchPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [doctorAccounts, setDoctorAccounts] = useState([]);
-  const [doctorProfiles, setDoctorProfiles] = useState([]);
   const [mergedDoctors, setMergedDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -28,12 +31,6 @@ const DoctorsSearchPage = () => {
 
       const doctors = accountRes?.data || [];
       const profiles = profileRes?.data || [];
-
-      setDoctorAccounts(doctors);
-      setDoctorProfiles(profiles);
-
-      console.log(doctors)
-      console.log(profiles)
 
       const merged = doctors.map(account => {
         const profile = profiles.find(p => p.doctor.id === account.id);
@@ -54,7 +51,6 @@ const DoctorsSearchPage = () => {
       setLoading(false);
     }
   };
-
 
   // Filter doctors based on search term
   const filteredDoctors = mergedDoctors.filter((doctors) =>
@@ -95,7 +91,7 @@ const DoctorsSearchPage = () => {
                 <p>
                     🕒 {mergedDoctors.startYear
                       ? `${new Date().getFullYear() - Number(mergedDoctors.startYear)} năm kinh nghiệm`
-                      : 'Chưa rõ năm kinh nghiệm'}
+                      : 'Chưa cập nhật'}
                   </p>
                 <p>{mergedDoctors.qualifications}</p>
                 <Link to={`/booking?doctorId=${mergedDoctors.id}`} className="btn-primary">
@@ -111,5 +107,4 @@ const DoctorsSearchPage = () => {
     </section>
   );
 };
-
 export default DoctorsSearchPage;

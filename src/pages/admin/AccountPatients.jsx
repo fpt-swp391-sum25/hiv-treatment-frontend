@@ -1,58 +1,58 @@
-import { useEffect, useState } from 'react';
-import { Button, Form, Input, Modal, notification, Popconfirm, Space, Spin, Table, Tag } from 'antd';
-import { createAccountAPI, deleteAccountAPI, fetchAccountByRoleAPI } from '../../services/api.service';
-import { DeleteOutlined, EditOutlined, PlusCircleOutlined } from '@ant-design/icons';
-import UpdateUserModal from '../../components/admin/UpdateUserModal';
+import { useEffect, useState } from 'react'
+import { Button, Form, Input, Modal, notification, Popconfirm, Space, Spin, Table, Tag } from 'antd'
+import { createAccountAPI, deleteAccountAPI, fetchAccountByRoleAPI } from '../../services/api.service'
+import { DeleteOutlined, EditOutlined, PlusCircleOutlined } from '@ant-design/icons'
+import UpdateUserModal from '../../components/admin/UpdateUserModal'
 
 const AccountPatients = () => {
-    const [form] = Form.useForm();
-    const [data, setData] = useState([]);
-    const [role, setRole] = useState("PATIENT");
-    const [dataUpdate, setDataUpdate] = useState({});
-    const [loading, setLoading] = useState(false);
-    const [isOpenModal, setIsOpenModal] = useState(false);
-    const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+    const [form] = Form.useForm()
+    const [data, setData] = useState([])
+    const [role] = useState("PATIENT")
+    const [dataUpdate, setDataUpdate] = useState({})
+    const [loading, setLoading] = useState(false)
+    const [isOpenModal, setIsOpenModal] = useState(false)
+    const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false)
 
     useEffect(() => {
-        loadAccounts();
-    }, []);
+        loadAccounts()
+    }, [])
 
     const loadAccounts = async () => {
         setLoading(true)
         try {
-            const response = await fetchAccountByRoleAPI(role);
-            setData(response.data);
+            const response = await fetchAccountByRoleAPI(role)
+            setData(response.data)
         } catch (error) {
             notification.error({
                 message: 'Hệ thống',
                 description: error?.message || 'Lỗi khi tải dữ liệu',
-            });
+            })
         }
         setLoading(false)
-    };
+    }
 
     const handleCreate = async (values) => {
-        setLoading(true);
+        setLoading(true)
         try {
-            const { username, password, email } = values;
-            const response = await createAccountAPI(username, password, email, role);
+            const { username, password, email } = values
+            const response = await createAccountAPI(username, password, email, role)
             if (response?.data) {
                 notification.success({
                     message: 'Hệ thống',
                     showProgress: true,
                     pauseOnHover: true,
                     description: 'Tạo tài khoản thành công'
-                });
-                setIsOpenModal(false);
-                form.resetFields();
-                await loadAccounts();
+                })
+                setIsOpenModal(false)
+                form.resetFields()
+                await loadAccounts()
             } else {
                 notification.error({
                     message: 'Hệ thống',
                     showProgress: true,
                     pauseOnHover: true,
                     description: 'Tạo tài khoản thất bại'
-                });
+                })
             }
         } catch (error) {
             notification.error({
@@ -60,10 +60,11 @@ const AccountPatients = () => {
                 showProgress: true,
                 pauseOnHover: true,
                 description: error?.message || 'Lỗi khi tạo tài khoản'
-            });
+            })
         }
-        setLoading(false);
-    };
+        setLoading(false)
+    }
+
     const showDeleteModal = (record) => {
         Modal.confirm({
             title: "Xoá người dùng",
@@ -82,28 +83,28 @@ const AccountPatients = () => {
             cancelText: "Không",
             okButtonProps: { loading: loading },
             onOk: () => handleDelete(record.id),
-        });
-    };
+        })
+    }
 
     const handleDelete = async (id) => {
-        setLoading(true);
+        setLoading(true)
         try {
-            const response = await deleteAccountAPI(id);
+            const response = await deleteAccountAPI(id)
             if (response?.data) {
                 notification.success({
                     message: 'Hệ thống',
                     showProgress: true,
                     pauseOnHover: true,
                     description: 'Xoá tài khoản thành công'
-                });
-                await loadAccounts();
+                })
+                await loadAccounts()
             } else {
                 notification.error({
                     message: 'Hệ thống',
                     showProgress: true,
                     pauseOnHover: true,
                     description: 'Xoá tài khoản thất bại'
-                });
+                })
             }
         } catch (error) {
             notification.error({
@@ -111,15 +112,15 @@ const AccountPatients = () => {
                 showProgress: true,
                 pauseOnHover: true,
                 description: error?.message || 'Lỗi khi xoá tài khoản'
-            });
+            })
         }
-        setLoading(false);
-    };
+        setLoading(false)
+    }
 
     const resetAndClose = () => {
-        setIsOpenModal(false);
-        form.resetFields();
-    };
+        setIsOpenModal(false)
+        form.resetFields()
+    }
 
     const columns = [
         {
@@ -145,12 +146,12 @@ const AccountPatients = () => {
             key: 'status',
             dataIndex: 'accountStatus',
             render: (_, { accountStatus }) => {
-                let color = accountStatus === 'Đang hoạt động' ? 'green' : 'volcano';
+                let color = accountStatus === 'Đang hoạt động' ? 'green' : 'volcano'
                 return (
                     <Tag color={color} key={accountStatus}>
                         {accountStatus}
                     </Tag>
-                );
+                )
             },
         },
         {
@@ -160,18 +161,20 @@ const AccountPatients = () => {
                 <Space size="large">
                     <EditOutlined
                         onClick={() => {
-                            setIsUpdateModalOpen(true);
-                            setDataUpdate(record);
+                            setIsUpdateModalOpen(true)
+                            setDataUpdate(record)
                         }}
                         style={{ color: 'orange' }}
                     />
 
-                    <DeleteOutlined style={{ color: 'red' }} onClick={() => showDeleteModal(record)} />
-
+                    <DeleteOutlined 
+                        style={{ color: 'red' }} 
+                        onClick={() => showDeleteModal(record)} 
+                    />
                 </Space>
             ),
         },
-    ];
+    ]
 
     return (
         <>
@@ -248,7 +251,6 @@ const AccountPatients = () => {
                 </>
             }
         </>
-    );
-};
-
-export default AccountPatients;
+    )
+}
+export default AccountPatients

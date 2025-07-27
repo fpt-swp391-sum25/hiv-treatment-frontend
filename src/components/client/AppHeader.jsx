@@ -20,8 +20,16 @@ import {
   SettingOutlined,
   BellOutlined
 } from '@ant-design/icons';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useState, useEffect, useContext } from 'react';
+import { 
+  Link, 
+  useLocation, 
+  useNavigate 
+} from 'react-router-dom';
+import { 
+  useState, 
+  useEffect, 
+  useContext 
+} from 'react';
 
 import appLogo from '../../assets/appLogo.png';
 import '../../styles/client/AppHeader.css';
@@ -38,6 +46,7 @@ const { Text } = Typography;
 const AppHeader = () => {
   const location = useLocation();
   const navigate = useNavigate();
+
   const { user, setUser } = useContext(AuthContext);
 
   const [activeSection, setActiveSection] = useState('home');
@@ -84,6 +93,7 @@ const AppHeader = () => {
   useEffect(() => {
     let intervalId;
 
+    // Poll notifications every 5 second
     const pollNotifications = async () => {
       try {
         const res = await getNotificationsByUserId(user.id);
@@ -100,15 +110,15 @@ const AppHeader = () => {
           setNotifications(latest);
         }
       } catch (error) {
-        console.error("Lỗi khi polling:", error);
+        console.error("Lỗi khi cập nhật thông báo:", error);
       }
     };
 
     if (user?.id) {
-      intervalId = setInterval(pollNotifications, 1000); // 1s
+      intervalId = setInterval(pollNotifications, 5000); 
     }
-
-    return () => clearInterval(intervalId); // cleanup
+    
+    return () => clearInterval(intervalId); 
   }, [user?.id, notifications]);
 
   const loadNotifications = async () => {
@@ -121,6 +131,7 @@ const AppHeader = () => {
     }
   };
 
+  // Change notification display when it's clicked
   const handleNotificationClick = async (notification) => {
     if (!notification.read) {
       await updateNotification(notification.id, { ...notification, isRead: true });
@@ -130,6 +141,7 @@ const AppHeader = () => {
     }
   };
 
+  // Scroll the menu to chosen option
   const scrollToSection = (sectionId) => {
     const section = document.getElementById(sectionId);
     if (section) {
@@ -153,6 +165,7 @@ const AppHeader = () => {
     { key: 'appointments', label: 'Lịch hẹn', path: '/appointment' },
   ];
 
+  // Naviagte to right menu option when it's clicked
   const handleMenuClick = (scrollTo, key) => {
     if (location.pathname !== '/') {
       navigate('/');
@@ -178,6 +191,7 @@ const AppHeader = () => {
       )
     }));
 
+  // Change display of active menu option
   const getActiveMenu = (items) => {
     return (
       items.find(
@@ -223,7 +237,12 @@ const AppHeader = () => {
                 content={
                   <Spin spinning={loading}>
                     <List
-                      dataSource={[...notifications].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))}
+                      // Only display first 10 notifications
+                      dataSource={
+                        [...notifications]
+                          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                          .slice(0, 10) 
+                      }
                       locale={{ emptyText: 'Không có thông báo' }}
                       renderItem={(item) => (
                         <List.Item
@@ -298,5 +317,4 @@ const AppHeader = () => {
     </Header>
   );
 };
-
 export default AppHeader;

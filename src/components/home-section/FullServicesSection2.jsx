@@ -1,6 +1,7 @@
-import React from 'react';
+import { 
+    Link 
+} from 'react-router-dom';
 import '../../styles/home-section/FullServicesSection2.css';
-import { Link } from 'react-router-dom';
 
 const FullServicesSection2 = () => {
     return (<div className="container" id="services-section">
@@ -55,5 +56,4 @@ const FullServicesSection2 = () => {
     </div>
     );
 };
-
 export default FullServicesSection2;

@@ -1,23 +1,38 @@
-import { Link, Outlet, useLocation } from "react-router-dom";
-import AdminHeader from "../../components/client/PageHeader";
-import DoctorPageSideBar from "../../components/doctor/DoctorPageSideBar";
-import { Breadcrumb, Layout, message } from "antd";
-import { useContext, useEffect } from "react";
-import { fetchAccountAPI } from "../../services/api.service";
-import { AuthContext } from "../../components/context/AuthContext";
-import { HomeOutlined } from "@ant-design/icons";
+import { 
+    Link, 
+    Outlet, 
+    useLocation 
+} from "react-router-dom"
+import AdminHeader from "../../components/client/PageHeader"
+import DoctorPageSideBar from "../../components/doctor/DoctorPageSideBar"
+import { 
+    Breadcrumb, 
+    Layout, 
+    message 
+} from "antd"
+import { 
+    useContext, 
+    useEffect 
+} from "react"
+import { 
+    fetchAccountAPI 
+} from "../../services/api.service"
+import { 
+    AuthContext 
+} from "../../components/context/AuthContext"
+import { 
+    HomeOutlined 
+} from "@ant-design/icons"
 
-const { Header, Content } = Layout;
+const { Content } = Layout
 
 const DoctorHome = () => {
-    const { setUser, isAppLoading, setIsAppLoading } = useContext(AuthContext)
+    const { setUser, setIsAppLoading } = useContext(AuthContext)
     const location = useLocation()
     const pathSnippets = location.pathname.split('/').filter(i => i)
     useEffect(() => {
         fetchUserInfo()
     }, [])
-
-
 
     const fetchUserInfo = async () => {
         try {
@@ -27,8 +42,9 @@ const DoctorHome = () => {
                 setIsAppLoading(false)
             }
         } catch (error) {
-            if (error.response?.status === 401 && error.response?.data?.message === 'JWT token has expired') {
-                localStorage.removeItem('token');
+            if (error.response?.status === 401 
+                && error.response?.data?.message === 'JWT token has expired') {
+                localStorage.removeItem('token')
                 message.error("Phiên đăng nhập hết hạn! Vui lòng đăng nhập lại.")
             }
         }
@@ -49,10 +65,10 @@ const DoctorHome = () => {
             const url = `/${pathSnippets.slice(0, idx + 1).join('/')}`
             if (url === '/doctor') return null
             if (
-                pathSnippets.length >= 3 &&
-                pathSnippets[0] === 'doctor' &&
-                pathSnippets[1] === 'patients' &&
-                idx === 2
+                pathSnippets.length >= 3 
+                && pathSnippets[0] === 'doctor' 
+                && pathSnippets[1] === 'patients' 
+                && idx === 2
             ) {
                 return {
                     title: 'Chi tiết bệnh nhân',
@@ -64,14 +80,11 @@ const DoctorHome = () => {
                 key: url,
             }
         }).filter(Boolean)
-
     ]
 
     return (
         <Layout style={{ minHeight: "100vh" }}>
-
             <AdminHeader />
-
             <Layout>
                 <DoctorPageSideBar />
                 <Layout style={{ padding: "16px" }}>
@@ -87,7 +100,6 @@ const DoctorHome = () => {
                 </Layout>
             </Layout>
         </Layout>
-    );
-};
-
-export default DoctorHome;
+    )
+}
+export default DoctorHome

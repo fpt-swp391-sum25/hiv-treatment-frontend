@@ -1,5 +1,4 @@
-import React from 'react';
-import '../../styles/home-section/ServicesSection.css'; // Đảm bảo bạn có file CSS để tùy chỉnh kiểu dáng
+import '../../styles/home-section/ServicesSection.css'; 
 
 const ServicesSection = () => {
   const services = [
@@ -18,8 +17,8 @@ const ServicesSection = () => {
       description: "Trang thiết bị hiện đại, kết quả nhanh chóng, chính xác.",
       icon: "🏥",
     },
-   
   ];
+  
   return (
     <section className="services-section" id="why-services-section">
       <h1>Tại sao chọn dịch vụ của chúng tôi?</h1>
@@ -33,7 +32,6 @@ const ServicesSection = () => {
         ))}
       </div>
     </section>
-  );
-};
-
-export default ServicesSection;
+  )
+}
+export default ServicesSection

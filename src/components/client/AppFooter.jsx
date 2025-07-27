@@ -1,4 +1,7 @@
-import { Layout, Spin } from 'antd';
+import { 
+  Layout, 
+  Spin 
+} from 'antd';
 import {
   EnvironmentOutlined,
   PhoneOutlined,
@@ -6,8 +9,13 @@ import {
   ClockCircleOutlined,
 } from '@ant-design/icons';
 import '../../styles/client/AppFooter.css';
-import { useEffect, useState } from 'react';
-import { fetchSystemConfigurationsAPI } from '../../services/api.service';
+import { 
+  useEffect, 
+  useState 
+} from 'react';
+import { 
+  fetchSystemConfigurationsAPI 
+} from '../../services/api.service';
 
 const { Footer } = Layout;
 
@@ -42,32 +50,25 @@ const AppFooter = () => {
       <div className="footer-content">
         <div className="footer-columns">
           <div className="footer-column">
-            <h3>{config['Tên hệ thống'] || 'HIV Care Center'}</h3>
-            <p>{config['Giới thiệu trang']}</p>
+            <h3>{config['Tên hệ thống'] ?? 'Chưa cập nhật'} </h3>
+            (Phiên bản {config['Phiên bản'] ?? 'Chưa cập nhật'})
+            <p>{config['Giới thiệu trang'] ?? 'Chưa cập nhật'}</p>
           </div>
 
           <div className="footer-column">
             <h4>Thông tin liên hệ</h4>
-            <p><EnvironmentOutlined /> Địa chỉ: {config['Địa chỉ']}</p>
-            <p><PhoneOutlined /> Đường dây nóng: {config['Đường dây nóng']}</p>
-            <p><MailOutlined /> Email hỗ trợ: {config['Email hỗ trợ']}</p>
-            <p><ClockCircleOutlined /> Thời gian làm việc: {config['Thời gian làm việc']}</p>
-          </div>
-
-          <div className="footer-column">
-            <h4>Liên kết nhanh</h4>
-            <p><a href="#">Chính sách bảo mật</a></p>
-            <p><a href="#">Điều khoản sử dụng</a></p>
-            <p><a href="#">Quy định website</a></p>
+            <p><EnvironmentOutlined /> Địa chỉ: {config['Địa chỉ'] ?? 'Chưa cập nhật'} </p>
+            <p><PhoneOutlined /> Đường dây nóng: {config['Đường dây nóng'] ?? 'Chưa cập nhật'}</p>
+            <p><MailOutlined /> Email hỗ trợ: {config['Email hỗ trợ'] ?? 'Chưa cập nhật'}</p>
+            <p><ClockCircleOutlined /> Thời gian làm việc: {config['Thời gian làm việc'] ?? 'Chưa cập nhật'}</p>
           </div>
         </div>
       </div>
 
       <div className="footer-bottom">
-        <p>{config['Chân trang'] || '© 2025 HIV Care Center. Tất cả quyền được bảo lưu.'}</p>
+        <p>{config['Chân trang'] ?? 'Chưa cập nhật'}</p>
       </div>
     </Footer>
   );
 };
-
 export default AppFooter;
