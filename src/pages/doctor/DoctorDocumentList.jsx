@@ -59,8 +59,9 @@ const DoctorDocumentList = () => {
     setLoading(true)
     try {
       const res = await getAllDocuments()
-      setDocuments(res.data)
-      setAllDocuments(res.data)
+      const myDocs = (res.data || []).filter(doc => doc.doctor?.id === user?.id)
+      setDocuments(myDocs)
+      setAllDocuments(myDocs)
     } catch {
       message.error('Lỗi khi tải danh sách document')
     }

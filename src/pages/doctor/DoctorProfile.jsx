@@ -12,7 +12,8 @@ import {
   Skeleton, 
   Avatar, 
   Typography, 
-  Tooltip 
+  Tooltip, 
+  Button
 } from 'antd'
 import { 
   MailOutlined, 
@@ -69,22 +70,19 @@ const DoctorProfile = () => {
                   style={{ border: '2px solid #1890ff', cursor: 'pointer', transition: 'box-shadow 0.2s' }}
                   onClick={() => fileInputRef.current.click()}
                 />
-                {hover && (
-                  <CameraOutlined
-                    style={{
-                      position: 'absolute',
-                      bottom: 8,
-                      right: 8,
-                      fontSize: 28,
-                      color: '#1890ff',
-                      background: '#fff',
-                      borderRadius: '50%',
-                      boxShadow: '0 2px 8px #0002',
-                      padding: 4,
-                      pointerEvents: 'none',
-                    }}
-                  />
+                {user?.avatar && (
+                  <div style={{ marginTop: 8, textAlign: 'center' }}>
+                    <Button
+                      danger
+                      type="link"
+                      onClick={() => setUser({ ...user, avatar: null })}
+                      style={{ fontSize: 12 }}
+                    >
+                      Xóa ảnh
+                    </Button>
+                  </div>
                 )}
+
                 <input
                   ref={fileInputRef}
                   type="file"

@@ -1,6 +1,7 @@
 import { 
     Card, 
     Col, 
+    notification, 
     Row, 
     Spin 
 } from "antd";
@@ -72,11 +73,12 @@ const AdminDashboard = () => {
                     return d.getMonth() + 1 === month && d.getFullYear() === year
                 }).length
                 // Count number of appointment by status
-                const schedulesByStatus = {} (
-                    schedules.data || []).forEach(sch => {
-                    const status = sch.status || 'Khác'
-                    schedulesByStatus[status] = (schedulesByStatus[status] || 0) + 1
-                })
+                const schedulesByStatus = {};
+                (schedules.data || []).forEach(sch => {
+                    const status = sch.status || 'Khác';
+                    schedulesByStatus[status] = (schedulesByStatus[status] || 0) + 1;
+                });
+
                 setCounts({
                     doctors: doctors.data?.length || 0,
                     labTechnicians: labTechs.data?.length || 0,

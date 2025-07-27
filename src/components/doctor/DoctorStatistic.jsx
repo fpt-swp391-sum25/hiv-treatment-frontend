@@ -6,8 +6,10 @@ import dayjs from 'dayjs';
 import quarterOfYear from 'dayjs/plugin/quarterOfYear';
 import '../../styles/doctor/Statistics.css';
 import { AuthContext } from '../context/AuthContext';
+import { 
+    fetchScheduleByDoctorIdAPI 
+} from "../../services/schedule.service";
 import { Select } from 'antd';
-import { fetchScheduleByDoctorIdAPI } from '../../services/schedule.service';
 
 
 // Register ChartJS components
@@ -91,7 +93,7 @@ const Statistic = () => {
     } else if (activeFilter === 'quarter') {
       const year = dayjs().year();
       start = dayjs().year(year).quarter(selectedQuarter).startOf('quarter');
-      end = dayjs().year(year).quarter(selectedQuarter).endOf('quarter');
+end = dayjs().year(year).quarter(selectedQuarter).endOf('quarter');
     } else if (activeFilter === 'year') {
       start = dayjs().startOf('year');
       end = dayjs().endOf('year');
@@ -101,10 +103,7 @@ const Statistic = () => {
       const d = dayjs(sch.date || sch.createdAt);
       return d.isAfter(start.subtract(1, 'day')) && d.isBefore(end.add(1, 'day'));
     });
-    // Log danh sách ngày của các lịch hẹn đã lọc
-    console.log(`=== Filter: ${activeFilter} ===`);
-    console.log('Start:', start.format('YYYY-MM-DD'), 'End:', end.format('YYYY-MM-DD'));
-    console.log('Filtered schedule dates:', filtered.map(sch => (sch.date || sch.createdAt)));
+
     // Tổng số lịch hẹn
     const totalAppointments = filtered.length;
     // Tổng số bệnh nhân duy nhất
@@ -158,18 +157,23 @@ const Statistic = () => {
     // Phân loại lịch hẹn theo loại (type)
     const typeMap = {};
     filtered.forEach(sch => {
-      const type = sch.type || 'Khác';
+      const type = sch.type || 'Chưa có bệnh nhân đăng ký';
       if (!typeMap[type]) typeMap[type] = 0;
       typeMap[type]++;
     });
+    
+
+    
     const typeLabels = Object.keys(typeMap);
     const typeData = Object.values(typeMap);
+    
+
     setStats({
       totalAppointments,
       uniquePatients,
       newPatients,
       chartLabels,
-      chartData,
+chartData,
       typeLabels,
       typeData,
     });
@@ -195,6 +199,7 @@ const Statistic = () => {
     labels: stats.typeLabels,
     datasets: [
       {
+        label: 'Số lượng lịch hẹn',
         data: stats.typeData,
         backgroundColor: [
           '#4caf50', '#2c7bbf', '#ff9800', '#e91e63', '#9c27b0', '#607d8b', '#ffc107', '#795548'
@@ -208,27 +213,49 @@ const Statistic = () => {
   });
 
   const lineOptions = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: 'top',
-      },
-      title: {
-        display: true,
-        text: 'Biểu đồ số lượng lịch hẹn',
-      },
+  responsive: true,
+  plugins: {
+    legend: {
+      position: 'top',
     },
-  };
+    title: {
+      display: true,
+      text: 'Biểu đồ số lượng lịch hẹn',
+    },
+  },
+  scales: {
+    y: {
+      beginAtZero: true,  // Đảm bảo trục y bắt đầu từ 0
+      ticks: {
+        stepSize: 5,
+        callback: function(value) { // Đảm bảo số nguyên
+          return Math.floor(value);
+        }
+      }
+    }
+  }
+};
 
   const pieOptions = {
-    responsive: true,
-    plugins: {
-      legend: { position: 'top' },
-      title: { display: true, text: 'Phân loại lịch hẹn theo loại' },
-    },
-  };
+  responsive: true,
+  plugins: {
+    legend: { display: false },  // Ẩn legend
+    title: { display: true, text: 'Phân loại lịch hẹn theo loại' },
+  },
+  scales: {
+    y: {
+      beginAtZero: true,
+      ticks: {
+        stepSize: 5,
+        callback: function(value) { // Đảm bảo số nguyên
+          return Math.floor(value);
+        }
+      }
+    }
+  }
+};
 
-  if (loading) return <div style={{ textAlign: 'center', marginTop: 40 }}><Spinner animation="border" /></div>;
+  if (loading) return <div style={{textAlign:'center',marginTop:40}}><Spinner animation="border" /></div>;
 
   return (
     <div className="statistic-section">
@@ -259,7 +286,7 @@ const Statistic = () => {
             onChange={setSelectedMonth}
           >
             {[...Array(12)].map((_, i) => (
-              <Select.Option key={i + 1} value={i + 1}>{`Tháng ${i + 1}`}</Select.Option>
+<Select.Option key={i + 1} value={i + 1}>{`Tháng ${i + 1}`}</Select.Option>
             ))}
           </Select>
         )}

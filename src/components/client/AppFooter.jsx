@@ -1,5 +1,6 @@
 import { 
   Layout, 
+  message, 
   Spin 
 } from 'antd';
 import {
@@ -33,7 +34,7 @@ const AppFooter = () => {
         });
         setConfig(configMap);
       } catch (err) {
-        console.error("Lỗi khi tải cấu hình:", err);
+        message.error("Lỗi khi tải cấu hình:", err);
       } finally {
         setLoading(false);
       }

@@ -102,12 +102,14 @@ const Booking = () => {
     const date = Form.useWatch('date', form);
     const slot = Form.useWatch('slot', form);
     const type = Form.useWatch('type', form);
+    const typeParam = searchParams.get('type');
 
     useEffect(() => {
         loadDoctors();
         loadSystemPrices();
         loadConfigs();
     }, []);
+
     useEffect(() => {
         if (date) {
             loadSchedules();
@@ -127,6 +129,15 @@ const Booking = () => {
         }
 
     }, [doctorIdParam, doctors, form])
+
+    useEffect(() => {
+        if (typeParam && !form.getFieldValue('type')) {
+            const allowedTypes = ['Khám', 'Tái khám', 'Tư vấn'];
+            if (allowedTypes.includes(typeParam)) {
+                form.setFieldValue('type', typeParam);
+            }
+        }
+    }, [typeParam, form]);
 
     useEffect(() => {
         const doctorId = form.getFieldValue('doctor');
