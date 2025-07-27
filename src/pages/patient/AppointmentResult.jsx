@@ -2,8 +2,8 @@ import { Button, Card, Descriptions, Layout, Spin } from "antd";
 import dayjs from "dayjs";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../components/context/AuthContext";
-import { fetchHealthRecordByScheduleIdAPI } from "../../services/api.service";
 import { useNavigate, useParams } from "react-router-dom";
+import { fetchHealthRecordByScheduleIdAPI } from "../../services/health-record.service";
 
 const { Content } = Layout
 

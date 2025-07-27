@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { message } from 'antd';
 import '../../styles/doctor-profile/DoctorProfileSearchPage.css';
-import { fetchAccountByRoleAPI, fetchDoctorProfileAPI } from '../../services/api.service';
 
 // Dùng ảnh từ thư mục public
 import defaultDoctorImage from '../../assets/doctor.png';
+import { fetchDoctorProfileAPI } from '../../services/doctorProfile.service';
+import { fetchAccountByRoleAPI } from '../../services/user.service';
 
 const DoctorsSearchPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -93,10 +94,10 @@ const DoctorsSearchPage = () => {
               <div className="doctor-info">
                 <h3>{mergedDoctors.fullName}</h3>
                 <p>
-                    🕒 {mergedDoctors.startYear
-                      ? `${new Date().getFullYear() - Number(mergedDoctors.startYear)} năm kinh nghiệm`
-                      : 'Chưa rõ năm kinh nghiệm'}
-                  </p>
+                  🕒 {mergedDoctors.startYear
+                    ? `${new Date().getFullYear() - Number(mergedDoctors.startYear)} năm kinh nghiệm`
+                    : 'Chưa rõ năm kinh nghiệm'}
+                </p>
                 <p>{mergedDoctors.qualifications}</p>
                 <Link to={`/booking?doctorId=${mergedDoctors.id}`} className="btn-primary">
                   Đặt lịch

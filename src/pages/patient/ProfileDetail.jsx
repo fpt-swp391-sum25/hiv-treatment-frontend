@@ -20,9 +20,8 @@ import {
 import dayjs from "dayjs";
 import { AuthContext } from "../../components/context/AuthContext";
 import { DeleteOutlined, SaveOutlined, UploadOutlined, UserOutlined } from "@ant-design/icons";
-import { updateProfileAPI } from "../../services/api.service";
-
 import { validateField } from "../../utils/validate";
+import { updateProfileAPI } from "../../services/user.service";
 
 
 const { Content } = Layout;

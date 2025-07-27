@@ -4,11 +4,10 @@ import { Form, Input, Button, Alert, Segmented, Typography, Divider, notificatio
 import { useGoogleLogin } from '@react-oauth/google';
 import { GoogleOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { googleLoginAPI, loginAPI } from '../../services/api.service';
 import { useForm } from 'antd/es/form/Form';
 import { AuthContext } from '../../components/context/AuthContext';
 import { validateField } from '../../utils/validate';
-import { sendResetPasswordAPI } from '../../services/auth.service';
+import { googleLoginAPI, loginAPI, resendVerifyEmailAPI, sendResetPasswordAPI } from '../../services/auth.service';
 
 const { Link, Text } = Typography;
 

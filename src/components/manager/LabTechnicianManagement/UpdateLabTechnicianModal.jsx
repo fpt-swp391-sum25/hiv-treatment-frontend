@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Form, Input, Select, Button, message, DatePicker } from 'antd';
-import { updateUserAPI } from '../../../services/api.service';
 import moment from 'moment';
+import { updateUserAPI } from '../../../services/user.service';
 
 const UpdateLabTechnicianModal = ({ visible, labTechnician, onCancel, onSuccess }) => {
     const [form] = Form.useForm();
@@ -26,10 +26,10 @@ const UpdateLabTechnicianModal = ({ visible, labTechnician, onCancel, onSuccess 
         try {
             const values = await form.validateFields();
             setLoading(true);
-            
+
             console.log('Updating lab technician with ID:', labTechnician.id);
             console.log('Update data:', values);
-            
+
             // Chuyển đổi dữ liệu để phù hợp với API
             const updateData = {
                 fullName: values.fullName,
@@ -40,10 +40,10 @@ const UpdateLabTechnicianModal = ({ visible, labTechnician, onCancel, onSuccess 
                 accountStatus: values.status,
                 dateOfBirth: values.dateOfBirth ? values.dateOfBirth.format('YYYY-MM-DD') : null
             };
-            
+
             const response = await updateUserAPI(labTechnician.id, updateData);
             console.log('Update response:', response);
-            
+
             if (onSuccess) {
                 onSuccess();
             }
@@ -69,10 +69,10 @@ const UpdateLabTechnicianModal = ({ visible, labTechnician, onCancel, onSuccess 
                 <Button key="back" onClick={onCancel}>
                     Hủy
                 </Button>,
-                <Button 
-                    key="submit" 
-                    type="primary" 
-                    loading={loading} 
+                <Button
+                    key="submit"
+                    type="primary"
+                    loading={loading}
                     onClick={handleSubmit}
                 >
                     Cập nhật
@@ -83,7 +83,7 @@ const UpdateLabTechnicianModal = ({ visible, labTechnician, onCancel, onSuccess 
             <Form
                 form={form}
                 layout="vertical"
-                initialValues={{ 
+                initialValues={{
                     gender: 'MALE',
                     status: 'ACTIVE'
                 }}

@@ -1,12 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import {
-  fetchHealthRecordByScheduleIdAPI,
-  fetchTestResultByHealthRecordIdAPI,
-  updateHealthRecordAPI,
-  updateTestResultAPI,
-} from "../../services/api.service.js";
-import {
   Typography, Space, notification, Button, Input, Card,
   Form, Row, Col, Divider, Select
 } from 'antd';
@@ -14,6 +8,8 @@ import { EditOutlined } from '@ant-design/icons';
 import UpdateTestResultModal from '../../components/lab-technician/UpdateTestResultModal.jsx';
 import dayjs from 'dayjs';
 import { createNotification } from "../../services/notification.service";
+import { fetchHealthRecordByScheduleIdAPI, fetchTestResultByHealthRecordIdAPI, updateHealthRecordAPI } from "../../services/health-record.service.js";
+import { updateTestResultAPI } from "../../services/testResult.service.js";
 
 
 const PatientDetail = () => {
@@ -95,10 +91,10 @@ const PatientDetail = () => {
         ) {
           const doctorId = healthRecordData.schedule?.doctor?.id;
           const patient = healthRecordData.schedule?.patient;
-        
+
           if (doctorId && patient?.id && patient?.fullName) {
             const createdAt = dayjs().format('YYYY-MM-DDTHH:mm:ss');
-        
+
             // Gửi cho bác sĩ
             await createNotification({
               title: "Thông báo kết quả xét nghiệm",
@@ -106,7 +102,7 @@ const PatientDetail = () => {
               createdAt,
               userId: doctorId,
             });
-        
+
             // Gửi cho bệnh nhân
             await createNotification({
               title: "Kết quả xét nghiệm đã sẵn sàng",
@@ -116,7 +112,7 @@ const PatientDetail = () => {
             });
           }
         }
-        
+
 
         await loadData();
       }
@@ -214,13 +210,13 @@ const PatientDetail = () => {
 const formatDate = (value) => {
   return value && !isNaN(new Date(value))
     ? new Intl.DateTimeFormat('vi-VN', {
-        hour: '2-digit',
-        minute: '2-digit',
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour12: false,
-      }).format(new Date(value))
+      hour: '2-digit',
+      minute: '2-digit',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour12: false,
+    }).format(new Date(value))
     : '';
 };
 

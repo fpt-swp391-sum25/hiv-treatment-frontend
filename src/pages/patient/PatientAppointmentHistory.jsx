@@ -10,9 +10,9 @@ import {
   ScheduleOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import { getSchedulesByPatientAPI, fetchTestResultByHealthRecordIdAPI } from '../../services/api.service';
-import { healthRecordService } from '../../services/health-record.service';
+import { fetchTestResultByHealthRecordIdAPI, healthRecordService } from '../../services/health-record.service';
 import { AuthContext } from '../../components/context/AuthContext';
+import { getSchedulesByPatientAPI } from '../../services/schedule.service';
 
 const { Search } = Input;
 const { Option } = Select;

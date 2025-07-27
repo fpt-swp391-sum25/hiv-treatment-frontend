@@ -1,310 +1,43 @@
 import axios from './axios.customize'
 
-const loginAPI = (username, password) => {
-    const URL_BACKEND = '/api/auth/login'
-    const data = {
-        username: username,
-        password: password,
-    }
-    return axios.post(URL_BACKEND, data)
-}
-
-const googleLoginAPI = (data) => {
-    const URL_BACKEND = '/api/auth/google'
-    return axios.post(URL_BACKEND, data)
-}
-
-const registerAPI = (values) => {
-    const URL_BACKEND = '/api/auth/register'
-    const data = {
-        fullName: values.fullname,
-        gender: values.gender,
-        dateOfBirth: values.dob.format('YYYY-MM-DD'),
-        email: values.email,
-        phone: values.phoneNumber,
-        address: values.address,
-        username: values.username,
-        password: values.newPassword
-    }
-    return axios.post(URL_BACKEND, data)
-}
-
-const bookingAPI = (values) => {
-    const URL_BACKEND = `/api/schedule/`
-    const data = {
-        name: values.name,
-        phone: values.phone,
-        service: values.type,
-        doctor: values.doctor,
-        date: values.date.format('DD-MM-YYYY'),
-        slot: values.time,
-    }
-    return axios.post(URL_BACKEND, data)
-}
-
-const cancelBookingAPI = (scheduleId, patientId) => {
-    const URL_BACKEND = `/api/schedule/${scheduleId}/cancel`
-
-    return axios.delete(URL_BACKEND, {
-        params: { patientId: patientId.toString() },
-    })
-}
-
-const fetchAllScheduleAPI = (doctorId, date) => {
-    const URL_BACKEND = '/api/schedule'
-    return axios.get(URL_BACKEND, {
-        params: {
-            doctorId,
-            date: date,
-            status: 'Trống',
-        },
-    })
-}
-
-const fetchScheduleByDateAPI = (date) => {
-    const URL_BACKEND = `/api/schedule/available-slots/${date}`
-    return axios.get(URL_BACKEND)
-}
-
-const registerScheduleAPI = (registerData) => {
-    const URL_BACKEND = `/api/schedule/register/schedule-id/${registerData.scheduleId}?patientId=${registerData.patientId}&type=${registerData.type}`
-    return axios.put(URL_BACKEND)
-}
-
-const initiatePaymentAPI = (params) => {
-    const URL_BACKEND = '/api/payment'
-    return axios.post(URL_BACKEND, params)
-}
-
-const retryPaymentAPI = (params) => {
-    const URL_BACKEND = '/api/payment/retry'
-    return axios.post(URL_BACKEND, params)
-}
 
 
-const createAccountAPI = (username, password, email, role) => {
-    const URL_BACKEND = '/api/user/create'
-    const data = {
-        username,
-        password,
-        email,
-        role
-    }
-    return axios.post(URL_BACKEND, data)
-}
 
-const handlePaymentCallbackAPI = (params) => {
-    const URL_BACKEND = '/api/payment/callback'
-    return axios.get(URL_BACKEND, { params })
-}
 
-const fetchAllPatientScheduleAPI = (id) => {
-    const URL_BACKEND = `/api/schedule/patient-id/${id}`
-    return axios.get(URL_BACKEND)
-}
 
-const fetchAccountByRoleAPI = (role) => {
-    // Đảm bảo role được viết hoa theo yêu cầu của BE
-    const uppercaseRole = role.toUpperCase();
-    const URL_BACKEND = `/api/user/${uppercaseRole}`;
-    console.log(`Fetching accounts with role ${uppercaseRole} from: ${URL_BACKEND}`);
-    return axios.get(URL_BACKEND);
-}
 
-const updateAccountAPI = (id, username, email) => {
-    const URL_BACKEND = `/api/user/${id}`
-    const data = {
-        username,
-        email
-    }
 
-    return axios.put(URL_BACKEND, data)
-}
 
-const deleteAccountAPI = (id) => {
-    const URL_BACKEND = `/api/user/${id}`
-    return axios.delete(URL_BACKEND)
-}
 
-const fetchDoctorProfileAPI = () => {
-    const URL_BACKEND = '/api/doctor-profile'
-    return axios.get(URL_BACKEND)
-}
 
-const fetchScheduleAPI = () => {
-    const URL_BACKEND = '/api/schedule/list'
-    return axios.get(URL_BACKEND)
-}
 
-const fetchAvailableSlotAPI = (doctorId, date) => {
-    const URL_BACKEND = `/api/schedule/available-slots?doctorId=${doctorId}&date=${date}`
-    return axios.get(URL_BACKEND)
-}
 
-const fetchAccountAPI = () => {
-    const URL_BACKEND = '/api/auth/account'
-    return axios.get(URL_BACKEND)
-}
 
-const logoutAPI = () => {
-    const URL_BACKEND = '/api/auth/logout'
-    return axios.post(URL_BACKEND)
-}
 
-const fetchAllDoctorsAPI = () => {
-    // Sử dụng đúng endpoint và format theo BE
-    const URL_BACKEND = '/api/user/DOCTOR'; // Role phải viết IN HOA: "DOCTOR"
-    console.log('Calling API to fetch doctors from:', URL_BACKEND);
-    return axios.get(URL_BACKEND);
-}
 
-// Lấy thông tin chi tiết của một bác sĩ
-const fetchDoctorByIdAPI = (doctorId) => {
-    const URL_BACKEND = `/api/doctor-profile/doctor-id/${doctorId}`;
-    return axios.get(URL_BACKEND);
-}
 
-// Cập nhật thông tin bác sĩ
-const updateDoctorProfileAPI = (doctorProfileId, profileData) => {
-    // Đảm bảo startYear là chuỗi
-    if (profileData.startYear !== null && profileData.startYear !== undefined) {
-        profileData.startYear = String(profileData.startYear);
-    }
 
-    console.log(`Updating doctor profile ID ${doctorProfileId} with data:`, profileData);
-    const URL_BACKEND = `/api/doctor-profile/${doctorProfileId}`;
-    return axios.put(URL_BACKEND, profileData);
-}
 
-// Lấy thống kê công việc của bác sĩ
-const fetchDoctorStatisticsAPI = (doctorId) => {
-    const URL_BACKEND = `/api/doctors/${doctorId}/statistics`;
-    return axios.get(URL_BACKEND);
-}
 
-const fetchAllDocumentsAPI = () => {
-    const URL_BACKEND = '/api/document'
-    return axios.get(URL_BACKEND)
-}
 
-const fetchUsersAPI = () => {
-    const URL_BACKEND = '/api/user/patient'
-    return axios.get(URL_BACKEND)
-}
 
-const fetchHealthRecordByScheduleIdAPI = (scheduleId) => {
-    const URL_BACKEND = `/api/health-record/schedule-id/${scheduleId}`
-    return axios.get(URL_BACKEND)
-}
 
-const createHealthRecordAPI = (paymentRef) => {
-    const URL_BACKEND = '/api/health-record'
-    const data = {
-        paymentRef: paymentRef
-    }
-    return axios.post(URL_BACKEND, data)
-}
 
-const fetchTestResultByHealthRecordIdAPI = (healthRecordId) => {
-    const URL_BACKEND = `/api/test-result/health-record-id/${healthRecordId}`
-    return axios.get(URL_BACKEND)
-}
 
-const updateHealthRecordAPI = (healthRecordId, healthRecordData) => {
-    const URL_BACKEND = `/api/health-record/${healthRecordId}`
-    return axios.put(URL_BACKEND, healthRecordData)
-}
 
-const deleteTestResultAPI = (testResultId) => {
-    const URL_BACKEND = `/api/test-result/${testResultId}`
-    return axios.delete(URL_BACKEND)
-}
 
-const createTestResultAPI = (type, note, expectedResultTime, healthRecordId) => {
-    const testResultData = {
-        type,
-        note,
-        expectedResultTime,
-        healthRecordId,
-    }
-    const URL_BACKEND = 'api/test-result'
-    return axios.post(URL_BACKEND, testResultData)
-}
 
-const updateTestResultAPI = (testResultId, type, result, unit, note, expectedResultTime, actualResultTime) => {
-    const testResultData = {
-        type,
-        result,
-        unit,
-        note,
-        expectedResultTime,
-        actualResultTime
-    }
-    const URL_BACKEND = `api/test-result/${testResultId}`
-    return axios.put(URL_BACKEND, testResultData)
-}
 
-const fetchUserInfoAPI = (id) => {
-    const URL_BACKEND = `/api/user/user-id/${id}`
-    return axios.get(URL_BACKEND)
-}
 
-const updateProfileAPI = (values) => {
-    const URL_BACKEND = `/api/user/${values.id}`
-    return axios.put(URL_BACKEND, values)
-}
-const fetchScheduleByDoctorIdAPI = (doctorId) => {
-    const URL_BACKEND = `/api/schedule/doctor-id/${doctorId}`
-    return axios.get(URL_BACKEND)
-}
 
-const fetchRegimensByDoctorIdAPI = (doctorId) => {
-    const URL_BACKEND = `/api/regimen/doctor-id/${doctorId}`
-    return axios.get(URL_BACKEND)
-}
 
-const fetchAllRegimensAPI = () => {
-    const URL_BACKEND = '/api/regimen'
-    return axios.get(URL_BACKEND)
-}
 
-const createRegimenAPI = (components, regimenName,
-    description, indications, contraindications, doctorId) => {
-    const createData = {
-        components,
-        regimenName,
-        description,
-        indications,
-        contraindications,
-        doctorId
-    }
-    const URL_BACKEND = '/api/regimen';
-    return axios.post(URL_BACKEND, createData)
-}
 
-const updateRegimenAPI = (id, components, regimenName,
-    description, indications, contraindications) => {
-    const createData = {
-        components,
-        regimenName,
-        description,
-        indications,
-        contraindications
-    }
-    const URL_BACKEND = `/api/regimen/${id}`;
-    return axios.put(URL_BACKEND, createData)
-}
 
-const deleteRegimenAPI = (id) => {
-    const URL_BACKEND = `/api/regimen/${id}`;
-    return axios.delete(URL_BACKEND)
-}
 
-const updateUserAPI = (id, updateData) => {
-    console.log(">>>>>>>>>>>>>>" + updateData.avatar)
-    const URL_BACKEND = `/api/user/${id}`;
-    return axios.put(URL_BACKEND, updateData)
-}
+
+
+
 
 // Thêm helper function để debug
 const debugRequest = (endpoint, method, data) => {
@@ -322,137 +55,18 @@ const debugRequest = (endpoint, method, data) => {
     return debugInfo;
 };
 
-const createScheduleAPI = (scheduleData) => {
-    const URL_BACKEND = '/api/schedule';
 
-    // Log chi tiết thông tin request
-    debugRequest(URL_BACKEND, 'POST', scheduleData);
 
-    // Xác định số lượng bệnh nhân tối đa
-    const maxPatients = Math.min(Math.max(parseInt(scheduleData.maxPatients) || 1, 1), 5);
-    console.log(`🔢 [API] Creating schedule with maxPatients = ${maxPatients}`);
 
-    // Đảm bảo scheduleData có định dạng đúng theo yêu cầu của BE
-    const baseFormattedData = {
-        type: null, // Manager tạo lịch trống với type=null
-        roomCode: scheduleData.roomCode || '100', // Mặc định phòng 100 nếu không có
-        date: scheduleData.date, // Giữ nguyên định dạng YYYY-MM-DD
-        slot: scheduleData.slot, // Định dạng HH:mm:ss
-        doctorId: parseInt(scheduleData.doctorId), // Đảm bảo là số
-        status: 'Trống', // Đặt trạng thái là "Trống" theo yêu cầu của BE
-        patient_id: null // Thêm patient_id: null để phù hợp với schema DB
-    };
 
-    // Loại bỏ các trường không cần thiết và kiểm tra giá trị
-    if (!baseFormattedData.date || !baseFormattedData.slot || !baseFormattedData.doctorId) {
-        console.error('❌ [API] Missing required fields for schedule creation:', baseFormattedData);
-        return Promise.reject(new Error('Thiếu thông tin cần thiết để tạo lịch'));
-    }
 
-    console.log('📝 [API] Base formatted data:', baseFormattedData);
 
-    // Thêm một số giá trị để debug
-    console.log('🔍 [API] Debug values:', {
-        'doctorId type': typeof baseFormattedData.doctorId,
-        'doctorId value': baseFormattedData.doctorId,
-        'slot format': baseFormattedData.slot.match(/^\d{2}:\d{2}:\d{2}$/) ? 'valid' : 'invalid',
-        'date format': baseFormattedData.date.match(/^\d{4}-\d{2}-\d{2}$/) ? 'valid' : 'invalid',
-        'patient_id': baseFormattedData.patient_id === null ? 'explicitly null' : baseFormattedData.patient_id,
-        'maxPatients': maxPatients
-    });
 
-    // Tạo mảng promises để lưu các lời hứa tạo lịch
-    const createPromises = [];
 
-    // Tạo nhiều lịch theo số lượng maxPatients
-    for (let i = 0; i < maxPatients; i++) {
-        console.log(`🔄 [API] Creating schedule ${i + 1}/${maxPatients}`);
-        const promise = axios.post(URL_BACKEND, baseFormattedData)
-            .then(response => {
-                console.log(`✅ [API] Created schedule ${i + 1}/${maxPatients}:`, response.data);
-                return response;
-            })
-            .catch(error => {
-                console.error(`❌ [API] Failed to create schedule ${i + 1}/${maxPatients}:`, error);
-                if (error.response) {
-                    console.error('Error response data:', error.response.data);
-                    console.error('Error response status:', error.response.status);
-                }
-                return Promise.reject(error);
-            });
-        
-        createPromises.push(promise);
-    }
 
-    // Trả về promise tổng hợp từ tất cả các lời hứa
-    return Promise.all(createPromises)
-        .then(responses => {
-            console.log(`✅ [API] Successfully created ${responses.length} schedules`);
-            // Trả về response đầu tiên để tương thích với code hiện tại
-            return responses[0];
-        })
-        .catch(error => {
-            console.error('❌ [API] Create schedule failed:', error);
-            return Promise.reject(error);
-        });
-}
 
-const getAllSchedulesAPI = () => {
-    // Sử dụng endpoint chính thức từ API documentation
-    const URL_BACKEND = '/api/schedule/list';
-    console.log('🔗 [API] Fetching schedules from:', URL_BACKEND);
 
-    return axios.get(URL_BACKEND)
-        .then(response => {
-            console.log('✅ [API] Schedule list response:', response);
-            return response;
-        })
-        .catch(error => {
-            console.error('❌ [API] Error fetching from /api/schedule/list:', error);
-            console.log('🔄 [API] Trying fallback endpoint /api/schedule...');
 
-            // If the first endpoint fails, try the fallback
-            return axios.get('/api/schedule')
-                .then(response => {
-                    console.log('✅ [API] Fallback schedule response:', response);
-                    return response;
-                })
-                .catch(fallbackError => {
-                    console.error('❌ [API] Fallback also failed:', fallbackError);
-                    throw fallbackError;
-                });
-        });
-}
-
-const getSchedulesByDoctorAPI = (doctorId) => {
-    const URL_BACKEND = `/api/schedule/doctor-id/${doctorId}`;
-    return axios.get(URL_BACKEND);
-}
-
-// API functions sử dụng endpoints từ documentation
-const getSchedulesByStatusAPI = (status) => {
-    const URL_BACKEND = `/api/schedule/status/${status}`;
-    console.log('🔗 [API] Fetching schedules by status:', status, 'from:', URL_BACKEND);
-    return axios.get(URL_BACKEND);
-}
-
-const getSchedulesByTypeAPI = (type) => {
-    const URL_BACKEND = `/api/schedule/type/${type}`;
-    console.log('🔗 [API] Fetching schedules by type:', type, 'from:', URL_BACKEND);
-    return axios.get(URL_BACKEND);
-}
-
-const getSchedulesByDateAPI = (date) => {
-    const URL_BACKEND = `/api/schedule/date/${date}`;
-    console.log('🔗 [API] Fetching schedules by date:', date, 'from:', URL_BACKEND);
-    return axios.get(URL_BACKEND);
-}
-
-const getSchedulesByPatientAPI = (patientId) => {
-    const URL_BACKEND = `/api/schedule/patient-id/${patientId}`;
-    console.log('🔗 [API] Fetching schedules by patient:', patientId, 'from:', URL_BACKEND);
-    return axios.get(URL_BACKEND);
-}
 
 // Đã xóa tất cả duplicate functions
 
@@ -501,77 +115,27 @@ const updateScheduleAPI = async (scheduleId, scheduleData) => {
     }
 };
 
-const deleteScheduleAPI = (scheduleId) => {
-    const URL_BACKEND = `/api/schedule/${scheduleId}`;
-    return axios.delete(URL_BACKEND);
-}
+
 
 // Thêm API mới để lấy users theo role
-const fetchUsersByRoleAPI = (role) => {
-    // Đảm bảo role được viết hoa theo yêu cầu của BE
-    const uppercaseRole = role.toUpperCase();
-    // Endpoint sử dụng đúng với backend API
-    const URL_BACKEND = `/api/user/${uppercaseRole}`;
-
-    console.log(`Fetching users with role ${uppercaseRole} from: ${URL_BACKEND}`);
-    return axios.get(URL_BACKEND);
-}
 
 // Thêm API mới để lấy danh sách nhân viên xét nghiệm
-const fetchAllLabTechniciansAPI = () => {
-    const URL_BACKEND = '/api/user/LAB_TECHNICIAN';
-    console.log('Calling API to fetch lab technicians from:', URL_BACKEND);
-    return axios.get(URL_BACKEND);
-}
+
 
 // Lấy thông tin doctor_profile theo doctorId
-const fetchDoctorProfileByDoctorIdAPI = (doctorId) => {
-    console.log(`Fetching doctor profile for doctor ID: ${doctorId}`);
-    const URL_BACKEND = `/api/doctor-profile/doctor-id/${doctorId}`;
-    return axios.get(URL_BACKEND);
-};
+
 
 // Tạo mới doctor_profile
-const createDoctorProfileAPI = (profileData) => {
-    console.log(`Creating new doctor profile with data:`, profileData);
-    // Đảm bảo startYear là chuỗi
-    if (profileData.startYear !== null && profileData.startYear !== undefined) {
-        profileData.startYear = String(profileData.startYear);
-    }
-    const URL_BACKEND = `/api/doctor-profile`;
-    return axios.post(URL_BACKEND, profileData);
-};
 
-// API mới để kiểm tra các slot khả dụng của bác sĩ trong ngày
-const checkAvailableSlotsAPI = (doctorId, date) => {
-    const URL_BACKEND = `/api/schedule/available-slots?doctorId=${doctorId}&date=${date}`;
-    console.log(`Checking available slots for doctor ${doctorId} on date ${date}`);
-    return axios.get(URL_BACKEND);
-};
+
+
 
 // ✅ Advanced API functions theo BE Documentation
-const fetchUsersByRoleAndStatusAPI = (role, status) => {
-    const URL_BACKEND = `/api/user/${role.toUpperCase()}/account-status/${status}`;
-    console.log(`Fetching ${role} users with status ${status} from:`, URL_BACKEND);
-    return axios.get(URL_BACKEND);
-};
 
-const fetchUsersByRoleAndVerificationAPI = (role, isVerified) => {
-    const URL_BACKEND = `/api/user/${role.toUpperCase()}/mail-verification-status/${isVerified}`;
-    console.log(`Fetching ${role} users with verification ${isVerified} from:`, URL_BACKEND);
-    return axios.get(URL_BACKEND);
-};
 
-const getSchedulesWithFiltersAPI = (filters = {}) => {
-    const params = new URLSearchParams();
-    if (filters.doctorId) params.append('doctorId', filters.doctorId);
-    if (filters.date) params.append('date', filters.date); // Format: YYYY-MM-DD
-    if (filters.status) params.append('status', filters.status);
 
-    const URL_BACKEND = `/api/schedule?${params.toString()}`;
-    console.log('Fetching schedules with filters from:', URL_BACKEND);
-    return axios.get(URL_BACKEND);
-};
+
+
 
 // API để lấy thống kê nhân sự
 const fetchStaffStatisticsAPI = (filters = {}) => {
@@ -816,180 +380,25 @@ const fetchAppointmentStatisticsAPI = (filters = {}) => {
         });
 };
 
-// Thêm hàm kiểm tra kết nối đến backend
-const checkBackendConnection = () => {
-    // Thay đổi endpoint từ /api/health sang /api/schedule/list
-    const URL_BACKEND = '/api/schedule/list';
-    console.log('Checking backend connection...');
 
-    return axios.get(URL_BACKEND, { timeout: 5000 }) // Thêm timeout 5 giây
-        .then(response => {
-            console.log('Backend connection successful');
-            return { success: true, data: response.data };
-        })
-        .catch(error => {
-            console.error('Backend connection failed:', error);
-            // Trả về success=true để không chặn quá trình chính của người dùng
-            // Đánh dấu là fallback để UI có thể hiển thị thông báo phù hợp
-            return { success: true, error, fallback: true };
-        });
-};
 
-const fetchSystemConfigurationsAPI = () => {
-    const URL_BACKEND = '/api/system-configuration'
-    return axios.get(URL_BACKEND)
-};
 
-const updateSystemConfigurationAPI = (id, dataUpdate) =>
-    axios.put(`/api/system-configuration/${id}`, dataUpdate);
 
-const createSystemConfigurationAPI = (createData) =>
-    axios.post("/api/system-configurations", createData);
 
-const deleteSystemConfigurationAPI = (id) =>
-    axios.delete(`/api/system-configuration/${id}`);
+
+
+
 
 // Fetch all health records
-const fetchHealthRecordsAPI = () => {
-    const URL_BACKEND = '/api/health-record';
-    console.log('Fetching all health records');
-    return axios.get(URL_BACKEND);
-};
 
-// Hàm để lấy số lượng bệnh nhân trong mỗi slot
-const getSlotCountsAPI = (doctorId, date) => {
-    const URL_BACKEND = `/api/schedule/slot-counts?doctorId=${doctorId}&date=${date}`;
-    console.log(`🔍 [API] Fetching slot counts for doctor ${doctorId} on date ${date}`);
-    
-    return axios.get(URL_BACKEND)
-        .then(response => {
-            console.log('✅ [API] Slot counts response:', response);
-            return response;
-        })
-        .catch(error => {
-            console.error('❌ [API] Error fetching slot counts:', error);
-            // Nếu API không tồn tại, tạo một cách thủ công từ danh sách lịch
-            console.log('🔄 [API] Trying to calculate slot counts from schedules...');
-            
-            // Lấy tất cả lịch của bác sĩ trong ngày
-            return getSchedulesByDoctorAPI(doctorId)
-                .then(response => {
-                    const schedules = response.data || [];
-                    // Lọc theo ngày
-                    const filteredSchedules = schedules.filter(s => s.date === date);
-                    
-                    // Nhóm theo slot và đếm
-                    const slotCounts = {};
-                    filteredSchedules.forEach(schedule => {
-                        const slot = schedule.slot;
-                        if (!slotCounts[slot]) {
-                            slotCounts[slot] = { total: 0, booked: 0 };
-                        }
-                        slotCounts[slot].total++;
-                        if (schedule.patient_id || schedule.patient) {
-                            slotCounts[slot].booked++;
-                        }
-                    });
-                    
-                    console.log('✅ [API] Calculated slot counts:', slotCounts);
-                    return { data: slotCounts };
-                })
-                .catch(fallbackError => {
-                    console.error('❌ [API] Fallback calculation also failed:', fallbackError);
-                    return { data: {} };
-                });
-        });
-};
+
+
 
 // services/api.service.js
-const getHealthRecordByDoctorIdAPI = async (doctorId, filterType, selectedDate) => {
-  const params = {};
 
-  if (filterType) params.filterType = filterType;
-  if (selectedDate) params.selectedDate = selectedDate;
-
-  try {
-    const response = await axios.get(`/api/health-record/doctor-id/${doctorId}`, {
-      params
-    });
-    return response;
-  } catch (error) {
-    console.error('Lỗi gọi API getHealthRecordByDoctorIdAPI:', error);
-    throw error;
-  }
-};
 
 
 // Export tất cả các hàm API
 export {
-    loginAPI,
-    googleLoginAPI,
-    registerAPI,
-    bookingAPI,
-    cancelBookingAPI,
-    fetchAllScheduleAPI,
-    fetchScheduleByDateAPI,
-    registerScheduleAPI,
-    initiatePaymentAPI,
-    retryPaymentAPI,
-    createAccountAPI,
-    handlePaymentCallbackAPI,
-    fetchAllPatientScheduleAPI,
-    fetchAccountByRoleAPI,
-    updateAccountAPI,
-    deleteAccountAPI,
-    fetchDoctorProfileAPI,
-    fetchScheduleAPI,
-    fetchAvailableSlotAPI,
-    fetchAccountAPI,
-    logoutAPI,
-    fetchAllDoctorsAPI,
-    fetchDoctorByIdAPI,
-    updateDoctorProfileAPI,
-    fetchDoctorStatisticsAPI,
-    fetchAllDocumentsAPI,
-    fetchUsersAPI,
-    fetchHealthRecordByScheduleIdAPI,
-    createHealthRecordAPI,
-    fetchTestResultByHealthRecordIdAPI,
-    updateHealthRecordAPI,
-    deleteTestResultAPI,
-    createTestResultAPI,
-    updateTestResultAPI,
-    fetchUserInfoAPI,
-    updateProfileAPI,
-    fetchScheduleByDoctorIdAPI,
-    fetchRegimensByDoctorIdAPI,
-    fetchAllRegimensAPI,
-    createRegimenAPI,
-    updateRegimenAPI,
-    deleteRegimenAPI,
-    updateUserAPI,
-    createScheduleAPI,
-    getAllSchedulesAPI,
-    getSchedulesByDoctorAPI,
-    getSchedulesByDateAPI,
-    getSchedulesByTypeAPI,
-    getSchedulesByStatusAPI,
-    getSchedulesByPatientAPI,
-    updateScheduleAPI,
-    deleteScheduleAPI,
-    fetchUsersByRoleAPI,
-    fetchUsersByRoleAndStatusAPI,
-    fetchUsersByRoleAndVerificationAPI,
-    getSchedulesWithFiltersAPI,
-    fetchAllLabTechniciansAPI,
-    fetchDoctorProfileByDoctorIdAPI,
-    createDoctorProfileAPI,
-    checkAvailableSlotsAPI,
-    fetchStaffStatisticsAPI,
-    fetchAppointmentStatisticsAPI,
-    checkBackendConnection,
-    fetchSystemConfigurationsAPI,
-    updateSystemConfigurationAPI,
-    createSystemConfigurationAPI,
-    deleteSystemConfigurationAPI,
-    fetchHealthRecordsAPI,
-    getSlotCountsAPI,
-    getHealthRecordByDoctorIdAPI,
+
 }

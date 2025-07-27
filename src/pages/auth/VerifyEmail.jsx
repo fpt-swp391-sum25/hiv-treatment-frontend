@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react"
 import { Link, useLocation } from "react-router-dom"
-import { resendVerifyEmailAPI, verifyEmailAPI } from "../../services/api.service"
 import { Input, Result, Typography, Form, notification, Spin, Button, Card, Row, Col } from "antd"
 import '../../styles/global.css'
+import { resendVerifyEmailAPI, verifyEmailAPI } from "../../services/auth.service"
 
 
 const { Text } = Typography

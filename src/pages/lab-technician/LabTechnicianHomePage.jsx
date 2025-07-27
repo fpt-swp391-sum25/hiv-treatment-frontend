@@ -4,8 +4,8 @@ import AdminHeader from "../../components/client/PageHeader";
 import LabTechnicianSideBar from '../../components/lab-technician/LabTechnicianSideBar';
 import { AuthContext } from "../../components/context/AuthContext";
 import { useContext, useEffect } from "react";
-import { fetchAccountAPI, fetchUserInfoAPI } from "../../services/api.service";
 import { HomeOutlined } from "@ant-design/icons";
+import { fetchAccountAPI } from "../../services/auth.service";
 
 const { Content } = Layout;
 

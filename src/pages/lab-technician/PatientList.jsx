@@ -1,10 +1,11 @@
 import { Button, Table, Typography, Input, Select, Row, Col, Tabs } from "antd";
 import { useState, useEffect } from "react";
-import { fetchUsersAPI, fetchScheduleAPI } from "../../services/api.service";
 import { useNavigate } from "react-router-dom";
 import { DatePicker } from "antd";
 import viVN from 'antd/es/date-picker/locale/vi_VN';
 import dayjs from 'dayjs';
+import { fetchScheduleAPI } from "../../services/schedule.service";
+import { fetchUsersAPI } from "../../services/user.service";
 
 const { Title } = Typography;
 const { Option } = Select;

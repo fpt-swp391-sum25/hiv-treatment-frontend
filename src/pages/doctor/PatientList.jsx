@@ -3,16 +3,14 @@ import {
     DatePicker, Select, Row, Col, Tabs
 } from "antd";
 import { useState, useEffect, useContext } from "react";
-import {
-    fetchUsersAPI,
-    fetchScheduleByDoctorIdAPI,
-    fetchHealthRecordByScheduleIdAPI
-} from "../../services/api.service";
 import { Outlet, useNavigate } from "react-router-dom";
 import dayjs from 'dayjs';
 import 'dayjs/locale/vi';
 import viVN from 'antd/es/date-picker/locale/vi_VN';
 import { AuthContext } from "../../components/context/AuthContext";
+import { fetchScheduleByDoctorIdAPI } from "../../services/schedule.service";
+import { fetchUsersAPI } from "../../services/user.service";
+import { fetchHealthRecordByScheduleIdAPI } from "../../services/health-record.service";
 dayjs.locale('vi');
 
 const { Content } = Layout;

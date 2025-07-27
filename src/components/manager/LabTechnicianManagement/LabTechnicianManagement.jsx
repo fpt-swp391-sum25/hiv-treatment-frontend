@@ -1,11 +1,11 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { Table, Space, Button, message, Tag, Row, Col, Card, Statistic, Select, Input, Alert } from 'antd';
 import { UserOutlined, CalendarOutlined, FileTextOutlined } from '@ant-design/icons';
-import { fetchAllLabTechniciansAPI, updateUserAPI } from '../../../services/api.service';
 import UpdateLabTechnicianModal from './UpdateLabTechnicianModal';
 import LabTechnicianDetail from './LabTechnicianDetail';
 import { AuthContext } from '../../context/AuthContext';
 import '../DoctorManagement/DoctorManagement.css';
+import { fetchAllLabTechniciansAPI } from '../../../services/user.service';
 
 const LabTechnicianManagement = () => {
     const [selectedLabTechnician, setSelectedLabTechnician] = useState(null);
@@ -14,7 +14,7 @@ const LabTechnicianManagement = () => {
     const [selectedLabTechnicianId, setSelectedLabTechnicianId] = useState('all');
     const [searchText, setSearchText] = useState('');
     const { user } = useContext(AuthContext);
-    
+
     // Thay thế useApi bằng useState và useEffect
     const [labTechnicians, setLabTechnicians] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -27,9 +27,9 @@ const LabTechnicianManagement = () => {
         try {
             const response = await fetchAllLabTechniciansAPI();
             console.log('Lab technicians API response:', response);
-            
+
             let processedData = [];
-            
+
             // Xử lý dữ liệu API trả về
             if (Array.isArray(response)) {
                 processedData = response;
@@ -41,7 +41,7 @@ const LabTechnicianManagement = () => {
                 console.warn('Unexpected response format:', response);
                 processedData = [];
             }
-            
+
             // Map dữ liệu theo cấu trúc chính xác từ BE
             const mappedData = processedData.map(tech => {
                 console.log('Original tech gender:', tech.gender); // Debug gender
@@ -62,7 +62,7 @@ const LabTechnicianManagement = () => {
             });
 
             console.log('Mapped lab technicians data:', mappedData);
-            
+
             setLabTechnicians(mappedData);
         } catch (error) {
             console.error('Error fetching lab technicians:', error);
@@ -73,7 +73,7 @@ const LabTechnicianManagement = () => {
             setLoading(false);
         }
     };
-    
+
     // Gọi API khi component mount
     useEffect(() => {
         loadLabTechnicians();
@@ -176,7 +176,7 @@ const LabTechnicianManagement = () => {
                     style={{ marginBottom: 16 }}
                 />
             )}
-            
+
             <Row gutter={[16, 16]} className="dashboard-stats">
                 <Col xs={24}>
                     <Card>

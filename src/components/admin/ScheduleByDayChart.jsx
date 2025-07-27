@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { Card } from "antd";
 import { Line, Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, Tooltip, Legend } from 'chart.js';
-import { fetchScheduleAPI } from '../../services/api.service';
 import dayjs from "dayjs";
+import { fetchScheduleAPI } from "../../services/schedule.service";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, Tooltip, Legend);
 

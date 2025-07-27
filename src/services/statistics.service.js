@@ -1,16 +1,4 @@
-import {
-  getAllSchedulesAPI,
-  fetchUsersByRoleAPI,
-  fetchUsersByRoleAndStatusAPI,
-  fetchUsersByRoleAndVerificationAPI,
-  getSchedulesWithFiltersAPI,
-  fetchAllDoctorsAPI,
-  getSchedulesByDateAPI,
-  getSchedulesByStatusAPI,
-  getSchedulesByTypeAPI,
-  fetchAllRegimensAPI,
-  fetchHealthRecordByScheduleIdAPI
-} from './api.service';
+
 import moment from 'moment';
 import {
   SCHEDULE_STATUS,
@@ -24,6 +12,8 @@ import {
   isScheduleConsultation,
   isAccountActive
 } from '../constants/status.constants';
+import { fetchUsersByRoleAPI } from './user.service';
+import { getAllSchedulesAPI } from './schedule.service';
 
 // Hàm xử lý thống kê nhân viên
 export const getStaffStatistics = async (filters = {}) => {
@@ -140,7 +130,7 @@ const processStaffStatistics = (doctors, labTechnicians, schedules, filters) => 
     const completedSchedules = doctorSchedules.filter(s =>
       isScheduleCompleted(s.status)
     );
-    
+
     // Sử dụng helper functions để lọc trạng thái
     const waitingSchedules = doctorSchedules.filter(s => isScheduleWaiting(s.status));
     const absentSchedules = doctorSchedules.filter(s => isScheduleAbsent(s.status));
@@ -226,7 +216,7 @@ const processAppointmentStatistics = (schedules, doctors, filters) => {
     (activeSchedules.length / totalSchedulesWithStatus) * 100 : 0;
 
   // Removed appointmentsByDayOfWeek calculation as it's no longer needed
-  
+
   // Phân bố lịch hẹn theo khung giờ
   const appointmentsByTimeSlot = calculateAppointmentsByTimeSlot(filteredSchedules);
 
@@ -279,20 +269,20 @@ const filterDataByDateRange = (data, filters) => {
 
 // Tính toán phân bố giới tính
 const calculateGenderDistribution = (users) => {
-  const maleCount = users.filter(user => 
-    user.gender === 'MALE' || 
-    user.gender === 'Nam' || 
+  const maleCount = users.filter(user =>
+    user.gender === 'MALE' ||
+    user.gender === 'Nam' ||
     user.gender === 'male'
   ).length;
-  
-  const femaleCount = users.filter(user => 
-    user.gender === 'FEMALE' || 
-    user.gender === 'Nữ' || 
+
+  const femaleCount = users.filter(user =>
+    user.gender === 'FEMALE' ||
+    user.gender === 'Nữ' ||
     user.gender === 'female'
   ).length;
-  
+
   const otherCount = users.length - maleCount - femaleCount;
-  
+
   return {
     maleCount,
     femaleCount,
@@ -306,12 +296,12 @@ const calculateGenderDistribution = (users) => {
 // Tính toán lịch hẹn theo khung giờ
 const calculateAppointmentsByTimeSlot = (schedules) => {
   const timeSlots = {};
-  
+
   schedules.forEach(schedule => {
     const slot = schedule.slot || '00:00:00';
     timeSlots[slot] = (timeSlots[slot] || 0) + 1;
   });
-  
+
   // Chuyển đổi thành mảng để dễ hiển thị
   return Object.entries(timeSlots).map(([slot, count]) => ({
     slot,
@@ -327,7 +317,7 @@ const calculateAppointmentsByDoctor = (schedules, doctors) => {
     const doctorId = doctor.id || doctor.userId;
     doctorMap[doctorId] = doctor.full_name || doctor.fullName || doctor.name || doctor.username;
   });
-  
+
   const appointmentsByDoctor = {};
   schedules.forEach(schedule => {
     const doctorId = schedule.doctorId;
@@ -336,7 +326,7 @@ const calculateAppointmentsByDoctor = (schedules, doctors) => {
       appointmentsByDoctor[doctorName] = (appointmentsByDoctor[doctorName] || 0) + 1;
     }
   });
-  
+
   // Chuyển đổi thành mảng để dễ hiển thị
   return Object.entries(appointmentsByDoctor).map(([doctorName, count]) => ({
     doctorName,
@@ -353,17 +343,17 @@ const calculateMonthlyTrend = (schedules) => {
     cancelled: 0,
     pending: 0
   }));
-  
+
   schedules.forEach(schedule => {
     const date = new Date(schedule.date);
     if (date.getFullYear() !== currentYear) return;
-    
+
     const month = date.getMonth();
-    
+
     // Tính tất cả lịch hẹn có status hợp lệ từ Backend
     if (isScheduleCompleted(schedule.status) ||
-        isScheduleCancelled(schedule.status) ||
-        isScheduleBooked(schedule.status)) {
+      isScheduleCancelled(schedule.status) ||
+      isScheduleBooked(schedule.status)) {
 
       monthlyData[month].total++;
 
@@ -376,6 +366,6 @@ const calculateMonthlyTrend = (schedules) => {
       }
     }
   });
-  
+
   return monthlyData;
 }; 

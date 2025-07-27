@@ -1,11 +1,11 @@
 import { useContext, useEffect, useState } from 'react';
 import { Form, Row, Col, Tag, Button, notification, Modal, Input } from 'antd';
-import { fetchRegimensByDoctorIdAPI, createRegimenAPI, deleteRegimenAPI } from '../../services/api.service';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import RegimenCard from '../../components/doctor/RegimenCard';
 import UpdateRegimenModal from '../../components/doctor/UpdateRegimenModal';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import { AuthContext } from '../../components/context/AuthContext';
+import { createRegimenAPI, deleteRegimenAPI, fetchRegimensByDoctorIdAPI } from '../../services/regimen.service';
 
 const RegimenList = () => {
   const [regimens, setRegimens] = useState([]);

@@ -15,13 +15,9 @@ import {
 } from 'antd';
 import { SaveOutlined, UserOutlined, CameraOutlined } from '@ant-design/icons';
 import { useOutletContext } from 'react-router-dom';
-import {
-  fetchAccountAPI,
-  fetchDoctorByIdAPI,
-  updateDoctorProfileAPI,
-  updateUserAPI,
-} from '../../services/api.service';
 import { AuthContext } from '../context/AuthContext';
+import { fetchDoctorByIdAPI, updateDoctorProfileAPI } from '../../services/doctorProfile.service';
+import { updateUserAPI } from '../../services/user.service';
 
 const { Title } = Typography;
 

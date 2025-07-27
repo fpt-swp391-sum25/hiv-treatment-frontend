@@ -1,11 +1,12 @@
 import { Card, Col, Row, Spin } from "antd";
 import { useEffect, useState } from "react";
-import { fetchAccountByRoleAPI, fetchScheduleAPI } from '../../services/api.service';
 
 import '../../styles/admin/AdminDashboard.css';
 import { Line, Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Title, Tooltip, Legend } from 'chart.js';
 import ScheduleByDayChart from '../../components/admin/ScheduleByDayChart';
+import { fetchAccountByRoleAPI } from "../../services/user.service";
+import { fetchScheduleAPI } from "../../services/schedule.service";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Title, Tooltip, Legend);
 
@@ -62,8 +63,8 @@ const AdminDashboard = () => {
                     newPatientsThisMonth,
                     schedulesByStatus,
                     totalUser: doctors.data?.length
-                    + labTechs.data?.length + managers.data?.length
-                    + patients.data?.length || 0
+                        + labTechs.data?.length + managers.data?.length
+                        + patients.data?.length || 0
 
                 });
             } catch (error) {
@@ -86,7 +87,7 @@ const AdminDashboard = () => {
                     <Card title="Tổng số người dùng hệ thống" className="admin-dashboard-card">
                         <div className="dashboard-number">{counts.totalUser}</div>
                     </Card>
-                    
+
                     <Card title="Phân loại nhân viên" className="pie-chart-dashboard-card">
                         <Pie
                             data={{

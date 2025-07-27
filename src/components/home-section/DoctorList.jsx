@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { message, Spin } from 'antd';
-import { fetchDoctorProfileAPI, fetchAccountByRoleAPI } from '../../services/api.service';
 import '../../styles/home-section/DoctorList.css';
 
 // Dùng ảnh từ thư mục public
 import defaultDoctorImage from '../../assets/doctor.png';
+import { fetchAccountByRoleAPI } from '../../services/user.service';
+import { fetchDoctorProfileAPI } from '../../services/doctorProfile.service';
 
 const DoctorList = () => {
   const [doctorAccounts, setDoctorAccounts] = useState([]);

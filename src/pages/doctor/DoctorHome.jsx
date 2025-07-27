@@ -3,9 +3,9 @@ import AdminHeader from "../../components/client/PageHeader";
 import DoctorPageSideBar from "../../components/doctor/DoctorPageSideBar";
 import { Breadcrumb, Layout, message } from "antd";
 import { useContext, useEffect } from "react";
-import { fetchAccountAPI } from "../../services/api.service";
 import { AuthContext } from "../../components/context/AuthContext";
 import { HomeOutlined } from "@ant-design/icons";
+import { fetchAccountAPI } from "../../services/auth.service";
 
 const { Header, Content } = Layout;
 

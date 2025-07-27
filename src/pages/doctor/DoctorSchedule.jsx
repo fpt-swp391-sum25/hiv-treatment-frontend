@@ -3,9 +3,9 @@ import { Select, Card } from 'antd';
 import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import '../../styles/doctor/Schedule.css';
-import { fetchScheduleByDoctorIdAPI } from '../../services/api.service';
 import { useOutletContext } from "react-router-dom";
 import { AuthContext } from '../../components/context/AuthContext';
+import { fetchScheduleByDoctorIdAPI } from '../../services/schedule.service';
 
 dayjs.extend(isoWeek);
 

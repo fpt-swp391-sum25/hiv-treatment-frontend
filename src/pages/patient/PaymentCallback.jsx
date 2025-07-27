@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react';
 import { Result, Button } from 'antd';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { createHealthRecordAPI, handlePaymentCallbackAPI } from '../../services/api.service';
+import { handlePaymentCallbackAPI } from '../../services/appointment.service';
+import { createHealthRecordAPI } from '../../services/health-record.service';
 
 
 const PaymentCallback = () => {
