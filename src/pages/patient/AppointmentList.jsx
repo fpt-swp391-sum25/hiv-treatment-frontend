@@ -99,7 +99,9 @@ const AppointmentList = () => {
 
             }))
             const filtered = withHealthStatus.filter(item => item.healthRecordStatus !== 'Đã khám')
-            setSchedule(filtered);
+            
+            const filteredStatus = filtered.filter(item => item.healthRecordStatus !== 'Đã tư vấn')
+            setSchedule(filteredStatus);
         } catch (error) {
             message.error(error.message || 'Lỗi khi tải lịch hẹn');
         } finally {
