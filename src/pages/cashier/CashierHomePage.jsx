@@ -22,7 +22,7 @@ import {
 import {
     fetchAccountAPI
 } from "../../services/auth.service";
-import CashierSideBar from "../../components/cashier/CashierSidebar";
+import CashierSideBar from "../../components/cashier/CashierSideBar";
 
 const { Content } = Layout;
 
