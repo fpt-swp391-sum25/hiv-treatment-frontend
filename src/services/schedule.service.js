@@ -307,6 +307,13 @@ const updateScheduleAPI = async (scheduleId, scheduleData) => {
         throw error;
     }
 };
+
+const searchSchedulesByNameAPI = (name) => {
+  return axios.get('/api/schedule/search', {
+    params: { name },
+  })
+}
+  
 export {
     fetchAllPatientScheduleAPI,
     fetchAllScheduleAPI,
@@ -326,5 +333,6 @@ export {
     deleteScheduleAPI,
     getSlotCountsAPI,
     checkBackendConnection,
-    updateScheduleAPI
+    updateScheduleAPI,
+    searchSchedulesByNameAPI
 }

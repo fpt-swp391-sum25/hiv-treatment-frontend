@@ -56,7 +56,7 @@ const DefaultRegimenPage = () => {
         resetAndClose();
         await loadRegimens();
       }
-    } catch (error) {
+    } catch {
       notification.error({ message: 'Lỗi tạo phác đồ' });
     }
   };

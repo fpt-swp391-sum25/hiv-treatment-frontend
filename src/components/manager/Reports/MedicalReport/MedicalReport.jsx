@@ -31,7 +31,7 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
     reports: [],
     statistics: {
       totalAppointments: 0,
-      totalTestResults: 0,
+      totalTestOrders: 0,
       testTypeDistribution: [],
       totalRegimens: 0,
       totalPatients: 0,
@@ -109,7 +109,7 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
         hivStatus: healthRecord.hiv_status || healthRecord.hivStatus,
         bloodType: healthRecord.blood_type || healthRecord.bloodType,
         weight: healthRecord.weight,
-        testResults: report.testResults || []
+        testOrders: report.testOrders || []
       });
       
       return acc;
@@ -194,7 +194,7 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
       // Tạo bảng thống kê tổng quan
       const overviewData = [
         ['Tổng số lịch hẹn đã hoàn thành', statistics.totalAppointments || 0],
-        ['Tổng số xét nghiệm đã thực hiện', statistics.totalTestResults || 0],
+        ['Tổng số xét nghiệm đã thực hiện', statistics.totalTestOrders || 0],
         ['Tổng số phác đồ điều trị', statistics.totalRegimens || 0],
         ['Tổng số bệnh nhân', statistics.totalPatients || 0],
         ['Tổng số ca dương tính HIV', statistics.totalPositiveHIV || 0],
@@ -316,7 +316,7 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
             <Card className="medical-stat-card">
               <Statistic
                 title="Tổng số xét nghiệm đã thực hiện"
-                value={statistics.totalTestResults}
+                value={statistics.totalTestOrders}
                 prefix={<ExperimentOutlined />}
               />
             </Card>
@@ -389,7 +389,7 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
     const { statistics } = reportData;
     
     // Sử dụng dữ liệu đã được tính toán từ useMemo
-    const { totalHIVTests, positiveRate } = hivStatistics;
+    const { totalHIVTests } = hivStatistics;
     
     // Kiểm tra dữ liệu HIV trends
     const hasValidTrends = Array.isArray(statistics.hivTrends) && statistics.hivTrends.length > 0;
@@ -612,9 +612,9 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
                           <div style={{ marginTop: 16 }}>
                             <Divider orientation="left" plain>Kết quả xét nghiệm</Divider>
                             
-                            {appointment.testResults && appointment.testResults.length > 0 ? (
+                            {appointment.testOrders && appointment.testOrders.length > 0 ? (
                               <Table
-                                dataSource={appointment.testResults}
+                                dataSource={appointment.testOrders}
                                 rowKey={(record, index) => `${appointment.id}-test-${index}`}
                           size="small"
                                 pagination={false}

@@ -1,4 +1,3 @@
-import React from 'react';
 import { Layout, Menu } from 'antd';
 import {
   BarChartOutlined,
@@ -19,11 +18,20 @@ const ManagerSidebar = () => {
   const location = useLocation();
 
   const menuItems = [
-
     {
-      key: '/manager',
+      key: '/manager/schedule',
+      icon: <CalendarOutlined />,
+      label: 'Quản lí lịch',
+    },
+    {
+      key: '/manager/dashboard',
       icon: <BarChartOutlined />,
       label: 'Thống kê',
+    },
+    {
+      key: '/manager/reports',
+      icon: <FileOutlined />,
+      label: 'Báo cáo',
     },
     {
       key: '/manager/doctors',
@@ -36,19 +44,9 @@ const ManagerSidebar = () => {
       label: 'Kĩ thuật viên',
     },
     {
-      key: '/manager/schedule',
-      icon: <CalendarOutlined />,
-      label: 'Quản lí lịch',
-    },
-    {
       key: '/manager/default-regimen',
       icon: <SolutionOutlined />,
       label: 'Phác đồ mặc định',
-    },
-    {
-      key: '/manager/reports',
-      icon: <FileOutlined />,
-      label: 'Báo cáo',
     },
     {
       key: '/manager/profile',

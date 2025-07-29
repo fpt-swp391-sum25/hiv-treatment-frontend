@@ -15,7 +15,7 @@ import {
 } from './user.service';
 import { 
   fetchHealthRecordByScheduleIdAPI,
-  fetchTestResultByHealthRecordIdAPI
+  fetchTestOrderByHealthRecordIdAPI
  } from './health-record.service';
 
 dayjs.extend(quarterOfYear);
@@ -98,14 +98,13 @@ export const getStaffData = async () => {
     }
 
     // 3. Lấy danh sách kết quả xét nghiệm theo từng health record
-    let testResultData = [];
+    let testOrderData = [];
     try {
       // Lấy danh sách health records từ schedules
       const healthRecordIds = [...new Set(scheduleData.map(schedule => schedule.healthRecordId).filter(Boolean))];
 
-      // Lấy test results cho từng health record
-      const testResultPromises = healthRecordIds.map(healthRecordId =>
-        axios.get(`/api/test-result/health-record-id/${healthRecordId}`)
+      const testOrderPromises = healthRecordIds.map(healthRecordId =>
+        axios.get(`/api/test-order/health-record-id/${healthRecordId}`)
           .then(response => response.data || [])
           .catch(error => {
             console.error(`Error fetching test results for health record ${healthRecordId}:`, error);
@@ -113,11 +112,11 @@ export const getStaffData = async () => {
           })
       );
 
-      const testResultResponses = await Promise.all(testResultPromises);
-      testResultData = testResultResponses.flat();
+      const testOrderResponses = await Promise.all(testOrderPromises);
+      testOrderData = testOrderResponses.flat();
     } catch (error) {
       console.error('Error processing test results:', error);
-      testResultData = [];
+      testOrderData = [];
     }
 
     // 4. Xử lý và tổng hợp dữ liệu
@@ -145,8 +144,8 @@ export const getStaffData = async () => {
 
     // Tính toán thống kê cho kỹ thuật viên
     const labTechStats = labTechs.map(tech => {
-      const techTestResults = testResultData.filter(t => t.technicianId === tech.id);
-      const completedTests = techTestResults.filter(t => t.status === 'COMPLETED');
+      const techTestOrders = testOrderData.filter(t => t.technicianId === tech.id);
+      const completedTests = techTestOrders.filter(t => t.status === 'COMPLETED');
 
       return {
         id: tech.id,
@@ -155,8 +154,8 @@ export const getStaffData = async () => {
         phoneNumber: tech.phoneNumber,
         role: 'LAB_TECHNICIAN',
         status: tech.status || 'ACTIVE',
-        casesHandled: techTestResults.length,
-        performance: calculatePerformance(techTestResults.length, completedTests.length),
+        casesHandled: techTestOrders.length,
+        performance: calculatePerformance(techTestOrders.length, completedTests.length),
         created_at: tech.created_at || tech.createdAt
       };
     });
@@ -179,12 +178,12 @@ export const getStaffData = async () => {
       managers: managerStats,
       totalStaff: doctors.length + labTechs.length + managers.length,
       totalAppointments: scheduleData.length,
-      totalTests: testResultData.length,
+      totalTests: testOrderData.length,
       statistics: {
         completedAppointments: scheduleData.filter(s => s.status === 'COMPLETED').length,
-        completedTests: testResultData.filter(t => t.status === 'COMPLETED').length,
+        completedTests: testOrderData.filter(t => t.status === 'COMPLETED').length,
         pendingAppointments: scheduleData.filter(s => s.status === 'PENDING').length,
-        pendingTests: testResultData.filter(t => t.status === 'PENDING').length
+        pendingTests: testOrderData.filter(t => t.status === 'PENDING').length
       }
     };
 
@@ -251,13 +250,13 @@ export const getScheduleStats = async (params = {}) => {
 };
 
 // Test Results Stats
-export const getTestResultStats = async (healthRecordId) => {
+export const getTestOrderStats = async (healthRecordId) => {
   try {
     if (!healthRecordId) {
       throw new Error('Health record ID is required');
     }
 
-    const response = await axios.get(`/api/test-results/${healthRecordId}`);
+    const response = await axios.get(`/api/test-orders/${healthRecordId}`);
 
     if (!response.data) {
       throw new Error('No test result data received');
@@ -704,16 +703,16 @@ export const getMedicalReportData = async (filters = {}) => {
     // 4. Lấy test results cho các health records
     const validHealthRecordIds = healthRecords.filter(hr => hr && hr.id).map(hr => hr.id);
 
-    const testResultsPromises = validHealthRecordIds.map(healthRecordId => {
-      return fetchTestResultByHealthRecordIdAPI(healthRecordId)
+    const testOrdersPromises = validHealthRecordIds.map(healthRecordId => {
+      return fetchTestOrderByHealthRecordIdAPI(healthRecordId)
         .then(response => response?.data || [])
         .catch(() => []);
     });
 
-    const testResultsArrays = await Promise.allSettled(testResultsPromises);
-    const allTestResults = testResultsArrays
-      .filter(result => result.status === 'fulfilled')
-      .flatMap(result => result.value);
+    const testOrdersArrays = await Promise.allSettled(testOrdersPromises);
+    const allTestOrders = testOrdersArrays
+      .filter(order => order.status === 'fulfilled')
+      .flatMap(order => order.value);
 
     // 5. Tính toán các số liệu thống kê
     // Đếm số lịch hẹn có treatmentStatus = "Đã khám"
@@ -723,7 +722,7 @@ export const getMedicalReportData = async (filters = {}) => {
     }).length;
 
     // Đếm số xét nghiệm đã thực hiện từ bảng test_result
-    const testsPerformed = allTestResults.length;
+    const testsPerformed = allTestOrders.length;
 
     // Tổng số phác đồ điều trị
     const totalRegimens = regimens.length;
@@ -773,8 +772,8 @@ export const getMedicalReportData = async (filters = {}) => {
         (healthRecord.schedule ? healthRecord.schedule.id : null);
       const schedule = schedules.find(s => s.id === scheduleId) || {};
 
-      // Tìm các test results tương ứng
-      const testResults = allTestResults.filter(test =>
+      // Tìm các test orders tương ứng
+      const testOrders = allTestOrders.filter(test =>
         test.healthRecordId === healthRecord.id ||
         test.health_record_id === healthRecord.id
       );
@@ -782,7 +781,7 @@ export const getMedicalReportData = async (filters = {}) => {
       return {
         schedule,
         healthRecord,
-        testResults
+        testOrders
       };
     });
 
@@ -790,7 +789,7 @@ export const getMedicalReportData = async (filters = {}) => {
     const filteredReports = filterMedicalReports(reports, filters);
 
     // 9. Tổng hợp thống kê về test type distribution
-    const testTypeDistribution = calculateTestTypeDistributionFromTestResults(allTestResults);
+    const testTypeDistribution = calculateTestTypeDistributionFromTestOrders(allTestOrders);
 
     // 10. Tính toán xu hướng HIV theo thời gian
     const hivTrends = calculateHIVTrends(healthRecords);
@@ -799,7 +798,7 @@ export const getMedicalReportData = async (filters = {}) => {
       reports: filteredReports,
       statistics: {
         totalAppointments: completedAppointments, // Số lịch hẹn đã khám
-        totalTestResults: testsPerformed, // Tổng số xét nghiệm đã thực hiện
+        totalTestOrders: testsPerformed, // Tổng số xét nghiệm đã thực hiện
         testTypeDistribution: testTypeDistribution, // Phân bố theo loại xét nghiệm
         totalRegimens: totalRegimens, // Tổng số phác đồ điều trị
         totalPatients: totalPatients, // Tổng số bệnh nhân
@@ -814,7 +813,7 @@ export const getMedicalReportData = async (filters = {}) => {
       reports: [],
       statistics: {
         totalAppointments: 0,
-        totalTestResults: 0,
+        totalTestOrders: 0,
         testTypeDistribution: [],
         totalRegimens: 0,
         totalPatients: 0,
@@ -897,8 +896,8 @@ const filterMedicalReports = (reports, filters) => {
     }
 
     // Lọc theo loại xét nghiệm
-    if (testType && report.testResults) {
-      const hasTestType = report.testResults.some(test => test.type === testType);
+    if (testType && report.testOrders) {
+      const hasTestType = report.testOrders.some(test => test.type === testType);
       if (!hasTestType) {
         return false;
       }
@@ -914,7 +913,7 @@ const calculateMedicalStatistics = (reports) => {
   const totalAppointments = reports.length;
 
   // Tổng số kết quả xét nghiệm
-  let totalTestResults = 0;
+  let totalTestOrders = 0;
   let testTypeCount = {};
 
   // Biến cho thống kê mới
@@ -928,11 +927,11 @@ const calculateMedicalStatistics = (reports) => {
       uniquePatientIds.add(report.schedule.patientId);
     }
 
-    if (report.testResults) {
-      totalTestResults += report.testResults.length;
+    if (report.testOrders) {
+      totalTestOrders += report.testOrders.length;
 
       // Đếm theo loại xét nghiệm
-      report.testResults.forEach(test => {
+      report.testOrders.forEach(test => {
         const type = test.type || 'Không xác định';
         testTypeCount[type] = (testTypeCount[type] || 0) + 1;
 
@@ -960,12 +959,12 @@ const calculateMedicalStatistics = (reports) => {
   const testTypeDistribution = Object.entries(testTypeCount).map(([type, count]) => ({
     type,
     count,
-    percentage: totalTestResults > 0 ? Math.round((count / totalTestResults) * 100) : 0
+    percentage: totalTestOrders > 0 ? Math.round((count / totalTestOrders) * 100) : 0
   }));
 
   return {
     totalAppointments,
-    totalTestResults,
+    totalTestOrders,
     testTypeDistribution,
     totalPatients: uniquePatientIds.size,
     totalPositiveHIV,
@@ -976,14 +975,14 @@ const calculateMedicalStatistics = (reports) => {
 // Helper function để tính phân bố theo loại xét nghiệm
 const calculateTestTypeDistribution = (reports) => {
   let testTypeCount = {};
-  let totalTestResults = 0;
+  let totalTestOrders = 0;
 
   reports.forEach(report => {
-    if (report.testResults && Array.isArray(report.testResults)) {
-      totalTestResults += report.testResults.length;
+    if (report.testOrders && Array.isArray(report.testOrders)) {
+      totalTestOrders += report.testOrders.length;
 
       // Đếm theo loại xét nghiệm
-      report.testResults.forEach(test => {
+      report.testOrders.forEach(test => {
         const type = test.type || 'Không xác định';
         testTypeCount[type] = (testTypeCount[type] || 0) + 1;
       });
@@ -994,7 +993,7 @@ const calculateTestTypeDistribution = (reports) => {
   return Object.entries(testTypeCount).map(([type, count]) => ({
     type,
     count,
-    percentage: totalTestResults > 0 ? Math.round((count / totalTestResults) * 100) : 0
+    percentage: totalTestOrders > 0 ? Math.round((count / totalTestOrders) * 100) : 0
   }));
 };
 
@@ -1003,10 +1002,10 @@ export const formatMedicalDataForExport = (reports) => {
   const exportData = [];
 
   reports.forEach(report => {
-    const { schedule, healthRecord, testResults } = report;
+    const { schedule, healthRecord, testOrders } = report;
 
-    if (testResults && testResults.length > 0) {
-      testResults.forEach(test => {
+    if (testOrders && testOrders.length > 0) {
+      testOrders.forEach(test => {
         exportData.push({
           'ID Lịch hẹn': schedule?.id || '',
           'Bệnh nhân': schedule?.patientName || '',
@@ -1063,20 +1062,20 @@ export const exportMedicalReportToExcel = async (startDate, endDate) => {
 };
 
 // Helper function để tính phân bố theo loại xét nghiệm từ test results
-const calculateTestTypeDistributionFromTestResults = (testResults) => {
-  if (!Array.isArray(testResults) || testResults.length === 0) {
+const calculateTestTypeDistributionFromTestOrders = (testOrders) => {
+  if (!Array.isArray(testOrders) || testOrders.length === 0) {
     return [];
   }
 
   // Đếm số lượng mỗi loại xét nghiệm
   const typeCounts = {};
-  testResults.forEach(test => {
+  testOrders.forEach(test => {
     const type = test.type || 'Không xác định';
     typeCounts[type] = (typeCounts[type] || 0) + 1;
   });
 
   // Chuyển đổi thành mảng và tính phần trăm
-  const totalTests = testResults.length;
+  const totalTests = testOrders.length;
   return Object.entries(typeCounts).map(([type, count]) => ({
     type,
     count,

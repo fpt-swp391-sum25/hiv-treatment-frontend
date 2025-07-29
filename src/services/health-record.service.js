@@ -49,8 +49,8 @@ const createHealthRecordAPI = (paymentRef) => {
     return axios.post(URL_BACKEND, data)
 }
 
-const fetchTestResultByHealthRecordIdAPI = (healthRecordId) => {
-    const URL_BACKEND = `/api/test-result/health-record-id/${healthRecordId}`
+const fetchTestOrderByHealthRecordIdAPI = (healthRecordId) => {
+    const URL_BACKEND = `/api/test-order/health-record-id/${healthRecordId}`
     return axios.get(URL_BACKEND)
 }
 
@@ -62,7 +62,7 @@ export {
     fetchHealthRecordByScheduleIdAPI,
     createHealthRecordAPI,
     fetchHealthRecordsAPI,
-    fetchTestResultByHealthRecordIdAPI,
+    fetchTestOrderByHealthRecordIdAPI,
     updateHealthRecordAPI,
     getHealthRecordByDoctorIdAPI,
 }

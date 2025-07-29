@@ -34,7 +34,7 @@ const Dashboard = () => {
 
   const [medicalStats, setMedicalStats] = useState({
     totalAppointments: 0,
-    totalTestResults: 0
+    totalTestOrders: 0
   });
 
   const [filters, setFilters] = useState({
@@ -171,7 +171,7 @@ const Dashboard = () => {
         if (response && response.statistics) {
           setMedicalStats({
             totalAppointments: response.statistics.totalAppointments || 0,
-            totalTestResults: response.statistics.totalTestResults || 0
+            totalTestOrders: response.statistics.totalTestOrders || 0
           });
         }
       } catch (error) {
@@ -479,7 +479,7 @@ const Dashboard = () => {
           <Col xs={24} sm={12} md={12} lg={12}>
             <KPICard
               title="Tổng số xét nghiệm đã thực hiện"
-              value={medicalStats.totalTestResults || 0}
+              value={medicalStats.totalTestOrders || 0}
               type="success"
               icon={<ExperimentOutlined />}
             />
