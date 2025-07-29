@@ -38,7 +38,7 @@ import {
   } from "../context/AuthContext.jsx";
 import { 
   fetchHealthRecordByScheduleIdAPI, 
-  fetchTestResultByHealthRecordIdAPI, 
+  fetchTestOrderByHealthRecordIdAPI, 
   updateHealthRecordAPI 
 } from "../../services/health-record.service.js";
 import { 
@@ -48,17 +48,17 @@ import {
   fetchUsersByRoleAPI 
 } from "../../services/user.service.js";
 import { 
-  createTestResultAPI, 
-  deleteTestResultAPI
-} from "../../services/testResult.service.js";
+  createTestOrderAPI, 
+  deleteTestOrderAPI
+} from "../../services/testOrder.service.js";
 
 const PatientDetailDoctorView = () => {
   const [healthRecordData, setHealthRecordData] = useState({});
-  const [testResultData, setTestResultData] = useState([]);
+  const [testOrderData, setTestOrderData] = useState([]);
   const [isIndiateRegimenModalOpen, setIsIndiateRegimenModalOpen] = useState(false);
   const [regimenOptions, setRegimenOptions] = useState([]);
   const [selectedRegimenId, setSelectedRegimenId] = useState(null);
-  const [isCreateTestResultModalOpen, setIsCreateTestResultModalOpen] = useState(false);
+  const [isCreateTestOrderModalOpen, setIsCreateTestOrderModalOpen] = useState(false);
   const [newTestTypes, setNewTestTypes] = useState([]);
   const [currentTestType, setCurrentTestType] = useState("");
   const [height, setHeight] = useState("");
@@ -81,8 +81,8 @@ const PatientDetailDoctorView = () => {
         setHeight(healthRecord.height || "");
         setWeight(healthRecord.weight || "");
         setTreatmentStatus(healthRecord.treatmentStatus || "");
-        const testResultRes = await fetchTestResultByHealthRecordIdAPI(healthRecord.id);
-        setTestResultData(testResultRes.data || []);
+        const testOrderRes = await fetchTestOrderByHealthRecordIdAPI(healthRecord.id);
+        setTestOrderData(testOrderRes.data || []);
       }
       const regimenRes = await fetchRegimensByDoctorIdAPI(user.id);
       setRegimenOptions(regimenRes.data || []);
@@ -149,12 +149,12 @@ const PatientDetailDoctorView = () => {
   const resetAndClose = () => {
     setSelectedRegimenId(null);
     setIsIndiateRegimenModalOpen(false);
-    setIsCreateTestResultModalOpen(false);
+    setIsCreateTestOrderModalOpen(false);
     setCurrentTestType("");
     setNewTestTypes([]);
   };
 
-  const handleCreateTestResultsBatch = async () => {
+  const handleCreateTestOrdersBatch = async () => {
     try {
       if (newTestTypes.length === 0) {
         notification.warning({
@@ -165,7 +165,7 @@ const PatientDetailDoctorView = () => {
       }
 
       for (const type of newTestTypes) {
-        await createTestResultAPI(type, "", "", healthRecordData.id);
+        await createTestOrderAPI(type, "", "", healthRecordData.id);
       }
 
       const labTechRes = await fetchUsersByRoleAPI("LAB_TECHNICIAN");
@@ -198,9 +198,9 @@ const PatientDetailDoctorView = () => {
     }
   };
 
-  const handleDeleteTestResult = async (testResultId) => {
+  const handleDeleteTestOrder = async (testOrderId) => {
     try {
-      const response = await deleteTestResultAPI(testResultId);
+      const response = await deleteTestOrderAPI(testOrderId);
       if (response.data) {
         notification.success({
           message: 'Hệ thống',
@@ -296,14 +296,14 @@ const PatientDetailDoctorView = () => {
 
       <Divider orientation="center" style={{ marginTop: 10 + 'vh' }}>Kết quả xét nghiệm</Divider>
 
-      <Button type="primary" icon={<PlusOutlined />} onClick={() => setIsCreateTestResultModalOpen(true)} style={{ marginBottom: 16 }}>
+      <Button type="primary" icon={<PlusOutlined />} onClick={() => setIsCreateTestOrderModalOpen(true)} style={{ marginBottom: 16 }}>
         Tạo mới
       </Button>
 
       <Modal
         title="Tạo kết quả xét nghiệm"
-        open={isCreateTestResultModalOpen}
-        onOk={handleCreateTestResultsBatch}
+        open={isCreateTestOrderModalOpen}
+        onOk={handleCreateTestOrdersBatch}
         onCancel={resetAndClose}
         okText="Tạo"
         cancelText="Hủy"
@@ -355,7 +355,7 @@ const PatientDetailDoctorView = () => {
         </Form>
       </Modal>
       
-      {testResultData.map((test) => (
+      {testOrderData.map((test) => (
         <Card key={test.id} style={{ marginTop: 16 }}>
           <Row gutter={5 + "vw"} align="middle">
             <Col span={8}>
@@ -397,7 +397,7 @@ const PatientDetailDoctorView = () => {
               <Space>
                 <Popconfirm
                   title="Xoá kết quả?"
-                  onConfirm={() => handleDeleteTestResult(test.id)}
+                  onConfirm={() => handleDeleteTestOrder(test.id)}
                   okText="Có"
                   cancelText="Không"
                 >

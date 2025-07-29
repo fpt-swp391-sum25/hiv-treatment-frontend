@@ -25,10 +25,10 @@ import {
   fetchAccountByRoleAPI
 } from '../../services/user.service';
 
-const AccountLabTechnicians = () => {
+const AccountCashiers = () => {
   const [form] = Form.useForm();
   const [data, setData] = useState([]);
-  const [role] = useState("LAB_TECHNICIAN");
+  const [role] = useState("CASHIER");
   const [dataUpdate, setDataUpdate] = useState({});
   const [loading, setLoading] = useState(false);
   const [isOpenModal, setIsOpenModal] = useState(false);
@@ -105,6 +105,11 @@ const AccountLabTechnicians = () => {
           description: 'Xoá tài khoản thành công',
         });
         await loadAccounts();
+      } else {
+        notification.error({
+          message: 'Hệ thống',
+          description: 'Xoá tài khoản thất bại',
+        });
       }
     } catch (error) {
       notification.error({
@@ -183,13 +188,13 @@ const AccountLabTechnicians = () => {
       ) : (
         <>
           <div style={{ display: 'flex', justifyContent: 'space-between', padding: '15px' }}>
-            <h2>Tài khoản kỹ thuật viên</h2>
+            <h2>Tài khoản thu ngân</h2>
             <Button onClick={() => setIsOpenModal(true)} type='primary'>
-              <PlusCircleOutlined /> Tạo mới
+              <PlusCircleOutlined />Tạo mới
             </Button>
           </div>
 
-          <Table columns={columns} dataSource={data} rowKey="id" />
+          <Table columns={columns} dataSource={data} rowKey="id" loading={loading} />
 
           <UpdateUserModal
             isUpdateModalOpen={isUpdateModalOpen}
@@ -203,10 +208,10 @@ const AccountLabTechnicians = () => {
             title="Tạo tài khoản"
             open={isOpenModal}
             onCancel={resetAndClose}
-            onOk={() => form.submit()}
             okText="Tạo"
             cancelText="Huỷ"
             confirmLoading={loading}
+            onOk={() => form.submit()}
           >
             <Form
               form={form}
@@ -247,4 +252,4 @@ const AccountLabTechnicians = () => {
   );
 };
 
-export default AccountLabTechnicians;
+export default AccountCashiers;

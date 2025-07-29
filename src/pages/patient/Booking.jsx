@@ -49,6 +49,7 @@ import {
     fetchScheduleByDateAPI, 
     registerScheduleAPI 
 } from '../../services/schedule.service';
+import { createCashPaymentAPI } from '../../services/payment.service';
 
 
 const { Link } = Typography;
@@ -240,45 +241,6 @@ const Booking = () => {
         }
     };
 
-    const onFinish = async (values) => {
-        try {
-            setLoading(true);
-            const selectedSchedules = availableSchedules.filter(
-                (schedule) => schedule.slot === values.slot
-            );
-            if (selectedSchedules.length === 0) {
-                throw new Error('Lịch hẹn không hợp lệ');
-            }
-
-            let schedule;
-            if (values.doctor) {
-                schedule = selectedSchedules.find((schedule) => schedule.doctor.id === values.doctor);
-                if (!schedule) {
-                    throw new Error('Bác sĩ không có lịch hẹn cho khung giờ này');
-                }
-            } else {
-                schedule = selectedSchedules[0];
-            }
-
-            await registerScheduleAPI({
-                scheduleId: schedule.id,
-                patientId: user.id,
-                type: values.type,
-            });
-
-            const paymentResponse = await initiatePaymentAPI({
-                scheduleId: schedule.id,
-                amount: selectedAmount,
-            });
-
-            window.location.href = paymentResponse.data;
-        } catch (error) {
-            message.error(error.message || 'Đặt lịch thất bại');
-        } finally {
-            setLoading(false);
-        }
-    };
-
     const disabledDate = (current) => {
         const isBeforeToday = current && current < dayjs().startOf('day');
         const isSunday = current && current.day() === 0;
@@ -292,6 +254,65 @@ const Booking = () => {
             .replace(/[\u0300-\u036f]/g, '')
             .replace(/\s+/g, ' ')
             .trim();
+    };
+
+    const onFinish = async (values) => {
+        try {
+            setLoading(true);
+
+            const patientSchedules = availableSchedules.filter(
+                (s) =>
+                    s.patient?.id === user.id &&
+                    dayjs(s.date).isSame(dayjs(values.date), 'day') &&
+                    s.status === 'Đang hoạt động'
+            );
+            if (patientSchedules.length > 0) {
+                message.warning('Bạn đã có lịch hẹn trong ngày này và đang hoạt động.');
+                setLoading(false);
+                return;
+            }
+
+            const selectedSchedules = availableSchedules.filter(
+                (schedule) => schedule.slot === values.slot
+            );
+
+            if (selectedSchedules.length === 0) {
+                throw new Error('Lịch hẹn không hợp lệ');
+            }
+
+            let schedule;
+            if (values.doctor) {
+                schedule = selectedSchedules.find((s) => s.doctor.id === values.doctor);
+                if (!schedule) throw new Error('Bác sĩ không có lịch hẹn cho khung giờ này');
+            } else {
+                schedule = selectedSchedules[0];
+            }
+
+            await registerScheduleAPI({
+                scheduleId: schedule.id,
+                patientId: user.id,
+                type: values.type,
+            });
+
+            if (values.paymentMethod === 'online') {
+                const paymentResponse = await initiatePaymentAPI({
+                    scheduleId: schedule.id,
+                    amount: selectedAmount,
+                });
+                window.location.href = paymentResponse.data;
+            } else {
+                 await createCashPaymentAPI({
+                    scheduleId: schedule.id,
+                    amount: selectedAmount
+                });
+                message.success('Đặt lịch thành công! Vui lòng thanh toán tiền mặt tại quầy.');
+            }
+
+        } catch (error) {
+            message.error(error.message || 'Đặt lịch thất bại');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -398,6 +419,17 @@ const Booking = () => {
                                         </Descriptions.Item>
                                     </Descriptions>
                                 )}
+                                <Form.Item
+                                    name="paymentMethod"
+                                    label="Hình thức thanh toán"
+                                    initialValue="online"
+                                    rules={[{ required: true, message: 'Vui lòng chọn hình thức thanh toán' }]}
+                                    >
+                                    <Select>
+                                        <Option value="online">Thanh toán trực tuyến</Option>
+                                        <Option value="cash">Thanh toán bằng tiền mặt</Option>
+                                    </Select>
+                                </Form.Item>
                                 <Form.Item>
                                     <Button block type="primary" size="large" htmlType="submit" loading={loading} style={{ fontSize: 18, borderRadius: 8, height: 48 }}>
                                         Xác nhận đặt lịch

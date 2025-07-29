@@ -20,18 +20,18 @@ import {
   Select
 } from 'antd';
 import { EditOutlined } from '@ant-design/icons';
-import UpdateTestResultModal from '../../components/lab-technician/UpdateTestResultModal.jsx';
+import UpdateTestOrderModal from '../../components/lab-technician/UpdateTestOrderModal.jsx';
 import dayjs from 'dayjs';
 import { createNotification } from "../../services/notification.service";
-import { fetchHealthRecordByScheduleIdAPI, fetchTestResultByHealthRecordIdAPI, updateHealthRecordAPI } from "../../services/health-record.service.js";
-import { updateTestResultAPI } from "../../services/testResult.service.js";
+import { fetchHealthRecordByScheduleIdAPI, fetchTestOrderByHealthRecordIdAPI, updateHealthRecordAPI } from "../../services/health-record.service.js";
+import { updateTestOrderAPI } from "../../services/testOrder.service.js";
 
 
 const PatientDetail = () => {
   const [dataUpdate, setDataUpdate] = useState({})
   const [healthRecordData, setHealthRecordData] = useState({})
-  const [testResultData, setTestResultData] = useState([])
-  const [isUpdateTestResultModalOpen, setIsUpdateTestResultModalOpen] = useState(false)
+  const [testOrderData, setTestOrderData] = useState([])
+  const [isUpdateTestOrderModalOpen, setIsUpdateTestOrderModalOpen] = useState(false)
 
   const { id } = useParams()
   const { Title } = Typography
@@ -46,8 +46,8 @@ const PatientDetail = () => {
       const healthRecord = (await fetchHealthRecordByScheduleIdAPI(id)).data
       if (healthRecord) {
         setHealthRecordData(healthRecord)
-        const testResultRes = await fetchTestResultByHealthRecordIdAPI(healthRecord.id)
-        setTestResultData(testResultRes.data || [])
+        const testOrderRes = await fetchTestOrderByHealthRecordIdAPI(healthRecord.id)
+        setTestOrderData(testOrderRes.data || [])
       }
     } catch (error) {
       console.error("Lỗi khi tải dữ liệu:", error)
@@ -74,8 +74,8 @@ const PatientDetail = () => {
 
       const response = await updateHealthRecordAPI(healthRecordData.id, updatePayload)
 
-      for (const test of testResultData) {
-        await updateTestResultAPI(
+      for (const test of testOrderData) {
+        await updateTestOrderAPI(
           test.id,
           test.type,
           test.result,
@@ -94,7 +94,7 @@ const PatientDetail = () => {
           description: 'Cập nhật thông tin sức khỏe thành công!'
         })
 
-        const allResultsFilled = testResultData.every(
+        const allResultsFilled = testOrderData.every(
           (test) => test.result !== null && test.result !== ''
         )
 
@@ -173,7 +173,7 @@ const PatientDetail = () => {
 
       <Divider orientation="center" style={{ marginTop: '10vh' }}>Kết quả xét nghiệm</Divider>
 
-      {testResultData.map((test) => (
+      {testOrderData.map((test) => (
         <Card key={test.id} style={{ marginTop: 16 }}>
           <Row gutter="5vw">
             <Col span={8}>
@@ -197,7 +197,7 @@ const PatientDetail = () => {
                   style={{ color: 'orange', cursor: 'pointer' }}
                   onClick={() => {
                     setDataUpdate(test)
-                    setIsUpdateTestResultModalOpen(true)
+                    setIsUpdateTestOrderModalOpen(true)
                   }}
                 />
               </Space>
@@ -206,12 +206,12 @@ const PatientDetail = () => {
         </Card>
       ))}
 
-      <UpdateTestResultModal
-        isUpdateTestResultModalOpen={isUpdateTestResultModalOpen}
-        setIsUpdateTestResultModalOpen={setIsUpdateTestResultModalOpen}
+      <UpdateTestOrderModal
+        isUpdateTestOrderModalOpen={isUpdateTestOrderModalOpen}
+        setIsUpdateTestOrderModalOpen={setIsUpdateTestOrderModalOpen}
         dataUpdate={dataUpdate}
         onPreviewUpdate={(updatedTest) => {
-          setTestResultData((prev) =>
+          setTestOrderData((prev) =>
             prev.map((test) => test.id === updatedTest.id ? updatedTest : test)
           )
         }}
