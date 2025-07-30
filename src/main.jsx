@@ -64,7 +64,6 @@ import AppointmentResult from './pages/patient/AppointmentResult';
 import PatientAppointmentHistory from './pages/patient/PatientAppointmentHistory';
 import AppointmentList from './pages/patient/AppointmentList';
 import ResetPassword from './pages/auth/ResetPassword';
-import VerifyEmail from './pages/auth/VerifyEmail';
 
 // Import for mail verification
 import VerifyEmail from './pages/auth/VerifyEmail';
