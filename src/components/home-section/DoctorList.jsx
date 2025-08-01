@@ -1,20 +1,20 @@
-import { 
-  useState, 
-  useEffect 
+import {
+  useState,
+  useEffect
 } from 'react';
-import { 
-  Link 
+import {
+  Link
 } from 'react-router-dom';
-import { 
-  Spin 
+import {
+  Spin
 } from 'antd';
 import '../../styles/home-section/DoctorList.css';
 import defaultDoctorImage from '../../assets/doctor.png';
-import { 
-  fetchAccountByRoleAPI 
+import {
+  fetchAccountByRoleAPI
 } from '../../services/user.service';
-import { 
-  fetchDoctorProfileAPI 
+import {
+  fetchDoctorProfileAPI
 } from '../../services/doctorProfile.service';
 
 const DoctorList = () => {

@@ -1,21 +1,21 @@
-import { 
-    Button, 
-    Card, 
-    Descriptions, 
-    Layout, 
-    Spin 
+import {
+    Button,
+    Card,
+    Descriptions,
+    Layout,
+    Spin
 } from "antd";
 import dayjs from "dayjs";
-import { 
-    useEffect, 
-    useState 
+import {
+    useEffect,
+    useState
 } from "react";
-import { 
-    useNavigate, 
-    useParams 
+import {
+    useNavigate,
+    useParams
 } from "react-router-dom";
-import { 
-    fetchHealthRecordByScheduleIdAPI 
+import {
+    fetchHealthRecordByScheduleIdAPI
 } from "../../services/health-record.service";
 
 const { Content } = Layout

@@ -1,26 +1,26 @@
-import { 
-    useEffect, 
-    useState 
+import {
+    useEffect,
+    useState
 } from "react"
-import { 
-    Link, 
-    useLocation 
+import {
+    Link,
+    useLocation
 } from "react-router-dom"
-import { 
-    Input, 
-    Result, 
-    Typography, 
-    Form, 
-    notification, 
-    Spin, 
-    Button, 
-    Row, 
-    Col 
+import {
+    Input,
+    Result,
+    Typography,
+    Form,
+    notification,
+    Spin,
+    Button,
+    Row,
+    Col
 } from "antd"
 import '../../styles/global.css'
-import { 
-    resendVerifyEmailAPI, 
-    verifyEmailAPI 
+import {
+    resendVerifyEmailAPI,
+    verifyEmailAPI
 } from "../../services/auth.service"
 
 const { Text } = Typography

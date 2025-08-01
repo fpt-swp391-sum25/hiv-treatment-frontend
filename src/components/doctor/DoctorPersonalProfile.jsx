@@ -1,7 +1,7 @@
-import { 
-  useState, 
-  useEffect, 
-  useContext 
+import {
+  useState,
+  useEffect,
+  useContext
 } from 'react';
 import {
   Button,
@@ -17,7 +17,7 @@ import {
   Avatar,
   Tooltip,
 } from 'antd';
-import { 
+import {
   SaveOutlined
 } from '@ant-design/icons';
 import {
@@ -25,13 +25,13 @@ import {
   updateDoctorProfileAPI,
 } from '../../services/doctorProfile.service';
 import {
-    fetchAccountAPI,
+  fetchAccountAPI,
 } from '../../services/auth.service';
 import {
   updateUserAPI
 } from '../../services/user.service';
-import { 
-  AuthContext 
+import {
+  AuthContext
 } from '../context/AuthContext';
 
 const { Title } = Typography;

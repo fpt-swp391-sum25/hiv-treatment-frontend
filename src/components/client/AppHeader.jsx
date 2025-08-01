@@ -20,15 +20,15 @@ import {
   SettingOutlined,
   BellOutlined
 } from '@ant-design/icons';
-import { 
-  Link, 
-  useLocation, 
-  useNavigate 
+import {
+  Link,
+  useLocation,
+  useNavigate
 } from 'react-router-dom';
-import { 
-  useState, 
-  useEffect, 
-  useContext 
+import {
+  useState,
+  useEffect,
+  useContext
 } from 'react';
 
 import appLogo from '../../assets/appLogo.png';
@@ -40,6 +40,7 @@ import {
   updateNotification
 } from '../../services/notification.service';
 import { logoutAPI } from '../../services/auth.service';
+import '../../styles/global.css'
 
 const { Header } = Layout;
 const { Text } = Typography;
@@ -116,10 +117,10 @@ const AppHeader = () => {
     };
 
     if (user?.id) {
-      intervalId = setInterval(pollNotifications, 5000); 
+      intervalId = setInterval(pollNotifications, 5000);
     }
-    
-    return () => clearInterval(intervalId); 
+
+    return () => clearInterval(intervalId);
   }, [user?.id, notifications]);
 
   const loadNotifications = async () => {
@@ -242,7 +243,7 @@ const AppHeader = () => {
                       dataSource={
                         [...notifications]
                           .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-                          .slice(0, 10) 
+                          .slice(0, 10)
                       }
                       locale={{ emptyText: 'Không có thông báo' }}
                       renderItem={(item) => (

@@ -1,51 +1,118 @@
 .calendar-container {
   overflow-x: auto;
   border: 1px solid #ddd;
+  border-radius: 12px;
+  /* mới: bo tròn tổng thể */
+  box-shadow: 0 4px 18px 0 rgba(0, 0, 0, .06);
+  /* mới: bóng nhẹ */
+  background: #fff;
 }
 
+/* Header và từng hàng hiển thị theo dòng ngang */
 .calendar-header,
 .calendar-row {
   display: flex;
 }
 
+/* Cell của từng ngày/giờ */
 .calendar-cell {
   flex: 1;
   border: 1px solid #eee;
-  padding: 4px;
-  min-height: 80px;
-  height: auto; /* ✅ Tự mở rộng theo nội dung */
+  padding: 4px 2px;
+  min-height: 70px;
+  max-height: 110px;
+  /* 💡 mới: GIỚI HẠN chiều cao cell */
   box-sizing: border-box;
-  overflow: visible; /* ✅ Cho phép tràn nội dung theo chiều dọc */
+  overflow-y: auto;
+  /* 💡 mới: scroll nếu nhiều lịch */
+  overflow-x: hidden;
+  background: #fcfcff;
+  transition: background .2s;
 }
 
-.calendar-cell .ant-card {
-  margin-bottom: 4px;
-  font-size: 12px;
-  white-space: normal; /* ✅ Cho phép nội dung xuống dòng */
-  overflow: visible;
+.calendar-cell:hover {
+  background: #f4f8ff;
+  /* 💡 hiệu ứng hover nhẹ */
 }
 
+/* Tiêu đề thứ trong tuần */
 .day-header {
   font-weight: bold;
   background: #f5f5f5;
   text-align: center;
+  font-size: 1rem;
+  border-bottom: 1.5px solid #84c1ff;
+  border-radius: 0;
+  padding: 6px 0 2px 0;
 }
 
+/* Ô giờ bên trái */
 .time-slot {
   font-weight: bold;
-  width: 80px;
+  width: 82px;
+  min-width: 70px;
   background: #fafafa;
   text-align: center;
   flex-shrink: 0;
+  border-right: 1.5px solid #bee3ff;
+  border-radius: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
 }
 
+/* --- CARD lịch khám --- */
 .calendar-cell .ant-card {
-  width: 9vw;
-  max-width: 100%;
-  margin-bottom: 4px;
-  font-size: 0.8vw;
+  margin-bottom: 6px;
+  font-size: 13px;
   white-space: normal;
-  box-sizing: border-box;
-  white-space: normal;
-  word-break: break-word;
+  width: 100%;
+  max-width: 98%;
+  background: #e6f7ff !important;
+  border: 1.5px solid #91d5ff !important;
+  border-radius: 7px !important;
+  box-shadow: 0 2px 8px 0 rgba(24, 100, 171, .07);
+  padding: 3px 6px !important;
+  transition: box-shadow .2s;
+  word-break: break-all;
+  overflow: visible;
+  cursor: pointer;
+}
+
+.calendar-cell .ant-card:hover {
+  box-shadow: 0 4px 16px 0 rgba(24, 144, 255, 0.13);
+  border: 1.5px solid #119fff !important;
+  background: #f0faff !important;
+}
+
+/* Đảm bảo responsive ở màn nhỏ hơn */
+@media (max-width: 950px) {
+  .calendar-cell .ant-card {
+    font-size: 11px;
+    padding: 2px 3px !important;
+    max-width: 100%;
+    margin-bottom: 3px;
+  }
+
+  .calendar-header .calendar-cell,
+  .calendar-row .calendar-cell {
+    min-width: 90px;
+    font-size: 13px;
+  }
+
+  .time-slot {
+    width: 62px;
+    min-width: 62px;
+    font-size: 0.95rem;
+  }
+}
+
+/* Ẩn border phải & dưới ở ô cuối bảng cho đẹp */
+.calendar-row:last-child .calendar-cell {
+  border-bottom: none;
+}
+
+.calendar-cell:last-child {
+  border-right: none;
 }

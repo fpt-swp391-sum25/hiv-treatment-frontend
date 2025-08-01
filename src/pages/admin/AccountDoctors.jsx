@@ -1,27 +1,27 @@
-import { 
-    useEffect, 
-    useState 
+import {
+    useEffect,
+    useState
 } from 'react';
-import { 
-    Button, 
-    Input, 
-    Modal, 
-    notification, 
-    Space, 
-    Spin, 
-    Table, 
-    Tag 
+import {
+    Button,
+    Input,
+    Modal,
+    notification,
+    Space,
+    Spin,
+    Table,
+    Tag
 } from 'antd';
-import { 
-    DeleteOutlined, 
-    EditOutlined, 
-    PlusCircleOutlined 
+import {
+    DeleteOutlined,
+    EditOutlined,
+    PlusCircleOutlined
 } from '@ant-design/icons';
 import UpdateUserModal from '../../components/admin/UpdateUserModal';
-import { 
-    createAccountAPI, 
-    deleteAccountAPI, 
-    fetchAccountByRoleAPI 
+import {
+    createAccountAPI,
+    deleteAccountAPI,
+    fetchAccountByRoleAPI
 } from '../../services/user.service';
 
 const AccountDoctors = () => {
@@ -176,9 +176,9 @@ const AccountDoctors = () => {
                         style={{ color: 'orange' }}
                     />
 
-                    <DeleteOutlined 
-                        style={{ color: 'red' }} 
-                        onClick={() => showDeleteModal(record)} 
+                    <DeleteOutlined
+                        style={{ color: 'red' }}
+                        onClick={() => showDeleteModal(record)}
                     />
                 </Space>
             ),

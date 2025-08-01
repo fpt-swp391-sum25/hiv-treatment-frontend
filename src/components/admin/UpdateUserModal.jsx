@@ -1,17 +1,19 @@
-import { 
-    Button, 
-    DatePicker, 
-    Input, 
-    Modal, 
-    notification, 
-    Popconfirm, 
-    Select } from "antd"
-import { 
-    useEffect, 
-    useState } from "react"
+import {
+    Button,
+    DatePicker,
+    Input,
+    Modal,
+    notification,
+    Popconfirm,
+    Select
+} from "antd"
+import {
+    useEffect,
+    useState
+} from "react"
 import dayjs from "dayjs"
-import { 
-    updateProfileAPI 
+import {
+    updateProfileAPI
 } from "../../services/user.service"
 
 const UpdateUserModal = (props) => {
@@ -70,7 +72,7 @@ const UpdateUserModal = (props) => {
         setEmail('')
         setDataUpdate({})
     }
-    
+
     return (
         <Modal
             title="Cập nhật tài khoản"

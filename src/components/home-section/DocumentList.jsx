@@ -1,21 +1,21 @@
-import { 
-  useState, 
-  useEffect 
+import {
+  useState,
+  useEffect
 } from 'react';
-import { 
-  Link 
+import {
+  Link
 } from 'react-router-dom';
-import { 
-  Spin, 
-  message, 
-  Modal 
+import {
+  Spin,
+  message,
+  Modal
 } from 'antd';
-import { 
-  fetchAllDocumentsAPI, 
-  getDocumentImagesByDocumentId 
+import {
+  fetchAllDocumentsAPI,
+  getDocumentImagesByDocumentId
 } from '../../services/document.service';
-import { 
-  FileImageOutlined 
+import {
+  FileImageOutlined
 } from '@ant-design/icons';
 import '../../styles/home-section/DocumentList.css';
 
@@ -25,7 +25,7 @@ const Document = () => {
   const [loading, setLoading] = useState(true);
   const [selectedDoc, setSelectedDoc] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [documentImages, setDocumentImages] = useState({}); 
+  const [documentImages, setDocumentImages] = useState({});
 
   useEffect(() => {
     const fetchDocuments = async () => {

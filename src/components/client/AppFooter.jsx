@@ -1,7 +1,7 @@
-import { 
-  Layout, 
-  message, 
-  Spin 
+import {
+  Layout,
+  message,
+  Spin
 } from 'antd';
 import {
   EnvironmentOutlined,
@@ -10,12 +10,12 @@ import {
   ClockCircleOutlined,
 } from '@ant-design/icons';
 import '../../styles/client/AppFooter.css';
-import { 
-  useEffect, 
-  useState 
+import {
+  useEffect,
+  useState
 } from 'react';
-import { 
-  fetchSystemConfigurationsAPI 
+import {
+  fetchSystemConfigurationsAPI
 } from '../../services/systemConfiguration.service';
 
 const { Footer } = Layout;

@@ -1,7 +1,7 @@
-import { 
-    useContext, 
-    useState, 
-    useRef 
+import {
+    useContext,
+    useState,
+    useRef
 } from "react";
 import {
     Layout,
@@ -20,20 +20,20 @@ import {
     Spin,
 } from "antd";
 import dayjs from "dayjs";
-import { 
-    AuthContext 
+import {
+    AuthContext
 } from "../../components/context/AuthContext";
-import { 
-    DeleteOutlined, 
-    SaveOutlined, 
-    UploadOutlined, 
-    UserOutlined 
+import {
+    DeleteOutlined,
+    SaveOutlined,
+    UploadOutlined,
+    UserOutlined
 } from "@ant-design/icons";
-import { 
-    validateField 
+import {
+    validateField
 } from "../../utils/validate";
-import { 
-    updateProfileAPI 
+import {
+    updateProfileAPI
 } from "../../services/user.service";
 
 const { Content } = Layout;

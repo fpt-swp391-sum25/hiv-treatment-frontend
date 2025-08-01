@@ -1,28 +1,28 @@
-import { 
-  useState, 
-  useEffect, 
-  useContext 
+import {
+  useState,
+  useEffect,
+  useContext
 } from 'react';
 import {
-  Card, 
-  Table, 
-  Tag, 
-  Modal, 
-  Descriptions, 
-  Divider, 
-  Spin, 
+  Card,
+  Table,
+  Tag,
+  Modal,
+  Descriptions,
+  Divider,
+  Spin,
   message,
-  Input, 
-  Select, 
-  Button, 
-  Space, 
-  Row, 
-  Col, 
+  Input,
+  Select,
+  Button,
+  Space,
+  Row,
+  Col,
   Typography
 } from 'antd';
 import {
-  CalendarOutlined, 
-  ClockCircleOutlined, 
+  CalendarOutlined,
+  ClockCircleOutlined,
   UserOutlined,
   FileTextOutlined,
   MedicineBoxOutlined,
@@ -30,15 +30,15 @@ import {
   ScheduleOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import { 
-  fetchTestOrderByHealthRecordIdAPI, 
-  healthRecordService 
+import {
+  fetchTestOrderByHealthRecordIdAPI,
+  healthRecordService
 } from '../../services/health-record.service';
-import { 
-  AuthContext 
+import {
+  AuthContext
 } from '../../components/context/AuthContext';
-import { 
-  getSchedulesByPatientAPI 
+import {
+  getSchedulesByPatientAPI
 } from '../../services/schedule.service';
 
 const { Search } = Input;
