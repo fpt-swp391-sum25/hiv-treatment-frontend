@@ -354,7 +354,6 @@ const PatientDetailDoctorView = () => {
           </Form.Item>
         </Form>
       </Modal>
-
       {testOrderData.map((test) => (
         <Card key={test.id} style={{ marginTop: 16 }}>
           <Row gutter={5 + "vw"} align="middle">

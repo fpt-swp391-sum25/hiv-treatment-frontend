@@ -153,26 +153,10 @@ const ManagerProfile = () => {
       } else {
         message.error('Cập nhật không thành công!');
       }
-    } catch (error) {
+    } catch {
       message.error('Cập nhật thất bại!');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleCancel = () => {
-    if (user?.id) {
-      setEditableUser({
-        fullName: user.fullName || '',
-        email: user.email || '',
-        phoneNumber: user.phoneNumber || '',
-        address: user.address || '',
-        gender: user.gender || '',
-        dateOfBirth: user.dateOfBirth || '',
-        password: '',
-        confirmPassword: '',
-      });
-      setAvatarUrl(user.avatar || '');
     }
   };
 
@@ -532,22 +516,6 @@ const ManagerProfile = () => {
                 }}
               >
                 Lưu thay đổi
-              </Button>
-              <Button
-                type='primary'
-                onClick={handleCancel}
-                style={{
-                  borderRadius: '8px',
-                  padding: '10px 32px',
-                  height: 'auto',
-                  fontSize: '14px',
-                  fontWeight: '500'
-                }}
-
-                className='custom-delete-btn'
-
-              >
-                Hủy
               </Button>
             </div>
           </Form.Item>
