@@ -1,5 +1,4 @@
 import axios from './axios.customize';
-import { STAFF_ROLES, PAYMENT_STATUS } from '../types/report.types';
 import * as XLSX from 'xlsx';
 import dayjs from 'dayjs';
 import quarterOfYear from 'dayjs/plugin/quarterOfYear';
@@ -213,40 +212,28 @@ const calculatePerformance = (total, completed) => {
   return Math.round((completed / total) * 100);
 };
 
-export const getDoctorScheduleStats = async (doctorId, dateRange) => {
-  try {
+export const getDoctorScheduleStats = async (doctorId) => {
     const response = await axios.get(`/api/schedule/doctor-id/${doctorId}`);
-    // Lọc và tổng hợp theo dateRange ở FE
     return response.data;
-  } catch (error) {
-    throw error;
-  }
 };
 
 // Financial Statistics
-export const getPaymentStats = async (status) => {
-  try {
-    let url = '/api/payment';
-    if (status) {
-      url = `/api/payment/status/${encodeURIComponent(status)}`;
-    }
-    const response = await axios.get(url);
-    // Đảm bảo trả về mảng dữ liệu
-    return Array.isArray(response.data) ? response.data : [];
-  } catch (error) {
-    console.error('Error in getPaymentStats:', error);
-    throw error;
-  }
+export const getPaymentStats = async (startDate, endDate) => {
+    const res = await axios.get(`/api/payment/statistics`, {
+        params: {
+            startDate,
+            endDate,
+        },
+    });
+    return res.data;
 };
 
+
+
 export const getScheduleStats = async (params = {}) => {
-  try {
     const queryParams = new URLSearchParams(params).toString();
     const response = await axios.get(`/api/schedule?${queryParams}`);
     return response.data;
-  } catch (error) {
-    throw error;
-  }
 };
 
 // Test Results Stats
