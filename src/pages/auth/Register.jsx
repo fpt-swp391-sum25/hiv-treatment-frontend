@@ -11,17 +11,17 @@ import {
     Alert,
     notification,
 } from 'antd';
-import { 
-    ArrowLeftOutlined 
+import {
+    ArrowLeftOutlined
 } from '@ant-design/icons';
-import { 
-    registerAPI 
+import {
+    registerAPI
 } from '../../services/auth.service';
-import { 
-    useState 
+import {
+    useState
 } from 'react';
-import { 
-    validateField 
+import {
+    validateField
 } from '../../utils/validate';
 
 const { Option } = Select

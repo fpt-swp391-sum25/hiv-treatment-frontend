@@ -1,7 +1,7 @@
-import { 
-    useContext, 
-    useEffect, 
-    useState 
+import {
+    useContext,
+    useEffect,
+    useState
 } from 'react';
 import {
     Form,
@@ -16,7 +16,9 @@ import {
     Descriptions,
     Card,
     Divider,
-    Tag
+    Tag,
+    Modal,
+    Radio
 } from 'antd';
 import {
     ArrowLeftOutlined,
@@ -27,27 +29,27 @@ import {
     ExclamationCircleOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import { 
-    useSearchParams 
+import {
+    useSearchParams
 } from 'react-router-dom';
-import { 
-    AuthContext 
+import {
+    AuthContext
 } from '../../components/context/AuthContext';
-import { 
-    fetchServicePrices, 
-    fetchSystemConfigurationsAPI 
+import {
+    fetchServicePrices,
+    fetchSystemConfigurationsAPI
 } from '../../services/systemConfiguration.service';
 import '../../styles/patient/Booking.css'
-import { 
-    initiatePaymentAPI 
+import {
+    initiatePaymentAPI
 } from '../../services/appointment.service';
-import { 
-    fetchAllDoctorsAPI 
+import {
+    fetchAllDoctorsAPI
 } from '../../services/user.service';
-import { 
-    fetchAllScheduleAPI, 
-    fetchScheduleByDateAPI, 
-    registerScheduleAPI 
+import {
+    fetchAllScheduleAPI,
+    fetchScheduleByDateAPI,
+    registerScheduleAPI
 } from '../../services/schedule.service';
 import { createCashPaymentAPI } from '../../services/payment.service';
 
@@ -99,11 +101,25 @@ const Booking = () => {
     const [loading, setLoading] = useState(false);
     const [servicePrices, setServicePrices] = useState({});
     const [config, setConfig] = useState({});
+    const [isVisibleModal, setIsVisibleModal] = useState(false)
     const doctorId = Form.useWatch('doctor', form);
     const date = Form.useWatch('date', form);
     const slot = Form.useWatch('slot', form);
     const type = Form.useWatch('type', form);
     const typeParam = searchParams.get('type');
+
+    const paymentOptions = [
+        {
+            value: "online",
+            label: "Thanh toán trực tuyến",
+            desc: "Chuyển khoản, ví điện tử,...",
+        },
+        {
+            value: "cash",
+            label: "Tiền mặt",
+            desc: "Trả tiền khi đến khám",
+        },
+    ];
 
     useEffect(() => {
         loadDoctors();
@@ -142,7 +158,6 @@ const Booking = () => {
 
     useEffect(() => {
         const doctorId = form.getFieldValue('doctor');
-        console.log('>>>>>>>>check schedule', availableSchedules)
         if (slot) {
             const schedule = availableSchedules.find(
                 (s) => s.slot === slot && (!doctorId || s.doctor.id === doctorId)
@@ -201,7 +216,7 @@ const Booking = () => {
                 setAvailableSchedules(response.data);
 
                 const grouped = response.data.reduce((acc, schedule) => {
-                    const startTime = schedule.slot.split('-')[0]; 
+                    const startTime = schedule.slot.split('-')[0];
                     if (!acc[startTime]) {
                         acc[startTime] = {
                             startTime,
@@ -260,18 +275,6 @@ const Booking = () => {
         try {
             setLoading(true);
 
-            const patientSchedules = availableSchedules.filter(
-                (s) =>
-                    s.patient?.id === user.id &&
-                    dayjs(s.date).isSame(dayjs(values.date), 'day') &&
-                    s.status === 'Đang hoạt động'
-            );
-            if (patientSchedules.length > 0) {
-                message.warning('Bạn đã có lịch hẹn trong ngày này và đang hoạt động.');
-                setLoading(false);
-                return;
-            }
-
             const selectedSchedules = availableSchedules.filter(
                 (schedule) => schedule.slot === values.slot
             );
@@ -288,11 +291,16 @@ const Booking = () => {
                 schedule = selectedSchedules[0];
             }
 
-            await registerScheduleAPI({
+            const regisRes = await registerScheduleAPI({
                 scheduleId: schedule.id,
                 patientId: user.id,
                 type: values.type,
             });
+
+            if (regisRes.status === 409 && regisRes.message.includes('already has')) {
+                setIsVisibleModal(true)
+                return
+            }
 
             if (values.paymentMethod === 'online') {
                 const paymentResponse = await initiatePaymentAPI({
@@ -301,11 +309,21 @@ const Booking = () => {
                 });
                 window.location.href = paymentResponse.data;
             } else {
-                 await createCashPaymentAPI({
+                await createCashPaymentAPI({
                     scheduleId: schedule.id,
                     amount: selectedAmount
                 });
-                message.success('Đặt lịch thành công! Vui lòng thanh toán tiền mặt tại quầy.');
+                Modal.success({
+                    title: 'Đặt lịch thành công!',
+                    content: (
+                        <div>
+                            Vui lòng thanh toán tiền mặt tại quầy khi đến khám.<br />
+                            <b>Cảm ơn bạn đã sử dụng dịch vụ!</b>
+                        </div>
+                    ),
+                    okText: 'Đóng'
+                    // Có thể custom okButtonProps, className, icon,... tùy ý
+                });
             }
 
         } catch (error) {
@@ -318,6 +336,17 @@ const Booking = () => {
     return (
         <Layout style={{ background: '#fafcff' }}>
             <Content style={{ padding: 0, maxWidth: 1300, margin: '0 auto' }}>
+                <Modal
+                    title={<span style={{ color: 'red' }}>Thông báo</span>}
+                    open={isVisibleModal}
+                    onOk={() => { setIsVisibleModal(false) }}
+                    onCancel={() => { setIsVisibleModal(false) }}
+                    okText="Đóng"
+                    okButtonProps={{ style: { display: 'none' } }}
+                    cancelButtonProps={{ style: { display: 'none' } }}
+                >
+                    <p>Bạn đã có lịch hẹn trong ngày này.<br />Không thể đặt thêm!</p>
+                </Modal>
                 <Row gutter={[16, 16]} style={{ padding: '16px 8px' }}>
                     <Col xs={24} md={15} style={{ minWidth: 320 }}>
                         <Card
@@ -424,11 +453,33 @@ const Booking = () => {
                                     label="Hình thức thanh toán"
                                     initialValue="online"
                                     rules={[{ required: true, message: 'Vui lòng chọn hình thức thanh toán' }]}
-                                    >
+                                >
                                     <Select>
                                         <Option value="online">Thanh toán trực tuyến</Option>
                                         <Option value="cash">Thanh toán bằng tiền mặt</Option>
                                     </Select>
+                                    rules={[{ required: true, message: "Vui lòng chọn hình thức thanh toán" }]}
+                                
+                                    <Radio.Group className="payment-block-group" style={{ width: "100%" }}>
+                                        {paymentOptions.map(opt => (
+                                            <label
+                                                key={opt.value}
+                                                className="payment-block-option"
+                                                htmlFor={`pay-method-${opt.value}`}
+                                                style={{ width: 220, cursor: "pointer", marginRight: 18 }}
+                                            >
+                                                <Radio
+                                                    value={opt.value}
+                                                    id={`pay-method-${opt.value}`}
+                                                    style={{ marginRight: 8 }}
+                                                />
+                                                <div className="info">
+                                                    <div className="label">{opt.label}</div>
+                                                    <div className="desc">{opt.desc}</div>
+                                                </div>
+                                            </label>
+                                        ))}
+                                    </Radio.Group>
                                 </Form.Item>
                                 <Form.Item>
                                     <Button block type="primary" size="large" htmlType="submit" loading={loading} style={{ fontSize: 18, borderRadius: 8, height: 48 }}>

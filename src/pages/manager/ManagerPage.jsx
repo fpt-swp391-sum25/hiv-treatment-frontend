@@ -11,7 +11,7 @@ import { fetchAccountAPI } from '../../services/auth.service';
 const { Content } = Layout;
 
 const ManagerPage = () => {
-  const { setUser, isAppLoading, setIsAppLoading } = useContext(AuthContext);
+  const { setUser, setIsAppLoading } = useContext(AuthContext);
   const location = useLocation()
   const pathSnippets = location.pathname.split('/').filter(i => i)
 

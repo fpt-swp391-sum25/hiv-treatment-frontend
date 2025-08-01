@@ -1,42 +1,42 @@
-import { 
-    Layout, 
-    Button, 
-    Avatar, 
-    Typography, 
-    theme, 
-    Popover, 
-    Tooltip, 
-    Popconfirm, 
-    Badge, 
-    List, 
-    Spin, 
+import {
+    Layout,
+    Button,
+    Avatar,
+    Typography,
+    theme,
+    Popover,
+    Tooltip,
+    Popconfirm,
+    Badge,
+    List,
+    Spin,
     notification,
     message
 } from "antd";
-import { 
-    UserOutlined, 
-    LogoutOutlined, 
-    BellOutlined 
+import {
+    UserOutlined,
+    LogoutOutlined,
+    BellOutlined
 } from "@ant-design/icons";
-import { 
-    useContext, 
-    useEffect, 
-    useState 
+import {
+    useContext,
+    useEffect,
+    useState
 } from "react";
-import { 
-    AuthContext 
+import {
+    AuthContext
 } from "../context/AuthContext";
-import { 
-    logoutAPI 
+import {
+    logoutAPI
 } from "../../services/auth.service";
 import {
-    useNavigate 
+    useNavigate
 } from "react-router-dom";
 import appLogo from '../../assets/appLogo.png'
 import '../manager/Layout/ManagerHeader.css'
-import { 
-    getNotificationsByUserId, 
-    updateNotification 
+import {
+    getNotificationsByUserId,
+    updateNotification
 } from "../../services/notification.service";
 
 
@@ -51,7 +51,7 @@ const PageHeader = () => {
     const [loading, setLoading] = useState(false);
     const [popoverOpen, setPopoverOpen] = useState(false);
     const unreadCount = notifications.filter(n => !n.isRead).length;
-    
+
     useEffect(() => {
         let intervalId;
 
@@ -82,7 +82,7 @@ const PageHeader = () => {
 
         return () => clearInterval(intervalId);
     }, [user?.id, notifications]);
-    
+
     const loadNotifications = async () => {
         if (!user?.id) return;
         setLoading(true);
@@ -90,7 +90,7 @@ const PageHeader = () => {
             const res = await getNotificationsByUserId(user.id);
             setNotifications((res.data || []).map(n => ({
                 ...n,
-                isRead: n.read  
+                isRead: n.read
             })));
         } finally {
             setLoading(false);

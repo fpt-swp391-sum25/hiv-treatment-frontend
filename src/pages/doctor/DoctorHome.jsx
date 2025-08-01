@@ -1,25 +1,26 @@
-import { 
-    Link, 
-    Outlet, 
-    useLocation } from "react-router-dom";
+import {
+    Link,
+    Outlet,
+    useLocation
+} from "react-router-dom";
 import AdminHeader from "../../components/client/PageHeader";
 import DoctorPageSideBar from "../../components/doctor/DoctorPageSideBar";
-import { 
-    Breadcrumb, 
-    Layout, 
-    message 
+import {
+    Breadcrumb,
+    Layout,
+    message
 } from "antd";
-import { 
-    useContext, useEffect 
+import {
+    useContext, useEffect
 } from "react";
-import { 
-    AuthContext 
+import {
+    AuthContext
 } from "../../components/context/AuthContext";
-import { 
-    HomeOutlined 
+import {
+    HomeOutlined
 } from "@ant-design/icons";
-import { 
-    fetchAccountAPI 
+import {
+    fetchAccountAPI
 } from "../../services/auth.service";
 
 const { Content } = Layout
@@ -40,7 +41,7 @@ const DoctorHome = () => {
                 setIsAppLoading(false)
             }
         } catch (error) {
-            if (error.response?.status === 401 
+            if (error.response?.status === 401
                 && error.response?.data?.message === 'JWT token has expired') {
                 localStorage.removeItem('token')
                 message.error("Phiên đăng nhập hết hạn! Vui lòng đăng nhập lại.")
@@ -63,9 +64,9 @@ const DoctorHome = () => {
             const url = `/${pathSnippets.slice(0, idx + 1).join('/')}`
             if (url === '/doctor') return null
             if (
-                pathSnippets.length >= 3 
-                && pathSnippets[0] === 'doctor' 
-                && pathSnippets[1] === 'patients' 
+                pathSnippets.length >= 3
+                && pathSnippets[0] === 'doctor'
+                && pathSnippets[1] === 'patients'
                 && idx === 2
             ) {
                 return {

@@ -1,7 +1,7 @@
-import React, { 
-  useState, 
-  useContext, 
-  useEffect 
+import React, {
+  useState,
+  useContext,
+  useEffect
 } from 'react'
 import {
   Card,
@@ -16,22 +16,23 @@ import {
   Select,
   DatePicker,
 } from 'antd';
-import { MailOutlined, 
-  PhoneOutlined, 
-  UserOutlined 
+import {
+  MailOutlined,
+  PhoneOutlined,
+  UserOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import { 
-  AuthContext 
+import {
+  AuthContext
 } from '../../components/context/AuthContext';
-import { 
-  validateField 
+import {
+  validateField
 } from '../../utils/validate';
-import { 
-  updateUserAPI 
+import {
+  updateUserAPI
 } from '../../services/user.service';
-import { 
-  fetchAccountAPI 
+import {
+  fetchAccountAPI
 } from '../../services/auth.service';
 
 const { Title, Text } = Typography
@@ -81,7 +82,7 @@ const LabTechnicianProfile = () => {
       newErrors.password = validateField("newPassword", value)
     } else if (field === "confirmPassword") {
       newErrors.confirmPassword = validateField("confirmPassword", value, {
-      newPassword: updatedUser.password,
+        newPassword: updatedUser.password,
       })
     } else {
       const error = validateField(field, value, updatedUser)
@@ -93,7 +94,7 @@ const LabTechnicianProfile = () => {
   }
 
   const handleUpdate = async () => {
-    if (editableUser.password && editableUser.password 
+    if (editableUser.password && editableUser.password
       !== editableUser.confirmPassword) {
       message.error('Mật khẩu xác nhận không khớp!')
       return

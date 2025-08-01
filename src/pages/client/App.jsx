@@ -1,24 +1,24 @@
-import { 
-    Outlet 
+import {
+    Outlet
 } from "react-router-dom"
 import AppFooter from "../../components/client/AppFooter"
 import AppHeader from "../../components/client/AppHeader"
-import { 
-    useContext, 
-    useEffect 
+import {
+    useContext,
+    useEffect
 } from "react"
-import { 
-    AuthContext 
+import {
+    AuthContext
 } from "../../components/context/AuthContext"
-import { 
-    Layout, 
-    Spin, 
-    message 
+import {
+    Layout,
+    Spin,
+    message
 } from "antd"
-import { 
-    fetchAccountAPI 
+import {
+    fetchAccountAPI
 } from '../../services/auth.service'
-
+import '../../styles/global.css'
 
 const App = () => {
     const { setUser, isAppLoading, setIsAppLoading } = useContext(AuthContext)

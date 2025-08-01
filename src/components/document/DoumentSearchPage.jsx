@@ -1,16 +1,18 @@
-import { 
-  useState, 
-  useEffect } from 'react';
-import { 
-  Modal, 
-  message, 
-  Spin } from 'antd';
-import { 
-  fetchAllDocumentsAPI, 
-  getDocumentImagesByDocumentId 
+import {
+  useState,
+  useEffect
+} from 'react';
+import {
+  Modal,
+  message,
+  Spin
+} from 'antd';
+import {
+  fetchAllDocumentsAPI,
+  getDocumentImagesByDocumentId
 } from '../../services/document.service';
-import { 
-  FileImageOutlined 
+import {
+  FileImageOutlined
 } from '@ant-design/icons';
 import '../../styles/document/DocumentSearchPage.css';
 
@@ -115,6 +117,14 @@ const ResourceSearchPage = () => {
     setModalVisible(false);
   };
 
+  const getSnippet = (html, maxLength = 70) => {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html || '';
+    const text = tmp.textContent || tmp.innerText || '';
+    return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
+  };
+
+
   return (
     <section className="resource-page">
       <input
@@ -149,7 +159,7 @@ const ResourceSearchPage = () => {
                   👨‍⚕️ {doc.doctor?.fullName || 'Chưa có tác giả'}
                 </p>
                 <p className="document-snippet">
-                  {doc.content?.length > 70 ? doc.content.slice(0, 70) + '...' : doc.content}
+                  {getSnippet(doc.content, 70)}
                 </p>
                 <p className="document-date">
                   📅 {new Date(doc.createdAt || doc.created_at).toLocaleDateString('vi-VN')}
@@ -195,8 +205,8 @@ const ResourceSearchPage = () => {
             <p className="document-date">
               📅 {new Date(selectedDoc.createdAt || selectedDoc.created_at).toLocaleDateString('vi-VN')}
             </p>
-            <div className="document-content">
-              {selectedDoc.content}
+            <div className="document-content"
+              dangerouslySetInnerHTML={{ __html: selectedDoc.content }}>
             </div>
           </div>
         )}

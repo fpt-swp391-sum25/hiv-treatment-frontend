@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { DatePicker, Button, Row, Col, Card, Radio } from 'antd';
+import { DatePicker, Button, Row, Col, Space, Card, Radio } from 'antd';
 import { ReloadOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import './Dashboard.css';
+import './ReportFilter.css';
 
-const DashboardFilters = ({ onFilterChange, initialFilters = {} }) => {
+const ReportFilters = ({ onFilterChange, initialFilters = {} }) => {
   const [filterType, setFilterType] = useState(initialFilters.filterType || 'month'); // month | quarter | year
   const [selectedDate, setSelectedDate] = useState(initialFilters.selectedDate ? dayjs(initialFilters.selectedDate) : null);
 
@@ -116,4 +116,4 @@ const DashboardFilters = ({ onFilterChange, initialFilters = {} }) => {
     </Card>
   );
 };
-export default DashboardFilters;
+export default ReportFilters;

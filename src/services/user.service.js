@@ -36,9 +36,12 @@ const deleteAccountAPI = (id) => {
 }
 
 const fetchAllDoctorsAPI = () => {
-    // Sử dụng đúng endpoint và format theo BE
-    const URL_BACKEND = '/api/user/DOCTOR'; // Role phải viết IN HOA: "DOCTOR"
-    console.log('Calling API to fetch doctors from:', URL_BACKEND);
+    const URL_BACKEND = '/api/user/DOCTOR'; 
+    return axios.get(URL_BACKEND);
+}
+
+const fetchAllCashiersAPI = () => {
+    const URL_BACKEND = '/api/user/CASHIER'; 
     return axios.get(URL_BACKEND);
 }
 
@@ -95,6 +98,7 @@ export {
     fetchAccountByRoleAPI,
     fetchAllDoctorsAPI,
     fetchAllLabTechniciansAPI,
+    fetchAllCashiersAPI,
     fetchUserInfoAPI,
     fetchUsersAPI,
     fetchUsersByRoleAPI,

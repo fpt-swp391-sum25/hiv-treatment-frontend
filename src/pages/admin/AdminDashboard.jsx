@@ -1,32 +1,33 @@
-import { 
-    Card, 
-    Col, 
-    notification, 
-    Row, 
-    Spin 
+import {
+    Card,
+    Col,
+    notification,
+    Row,
+    Spin
 } from "antd";
-import { 
-    useEffect, useState } from "react";
+import {
+    useEffect, useState
+} from "react";
 import '../../styles/admin/AdminDashboard.css';
-import { 
-    Pie 
+import {
+    Pie
 } from 'react-chartjs-2';
-import { 
-    Chart as ChartJS, 
-    CategoryScale, 
-    LinearScale, 
-    PointElement, 
-    LineElement, 
-    ArcElement, 
-    Title, 
-    Tooltip, 
-    Legend 
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    ArcElement,
+    Title,
+    Tooltip,
+    Legend
 } from 'chart.js';
-import { 
-    fetchAccountByRoleAPI 
+import {
+    fetchAccountByRoleAPI
 } from "../../services/user.service";
-import { 
-    fetchScheduleAPI 
+import {
+    fetchScheduleAPI
 } from "../../services/schedule.service";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Title, Tooltip, Legend);
@@ -34,7 +35,7 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ArcEleme
 function getCurrentMonth() {
     const now = new Date()
     // JS month is 0-based
-    return now.getMonth() + 1 
+    return now.getMonth() + 1
 }
 
 function getCurrentYear() {
@@ -97,9 +98,9 @@ const AdminDashboard = () => {
                 });
             } catch {
                 notification.error({
-                message: 'Hệ thống',
-                description: 'Lỗi khi tải dữ liệu',
-            })
+                    message: 'Hệ thống',
+                    description: 'Lỗi khi tải dữ liệu',
+                })
             } finally {
                 setLoading(false)
             }
