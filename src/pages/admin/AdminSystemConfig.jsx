@@ -1,6 +1,6 @@
-import { 
-  useEffect, 
-  useState 
+import {
+  useEffect,
+  useState
 } from "react"
 import {
   Card,
@@ -14,11 +14,12 @@ import {
 import {
   SaveOutlined,
 } from "@ant-design/icons";
-import { 
-  fetchSystemConfigurationsAPI, 
-  updateSystemConfigurationAPI 
+import {
+  fetchSystemConfigurationsAPI,
+  updateSystemConfigurationAPI
 } from "../../services/systemConfiguration.service";
 import "../../styles/admin/AdminDashboard.css";
+
 
 const AdminSystemConfig = () => {
   const [configs, setConfigs] = useState([])

@@ -1,14 +1,15 @@
-import { 
-    useEffect, 
-    useState } from "react"
-import { 
-    Form, 
-    Input, 
-    Modal, 
-    notification 
+import {
+    useEffect,
+    useState
+} from "react"
+import {
+    Form,
+    Input,
+    Modal,
+    notification
 } from "antd"
-import { 
-    updateRegimenAPI 
+import {
+    updateRegimenAPI
 } from "../../services/regimen.service"
 const UpdateRegimenModal = (props) => {
     const [id, setId] = useState("")
@@ -18,12 +19,12 @@ const UpdateRegimenModal = (props) => {
     const [indications, setIndications] = useState('')
     const [contraindications, setContradications] = useState('')
 
-    const { 
-        dataUpdate, 
-        setDataUpdate, 
+    const {
+        dataUpdate,
+        setDataUpdate,
         isUpdateRegimenModalOpen,
-        setIsUpdateRegimenModalOpen, 
-        loadRegimens 
+        setIsUpdateRegimenModalOpen,
+        loadRegimens
     } = props
 
     useEffect(() => {

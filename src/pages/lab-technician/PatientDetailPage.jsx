@@ -1,22 +1,22 @@
-import { 
-  useParams, 
-  useNavigate 
+import {
+  useParams,
+  useNavigate
 } from "react-router-dom"
-import { 
-  useState, 
-  useEffect 
+import {
+  useState,
+  useEffect
 } from "react"
 import {
-  Typography, 
-  Space, 
-  notification, 
-  Button, 
-  Input, 
+  Typography,
+  Space,
+  notification,
+  Button,
+  Input,
   Card,
-  Form, 
-  Row, 
-  Col, 
-  Divider, 
+  Form,
+  Row,
+  Col,
+  Divider,
   Select
 } from 'antd';
 import { EditOutlined } from '@ant-design/icons';

@@ -1,19 +1,19 @@
-import { 
-    useEffect 
+import {
+    useEffect
 } from 'react';
-import { 
-    Result, 
-    Button 
+import {
+    Result,
+    Button
 } from 'antd';
-import { 
-    useLocation, 
-    useNavigate 
+import {
+    useLocation,
+    useNavigate
 } from 'react-router-dom';
-import { 
-    handlePaymentCallbackAPI 
+import {
+    handlePaymentCallbackAPI
 } from '../../services/appointment.service';
-import { 
-    createHealthRecordAPI 
+import {
+    createHealthRecordAPI
 } from '../../services/health-record.service';
 
 const PaymentCallback = () => {

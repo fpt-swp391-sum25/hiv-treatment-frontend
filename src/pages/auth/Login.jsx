@@ -1,41 +1,42 @@
-import { 
-    useContext, 
-    useEffect, 
-    useState 
+import {
+    useContext,
+    useEffect,
+    useState
 } from 'react';
 import '@ant-design/v5-patch-for-react-19';
-import { 
-    Form, 
-    Input, 
-    Button, 
-    Alert, 
-    Typography, 
-    Divider, 
-    notification, 
+import {
+    Form,
+    Input,
+    Button,
+    Alert,
+    Typography,
+    Divider,
+    notification,
 } from 'antd';
-import { 
-    useGoogleLogin 
+import {
+    useGoogleLogin
 } from '@react-oauth/google';
-import { 
-    GoogleOutlined, 
-    ArrowLeftOutlined } from '@ant-design/icons';
-import { 
-    useNavigate 
+import {
+    GoogleOutlined,
+    ArrowLeftOutlined
+} from '@ant-design/icons';
+import {
+    useNavigate
 } from 'react-router-dom';
-import { 
-    useForm 
+import {
+    useForm
 } from 'antd/es/form/Form';
-import { 
-    AuthContext 
+import {
+    AuthContext
 } from '../../components/context/AuthContext';
-import { 
-    validateField 
+import {
+    validateField
 } from '../../utils/validate';
-import { 
-    googleLoginAPI, 
-    loginAPI, 
-    resendVerifyEmailAPI, 
-    sendResetPasswordAPI 
+import {
+    googleLoginAPI,
+    loginAPI,
+    resendVerifyEmailAPI,
+    sendResetPasswordAPI
 } from '../../services/auth.service';
 
 const { Link, Text } = Typography
@@ -73,9 +74,15 @@ const Login = () => {
             }
             localStorage.removeItem('auth_error')
         }
+<<<<<<< HEAD
         if (user && (user.role === 'ADMIN' 
             || user.role === 'MANAGER' 
             || user.role === 'LAB_TECHNICIAN' 
+=======
+        if (user && (user.role === 'ADMIN'
+            || user.role === 'MANAGER'
+            || user.role === 'LAB_TECHNICIAN'
+>>>>>>> 5f3e4d16fc5d27323b351001a6224b2ef692baa8
             || user.role === 'DOCTOR'
             || user.role === 'CASHIER'
         )) {
@@ -117,11 +124,11 @@ const Login = () => {
                     description: `Xin chào, ${response.data.fullName || username}!`
                 })
             } else {
-                if (response.status === 403 
+                if (response.status === 403
                     && response.message.includes('NOT VERIFIED')) {
                     setError('Tài khoản chưa xác minh email')
                     setShowResend(true)
-                } else if (response.status === 403 
+                } else if (response.status === 403
                     && response.message.includes('UNACTIVE')) {
                     setError('Tài khoản của bạn đã bị tạm khóa')
                 } else {
@@ -132,8 +139,8 @@ const Login = () => {
             console.error('Login error:', error)
 
             if (error.response) {
-                const errorMessage = error.response.data?.message 
-                || 'Thông tin đăng nhập không hợp lệ!'
+                const errorMessage = error.response.data?.message
+                    || 'Thông tin đăng nhập không hợp lệ!'
                 setError(errorMessage)
             } else {
                 setError('Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng.')
@@ -143,8 +150,8 @@ const Login = () => {
                 message: "Lỗi đăng nhập",
                 showProgress: true,
                 pauseOnHover: true,
-                description: error.response?.data?.message 
-                || 'Thông tin đăng nhập không hợp lệ!'
+                description: error.response?.data?.message
+                    || 'Thông tin đăng nhập không hợp lệ!'
             })
         } finally {
             setLoading(false)
@@ -167,18 +174,18 @@ const Login = () => {
                         message: "Đăng nhập thành công",
                         showProgress: true,
                         pauseOnHover: true,
-                        description: `Xin chào, ${response.data.fullName 
+                        description: `Xin chào, ${response.data.fullName
                             || 'người dùng'}!`,
                         duration: 3
                     })
                     navigate("/")
                 } else {
-                    throw new Error(response.message 
+                    throw new Error(response.message
                         || "Không nhận được token từ server")
                 }
             } catch (error) {
-                const errorMessage = error?.response?.data?.message 
-                || 'Đăng nhập bằng Google thất bại!'
+                const errorMessage = error?.response?.data?.message
+                    || 'Đăng nhập bằng Google thất bại!'
                 setError(errorMessage)
                 notification.error({
                     message: 'Lỗi đăng nhập',
@@ -270,16 +277,16 @@ const Login = () => {
             {showForgotPassword ? (
                 <>
                     <div>
-                        <Link 
-                            onClick={() => { setShowForgotPassword(false) }} 
-                            className='link'><ArrowLeftOutlined /> 
+                        <Link
+                            onClick={() => { setShowForgotPassword(false) }}
+                            className='link'><ArrowLeftOutlined />
                             Quay lại trang đăng nhập
                         </Link>
                     </div>
-                    <h2 
+                    <h2
                         style={{ textAlign: 'center', margin: 24 }}>
                         Quên mật khẩu
-                        </h2>
+                    </h2>
                     <Form
                         form={form}
                         name='forgotPasswordForm'
@@ -315,18 +322,18 @@ const Login = () => {
             ) : showResend ? (
                 <>
                     <div>
-                        <Link 
-                            onClick={() => { setShowResend(false) }} 
-                            className='link'><ArrowLeftOutlined /> 
+                        <Link
+                            onClick={() => { setShowResend(false) }}
+                            className='link'><ArrowLeftOutlined />
                             Quay lại trang đăng nhập
                         </Link>
                     </div>
-                    {error && 
-                    <Alert 
-                        message={error} 
-                        type="error" 
-                        style={{ marginTop: 20 }} 
-                    />}
+                    {error &&
+                        <Alert
+                            message={error}
+                            type="error"
+                            style={{ marginTop: 20 }}
+                        />}
                     <Form
                         form={form}
                         name="resendVerificationForm"
@@ -365,12 +372,12 @@ const Login = () => {
                 <>
                     <Link onClick={redirectHomePage} className='link'><ArrowLeftOutlined /> Về trang chủ</Link>
                     <h2 style={{ textAlign: 'center', marginBottom: 24 }}>Đăng nhập</h2>
-                    {error && 
-                    <Alert 
-                        message={error} 
-                        type="error" 
-                        style={{ marginBottom: 16 }} 
-                    />}
+                    {error &&
+                        <Alert
+                            message={error}
+                            type="error"
+                            style={{ marginBottom: 16 }}
+                        />}
                     <Form
                         name="loginForm"
                         onFinish={handleLogin}
@@ -382,8 +389,10 @@ const Login = () => {
                             id="username"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
-                            rules={[{ required: true, 
-                                message: 'Hãy nhập tên đăng nhập của bạn' }]}
+                            rules={[{
+                                required: true,
+                                message: 'Hãy nhập tên đăng nhập của bạn'
+                            }]}
                         >
                             <Input placeholder="Tên đăng nhập" />
                         </Form.Item>

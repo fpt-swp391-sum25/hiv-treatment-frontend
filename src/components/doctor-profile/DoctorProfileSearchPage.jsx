@@ -1,17 +1,17 @@
-import { 
-  useState, 
-  useEffect 
+import {
+  useState,
+  useEffect
 } from 'react';
-import { 
-  Link 
+import {
+  Link
 } from 'react-router-dom';
 import '../../styles/doctor-profile/DoctorProfileSearchPage.css';
 import defaultDoctorImage from '../../assets/doctor.png';
-import { 
-  fetchDoctorProfileAPI 
+import {
+  fetchDoctorProfileAPI
 } from '../../services/doctorProfile.service';
-import { 
-  fetchAccountByRoleAPI 
+import {
+  fetchAccountByRoleAPI
 } from '../../services/user.service';
 
 const DoctorsSearchPage = () => {

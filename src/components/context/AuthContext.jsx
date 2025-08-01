@@ -1,10 +1,10 @@
-import { 
-    createContext, 
-    useEffect, 
-    useState 
+import {
+    createContext,
+    useEffect,
+    useState
 } from 'react'
-import { 
-    fetchAccountAPI 
+import {
+    fetchAccountAPI
 } from '../../services/auth.service'
 
 export const AuthContext = createContext({

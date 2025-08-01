@@ -334,12 +334,15 @@ const router = createBrowserRouter([
           <PrivateRoute children={<LabTechnicianManagement />} requiredRole={['MANAGER']} />
         ),
         errorElement: <Errors />,
+<<<<<<< HEAD
       }, {
         path: 'cashier',
         element: (
           <PrivateRoute children={<CashierManagement />} requiredRole={['MANAGER']} />
         ),
         errorElement: <Errors />,
+=======
+>>>>>>> 5f3e4d16fc5d27323b351001a6224b2ef692baa8
       }, {
         path: 'default-regimen',
         element: (

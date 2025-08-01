@@ -1,25 +1,28 @@
-import { 
-    Breadcrumb, 
-    Layout, 
-    message, 
-    theme } from 'antd';
+import {
+    Breadcrumb,
+    Layout,
+    message,
+    theme
+} from 'antd';
 import PageHeader from '../../components/client/PageHeader';
 import AdminSidebar from '../../components/admin/AdminSideBar';
-import { 
-    Link, 
+import {
+    Link,
     Outlet,
-    useLocation } from 'react-router-dom';
-import { 
-    useContext, 
-    useEffect } from 'react';
-import { 
-    AuthContext 
+    useLocation
+} from 'react-router-dom';
+import {
+    useContext,
+    useEffect
+} from 'react';
+import {
+    AuthContext
 } from '../../components/context/AuthContext';
-import { 
-    HomeOutlined 
+import {
+    HomeOutlined
 } from '@ant-design/icons';
-import { 
-    fetchAccountAPI 
+import {
+    fetchAccountAPI
 } from '../../services/auth.service';
 const { Content } = Layout;
 

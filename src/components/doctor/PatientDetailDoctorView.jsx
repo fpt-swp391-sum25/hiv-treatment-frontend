@@ -1,54 +1,68 @@
-import { 
-  useParams, 
-  useNavigate 
+import {
+  useParams,
+  useNavigate
 } from "react-router-dom";
-import { 
-  useState, 
-  useEffect, 
-  useContext 
+import {
+  useState,
+  useEffect,
+  useContext
 } from "react";
 import {
-  Typography, 
+  Typography,
   Space,
-  Button, 
-  Card, 
-  Form, 
+  Button,
+  Card,
+  Form,
   Row,
-  Col, 
-  Divider, 
-  notification, 
+  Col,
+  Divider,
+  notification,
   Modal,
-  Select, 
+  Select,
   Input
 } from 'antd';
 import '../../styles/ReturnButton.css'
-import { 
-  DeleteOutlined, 
-  PlusOutlined 
+import {
+  DeleteOutlined,
+  PlusOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import { 
-  Popconfirm 
+import {
+  Popconfirm
 } from 'antd';
-import { 
-  createNotification 
+import {
+  createNotification
 } from "../../services/notification.service";
 import {
+<<<<<<< HEAD
    AuthContext 
   } from "../context/AuthContext.jsx";
 import { 
   fetchHealthRecordByScheduleIdAPI, 
   fetchTestOrderByHealthRecordIdAPI, 
   updateHealthRecordAPI 
+=======
+  AuthContext
+} from "../context/AuthContext.jsx";
+import {
+  fetchHealthRecordByScheduleIdAPI,
+  fetchTestOrderByHealthRecordIdAPI,
+  updateHealthRecordAPI
+>>>>>>> 5f3e4d16fc5d27323b351001a6224b2ef692baa8
 } from "../../services/health-record.service.js";
-import { 
-  fetchRegimensByDoctorIdAPI 
+import {
+  fetchRegimensByDoctorIdAPI
 } from "../../services/regimen.service.js";
-import { 
-  fetchUsersByRoleAPI 
+import {
+  fetchUsersByRoleAPI
 } from "../../services/user.service.js";
+<<<<<<< HEAD
 import { 
   createTestOrderAPI, 
+=======
+import {
+  createTestOrderAPI,
+>>>>>>> 5f3e4d16fc5d27323b351001a6224b2ef692baa8
   deleteTestOrderAPI
 } from "../../services/testOrder.service.js";
 
@@ -354,7 +368,11 @@ const PatientDetailDoctorView = () => {
           </Form.Item>
         </Form>
       </Modal>
+<<<<<<< HEAD
       
+=======
+
+>>>>>>> 5f3e4d16fc5d27323b351001a6224b2ef692baa8
       {testOrderData.map((test) => (
         <Card key={test.id} style={{ marginTop: 16 }}>
           <Row gutter={5 + "vw"} align="middle">
@@ -412,33 +430,35 @@ const PatientDetailDoctorView = () => {
       {/* Display regimens */}
       <Divider orientation="center" style={{ marginTop: 10 + 'vh' }}>Phác đồ điều trị</Divider>
 
-      {!healthRecordData.regimen ? (
-        <div style={{ marginBottom: 15 }}>
-          <p><strong>Hiện tại chưa có phác đồ</strong></p>
-        </div>
-      ) : (
-        <Card style={{ marginBottom: 15 }}>
-          {(() => {
-            const selectedRegimen = healthRecordData.regimen;
-            return selectedRegimen ? (
-              <div>
-                <p><strong>{selectedRegimen.regimenName}</strong></p>
-                <p><strong>Thành phần</strong> {selectedRegimen.components}</p>
-                <p><strong>Mô tả</strong> {selectedRegimen.description}</p>
-                <p><strong>Chỉ định</strong> {selectedRegimen.indications}</p>
-                <p><strong>Chống chỉ định</strong> {selectedRegimen.contraindications}</p>
-              </div>
-            ) : (
-              <p><em>Không tìm thấy thông tin phác đồ.</em></p>
-            );
-          })()}
-        </Card>
+      {
+        !healthRecordData.regimen ? (
+          <div style={{ marginBottom: 15 }}>
+            <p><strong>Hiện tại chưa có phác đồ</strong></p>
+          </div>
+        ) : (
+          <Card style={{ marginBottom: 15 }}>
+            {(() => {
+              const selectedRegimen = healthRecordData.regimen;
+              return selectedRegimen ? (
+                <div>
+                  <p><strong>{selectedRegimen.regimenName}</strong></p>
+                  <p><strong>Thành phần</strong> {selectedRegimen.components}</p>
+                  <p><strong>Mô tả</strong> {selectedRegimen.description}</p>
+                  <p><strong>Chỉ định</strong> {selectedRegimen.indications}</p>
+                  <p><strong>Chống chỉ định</strong> {selectedRegimen.contraindications}</p>
+                </div>
+              ) : (
+                <p><em>Không tìm thấy thông tin phác đồ.</em></p>
+              );
+            })()}
+          </Card>
 
-      )}
+        )
+      }
 
       <div style={{ textAlign: "right", marginBottom: 15 }}>
-        <Button 
-          type='primary' 
+        <Button
+          type='primary'
           onClick={() => setIsIndiateRegimenModalOpen(true)}>
           Cập nhật phác đồ
         </Button>
@@ -519,7 +539,7 @@ const PatientDetailDoctorView = () => {
           </Form.Item>
         </Form>
       </Modal>
-    </div>
+    </div >
   );
 };
 export default PatientDetailDoctorView;
