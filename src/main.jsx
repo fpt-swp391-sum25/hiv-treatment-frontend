@@ -385,8 +385,8 @@ const router = createBrowserRouter([
   },
 
   // Path for cashier pages
-{
-  path: '/cashier',
+  {
+    path: '/cashier',
     element: (
       <PrivateRoute children={<CashierHomePage />} requiredRole={['CASHIER']} />
     ),
@@ -394,13 +394,6 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: (
-          <PrivateRoute children={<CashierPaymentSchedulePage />} requiredRole={['CASHIER']} />
-        ),
-        errorElement: <Errors />
-      },
-      {
-        path: 'schedule-payment',
         element: (
           <PrivateRoute children={<CashierPaymentSchedulePage />} requiredRole={['CASHIER']} />
         ),

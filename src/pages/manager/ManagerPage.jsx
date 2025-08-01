@@ -38,7 +38,7 @@ const ManagerPage = () => {
   const breadcrumbNameMap = {
     '/manager/doctors': 'Bác sĩ',
     '/manager/lab-technicians': 'Kĩ thuật viên',
-    '/manager/schedule': 'Quản lí lịch',
+    '/manager/dashboard': 'Thống kê',
     '/manager/default-regimen': 'Phác đồ mặc định',
     '/manager/reports': 'Báo cáo',
     '/manager/profile': 'Thông tin cá nhân'

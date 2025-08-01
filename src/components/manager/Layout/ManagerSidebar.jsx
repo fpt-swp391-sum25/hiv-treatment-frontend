@@ -19,7 +19,7 @@ const ManagerSidebar = () => {
 
   const menuItems = [
     {
-      key: '/manager/schedule',
+      key: '/manager',
       icon: <CalendarOutlined />,
       label: 'Quản lí lịch',
     },

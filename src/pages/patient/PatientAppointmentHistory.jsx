@@ -287,7 +287,7 @@ export default function PatientAppointmentHistory() {
               <Text type="secondary">Chưa có kết quả.</Text>
             ) : (
               testOrders.map(test => (
-                <Card key={test.id} size="small" style={{ marginBottom: 12 }} type="inner" title={test.type}>
+                <Card key={test.id} size="small" style={{ marginBottom: 12 }} type="inner" title={test.type?.testTypeName}>
                   <Row gutter={16}>
                     <Col span={12}><b>Kết quả:</b> {test.result} {test.unit}</Col>
                     <Col span={12}><b>Ghi chú:</b> {test.note || 'Không có'}</Col>
