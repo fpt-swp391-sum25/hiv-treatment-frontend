@@ -74,15 +74,9 @@ const Login = () => {
             }
             localStorage.removeItem('auth_error')
         }
-<<<<<<< HEAD
-        if (user && (user.role === 'ADMIN' 
-            || user.role === 'MANAGER' 
-            || user.role === 'LAB_TECHNICIAN' 
-=======
         if (user && (user.role === 'ADMIN'
             || user.role === 'MANAGER'
             || user.role === 'LAB_TECHNICIAN'
->>>>>>> 5f3e4d16fc5d27323b351001a6224b2ef692baa8
             || user.role === 'DOCTOR'
             || user.role === 'CASHIER'
         )) {

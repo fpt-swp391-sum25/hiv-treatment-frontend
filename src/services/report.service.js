@@ -894,8 +894,6 @@ const filterMedicalReports = (reports, filters) => {
   });
 };
 
-<<<<<<< HEAD
-=======
 // Tính toán thống kê y tế
 const calculateMedicalStatistics = (reports) => {
   // Số lượng lịch hẹn
@@ -986,17 +984,12 @@ const calculateTestTypeDistribution = (reports) => {
   }));
 };
 
->>>>>>> 5f3e4d16fc5d27323b351001a6224b2ef692baa8
 // Format dữ liệu báo cáo y tế cho xuất Excel
 export const formatMedicalDataForExport = (reports) => {
   const exportData = [];
 
   reports.forEach(report => {
-<<<<<<< HEAD
-    const { schedule, testOrders } = report;
-=======
     const { schedule, healthRecord, testOrders } = report;
->>>>>>> 5f3e4d16fc5d27323b351001a6224b2ef692baa8
 
     if (testOrders && testOrders.length > 0) {
       testOrders.forEach(test => {

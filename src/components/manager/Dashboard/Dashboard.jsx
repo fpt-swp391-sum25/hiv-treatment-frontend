@@ -32,14 +32,11 @@ const Dashboard = () => {
     appointments: null
   });
 
-<<<<<<< HEAD
-=======
   const [medicalStats, setMedicalStats] = useState({
     totalAppointments: 0,
     totalTestOrders: 0
   });
 
->>>>>>> 5f3e4d16fc5d27323b351001a6224b2ef692baa8
   const [filters, setFilters] = useState({
     dateRange: [null, null],
     period: 'month', 

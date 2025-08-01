@@ -34,21 +34,12 @@ import {
   createNotification
 } from "../../services/notification.service";
 import {
-<<<<<<< HEAD
-   AuthContext 
-  } from "../context/AuthContext.jsx";
-import { 
-  fetchHealthRecordByScheduleIdAPI, 
-  fetchTestOrderByHealthRecordIdAPI, 
-  updateHealthRecordAPI 
-=======
   AuthContext
 } from "../context/AuthContext.jsx";
 import {
   fetchHealthRecordByScheduleIdAPI,
   fetchTestOrderByHealthRecordIdAPI,
   updateHealthRecordAPI
->>>>>>> 5f3e4d16fc5d27323b351001a6224b2ef692baa8
 } from "../../services/health-record.service.js";
 import {
   fetchRegimensByDoctorIdAPI
@@ -56,13 +47,8 @@ import {
 import {
   fetchUsersByRoleAPI
 } from "../../services/user.service.js";
-<<<<<<< HEAD
-import { 
-  createTestOrderAPI, 
-=======
 import {
   createTestOrderAPI,
->>>>>>> 5f3e4d16fc5d27323b351001a6224b2ef692baa8
   deleteTestOrderAPI
 } from "../../services/testOrder.service.js";
 
@@ -368,11 +354,6 @@ const PatientDetailDoctorView = () => {
           </Form.Item>
         </Form>
       </Modal>
-<<<<<<< HEAD
-      
-=======
-
->>>>>>> 5f3e4d16fc5d27323b351001a6224b2ef692baa8
       {testOrderData.map((test) => (
         <Card key={test.id} style={{ marginTop: 16 }}>
           <Row gutter={5 + "vw"} align="middle">

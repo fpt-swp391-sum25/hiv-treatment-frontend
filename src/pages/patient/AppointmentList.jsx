@@ -99,12 +99,6 @@ const AppointmentList = () => {
                 return { ...item, healthRecordStatus: healthRecord?.data?.treatmentStatus || null }
 
             }))
-<<<<<<< HEAD
-            const filtered = withHealthStatus.filter(item => item.healthRecordStatus !== 'Đã khám')
-            
-            const filteredStatus = filtered.filter(item => item.healthRecordStatus !== 'Đã tư vấn')
-            setSchedule(filteredStatus);
-=======
             const filtered = withHealthStatus
                 .filter(item => item.healthRecordStatus !== 'Đã khám')
                 .filter(item => item.healthRecordStatus !== 'Đã tư vấn');
@@ -117,7 +111,6 @@ const AppointmentList = () => {
                 paymentDes: paymentList[idx]?.data?.description || 'N/A'
             }));
             setSchedule(joined);
->>>>>>> 5f3e4d16fc5d27323b351001a6224b2ef692baa8
         } catch (error) {
             message.error(error.message || 'Lỗi khi tải lịch hẹn');
         } finally {

@@ -30,15 +30,9 @@ import {
   ScheduleOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
-<<<<<<< HEAD
-import { 
-  fetchTestOrderByHealthRecordIdAPI, 
-  healthRecordService 
-=======
 import {
   fetchTestOrderByHealthRecordIdAPI,
   healthRecordService
->>>>>>> 5f3e4d16fc5d27323b351001a6224b2ef692baa8
 } from '../../services/health-record.service';
 import {
   AuthContext

@@ -275,21 +275,6 @@ const Booking = () => {
         try {
             setLoading(true);
 
-<<<<<<< HEAD
-            const patientSchedules = availableSchedules.filter(
-                (s) =>
-                    s.patient?.id === user.id &&
-                    dayjs(s.date).isSame(dayjs(values.date), 'day') &&
-                    s.status === 'Đang hoạt động'
-            );
-            if (patientSchedules.length > 0) {
-                message.warning('Bạn đã có lịch hẹn trong ngày này và đang hoạt động.');
-                setLoading(false);
-                return;
-            }
-
-=======
->>>>>>> 5f3e4d16fc5d27323b351001a6224b2ef692baa8
             const selectedSchedules = availableSchedules.filter(
                 (schedule) => schedule.slot === values.slot
             );
@@ -306,24 +291,17 @@ const Booking = () => {
                 schedule = selectedSchedules[0];
             }
 
-<<<<<<< HEAD
-            await registerScheduleAPI({
-=======
             const regisRes = await registerScheduleAPI({
->>>>>>> 5f3e4d16fc5d27323b351001a6224b2ef692baa8
                 scheduleId: schedule.id,
                 patientId: user.id,
                 type: values.type,
             });
 
-<<<<<<< HEAD
-=======
             if (regisRes.status === 409 && regisRes.message.includes('already has')) {
                 setIsVisibleModal(true)
                 return
             }
 
->>>>>>> 5f3e4d16fc5d27323b351001a6224b2ef692baa8
             if (values.paymentMethod === 'online') {
                 const paymentResponse = await initiatePaymentAPI({
                     scheduleId: schedule.id,
@@ -331,13 +309,6 @@ const Booking = () => {
                 });
                 window.location.href = paymentResponse.data;
             } else {
-<<<<<<< HEAD
-                 await createCashPaymentAPI({
-                    scheduleId: schedule.id,
-                    amount: selectedAmount
-                });
-                message.success('Đặt lịch thành công! Vui lòng thanh toán tiền mặt tại quầy.');
-=======
                 await createCashPaymentAPI({
                     scheduleId: schedule.id,
                     amount: selectedAmount
@@ -353,7 +324,6 @@ const Booking = () => {
                     okText: 'Đóng'
                     // Có thể custom okButtonProps, className, icon,... tùy ý
                 });
->>>>>>> 5f3e4d16fc5d27323b351001a6224b2ef692baa8
             }
 
         } catch (error) {
@@ -481,17 +451,15 @@ const Booking = () => {
                                 <Form.Item
                                     name="paymentMethod"
                                     label="Hình thức thanh toán"
-<<<<<<< HEAD
                                     initialValue="online"
                                     rules={[{ required: true, message: 'Vui lòng chọn hình thức thanh toán' }]}
-                                    >
+                                >
                                     <Select>
                                         <Option value="online">Thanh toán trực tuyến</Option>
                                         <Option value="cash">Thanh toán bằng tiền mặt</Option>
                                     </Select>
-=======
                                     rules={[{ required: true, message: "Vui lòng chọn hình thức thanh toán" }]}
-                                >
+                                
                                     <Radio.Group className="payment-block-group" style={{ width: "100%" }}>
                                         {paymentOptions.map(opt => (
                                             <label
@@ -512,7 +480,6 @@ const Booking = () => {
                                             </label>
                                         ))}
                                     </Radio.Group>
->>>>>>> 5f3e4d16fc5d27323b351001a6224b2ef692baa8
                                 </Form.Item>
                                 <Form.Item>
                                     <Button block type="primary" size="large" htmlType="submit" loading={loading} style={{ fontSize: 18, borderRadius: 8, height: 48 }}>
