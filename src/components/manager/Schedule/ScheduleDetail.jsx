@@ -4,7 +4,7 @@ import { notification } from 'antd';
 import { ScheduleStatus, SlotTimes, StatusMapping } from '../../../types/schedule.types';
 import moment from 'moment';
 import './ScheduleDetail.css';
-import { BsCalendarWeek, BsClock, BsDoorOpen, BsPerson, BsBriefcase, BsPersonPlus, BsList } from 'react-icons/bs';
+import { BsCalendarWeek, BsClock, BsDoorOpen, BsPerson, BsBriefcase, BsPersonPlus } from 'react-icons/bs';
 import { deleteScheduleAPI, updateScheduleAPI } from '../../../services/schedule.service';
 
 const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToast, onRefreshData }) => {
