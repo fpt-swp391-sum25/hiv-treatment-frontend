@@ -1,5 +1,4 @@
 import axios from './axios.customize';
-import { STAFF_ROLES, PAYMENT_STATUS } from '../types/report.types';
 import * as XLSX from 'xlsx';
 import dayjs from 'dayjs';
 import quarterOfYear from 'dayjs/plugin/quarterOfYear';
@@ -213,40 +212,28 @@ const calculatePerformance = (total, completed) => {
   return Math.round((completed / total) * 100);
 };
 
-export const getDoctorScheduleStats = async (doctorId, dateRange) => {
-  try {
+export const getDoctorScheduleStats = async (doctorId) => {
     const response = await axios.get(`/api/schedule/doctor-id/${doctorId}`);
-    // Lọc và tổng hợp theo dateRange ở FE
     return response.data;
-  } catch (error) {
-    throw error;
-  }
 };
 
 // Financial Statistics
-export const getPaymentStats = async (status) => {
-  try {
-    let url = '/api/payment';
-    if (status) {
-      url = `/api/payment/status/${encodeURIComponent(status)}`;
-    }
-    const response = await axios.get(url);
-    // Đảm bảo trả về mảng dữ liệu
-    return Array.isArray(response.data) ? response.data : [];
-  } catch (error) {
-    console.error('Error in getPaymentStats:', error);
-    throw error;
-  }
+export const getPaymentStats = async (startDate, endDate) => {
+    const res = await axios.get(`/api/payment/statistics`, {
+        params: {
+            startDate,
+            endDate,
+        },
+    });
+    return res.data;
 };
 
+
+
 export const getScheduleStats = async (params = {}) => {
-  try {
     const queryParams = new URLSearchParams(params).toString();
     const response = await axios.get(`/api/schedule?${queryParams}`);
     return response.data;
-  } catch (error) {
-    throw error;
-  }
 };
 
 // Test Results Stats
@@ -907,102 +894,12 @@ const filterMedicalReports = (reports, filters) => {
   });
 };
 
-// Tính toán thống kê y tế
-const calculateMedicalStatistics = (reports) => {
-  // Số lượng lịch hẹn
-  const totalAppointments = reports.length;
-
-  // Tổng số kết quả xét nghiệm
-  let totalTestOrders = 0;
-  let testTypeCount = {};
-
-  // Biến cho thống kê mới
-  const uniquePatientIds = new Set();
-  let totalPositiveHIV = 0;
-  let totalNegativeHIV = 0;
-
-  reports.forEach(report => {
-    // Đếm số bệnh nhân duy nhất
-    if (report.schedule?.patientId) {
-      uniquePatientIds.add(report.schedule.patientId);
-    }
-
-    if (report.testOrders) {
-      totalTestOrders += report.testOrders.length;
-
-      // Đếm theo loại xét nghiệm
-      report.testOrders.forEach(test => {
-        const type = test.type || 'Không xác định';
-        testTypeCount[type] = (testTypeCount[type] || 0) + 1;
-
-        // Đếm kết quả HIV
-        if (type.toLowerCase().includes('hiv') || type.toLowerCase().includes('kháng thể hiv')) {
-          if (test.result && (
-            test.result.toLowerCase().includes('dương tính') ||
-            test.result.toLowerCase().includes('positive') ||
-            test.result === '+'
-          )) {
-            totalPositiveHIV++;
-          } else if (test.result && (
-            test.result.toLowerCase().includes('âm tính') ||
-            test.result.toLowerCase().includes('negative') ||
-            test.result === '-'
-          )) {
-            totalNegativeHIV++;
-          }
-        }
-      });
-    }
-  });
-
-  // Chuyển đổi testTypeCount thành mảng để dễ sử dụng
-  const testTypeDistribution = Object.entries(testTypeCount).map(([type, count]) => ({
-    type,
-    count,
-    percentage: totalTestOrders > 0 ? Math.round((count / totalTestOrders) * 100) : 0
-  }));
-
-  return {
-    totalAppointments,
-    totalTestOrders,
-    testTypeDistribution,
-    totalPatients: uniquePatientIds.size,
-    totalPositiveHIV,
-    totalNegativeHIV
-  };
-};
-
-// Helper function để tính phân bố theo loại xét nghiệm
-const calculateTestTypeDistribution = (reports) => {
-  let testTypeCount = {};
-  let totalTestOrders = 0;
-
-  reports.forEach(report => {
-    if (report.testOrders && Array.isArray(report.testOrders)) {
-      totalTestOrders += report.testOrders.length;
-
-      // Đếm theo loại xét nghiệm
-      report.testOrders.forEach(test => {
-        const type = test.type || 'Không xác định';
-        testTypeCount[type] = (testTypeCount[type] || 0) + 1;
-      });
-    }
-  });
-
-  // Chuyển đổi testTypeCount thành mảng để dễ sử dụng
-  return Object.entries(testTypeCount).map(([type, count]) => ({
-    type,
-    count,
-    percentage: totalTestOrders > 0 ? Math.round((count / totalTestOrders) * 100) : 0
-  }));
-};
-
 // Format dữ liệu báo cáo y tế cho xuất Excel
 export const formatMedicalDataForExport = (reports) => {
   const exportData = [];
 
   reports.forEach(report => {
-    const { schedule, healthRecord, testOrders } = report;
+    const { schedule, testOrders } = report;
 
     if (testOrders && testOrders.length > 0) {
       testOrders.forEach(test => {

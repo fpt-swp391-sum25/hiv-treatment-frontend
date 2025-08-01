@@ -1,11 +1,3 @@
-// Schedule Types
-export const ScheduleType = {
-    EXAMINATION: 'EXAMINATION',     // Khám thông thường
-    EMERGENCY: 'EMERGENCY',         // Khám khẩn cấp
-    FOLLOW_UP: 'FOLLOW_UP',        // Tái khám
-    CONSULTATION: 'CONSULTATION'    // Tư vấn
-};
-
 // Schedule Status
 export const ScheduleStatus = {
     PENDING: 'PENDING',         // Chờ xác nhận
@@ -21,12 +13,10 @@ export const ScheduleStatus = {
 
 // Mapping giữa Status FE và BE
 export const StatusMapping = {
-    // FE -> BE
     'available': 'Trống',
     'UNAVAILABLE': 'Đã hủy',
     'active': 'Đang hoạt động',
     
-    // BE -> FE
     'Trống': 'available',
     'Đã hủy': 'cancelled',
     'Đang hoạt động': 'active',
@@ -36,7 +26,6 @@ export const StatusMapping = {
     'Hoàn thành': 'completed'
 };
 
-// Time slots for schedule - Chỉ giữ lại các khung giờ chẵn
 export const SlotTimes = [
     { value: '08:00:00', label: '08:00' },
     { value: '09:00:00', label: '09:00' },

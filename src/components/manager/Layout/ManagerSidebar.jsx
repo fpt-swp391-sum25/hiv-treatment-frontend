@@ -2,11 +2,12 @@ import { Layout, Menu } from 'antd';
 import {
   BarChartOutlined,
   UserOutlined,
-  TeamOutlined,
-  CalendarOutlined,
+    CalendarOutlined,
   FileOutlined,
   SolutionOutlined,
-  IdcardOutlined
+  IdcardOutlined,
+  DollarOutlined,
+  MedicineBoxOutlined
 } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './ManagerSidebar.css';
@@ -40,8 +41,13 @@ const ManagerSidebar = () => {
     },
     {
       key: '/manager/lab-technicians',
-      icon: <TeamOutlined />,
+      icon: <MedicineBoxOutlined />,
       label: 'Kĩ thuật viên',
+    },
+    {
+      key: '/manager/cashier',
+      icon: <DollarOutlined  />,
+      label: 'Thu ngân',
     },
     {
       key: '/manager/default-regimen',
@@ -54,17 +60,6 @@ const ManagerSidebar = () => {
       label: 'Hồ sơ cá nhân',
     },
   ];
-
-  // Custom styles cho menu items
-  const getMenuItemStyle = (isSelected) => {
-    return {
-      backgroundColor: isSelected ? '#f0f7ff' : 'transparent', // Màu nền nhẹ khi được chọn
-      color: isSelected ? '#2056df' : '#555', // Màu chữ xanh khi được chọn, xám khi không
-      margin: '4px 0',
-      borderRadius: '4px',
-      fontWeight: isSelected ? '500' : 'normal',
-    };
-  };
 
   return (
     <Sider
