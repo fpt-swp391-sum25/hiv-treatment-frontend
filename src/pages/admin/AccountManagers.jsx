@@ -4,6 +4,7 @@ import {
 } from 'react';
 import {
     Button,
+    Form,
     Input,
     Modal,
     notification,
@@ -25,14 +26,11 @@ import {
 } from '../../services/user.service';
 
 const AccountManagers = () => {
+    const [form] = Form.useForm()
     const [data, setData] = useState([])
-    const [username, setUsername] = useState("")
-    const [password, setPassword] = useState("")
-    const [email, setEmail] = useState("")
-    const [role, setRole] = useState("MANAGER")
+    const [role] = useState("MANAGER")
     const [dataUpdate, setDataUpdate] = useState({})
     const [loading, setLoading] = useState(false)
-
     const [isOpenModal, setIsOpenModal] = useState(false)
     const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false)
 
@@ -54,19 +52,37 @@ const AccountManagers = () => {
         setLoading(false)
     }
 
-    const handleCreate = async () => {
+    const handleCreate = async (values) => {
         setLoading(true)
-        const response = await createAccountAPI(username, password, email, role)
-        if (response.data) {
-            notification.success({
-                message: 'Hệ thống',
+        try {
+            const { username, password, email } = values
+            const response = await createAccountAPI(username, password, email, role)
+            if (response?.data) {
+                notification.success({
+                    message: 'Hệ thống',
+                    showProgress: true,
+                    pauseOnHover: true,
+                    description: 'Tạo tài khoản thành công'
+                })
+                setIsOpenModal(false)
+                form.resetFields()
+                await loadAccounts()
+            } else {
+                notification.error({
+                    message: 'Hệ thống',
+                    showProgress: true,
+                    pauseOnHover: true,
+                    description: 'Tạo tài khoản thất bại'
+                })
+            }
+        } catch (error) {
+            notification.error({
+                message: 'Hệ thống',
                 showProgress: true,
                 pauseOnHover: true,
-                description: 'Tạo tài khoản thành công'
+                description: error?.message || 'Lỗi khi tạo tài khoản'
             })
         }
-        resetAndClose()
-        await loadAccounts()
         setLoading(false)
     }
 
@@ -93,30 +109,43 @@ const AccountManagers = () => {
 
     const handleDelete = async (id) => {
         setLoading(true)
-        const response = await deleteAccountAPI(id)
-        if (response.data) {
-            notification.success({
-                message: 'Hệ thống',
+        try {
+            const response = await deleteAccountAPI(id)
+            if (response?.data) {
+                notification.success({
+                    message: 'Hệ thống',
+                    showProgress: true,
+                    pauseOnHover: true,
+                    description: 'Xoá tài khoản thành công'
+                })
+                await loadAccounts()
+            } else {
+                notification.error({
+                    message: 'Hệ thống',
+                    showProgress: true,
+                    pauseOnHover: true,
+                    description: 'Xoá tài khoản thất bại'
+                })
+            }
+        } catch (error) {
+            notification.error({
+                message: 'Hệ thống',
                 showProgress: true,
                 pauseOnHover: true,
-                description: 'Xóa tài khoản thành công'
+                description: error?.message || 'Lỗi khi xoá tài khoản'
             })
-            await loadAccounts()
-            setLoading(false)
         }
+        setLoading(false)
     }
 
     const resetAndClose = () => {
         setIsOpenModal(false)
-        setUsername("")
-        setEmail("")
-        setPassword("")
-        setRole("MANAGER")
+        form.resetFields()
     }
 
     const columns = [
         {
-            title: 'Tên đăng nhập',
+            title: 'Tên đăng nhập',
             dataIndex: 'username',
             key: 'username',
         },
@@ -134,7 +163,7 @@ const AccountManagers = () => {
             ),
         },
         {
-            title: 'Trạng thái',
+            title: 'Trạng thái',
             key: 'status',
             dataIndex: 'accountStatus',
             render: (_, { accountStatus }) => {
@@ -144,7 +173,6 @@ const AccountManagers = () => {
                         {accountStatus}
                     </Tag>
                 )
-
             },
         },
         {
@@ -177,15 +205,19 @@ const AccountManagers = () => {
                 left: "50%",
                 transform: "translate(-50%, -50%)",
             }}>
-                < Spin />
+                <Spin />
             </div>
                 :
                 <>
                     <div style={{ display: 'flex', justifyContent: 'space-between', padding: '15px' }}>
-                        <h2>Tài khoản quản lí</h2>
-                        <Button onClick={() => setIsOpenModal(true)} type='primary'><PlusCircleOutlined />Tạo mới</Button>
+                        <h2>Tài khoản quản lí</h2>
+                        <Button onClick={() => setIsOpenModal(true)} type='primary'>
+                            <PlusCircleOutlined />Tạo mới
+                        </Button>
                     </div>
-                    <Table columns={columns} dataSource={data} rowKey={data.id} />
+
+                    <Table columns={columns} dataSource={data} rowKey="id" loading={loading} />
+
                     <UpdateUserModal
                         isUpdateModalOpen={isUpdateModalOpen}
                         setIsUpdateModalOpen={setIsUpdateModalOpen}
@@ -193,30 +225,49 @@ const AccountManagers = () => {
                         setDataUpdate={setDataUpdate}
                         loadAccounts={loadAccounts}
                     />
+
                     <Modal
-                        title="Tạo tài khoản"
+                        title="Tạo tài khoản"
                         closable={{ 'aria-label': 'Custom Close Button' }}
                         open={isOpenModal}
-                        onOk={handleCreate}
                         onCancel={resetAndClose}
-                        okText={"Tạo"}
-                        cancelText={"Hủy"}
-                        loading={loading}
+                        okText="Tạo"
+                        cancelText="Hủy"
+                        confirmLoading={loading}
+                        onOk={() => form.submit()}
                     >
-                        <div style={{ display: 'flex', gap: '15px', flexDirection: 'column' }}>
-                            <div>
-                                <span>Tên đăng nhập</span>
-                                <Input value={username} onChange={(event) => { setUsername(event.target.value) }} />
-                            </div>
-                            <div>
-                                <span>Email</span>
-                                <Input value={email} onChange={(event) => { setEmail(event.target.value) }} />
-                            </div>
-                            <div>
-                                <span>Mật khẩu</span>
-                                <Input.Password value={password} onChange={(event) => { setPassword(event.target.value) }} />
-                            </div>
-                        </div>
+                        <Form
+                            form={form}
+                            layout="vertical"
+                            onFinish={handleCreate}
+                        >
+                            <Form.Item
+                                label="Tên đăng nhập"
+                                name="username"
+                                rules={[{ required: true, message: 'Vui lòng nhập tên đăng nhập' }]}
+                            >
+                                <Input />
+                            </Form.Item>
+
+                            <Form.Item
+                                label="Email"
+                                name="email"
+                                rules={[
+                                    { required: true, message: 'Vui lòng nhập email' },
+                                    { type: 'email', message: 'Email không hợp lệ' },
+                                ]}
+                            >
+                                <Input />
+                            </Form.Item>
+
+                            <Form.Item
+                                label="Mật khẩu"
+                                name="password"
+                                rules={[{ required: true, message: 'Vui lòng nhập mật khẩu' }]}
+                            >
+                                <Input.Password />
+                            </Form.Item>
+                        </Form>
                     </Modal>
                 </>
             }

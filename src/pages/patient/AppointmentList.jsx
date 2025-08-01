@@ -51,6 +51,7 @@ import {
 import {
     fetchHealthRecordByScheduleIdAPI
 } from "../../services/health-record.service";
+import { getPaymentByScheduleIdAPI } from "../../services/payment.service";
 
 const { Text, Title } = Typography;
 
@@ -98,9 +99,18 @@ const AppointmentList = () => {
                 return { ...item, healthRecordStatus: healthRecord?.data?.treatmentStatus || null }
 
             }))
-            const filtered = withHealthStatus.filter(item => item.healthRecordStatus !== 'Đã khám')
-            const filteredStatus = filtered.filter(item => item.healthRecordStatus !== 'Đã tư vấn')
-            setSchedule(filteredStatus);
+            const filtered = withHealthStatus
+                .filter(item => item.healthRecordStatus !== 'Đã khám')
+                .filter(item => item.healthRecordStatus !== 'Đã tư vấn');
+            const paymentList = await Promise.all(
+                filtered.map(item => getPaymentByScheduleIdAPI(item.id))
+            );
+            const joined = filtered.map((item, idx) => ({
+                ...item,
+                paymentStatus: paymentList[idx]?.data?.status || 'CHƯA THANH TOÁN',
+                paymentDes: paymentList[idx]?.data?.description || 'N/A'
+            }));
+            setSchedule(joined);
         } catch (error) {
             message.error(error.message || 'Lỗi khi tải lịch hẹn');
         } finally {
@@ -125,7 +135,6 @@ const AppointmentList = () => {
             message.error('Không thể tải cấu hình hệ thống');
         }
     };
-
 
     const handleRetryPayment = async (scheduleId) => {
         const retrySchedule = schedule.find(item => item.id === scheduleId);
@@ -230,8 +239,7 @@ const AppointmentList = () => {
                 let color = 'default';
                 switch (status) {
                     case 'Đang chờ thanh toán': color = 'gold'; break;
-                    case 'Đã thanh toán': color = 'green'; break;
-                    case 'Đang hoạt động': color = 'blue'; break;
+                    case 'Đang hoạt động': color = 'green'; break;
                     case 'Thanh toán thất bại': color = 'red'; break;
                     default: color = 'default';
                 }
@@ -239,14 +247,51 @@ const AppointmentList = () => {
             }
         },
         {
+            title: 'Thanh toán',
+            dataIndex: 'paymentStatus',
+            key: 'paymentStatus',
+            render: (paymentStatus) => {
+                let color, label;
+                switch (paymentStatus) {
+                    case 'Thanh toán thành công':
+                        color = 'green'; label = 'Đã thanh toán'; break;
+                    case 'Thanh toán thất bại':
+                        color = 'red'; label = 'Thanh toán thất bại'; break;
+                    case 'Chờ thanh toán':
+                        color = 'gold'; label = 'Đang chờ'; break;
+                    default:
+                        color = 'default'; label = 'Chưa thanh toán';
+                }
+                return <Tag color={color}>{label}</Tag>;
+            }
+        },
+        {
             title: '',
             key: 'action',
             render: (_, record) => {
+                const { paymentStatus, status, paymentDes } = record;
                 const appointmentDateTime = dayjs(`${record.date} ${record.slot}`, 'DD-MM-YYYY HH:mm')
                 const now = dayjs()
                 const canCancel = appointmentDateTime.diff(now, 'hour') >= minCancelHour;
+                if (paymentStatus === 'Thanh toán thất bại' || (paymentDes === 'ONLINE' && paymentStatus === 'Chờ thanh toán')) {
+                    return (
+                        <Popconfirm
+                            title="Thanh toán lại?"
+                            description="Bạn có chắc muốn thanh toán lại?"
+                            onConfirm={() => handleRetryPayment(record.id)}
+                            okText="Có"
+                            cancelText="Không"
+                        >
+                            <Button
+                                type="default"
+                            >
+                                Thanh toán lại
+                            </Button>
+                        </Popconfirm>
 
-                if (['Đã thanh toán', 'Đang chờ thanh toán', 'Đang hoạt động'].includes(record.status)) {
+                    );
+                }
+                if (paymentDes === 'Tiền mặt' && paymentStatus === 'Chờ thanh toán' && status === 'Đang hoạt động') {
                     if (canCancel) {
 
                         return (
@@ -281,24 +326,42 @@ const AppointmentList = () => {
                             </>
                         )
                     }
-                } else if (record.status === 'Thanh toán thất bại') {
-                    return (
-                        <Popconfirm
-                            title="Huỷ lịch hẹn?"
-                            description="Bạn có chắc muốn huỷ?"
-                            onConfirm={() => handleRetryPayment(record.id)}
-                            okText="Có"
-                            cancelText="Không"
-                        >
-                            <Button
-                                type="dashed"
-                                danger
-                            >
-                                Thanh toán lại
-                            </Button>
-                        </Popconfirm>
+                }
+                if (paymentDes === 'ONLINE' && paymentStatus === 'Thanh toán thành công' && status === 'Đang hoạt động') {
+                    if (canCancel) {
 
-                    );
+                        return (
+                            <Button
+                                className="custom-delete-btn"
+                                icon={<DeleteOutlined />}
+                                onClick={() => showCancelModal(record)}
+                            >
+                                Huỷ
+                            </Button>
+                        );
+                    } else {
+                        return (
+                            <>
+                                <Popover
+                                    content={
+                                        <div style={{ minWidth: 180 }}>
+                                            <b>Không thể huỷ lịch</b>
+                                            <div style={{ color: '#888', marginTop: 4 }}>
+                                                Chỉ được huỷ trước {minCancelHour} giờ so với giờ hẹn.
+                                            </div>
+                                        </div>
+                                    }
+                                    title={null}
+                                    placement="top"
+                                    trigger="hover"
+                                >
+                                    <Button className="custom-delete-btn" icon={<DeleteOutlined />} disabled >
+                                        Huỷ
+                                    </Button>
+                                </Popover>
+                            </>
+                        )
+                    }
                 }
                 return null;
             }

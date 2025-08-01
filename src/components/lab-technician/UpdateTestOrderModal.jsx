@@ -9,10 +9,10 @@ import {
 } from "react"
 import dayjs from "dayjs"
 
-const UpdateTestResultModal = (props) => {
+const UpdateTestOrderModal = (props) => {
   const {
-    isUpdateTestResultModalOpen,
-    setIsUpdateTestResultModalOpen,
+    isUpdateTestOrderModalOpen,
+    setIsUpdateTestOrderModalOpen,
     dataUpdate,
     onPreviewUpdate,
   } = props
@@ -56,14 +56,14 @@ const UpdateTestResultModal = (props) => {
   }
 
   const resetAndClose = () => {
-    setIsUpdateTestResultModalOpen(false)
+    setIsUpdateTestOrderModalOpen(false)
   }
 
   return (
     <Modal
       title="Cập nhật kết quả xét nghiệm"
       closable={{ "aria-label": "Custom Close Button" }}
-      open={isUpdateTestResultModalOpen}
+      open={isUpdateTestOrderModalOpen}
       onOk={handleUpdate}
       onCancel={resetAndClose}
       okText={"Xác nhận"}
@@ -101,4 +101,4 @@ const UpdateTestResultModal = (props) => {
     </Modal>
   )
 }
-export default UpdateTestResultModal
+export default UpdateTestOrderModal

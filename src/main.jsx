@@ -27,6 +27,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AccountManagers from './pages/admin/AccountManagers';
 import AccountDoctors from './pages/admin/AccountDoctors';
 import AccountLabTechnicians from './pages/admin/AccountLabTechnicians';
+import AccountCashiers from './pages/admin/AccountCashiers'
 import AccountPatients from './pages/admin/AccountPatients';
 import AdminSystemConfig from './pages/admin/AdminSystemConfig'
 
@@ -47,11 +48,10 @@ import DoctorSchedule from './pages/doctor/DoctorSchedule';
 import PatientDetailDoctorView from './components/doctor/PatientDetailDoctorView';
 import PatientList from './pages/doctor/PatientList';
 import RegimenList from './pages/doctor/RegimenList';
-import UpdateRegimenModal from './pages/doctor/RegimenList';
 import DoctorDocumentList from './pages/doctor/DoctorDocumentList';
+
 // Import for lab technician pages
 import LabTechnicianHomePage from './pages/lab-technician/LabTechnicianHomePage'
-
 import PatientDetail from './pages/lab-technician/PatientDetailPage'
 import LabTechnicianProfile from './pages/lab-technician/Profile';
 import LabTechnicianPatientList from './pages/lab-technician/PatientList';
@@ -67,6 +67,13 @@ import ResetPassword from './pages/auth/ResetPassword';
 
 // Import for mail verification
 import VerifyEmail from './pages/auth/VerifyEmail';
+
+// Import for cashier pages
+import CashierHomePage from './pages/cashier/CashierHomePage';
+import CashierPaymentSchedulePage from './pages/cashier/CashierPaymentSchedulePage';
+import CashierPaymentTestPage from './pages/cashier/CashierPaymentTestPage';
+import CashierTransactionHistoryPage from './pages/cashier/CashierTransactionHistoryPage';
+import CashierProfilePage from './pages/cashier/CashierProfilePage';
 
 const router = createBrowserRouter([
   {
@@ -99,9 +106,6 @@ const router = createBrowserRouter([
       {
         path: '/profile',
         element: (
-          // <PrivateRoute>
-          //   <ProfileDetail />
-          // </PrivateRoute>
           <PrivateRoute children={<ProfileDetail />} />
         ),
         errorElement: <Errors />,
@@ -109,9 +113,6 @@ const router = createBrowserRouter([
       {
         path: '/appointment',
         element: (
-          // <PrivateRoute>
-          //   <AppointmentList />
-          // </PrivateRoute>
           <PrivateRoute children={<AppointmentList />} />
         ),
         errorElement: <Errors />,
@@ -119,9 +120,6 @@ const router = createBrowserRouter([
       {
         path: '/appointment-result/:scheduleId',
         element: (
-          // <PrivateRoute>
-          //   <AppointmentResult />
-          // </PrivateRoute>
           <PrivateRoute children={<AppointmentResult />} />
         ),
         errorElement: <Errors />,
@@ -129,9 +127,6 @@ const router = createBrowserRouter([
       {
         path: '/appointment-history',
         element: (
-          // <PrivateRoute>
-          //   <PatientAppointmentHistory />
-          // </PrivateRoute>
           <PrivateRoute children={<PatientAppointmentHistory />} />
         ),
         errorElement: <Errors />,
@@ -277,6 +272,11 @@ const router = createBrowserRouter([
         errorElement: <Errors />,
       },
       {
+        path: '/admin/cashiers',
+        element: (<PrivateRoute children={<AccountCashiers />} requiredRole={['ADMIN']} />),
+        errorElement: <Errors />,
+      },
+      {
         path: '/admin/patients',
         element: (<PrivateRoute children={<AccountPatients />} requiredRole={['ADMIN']} />),
         errorElement: <Errors />,
@@ -300,13 +300,25 @@ const router = createBrowserRouter([
       {
         index: true,
         element: (
-          <PrivateRoute children={<ManagerDashboard />} requiredRole={['MANAGER']} />
+          <PrivateRoute children={<ManagerSchedule />} requiredRole={['MANAGER']} />
         ),
         errorElement: <Errors />,
       }, {
         path: 'schedule',
         element: (
           <PrivateRoute children={<ManagerSchedule />} requiredRole={['MANAGER']} />
+        ),
+        errorElement: <Errors />,
+      }, {
+        path: 'dashboard',
+        element: (
+          <PrivateRoute children={<ManagerDashboard />} requiredRole={['MANAGER']} />
+        ),
+        errorElement: <Errors />,
+      }, {
+        path: 'reports',
+        element: (
+          <PrivateRoute children={<Reports />} requiredRole={['MANAGER']} />
         ),
         errorElement: <Errors />,
       }, {
@@ -319,13 +331,6 @@ const router = createBrowserRouter([
         path: 'lab-technicians',
         element: (
           <PrivateRoute children={<LabTechnicianManagement />} requiredRole={['MANAGER']} />
-        ),
-        errorElement: <Errors />,
-      },
-      {
-        path: 'reports',
-        element: (
-          <PrivateRoute children={<Reports />} requiredRole={['MANAGER']} />
         ),
         errorElement: <Errors />,
       }, {
@@ -377,7 +382,53 @@ const router = createBrowserRouter([
   {
     path: '/verify',
     element: (<VerifyEmail />)
-  }
+  },
+
+  // Path for cashier pages
+{
+  path: '/cashier',
+    element: (
+      <PrivateRoute children={<CashierHomePage />} requiredRole={['CASHIER']} />
+    ),
+    errorElement: <Errors />,
+    children: [
+      {
+        index: true,
+        element: (
+          <PrivateRoute children={<CashierPaymentSchedulePage />} requiredRole={['CASHIER']} />
+        ),
+        errorElement: <Errors />
+      },
+      {
+        path: 'schedule-payment',
+        element: (
+          <PrivateRoute children={<CashierPaymentSchedulePage />} requiredRole={['CASHIER']} />
+        ),
+        errorElement: <Errors />
+      },
+      {
+        path: 'test-payment',
+        element: (
+          <PrivateRoute children={<CashierPaymentTestPage />} requiredRole={['CASHIER']} />
+        ),
+        errorElement: <Errors />
+      },
+      {
+        path: 'transaction-lookup',
+        element: (
+          <PrivateRoute children={<CashierTransactionHistoryPage />} requiredRole={['CASHIER']} />
+        ),
+        errorElement: <Errors />
+      },
+      {
+        path: 'profile',
+        element: (
+          <PrivateRoute children={<CashierProfilePage />} requiredRole={['CASHIER']} />
+        ),
+        errorElement: <Errors />
+      }
+    ]
+  },
 ]);
 
 ReactDOM.createRoot(document.getElementById('root')).render(

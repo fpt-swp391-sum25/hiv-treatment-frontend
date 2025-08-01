@@ -77,7 +77,9 @@ const Login = () => {
         if (user && (user.role === 'ADMIN'
             || user.role === 'MANAGER'
             || user.role === 'LAB_TECHNICIAN'
-            || user.role === 'DOCTOR')) {
+            || user.role === 'DOCTOR'
+            || user.role === 'CASHIER'
+        )) {
             redirectHomePage()
         }
     }, [])
@@ -103,6 +105,8 @@ const Login = () => {
                     navigate('/doctor')
                 } else if (response.data.role === 'MANAGER') {
                     navigate('/manager')
+                } else if (response.data.role === 'CASHIER') {
+                    navigate('/cashier')
                 } else {
                     navigate('/')
                 }

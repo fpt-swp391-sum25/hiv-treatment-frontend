@@ -100,7 +100,7 @@
 }
 
 /* Kết quả xét nghiệm */
-.test-results-section {
+.test-orders-section {
   margin-top: 16px;
 }
 
@@ -109,12 +109,12 @@
   .medical-report-container {
     padding: 10px;
   }
-  
+
   .report-tabs {
     padding: 8px;
   }
-  
+
   .patient-card .ant-descriptions-item {
     padding-bottom: 8px;
   }
-} 
+}

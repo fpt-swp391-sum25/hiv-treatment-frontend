@@ -11,6 +11,43 @@
     justify-content: flex-start;
 }
 
+.payment-block-group {
+    display: flex;
+    gap: 20px;
+}
+
+.payment-block-option {
+    border: 1.5px solid #eee;
+    border-radius: 7px;
+    padding: 16px 18px 12px;
+    background: #f8fafc;
+    display: flex;
+    align-items: flex-start;
+    transition: border 0.2s, background 0.2s, box-shadow 0.2s;
+    font-size: 15px;
+}
+
+.payment-block-option:hover {
+    border: 1.5px solid #1677ff;
+    background: #e6f7ff;
+    box-shadow: 0 2px 8px #bae7ff66;
+}
+
+.payment-block-option .label {
+    font-weight: 600;
+}
+
+.payment-block-option .desc {
+    font-size: 13px;
+    color: #888;
+}
+
+.payment-block-option:has(input[type="radio"]:checked) {
+    border: 1.5px solid #1677ff;
+    background: #e6f7ff;
+    box-shadow: 0 2px 8px #bae7ff66;
+}
+
 
 @media (max-width: 991px) {
     .ant-card {

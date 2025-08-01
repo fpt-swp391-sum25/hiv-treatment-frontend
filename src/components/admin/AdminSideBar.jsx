@@ -47,18 +47,22 @@ const AdminSidebar = () => {
         },
         {
           key: '6',
+          label: <NavLink to='/admin/cashiers'>Thu ngân</NavLink>,
+          path: '/admin/cashiers'
+        },
+        {
+          key: '7',
           label: <NavLink to='/admin/patients'>Bệnh nhân</NavLink>,
           path: '/admin/patients'
-
         },
       ],
     },
     {
-      key: '7',
+      key: '8',
       label: <NavLink to='/admin/system-config'>Cài đặt hệ thống</NavLink>,
       icon: < SettingOutlined />,
       path: '/admin/system-config'
-    },
+    }
   ];
 
   // Function to keep the chosen sidebar option stay active

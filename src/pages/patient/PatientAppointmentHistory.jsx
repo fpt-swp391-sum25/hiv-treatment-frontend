@@ -31,7 +31,7 @@ import {
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import {
-  fetchTestResultByHealthRecordIdAPI,
+  fetchTestOrderByHealthRecordIdAPI,
   healthRecordService
 } from '../../services/health-record.service';
 import {
@@ -52,7 +52,7 @@ export default function PatientAppointmentHistory() {
   const [searchDoctor, setSearchDoctor] = useState('');
   const [selectedType, setSelectedType] = useState('all');
   const [healthRecord, setHealthRecord] = useState(null);
-  const [testResults, setTestResults] = useState([]);
+  const [testOrders, setTestOrders] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [loadingModal, setLoadingModal] = useState(false);
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10 });
@@ -84,12 +84,12 @@ export default function PatientAppointmentHistory() {
     try {
       const data = await healthRecordService.getHealthRecordByScheduleId(scheduleId);
       setHealthRecord(data);
-      const testRes = data?.id ? await fetchTestResultByHealthRecordIdAPI(data.id) : { data: [] };
-      setTestResults(testRes.data || []);
+      const testRes = data?.id ? await fetchTestOrderByHealthRecordIdAPI(data.id) : { data: [] };
+      setTestOrders(testRes.data || []);
     } catch {
       message.error('Không thể tải hồ sơ khám.');
       setHealthRecord(null);
-      setTestResults([]);
+      setTestOrders([]);
     } finally {
       setLoadingModal(false);
     }
@@ -98,7 +98,7 @@ export default function PatientAppointmentHistory() {
   const closeModal = () => {
     setShowModal(false);
     setHealthRecord(null);
-    setTestResults([]);
+    setTestOrders([]);
   };
 
   const filteredRecords = records.filter(r => {
@@ -283,10 +283,10 @@ export default function PatientAppointmentHistory() {
             <Divider orientation="left">
               <FileTextOutlined /> <Text strong>Kết quả xét nghiệm</Text>
             </Divider>
-            {testResults.length === 0 ? (
+            {testOrders.length === 0 ? (
               <Text type="secondary">Chưa có kết quả.</Text>
             ) : (
-              testResults.map(test => (
+              testOrders.map(test => (
                 <Card key={test.id} size="small" style={{ marginBottom: 12 }} type="inner" title={test.type}>
                   <Row gutter={16}>
                     <Col span={12}><b>Kết quả:</b> {test.result} {test.unit}</Col>

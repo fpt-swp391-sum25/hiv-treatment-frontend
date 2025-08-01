@@ -16,7 +16,9 @@ import {
     Descriptions,
     Card,
     Divider,
-    Tag
+    Tag,
+    Modal,
+    Radio
 } from 'antd';
 import {
     ArrowLeftOutlined,
@@ -49,6 +51,7 @@ import {
     fetchScheduleByDateAPI,
     registerScheduleAPI
 } from '../../services/schedule.service';
+import { createCashPaymentAPI } from '../../services/payment.service';
 
 
 const { Link } = Typography;
@@ -98,11 +101,25 @@ const Booking = () => {
     const [loading, setLoading] = useState(false);
     const [servicePrices, setServicePrices] = useState({});
     const [config, setConfig] = useState({});
+    const [isVisibleModal, setIsVisibleModal] = useState(false)
     const doctorId = Form.useWatch('doctor', form);
     const date = Form.useWatch('date', form);
     const slot = Form.useWatch('slot', form);
     const type = Form.useWatch('type', form);
     const typeParam = searchParams.get('type');
+
+    const paymentOptions = [
+        {
+            value: "online",
+            label: "Thanh toán trực tuyến",
+            desc: "Chuyển khoản, ví điện tử,...",
+        },
+        {
+            value: "cash",
+            label: "Tiền mặt",
+            desc: "Trả tiền khi đến khám",
+        },
+    ];
 
     useEffect(() => {
         loadDoctors();
@@ -141,7 +158,6 @@ const Booking = () => {
 
     useEffect(() => {
         const doctorId = form.getFieldValue('doctor');
-        console.log('>>>>>>>>check schedule', availableSchedules)
         if (slot) {
             const schedule = availableSchedules.find(
                 (s) => s.slot === slot && (!doctorId || s.doctor.id === doctorId)
@@ -240,45 +256,6 @@ const Booking = () => {
         }
     };
 
-    const onFinish = async (values) => {
-        try {
-            setLoading(true);
-            const selectedSchedules = availableSchedules.filter(
-                (schedule) => schedule.slot === values.slot
-            );
-            if (selectedSchedules.length === 0) {
-                throw new Error('Lịch hẹn không hợp lệ');
-            }
-
-            let schedule;
-            if (values.doctor) {
-                schedule = selectedSchedules.find((schedule) => schedule.doctor.id === values.doctor);
-                if (!schedule) {
-                    throw new Error('Bác sĩ không có lịch hẹn cho khung giờ này');
-                }
-            } else {
-                schedule = selectedSchedules[0];
-            }
-
-            await registerScheduleAPI({
-                scheduleId: schedule.id,
-                patientId: user.id,
-                type: values.type,
-            });
-
-            const paymentResponse = await initiatePaymentAPI({
-                scheduleId: schedule.id,
-                amount: selectedAmount,
-            });
-
-            window.location.href = paymentResponse.data;
-        } catch (error) {
-            message.error(error.message || 'Đặt lịch thất bại');
-        } finally {
-            setLoading(false);
-        }
-    };
-
     const disabledDate = (current) => {
         const isBeforeToday = current && current < dayjs().startOf('day');
         const isSunday = current && current.day() === 0;
@@ -294,9 +271,82 @@ const Booking = () => {
             .trim();
     };
 
+    const onFinish = async (values) => {
+        try {
+            setLoading(true);
+
+            const selectedSchedules = availableSchedules.filter(
+                (schedule) => schedule.slot === values.slot
+            );
+
+            if (selectedSchedules.length === 0) {
+                throw new Error('Lịch hẹn không hợp lệ');
+            }
+
+            let schedule;
+            if (values.doctor) {
+                schedule = selectedSchedules.find((s) => s.doctor.id === values.doctor);
+                if (!schedule) throw new Error('Bác sĩ không có lịch hẹn cho khung giờ này');
+            } else {
+                schedule = selectedSchedules[0];
+            }
+
+            const regisRes = await registerScheduleAPI({
+                scheduleId: schedule.id,
+                patientId: user.id,
+                type: values.type,
+            });
+
+            if (regisRes.status === 409 && regisRes.message.includes('already has')) {
+                setIsVisibleModal(true)
+                return
+            }
+
+            if (values.paymentMethod === 'online') {
+                const paymentResponse = await initiatePaymentAPI({
+                    scheduleId: schedule.id,
+                    amount: selectedAmount,
+                });
+                window.location.href = paymentResponse.data;
+            } else {
+                await createCashPaymentAPI({
+                    scheduleId: schedule.id,
+                    amount: selectedAmount
+                });
+                Modal.success({
+                    title: 'Đặt lịch thành công!',
+                    content: (
+                        <div>
+                            Vui lòng thanh toán tiền mặt tại quầy khi đến khám.<br />
+                            <b>Cảm ơn bạn đã sử dụng dịch vụ!</b>
+                        </div>
+                    ),
+                    okText: 'Đóng'
+                    // Có thể custom okButtonProps, className, icon,... tùy ý
+                });
+            }
+
+        } catch (error) {
+            message.error(error.message || 'Đặt lịch thất bại');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <Layout style={{ background: '#fafcff' }}>
             <Content style={{ padding: 0, maxWidth: 1300, margin: '0 auto' }}>
+                <Modal
+                    title={<span style={{ color: 'red' }}>Thông báo</span>}
+                    open={isVisibleModal}
+                    onOk={() => { setIsVisibleModal(false) }}
+                    onCancel={() => { setIsVisibleModal(false) }}
+                    okText="Đóng"
+                    okButtonProps={{ style: { display: 'none' } }}
+                    cancelButtonProps={{ style: { display: 'none' } }}
+                >
+                    <p>Bạn đã có lịch hẹn trong ngày này.<br />Không thể đặt thêm!</p>
+                </Modal>
                 <Row gutter={[16, 16]} style={{ padding: '16px 8px' }}>
                     <Col xs={24} md={15} style={{ minWidth: 320 }}>
                         <Card
@@ -398,6 +448,32 @@ const Booking = () => {
                                         </Descriptions.Item>
                                     </Descriptions>
                                 )}
+                                <Form.Item
+                                    name="paymentMethod"
+                                    label="Hình thức thanh toán"
+                                    rules={[{ required: true, message: "Vui lòng chọn hình thức thanh toán" }]}
+                                >
+                                    <Radio.Group className="payment-block-group" style={{ width: "100%" }}>
+                                        {paymentOptions.map(opt => (
+                                            <label
+                                                key={opt.value}
+                                                className="payment-block-option"
+                                                htmlFor={`pay-method-${opt.value}`}
+                                                style={{ width: 220, cursor: "pointer", marginRight: 18 }}
+                                            >
+                                                <Radio
+                                                    value={opt.value}
+                                                    id={`pay-method-${opt.value}`}
+                                                    style={{ marginRight: 8 }}
+                                                />
+                                                <div className="info">
+                                                    <div className="label">{opt.label}</div>
+                                                    <div className="desc">{opt.desc}</div>
+                                                </div>
+                                            </label>
+                                        ))}
+                                    </Radio.Group>
+                                </Form.Item>
                                 <Form.Item>
                                     <Button block type="primary" size="large" htmlType="submit" loading={loading} style={{ fontSize: 18, borderRadius: 8, height: 48 }}>
                                         Xác nhận đặt lịch
