@@ -1,43 +1,46 @@
 import {
-    Layout, 
-    Button, 
-    Table, 
-    Typography, 
+    Layout,
+    Button,
+    Table,
+    Typography,
     Input,
+    DatePicker,
+    Select,
+    Row,
+    Col,
     Tabs,
     message,
     Space,
     Spin
 } from "antd";
-import { 
-    useState, 
-    useEffect, 
-    useContext 
+import {
+    useState,
+    useEffect,
+    useContext
 } from "react";
-import { 
-    Outlet, 
-    useNavigate 
+import {
+    Outlet,
+    useNavigate
 } from "react-router-dom";
 import dayjs from 'dayjs';
 import 'dayjs/locale/vi';
+import viVN from 'antd/es/date-picker/locale/vi_VN';
 import { 
     AuthContext 
 } from "../../components/context/AuthContext";
-import { 
-    fetchScheduleByDoctorIdAPI 
+import {
+    fetchScheduleByDoctorIdAPI
 } from "../../services/schedule.service";
-import { 
-    fetchUsersAPI 
+import {
+    fetchUsersAPI
 } from "../../services/user.service";
-import { 
-    fetchHealthRecordByScheduleIdAPI 
+import {
+    fetchHealthRecordByScheduleIdAPI
 } from "../../services/health-record.service";
 import { 
     getPaymentByScheduleIdAPI 
 } from "../../services/payment.service";
 dayjs.locale('vi');
-
-dayjs.locale('vi')
 
 const { Content } = Layout
 const { Title } = Typography

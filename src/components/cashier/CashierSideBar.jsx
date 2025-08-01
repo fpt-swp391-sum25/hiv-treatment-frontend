@@ -15,7 +15,7 @@ const icons = [
   DollarOutlined,
   FileDoneOutlined,
   HistoryOutlined,
-  UserOutlined, 
+  UserOutlined,
 ];
 
 const labels = [
@@ -26,10 +26,10 @@ const labels = [
 ];
 
 const paths = [
-  '/cashier/schedule-payment',
+  '/cashier',
   '/cashier/test-payment',
   '/cashier/transaction-lookup',
-  '/cashier/profile', 
+  '/cashier/profile',
 ];
 
 const items = icons.map((icon, index) => ({

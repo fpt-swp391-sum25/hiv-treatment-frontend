@@ -51,28 +51,43 @@ const CashierHomePage = () => {
     };
 
     const breadcrumbNameMap = {
-        '/cashier/payment-schedule': 'Thanh toán đặt lịch',
-        '/cashier/payment-test': 'Thanh toán xét nghiệm',
-        '/cashier/transaction-schedule': 'Tra cứu giao dịch đặt lịch',
-        '/cashier/transaction-test': 'Tra cứu thanh toán xét nghiệm'
+        '/cashier/test-payment': 'Thanh toán xét nghiệm',
+        '/cashier/transaction-lookup': 'Tra cứu giao dịch',
+        '/cashier/profile': 'Thông tin cá nhân'
     };
 
-    const breadcrumbItems = [
-        {
-            title: <Link to='/cashier'><HomeOutlined /></Link>,
-            key: 'home'
-        },
-        ...pathSnippets.map((_, idx) => {
-            const url = `/${pathSnippets.slice(0, idx + 1).join('/')}`;
-            if (url === '/cashier') return null;
-            if (breadcrumbNameMap[url]) {
-                return {
-                    title: <Link to={url}>{breadcrumbNameMap[url]}</Link>,
-                    key: url
-                };
+
+    const isCashierRoot = location.pathname === '/cashier';
+    const breadcrumbItems = isCashierRoot
+        ? [
+            {
+                title: (
+                    <>
+                        <HomeOutlined style={{ marginRight: 6 }} />
+                        <span>Thanh toán lịch khám</span>
+                    </>
+                ),
+                key: 'cashier-home'
             }
-        }).filter(Boolean),
-    ];
+        ]
+        : [
+            {
+                title: <Link to='/cashier'><HomeOutlined /></Link>,
+                key: 'home'
+            },
+            ...pathSnippets.map((_, idx) => {
+                const url = `/${pathSnippets.slice(0, idx + 1).join('/')}`;
+                if (url === '/cashier') return null;
+                if (breadcrumbNameMap[url]) {
+                    return {
+                        title: <Link to={url}>{breadcrumbNameMap[url]}</Link>,
+                        key: url
+                    };
+                }
+                return null;
+            }).filter(Boolean)
+        ];
+
 
     return (
         <Layout>
