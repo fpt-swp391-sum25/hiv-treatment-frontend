@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { Table, Space, Button, Row, Col, Card, Statistic, Select, Input, Alert } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import UpdateLabTechnicianModal from './UpdateLabTechnicianModal';
-import '../DoctorManagement/DoctorManagement.css';
 import { fetchAllLabTechniciansAPI } from '../../../services/user.service';
+import '../../../styles/manager/DoctorManagement.css';
 
 const LabTechnicianManagement = () => {
     const [selectedLabTechnician, setSelectedLabTechnician] = useState(null);

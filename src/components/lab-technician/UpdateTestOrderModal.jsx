@@ -1,13 +1,7 @@
-import { 
-  Input, 
-  Modal, 
-  DatePicker 
-} from "antd"
-import {
-  useEffect, 
-  useState 
-} from "react"
-import dayjs from "dayjs"
+import { Input, Modal, DatePicker, Select, message } from "antd";
+import { useEffect, useState } from "react";
+import dayjs from "dayjs";
+import { getAllTestTypes } from "../../services/testtype.service"; 
 
 const UpdateTestOrderModal = (props) => {
   const {
@@ -15,27 +9,54 @@ const UpdateTestOrderModal = (props) => {
     setIsUpdateTestOrderModalOpen,
     dataUpdate,
     onPreviewUpdate,
-  } = props
+  } = props;
 
-  const [id, setId] = useState("")
-  const [type, setType] = useState("")
-  const [result, setResult] = useState("")
-  const [unit, setUnit] = useState("")
-  const [note, setNote] = useState("")
-  const [expectedResultTime, setExpectedResultTime] = useState(null)
-  const [actualResultTime, setActualResultTime] = useState(null)
+  const [id, setId] = useState("");
+  const [type, setType] = useState(null);
+  const [result, setResult] = useState("");
+  const [unit, setUnit] = useState("");
+  const [note, setNote] = useState("");
+  const [expectedResultTime, setExpectedResultTime] = useState(null);
+  const [actualResultTime, setActualResultTime] = useState(null);
+
+  const [testTypes, setTestTypes] = useState([]);
+
+  // Gọi API khi mở modal
+  useEffect(() => {
+    if (isUpdateTestOrderModalOpen) {
+      fetchTestTypes();
+    }
+  }, [isUpdateTestOrderModalOpen]);
+
+  const fetchTestTypes = async () => {
+    try {
+      const data = await getAllTestTypes();
+      setTestTypes(data);
+    } catch (error) {
+      message.error("Không thể tải danh sách loại xét nghiệm");
+      console.error(error);
+    }
+  };
 
   useEffect(() => {
     if (dataUpdate) {
-      setId(dataUpdate.id ?? "")
-      setType(dataUpdate.type ?? "")
-      setResult(dataUpdate.result ?? "")
-      setUnit(dataUpdate.unit ?? "")
-      setNote(dataUpdate.note ?? "")
-      setExpectedResultTime(dataUpdate.expectedResultTime ? dayjs(dataUpdate.expectedResultTime) : null)
-      setActualResultTime(dataUpdate.actualResultTime ? dayjs(dataUpdate.actualResultTime) : null)
+      setId(dataUpdate.id ?? "");
+      setType(dataUpdate.type ?? null);
+      setResult(dataUpdate.result ?? "");
+      setUnit(dataUpdate.unit ?? "");
+      setNote(dataUpdate.note ?? "");
+      setExpectedResultTime(
+        dataUpdate.expectedResultTime
+          ? dayjs(dataUpdate.expectedResultTime)
+          : null
+      );
+      setActualResultTime(
+        dataUpdate.actualResultTime
+          ? dayjs(dataUpdate.actualResultTime)
+          : null
+      );
     }
-  }, [dataUpdate])
+  }, [dataUpdate]);
 
   const handleUpdate = () => {
     const updatedData = {
@@ -44,25 +65,28 @@ const UpdateTestOrderModal = (props) => {
       result,
       unit,
       note,
-      expectedResultTime: expectedResultTime ? expectedResultTime.toISOString() : null,
-      actualResultTime: actualResultTime ? actualResultTime.toISOString() : null,
-    }
+      expectedResultTime: expectedResultTime
+        ? expectedResultTime.toISOString()
+        : null,
+      actualResultTime: actualResultTime
+        ? actualResultTime.toISOString()
+        : null,
+    };
 
     if (typeof onPreviewUpdate === "function") {
-      onPreviewUpdate(updatedData) 
+      onPreviewUpdate(updatedData);
     }
 
-    resetAndClose()
-  }
+    resetAndClose();
+  };
 
   const resetAndClose = () => {
-    setIsUpdateTestOrderModalOpen(false)
-  }
+    setIsUpdateTestOrderModalOpen(false);
+  };
 
   return (
     <Modal
       title="Cập nhật kết quả xét nghiệm"
-      closable={{ "aria-label": "Custom Close Button" }}
       open={isUpdateTestOrderModalOpen}
       onOk={handleUpdate}
       onCancel={resetAndClose}
@@ -71,7 +95,21 @@ const UpdateTestOrderModal = (props) => {
     >
       <div style={{ display: "flex", gap: "15px", flexDirection: "column" }}>
         <span>Loại xét nghiệm</span>
-        <Input readOnly value={type} />
+        <Select
+          showSearch
+          style={{ width: "100%" }}
+          value={type?.id}
+          onChange={(id) => {
+            const selected = testTypes.find(item => item.id === id);
+            setType(selected);
+          }}
+          options={testTypes.map((item) => ({
+            label: item.testTypeName,
+            value: item.id,
+          }))}
+          placeholder="Chọn loại xét nghiệm"
+          optionFilterProp="label"
+        />
 
         <span>Kết quả</span>
         <Input value={result} onChange={(e) => setResult(e.target.value)} />
@@ -99,6 +137,7 @@ const UpdateTestOrderModal = (props) => {
         />
       </div>
     </Modal>
-  )
-}
-export default UpdateTestOrderModal
+  );
+};
+
+export default UpdateTestOrderModal;

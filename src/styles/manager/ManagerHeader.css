@@ -5,7 +5,7 @@
   padding: 12px 24px;
   background-color: #212529;
   border-bottom: 1px solid #343a40;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   color: white;
   height: 80px; /* Điều chỉnh chiều cao header */
   width: 100%;
@@ -27,7 +27,7 @@
   left: 0;
   right: 0;
   z-index: 1000;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   border-bottom: 1px solid #f0f0f0;
 }
 

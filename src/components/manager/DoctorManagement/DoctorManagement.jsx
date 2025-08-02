@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Table, Space, Button, message, Tag, Row, Col, Card, Statistic, Select, Input, Alert } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import UpdateDoctorModal from './UpdateDoctorModal';
-import './DoctorManagement.css';
 import { fetchAllDoctorsAPI } from '../../../services/user.service';
 import { fetchDoctorByIdAPI, fetchDoctorProfileByDoctorIdAPI } from '../../../services/doctorProfile.service';
+import '../../../styles/manager/DoctorManagement.css';
 
 const DoctorManagement = () => {
     const [doctors, setDoctors] = useState([]);

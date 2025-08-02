@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { DatePicker, Button, Row, Col, Space, Card, Radio } from 'antd';
 import { ReloadOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import './ReportFilter.css';
+import '../../../styles/manager/ReportFilter.css';
 
 const ReportFilters = ({ onFilterChange, initialFilters = {} }) => {
   const [filterType, setFilterType] = useState(initialFilters.filterType || 'month'); // month | quarter | year

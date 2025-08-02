@@ -1,17 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Row, Col, Tabs, Spin, Empty, message, Table, Card } from 'antd';
 import {
-  UserOutlined,
-  CheckCircleOutlined,
-  ExperimentOutlined
-} from '@ant-design/icons';
-import {
   getStaffStatistics,
   getAppointmentStatistics
 } from '../../../services/statistics.service';
-import { getMedicalReportData } from '../../../services/report.service';
-import './Dashboard.css';
-import KPICard from './KPICard';
 import DashboardFilters from './DashboardFilters';
 import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
@@ -20,6 +12,7 @@ import MonthlyTrendChart from './MonthlyTrendChart';
 import { fetchAccountByRoleAPI, fetchAllDoctorsAPI } from '../../../services/user.service';
 import { getAllSchedulesAPI } from '../../../services/schedule.service';
 import { getHealthRecordByDoctorIdAPI } from '../../../services/health-record.service';
+import '../../../styles/manager/Dashboard.css';
 
 dayjs.extend(isBetween);
 
@@ -30,11 +23,6 @@ const Dashboard = () => {
   const [statistics, setStatistics] = useState({
     staff: null,
     appointments: null
-  });
-
-  const [medicalStats, setMedicalStats] = useState({
-    totalAppointments: 0,
-    totalTestOrders: 0
   });
 
   const [filters, setFilters] = useState({
@@ -162,24 +150,6 @@ const Dashboard = () => {
     };
 
     loadDoctors();
-  }, []);
-
-  useEffect(() => {
-    const fetchMedicalStats = async () => {
-      try {
-        const response = await getMedicalReportData();
-        if (response && response.statistics) {
-          setMedicalStats({
-            totalAppointments: response.statistics.totalAppointments || 0,
-            totalTestOrders: response.statistics.totalTestOrders || 0
-          });
-        }
-      } catch (error) {
-        console.error('Error fetching medical statistics:', error);
-      }
-    };
-
-    fetchMedicalStats();
   }, []);
 
   const fetchStaffStatistics = useCallback(async () => {
