@@ -3,8 +3,8 @@ import { Row, Col, Card, Table, Spin, Statistic, Select, Input, Space, Button, T
 import { UserOutlined, TeamOutlined, FilterOutlined, SearchOutlined, ReloadOutlined, FileExcelOutlined, FilePdfOutlined, DownloadOutlined, MedicineBoxOutlined, ExperimentOutlined, SettingOutlined } from '@ant-design/icons';
 import { getStaffData, exportToExcel } from '../../../../services/report.service';
 import { STAFF_ROLES } from '../../../../types/report.types';
-import './StaffReport.css';
 import dayjs from 'dayjs';
+import '../../../../styles/manager/StaffReport.css';
 
 const { Option } = Select;
 const { Search } = Input;

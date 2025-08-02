@@ -13,7 +13,7 @@ import {
 } from '../../../../services/report.service';
 import dayjs from 'dayjs';
 import ReportFilters from '../ReportFilters';
-import './FinancialReport.css';
+import '../../../../styles/manager/FinancialReport.css';
 
 const { Title, Text } = Typography;
 const { Option } = Select;

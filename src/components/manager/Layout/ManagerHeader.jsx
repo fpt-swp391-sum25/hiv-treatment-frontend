@@ -3,10 +3,9 @@ import { Layout, Avatar, Typography, Space, Button, Popconfirm } from 'antd';
 import { UserOutlined, LogoutOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import appLogo from '../../../assets/appLogo.png';
-import './ManagerHeader.css';
 import { AuthContext } from '../../context/AuthContext';
 import { logoutAPI } from '../../../services/auth.service';
-
+import '../../../styles/manager/ManagerHeader.css';
 
 const { Header } = Layout;
 const { Title, Text } = Typography;

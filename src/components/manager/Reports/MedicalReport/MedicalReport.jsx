@@ -10,7 +10,7 @@ import {
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { getMedicalReportData, exportMedicalReportToExcel } from '../../../../services/report.service';
-import './MedicalReport.css';
+import '../../../../styles/manager/MedicalReport.css';
 
 const { RangePicker } = DatePicker;
 const { Text, Title } = Typography;

@@ -8,9 +8,9 @@ import listPlugin from '@fullcalendar/list'; // Thêm plugin hiển thị dạng
 import viLocale from '@fullcalendar/core/locales/vi';
 import moment from 'moment';
 import { BsChevronLeft, BsChevronRight, BsCalendarWeek, BsCalendarMonth, BsListUl } from 'react-icons/bs';
-import './Calendar.css';
-import './CustomButtons.css';
 import { ScheduleStatus, SlotTimes } from '../../../types/schedule.types';
+import '../../../styles/manager/Calendar.css';
+import '../../../styles/manager/CustomButtons.css';
 
 const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
     // Thay đổi view mặc định thành dayGridMonth

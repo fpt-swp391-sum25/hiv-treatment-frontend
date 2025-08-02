@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { Table, Space, Button, Row, Col, Card, Statistic, Input, Alert } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import UpdateCashierModal from './UpdateCashierModal';
-import '../DoctorManagement/DoctorManagement.css';
 import { fetchAllCashiersAPI } from '../../../services/user.service'; 
+import '../../../styles/manager/DoctorManagement.css';
 
 const CashierManagement = () => {
     const [selectedCashier, setSelectedCashier] = useState(null);

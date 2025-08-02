@@ -10,7 +10,7 @@ import {
   MedicineBoxOutlined
 } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
-import './ManagerSidebar.css';
+import '../../../styles/manager/ManagerSidebar.css';
 
 const { Sider } = Layout;
 

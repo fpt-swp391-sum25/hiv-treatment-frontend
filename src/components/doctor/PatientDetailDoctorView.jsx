@@ -51,6 +51,9 @@ import {
   createTestOrderAPI,
   deleteTestOrderAPI
 } from "../../services/testOrder.service.js";
+import { 
+  getAllTestTypes 
+} from "../../services/testtype.service.js";
 
 const PatientDetailDoctorView = () => {
   const [healthRecordData, setHealthRecordData] = useState({});
@@ -67,6 +70,7 @@ const PatientDetailDoctorView = () => {
   const { user } = useContext(AuthContext);
   const { id } = useParams();
   const { Title, Text } = Typography;
+  const [testTypes, setTestTypes] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -83,6 +87,8 @@ const PatientDetailDoctorView = () => {
         setTreatmentStatus(healthRecord.treatmentStatus || "");
         const testOrderRes = await fetchTestOrderByHealthRecordIdAPI(healthRecord.id);
         setTestOrderData(testOrderRes.data || []);
+        const testTypeRes = await getAllTestTypes();
+        setTestTypes(testTypeRes.data || []);
       }
       const regimenRes = await fetchRegimensByDoctorIdAPI(user.id);
       setRegimenOptions(regimenRes.data || []);
@@ -310,18 +316,22 @@ const PatientDetailDoctorView = () => {
       >
         <Form layout="vertical">
           <Form.Item label="Loại xét nghiệm">
-            <Input
+            <Select
               value={currentTestType}
-              onChange={e => setCurrentTestType(e.target.value)}
-              placeholder="Nhập loại xét nghiệm"
+              onChange={(value) => setCurrentTestType(value)}
+              options={testTypes.map(item => ({
+                label: item.testTypeName,
+                value: item.testTypeName  
+              }))}
+              placeholder="Chọn loại xét nghiệm"
             />
             <Button
               type="dashed"
               style={{ marginTop: 8 }}
               icon={<PlusOutlined />}
               onClick={() => {
-                if (currentTestType.trim()) {
-                  setNewTestTypes(prev => [...prev, currentTestType.trim()]);
+                if (currentTestType) {
+                  setNewTestTypes(prev => [...prev, currentTestType]);
                   setCurrentTestType("");
                 }
               }}
@@ -358,16 +368,22 @@ const PatientDetailDoctorView = () => {
       {testOrderData.map((test) => (
         <Card key={test.id} style={{ marginTop: 16 }}>
           <Row gutter={5 + "vw"} align="middle">
-            <Col span={8}>
-              <p><strong>Loại:</strong> {test.type}</p>
+             <Col span={6}>
+              <p><strong>Tên:</strong> {test.name}</p>
             </Col>
-            <Col span={8}>
+            <Col span={6}>
+              <p><strong>Loại:</strong> {test.type.testTypeName}</p>
+            </Col>
+            <Col span={6}>
               <p><strong>Kết quả:</strong> {test.result} {test.unit}</p>
             </Col>
-            <Col span={8}>
+          </Row>
+
+          <Row gutter="5vw">
+            <Col span={6}>
               <p><strong>Ghi chú:</strong> {test.note}</p>
             </Col>
-            <Col span={8}>
+            <Col span={6}>
               <p><strong>Thời gian dự kiến:</strong> {test.expectedResultTime && !isNaN(new Date(test.expectedResultTime))
                 ? new Intl.DateTimeFormat('vi-VN', {
                   hour: '2-digit',
@@ -376,12 +392,12 @@ const PatientDetailDoctorView = () => {
                   month: '2-digit',
                   year: 'numeric',
                   hour12: false,
-                }).format(new Date(test.expectedResultTime))
-                : ''
-              }</p>
-            </Col>
-            <Col span={8}>
-              <p><strong>Thời gian nhận kết quả:</strong> {test.actualResultTime && !isNaN(new Date(test.actualResultTime))
+                  }).format(new Date(test.expectedResultTime))
+                  : ''
+                }</p>
+              </Col>
+             <Col span={6}>
+                <p><strong>Thời gian nhận kết quả:</strong> {test.actualResultTime && !isNaN(new Date(test.actualResultTime))
                 ? new Intl.DateTimeFormat('vi-VN', {
                   hour: '2-digit',
                   minute: '2-digit',
@@ -393,7 +409,7 @@ const PatientDetailDoctorView = () => {
                 : ''
               }</p>
             </Col>
-            <Col span={8} style={{ display: 'flex', alignItems: 'center' }}>
+            <Col span={6} style={{ display: 'flex', alignItems: 'center' }}>
               <Space>
                 <Popconfirm
                   title="Xoá kết quả?"
