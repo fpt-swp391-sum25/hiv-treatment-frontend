@@ -4,6 +4,10 @@ import {
     Table,
     Typography,
     Input,
+    DatePicker,
+    Select,
+    Row,
+    Col,
     Tabs,
     message,
     Space,
@@ -20,6 +24,7 @@ import {
 } from "react-router-dom";
 import dayjs from 'dayjs';
 import 'dayjs/locale/vi';
+import viVN from 'antd/es/date-picker/locale/vi_VN';
 import {
     AuthContext
 } from "../../components/context/AuthContext";
@@ -36,8 +41,6 @@ import {
     getPaymentByScheduleIdAPI
 } from "../../services/payment.service";
 dayjs.locale('vi');
-
-dayjs.locale('vi')
 
 const { Content } = Layout
 const { Title } = Typography
