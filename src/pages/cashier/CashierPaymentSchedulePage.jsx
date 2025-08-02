@@ -9,12 +9,13 @@ import {
   Typography,
   Space,
   message,
-  Modal 
+  Modal
 } from 'antd';
 import {
   getPaymentsByFilter,
   togglePaymentStatus
 } from '../../services/payment.service';
+import { createHealthRecordByPaymentIdAPI } from '../../services/health-record.service';
 
 const { Title } = Typography;
 
@@ -35,7 +36,7 @@ export default function CashierPaymentSchedulePage() {
       const allPayments = [...pending, ...completed].sort((a, b) => {
         const dateA = new Date(a.schedule?.date);
         const dateB = new Date(b.schedule?.date);
-        return dateB - dateA; 
+        return dateB - dateA;
       });
 
       setPayments(allPayments);
@@ -52,7 +53,7 @@ export default function CashierPaymentSchedulePage() {
     const trimmed = searchName.trim();
     if (!trimmed) {
       message.warning('Vui lòng nhập tên bệnh nhân để tìm kiếm');
-      setHasSearched(false); 
+      setHasSearched(false);
       return;
     }
     setHasSearched(true);
@@ -106,6 +107,7 @@ export default function CashierPaymentSchedulePage() {
         setLoading(true);
         try {
           await togglePaymentStatus(id);
+          await createHealthRecordByPaymentIdAPI(id);
           await fetchPayments(searchName.trim());
           message.success('Cập nhật trạng thái thành công');
         } catch {
@@ -122,7 +124,7 @@ export default function CashierPaymentSchedulePage() {
       title: '#',
       render: (_, __, index) => index + 1,
     },
-        {
+    {
       title: 'Mã bệnh nhân',
       dataIndex: ['schedule', 'patient', 'displayId'],
       render: (text) => text || 'N/A',

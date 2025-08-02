@@ -1,172 +1,79 @@
-import {
-    Layout, 
+import { 
     Button, 
     Table, 
     Typography, 
-    Input,
+    Input, 
     Tabs,
-    message,
     Space,
-    Spin
+    Spin,
+    message
 } from "antd";
 import { 
     useState, 
-    useEffect, 
-    useContext 
+    useEffect 
 } from "react";
 import { 
-    Outlet, 
     useNavigate 
 } from "react-router-dom";
 import dayjs from 'dayjs';
-import 'dayjs/locale/vi';
 import { 
-    AuthContext 
-} from "../../components/context/AuthContext";
-import { 
-    fetchScheduleByDoctorIdAPI 
+    fetchScheduleAPI 
 } from "../../services/schedule.service";
 import { 
     fetchUsersAPI 
 } from "../../services/user.service";
 import { 
-    fetchHealthRecordByScheduleIdAPI 
-} from "../../services/health-record.service";
-import { 
     getPaymentByScheduleIdAPI 
 } from "../../services/payment.service";
-dayjs.locale('vi');
 
-dayjs.locale('vi')
-
-const { Content } = Layout
 const { Title } = Typography
 const { TabPane } = Tabs
 
-const PatientList = () => {
-    const { user } = useContext(AuthContext)
-    const [data, setData] = useState([])
-    const [searchText, setSearchText] = useState('')
-    const [filteredData, setFilteredData] = useState([])
-    const [activeTab, setActiveTab] = useState("waiting")
+const LabTechnicianPatientList = () => {
+    const [pendingData, setPendingData] = useState([])
+    const [historyData, setHistoryData] = useState([])
+    // Filter for "Đang chờ xử lý"
+    const [pendingSearchName, setPendingSearchName] = useState('')
+    // Filter for "Lịch sử"
+    const [historySearchName, setHistorySearchName] = useState('')
     const [loading, setLoading] = useState(false)
-    const [hasSearchedExamined, setHasSearchedExamined] = useState(false)
-    const [hasSearchedConsulted, setHasSearchedConsulted] = useState(false)
-    const [hasSearchedAbsent, setHasSearchedAbsent] = useState(false)
-    const [examinedSearchText, setExaminedSearchText] = useState('')
-    const [consultedSearchText, setConsultedSearchText] = useState('')
-    const [absentSearchText, setAbsentSearchText] = useState('')
-
+    const [hasSearchedHistory, setHasSearchedHistory] = useState(false)
+    
     const navigate = useNavigate()
 
     useEffect(() => {
-        const filtered = data.filter(item => {
-            const matchesText =
-                normalizeString(item.fullName).includes(normalizeString(searchText)) ||
-                normalizeString(item.patientCode).includes(normalizeString(searchText))
-            
-            return matchesText
-        })
-        setFilteredData(filtered)
-    }, [searchText, data])
-
-    useEffect(() => {
-        loadWaitingData()
+        loadPendingData()
     }, [])
 
-    const loadWaitingData = async () => {
+    // Tải dữ liệu cho tab "Đang chờ xử lý"
+    const loadPendingData = async () => {
         setLoading(true)
         try {
             const [scheduleRes, patientRes] = await Promise.all([
-                fetchScheduleByDoctorIdAPI(user.id),
+                fetchScheduleAPI(),
                 fetchUsersAPI(),
             ])
 
             const scheduleList = scheduleRes?.data || []
             const patientList = patientRes?.data || []
 
-            const waitingSchedules = scheduleList.filter(schedule => {
-                // Chỉ lấy các lịch có bệnh nhân
-                return schedule.patient && schedule.patient.id
-            })
-
-            const healthRecordPromises = waitingSchedules.map(item =>
-                fetchHealthRecordByScheduleIdAPI(item.id).then(
-                    res => ({ scheduleId: item.id, data: res.data })
-                ).catch(() => ({ scheduleId: item.id, data: null }))
-            )
-            
-            const paymentPromises = waitingSchedules.map(item =>
-                getPaymentByScheduleIdAPI(item.id).then(
-                    res => ({ scheduleId: item.id, data: res.data })
-                ).catch(() => ({ scheduleId: item.id, data: null }))
+            // Lọc các lịch có bệnh nhân
+            const validSchedules = scheduleList.filter(item => 
+                item.patient && item.patient.id && item.date && item.slot
             )
 
-            const [healthRecords, payments] = await Promise.all([
-                Promise.all(healthRecordPromises),
-                Promise.all(paymentPromises)
-            ])
-
-            const mergedData = waitingSchedules.map((item) => {
-                const matchedPatient = patientList.find(p => p.id === item.patient.id)
-                const matchedHealthRecord = healthRecords.find(hr => hr.scheduleId === item.id)
-                const matchedPayment = payments.find(p => p.scheduleId === item.id)
-                
-                return {
-                    id: item.id,
-                    ...item,
-                    patientCode: matchedPatient?.displayId || 'N/A',
-                    avatar: matchedPatient?.avatar || '',
-                    fullName: matchedPatient?.fullName || 'Chưa rõ tên',
-                    treatmentStatus: matchedHealthRecord?.data?.treatmentStatus || 'Chưa cập nhật',
-                    paymentStatus: matchedPayment?.data?.status || 'Chưa thanh toán',
-                }
-            }).filter(item => item.treatmentStatus === 'Đang chờ khám')
-
-            setData(mergedData)
-        } catch (error) {
-            message.error("Lỗi khi tải dữ liệu bệnh nhân đang chờ khám")
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    const loadTabData = async (tabKey, searchValue = '') => {
-        setLoading(true)
-        try {
-            const [scheduleRes, patientRes] = await Promise.all([
-                fetchScheduleByDoctorIdAPI(user.id),
-                fetchUsersAPI(),
-            ])
-
-            const scheduleList = scheduleRes?.data || []
-            const patientList = patientRes?.data || []
-
-            // Chỉ lấy các lịch có bệnh nhân
-            const validSchedules = scheduleList.filter(schedule => 
-                schedule.patient && schedule.patient.id
-            )
-
-            const healthRecordPromises = validSchedules.map(item =>
-                fetchHealthRecordByScheduleIdAPI(item.id).then(
-                    res => ({ scheduleId: item.id, data: res.data })
-                ).catch(() => ({ scheduleId: item.id, data: null }))
-            )
-            
+            // Lấy thông tin thanh toán cho mỗi lịch khám
             const paymentPromises = validSchedules.map(item =>
                 getPaymentByScheduleIdAPI(item.id).then(
                     res => ({ scheduleId: item.id, data: res.data })
                 ).catch(() => ({ scheduleId: item.id, data: null }))
             )
 
-            const [healthRecords, payments] = await Promise.all([
-                Promise.all(healthRecordPromises),
-                Promise.all(paymentPromises)
-            ])
+            const payments = await Promise.all(paymentPromises)
 
             const mergedData = validSchedules.map((item) => {
-                const matchedPatient = patientList.find(p => p.id === item.patient.id)
-                const matchedHealthRecord = healthRecords.find(hr => hr.scheduleId === item.id)
+                const patientId = item.patient?.id
+                const matchedPatient = patientList.find(p => p.id === patientId)
                 const matchedPayment = payments.find(p => p.scheduleId === item.id)
                 
                 return {
@@ -175,90 +82,118 @@ const PatientList = () => {
                     patientCode: matchedPatient?.displayId || 'N/A',
                     avatar: matchedPatient?.avatar || '',
                     fullName: matchedPatient?.fullName || 'Chưa rõ tên',
-                    treatmentStatus: matchedHealthRecord?.data?.treatmentStatus || 'Chưa cập nhật',
                     paymentStatus: matchedPayment?.data?.status || 'Chưa thanh toán',
                 }
             })
 
-            // Lọc theo trạng thái điều trị tương ứng với tab
-            let statusFilter = ''
-            switch (tabKey) {
-                case 'examined':
-                    statusFilter = 'Đã khám'
-                    break
-                case 'consulted':
-                    statusFilter = 'Đã tư vấn'
-                    break
-                case 'absent':
-                    statusFilter = 'Không đến'
-                    break
-                default:
-                    statusFilter = 'Đang chờ khám'
-            }
+            // Lọc dữ liệu cho tab "Đang chờ xử lý" (ngày hiện tại hoặc tương lai)
+            const today = dayjs().startOf('day')
+            const pendingList = mergedData.filter(item => {
+                const itemDate = item.date ? dayjs(item.date).startOf('day') : null
+                return itemDate && (itemDate.isSame(today) || itemDate.isAfter(today))
+            }).sort((a, b) => {
+                const dateTimeA = a.date && a.slot ? `${a.date} ${a.slot}` : a.date || ''
+                const dateTimeB = b.date && b.slot ? `${b.date} ${b.slot}` : b.date || ''
+                return dateTimeB.localeCompare(dateTimeA)
+            })
 
-            // Lọc theo trạng thái và từ khóa tìm kiếm
-            const filteredByStatus = mergedData.filter(item => item.treatmentStatus === statusFilter)
-            
-            let result = filteredByStatus
-            if (searchValue) {
-                const normalizedSearch = normalizeString(searchValue)
-                result = filteredByStatus.filter(item => 
-                    normalizeString(item.fullName).includes(normalizedSearch) ||
-                    normalizeString(item.patientCode).includes(normalizedSearch)
-                )
-            }
-
-            setData(result)
-
-            // Cập nhật trạng thái đã tìm kiếm cho tab tương ứng
-            switch (tabKey) {
-                case 'examined':
-                    setHasSearchedExamined(true)
-                    break
-                case 'consulted':
-                    setHasSearchedConsulted(true)
-                    break
-                case 'absent':
-                    setHasSearchedAbsent(true)
-                    break
-                default:
-                    break
-            }
+            setPendingData(pendingList)
         } catch (error) {
-            message.error(`Lỗi khi tải dữ liệu: ${error.message}`)
+            console.error("Lỗi khi tải dữ liệu:", error)
+            message.error("Lỗi khi tải dữ liệu bệnh nhân đang chờ xử lý")
         } finally {
             setLoading(false)
         }
     }
 
-    const handleTabChange = (key) => {
-        setActiveTab(key)
-        if (key === 'waiting') {
-            loadWaitingData()
-        } else {
-            // Không tự động tải dữ liệu cho các tab khác
-            setData([])
+    // Tải dữ liệu cho tab "Lịch sử" khi người dùng tìm kiếm hoặc hiển thị tất cả
+    const loadHistoryData = async (searchName = '') => {
+        setLoading(true)
+        try {
+            const [scheduleRes, patientRes] = await Promise.all([
+                fetchScheduleAPI(),
+                fetchUsersAPI(),
+            ])
+
+            const scheduleList = scheduleRes?.data || []
+            const patientList = patientRes?.data || []
+
+            // Lọc các lịch có bệnh nhân
+            const validSchedules = scheduleList.filter(item => 
+                item.patient && item.patient.id && item.date && item.slot
+            )
+
+            const mergedData = validSchedules.map((item) => {
+                const patientId = item.patient?.id
+                const matchedPatient = patientList.find(p => p.id === patientId)
+                
+                return {
+                    id: item.id,
+                    ...item,
+                    patientCode: matchedPatient?.displayId || 'N/A',
+                    avatar: matchedPatient?.avatar || '',
+                    fullName: matchedPatient?.fullName || 'Chưa rõ tên',
+                }
+            })
+
+            // Lọc dữ liệu cho tab "Lịch sử" (ngày đã qua)
+            const today = dayjs().startOf('day')
+            let historyList = mergedData.filter(item => {
+                const itemDate = item.date ? dayjs(item.date).startOf('day') : null
+                return itemDate && itemDate.isBefore(today)
+            })
+
+            // Lọc theo tên nếu có
+            if (searchName) {
+                historyList = historyList.filter(item => 
+                    item.fullName.toLowerCase().includes(searchName.toLowerCase())
+                )
+            }
+
+            // Sắp xếp theo ngày giảm dần (mới nhất lên đầu)
+            historyList = historyList.sort((a, b) => {
+                const dateTimeA = a.date && a.slot ? `${a.date} ${a.slot}` : a.date || ''
+                const dateTimeB = b.date && b.slot ? `${b.date} ${b.slot}` : b.date || ''
+                return dateTimeB.localeCompare(dateTimeA)
+            })
+
+            setHistoryData(historyList)
+            setHasSearchedHistory(true)
+        } catch (error) {
+            console.error("Lỗi khi tải dữ liệu:", error)
+            message.error("Lỗi khi tải dữ liệu lịch sử bệnh nhân")
+        } finally {
+            setLoading(false)
         }
     }
 
-    const handleSearch = (tabKey, searchValue) => {
-        loadTabData(tabKey, searchValue)
+    // Lọc dữ liệu tab "Đang chờ xử lý" theo tên
+    const filteredPendingData = pendingData.filter(item => 
+        !pendingSearchName || 
+        item.fullName.toLowerCase().includes(pendingSearchName.toLowerCase()) ||
+        item.patientCode.toLowerCase().includes(pendingSearchName.toLowerCase())
+    )
+
+    const handleTabChange = (key) => {
+        if (key === 'pending') {
+            // Không cần làm gì vì dữ liệu đã được tải khi mở trang
+        } else {
+            // Reset dữ liệu lịch sử khi chuyển tab
+            setHistoryData([])
+            setHasSearchedHistory(false)
+        }
+    }
+
+    const handleSearch = () => {
+        loadHistoryData(historySearchName)
     }
 
     const handleViewDetail = (record) => {
-        navigate(`/doctor/patients/${record.id}`)
+        navigate(`/lab-technician/patient-detail/${record.id}`)
     }
 
-    const normalizeString = (str) => {
-        return str
-            .toLowerCase()
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .replace(/\s+/g, ' ')
-            .trim()
-    }
-
-    const columns = [
+    // Columns cho tab "Đang chờ xử lý" (có cột trạng thái thanh toán)
+    const pendingColumns = [
         {
             title: 'Mã bệnh nhân',
             dataIndex: 'patientCode',
@@ -290,12 +225,13 @@ const PatientList = () => {
             title: 'Ngày khám',
             dataIndex: 'date',
             key: 'date',
-            render: (text) => dayjs(text).format('DD/MM/YYYY'),
+            render: (date) => date ? dayjs(date).format('DD-MM-YYYY') : '',
         },
         {
             title: 'Ca khám',
             dataIndex: 'slot',
             key: 'slot',
+            render: (slot) => slot ? dayjs(slot, 'HH:mm:ss').format('HH:mm') : '',
         },
         {
             title: 'Trạng thái thanh toán',
@@ -303,9 +239,9 @@ const PatientList = () => {
             key: 'paymentStatus',
             render: (status) => {
                 switch (status) {
-                    case 'Thanh toán thành công':
-                        return <span style={{ color: '#52c41a' }}>{status}</span>
                     case 'Đã thanh toán':
+                        return <span style={{ color: '#52c41a' }}>{status}</span>
+                    case 'Thanh toán thành công':
                         return <span style={{ color: '#52c41a' }}>{status}</span>
                     case 'Đang xử lý':
                         return <span style={{ color: '#1890ff' }}>{status}</span>
@@ -317,25 +253,7 @@ const PatientList = () => {
             }
         },
         {
-            title: 'Trạng thái điều trị',
-            dataIndex: 'treatmentStatus',
-            key: 'treatmentStatus',
-            render: (status) => {
-                switch (status) {
-                    case 'Đang chờ khám':
-                        return <span style={{ color: '#faad14' }}>{status}</span>
-                    case 'Đã khám':
-                        return <span style={{ color: '#52c41a' }}>{status}</span>
-                    case 'Đã tư vấn':
-                        return <span style={{ color: '#237804' }}>{status}</span>
-                    case 'Không đến':
-                        return <span style={{ color: '#f5222d' }}>{status}</span>
-                    default:
-                        return <span style={{ color: 'gray' }}>{status || 'Chưa cập nhật'}</span>
-                }
-            }
-        },
-        {
+            title: 'Hành động',
             key: 'action',
             render: (text, record) => (
                 <Button type="link" onClick={() => handleViewDetail(record)}>
@@ -345,135 +263,128 @@ const PatientList = () => {
         },
     ]
 
-    // Create 4 lists for each appointment status
-    const waitingList = filteredData.filter(item => item.treatmentStatus === 'Đang chờ khám')
-
-    const renderSearchBar = (tabKey, searchValue, setSearchValue, hasSearched) => (
-        <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center' }}>
-            <Input
-                placeholder="Tìm theo tên hoặc mã bệnh nhân"
-                value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value)}
-                style={{ width: 300, marginRight: 16 }}
-                onPressEnter={() => handleSearch(tabKey, searchValue)}
-            />
-            <Space>
-                <Button 
-                    type="primary" 
-                    onClick={() => handleSearch(tabKey, searchValue)}
-                >
-                    Tìm kiếm
+    // Columns cho tab "Lịch sử" (không có cột trạng thái thanh toán)
+    const historyColumns = [
+        {
+            title: 'Mã bệnh nhân',
+            dataIndex: 'patientCode',
+            key: 'patientCode',
+        },
+        {
+            title: 'Ảnh',
+            dataIndex: 'avatar',
+            key: 'avatar',
+            render: (avatar) =>
+                avatar ? (
+                    <img
+                        src={
+                            avatar.startsWith('data:image')
+                                ? avatar
+                                : `data:image/jpegbase64,${avatar}`
+                        }
+                        alt="avatar"
+                        style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }}
+                    />
+                ) : 'Không có ảnh',
+        },
+        {
+            title: 'Tên bệnh nhân',
+            dataIndex: 'fullName',
+            key: 'fullName',
+        },
+        {
+            title: 'Ngày khám',
+            dataIndex: 'date',
+            key: 'date',
+            render: (date) => date ? dayjs(date).format('DD-MM-YYYY') : '',
+        },
+        {
+            title: 'Ca khám',
+            dataIndex: 'slot',
+            key: 'slot',
+            render: (slot) => slot ? dayjs(slot, 'HH:mm:ss').format('HH:mm') : '',
+        },
+        {
+            title: 'Hành động',
+            key: 'action',
+            render: (text, record) => (
+                <Button type="link" onClick={() => handleViewDetail(record)}>
+                    Chi tiết
                 </Button>
-                <Button 
-                    onClick={() => handleSearch(tabKey, '')}
-                >
-                    Hiển thị tất cả
-                </Button>
-            </Space>
-        </div>
-    )
+            ),
+        },
+    ]
 
     return (
-        <Layout>
-            <Content>
-                <div style={{
-                    display: 'flex', 
-                    justifyContent: 'space-between',
-                    padding: '15px', 
-                    margin: '0 0 0 10px'
-                }}>
-                    <Title>Danh sách bệnh nhân</Title>
-                </div>
-                
-                <Tabs defaultActiveKey="waiting" onChange={handleTabChange}>
-                    <TabPane tab="Đang chờ khám" key="waiting">
-                        <div style={{ margin: '0 10px 15px 10px' }}>
-                            <Input
-                                placeholder="Tìm theo tên hoặc mã bệnh nhân"
-                                value={searchText}
-                                onChange={e => setSearchText(e.target.value)}
-                                style={{ width: '100%', maxWidth: '400px' }}
-                            />
+        <>
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '15px' }}>
+                <Title>Danh sách bệnh nhân</Title>
+            </div>
+            <Tabs defaultActiveKey="pending" onChange={handleTabChange}>
+                <TabPane tab="Đang chờ xử lý" key="pending">
+                    <div style={{ marginBottom: 16 }}>
+                        <Input
+                            placeholder="Tìm kiếm theo tên bệnh nhân"
+                            value={pendingSearchName}
+                            onChange={e => setPendingSearchName(e.target.value)}
+                            style={{ width: '100%', maxWidth: '400px' }}
+                            allowClear
+                        />
+                    </div>
+                    {loading ? (
+                        <div style={{ textAlign: 'center', margin: '40px 0' }}>
+                            <Spin size="large" />
                         </div>
-                        
-                        {loading ? (
-                            <div style={{ textAlign: 'center', margin: '40px 0' }}>
-                                <Spin size="large" />
-                            </div>
-                        ) : (
+                    ) : (
+                        <Table 
+                            columns={pendingColumns} 
+                            dataSource={filteredPendingData} 
+                            rowKey={(record) => record.id} 
+                            locale={{ emptyText: 'Không có bệnh nhân nào đang chờ xử lý' }}
+                        />
+                    )}
+                </TabPane>
+                <TabPane tab="Lịch sử" key="history">
+                    <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center' }}>
+                        <Input
+                            placeholder="Tìm kiếm theo tên bệnh nhân"
+                            value={historySearchName}
+                            onChange={e => setHistorySearchName(e.target.value)}
+                            style={{ width: 300, marginRight: 16 }}
+                            onPressEnter={handleSearch}
+                            allowClear
+                        />
+                        <Space>
+                            <Button 
+                                type="primary" 
+                                onClick={handleSearch}
+                            >
+                                Tìm kiếm
+                            </Button>
+                            <Button 
+                                onClick={() => loadHistoryData('')}
+                            >
+                                Hiển thị tất cả
+                            </Button>
+                        </Space>
+                    </div>
+                    {loading ? (
+                        <div style={{ textAlign: 'center', margin: '40px 0' }}>
+                            <Spin size="large" />
+                        </div>
+                    ) : (
+                        hasSearchedHistory && (
                             <Table 
-                                style={{ margin: '0 10px 0 10px' }}
-                                columns={columns}
-                                dataSource={waitingList}
-                                rowKey={(record) => record.id}
-                                locale={{ emptyText: 'Không có bệnh nhân nào đang chờ khám' }}
+                                columns={historyColumns} 
+                                dataSource={historyData} 
+                                rowKey={(record) => record.id} 
+                                locale={{ emptyText: 'Không tìm thấy dữ liệu' }}
                             />
-                        )}
-                    </TabPane>
-                    
-                    <TabPane tab="Đã khám" key="examined">
-                        {renderSearchBar('examined', examinedSearchText, setExaminedSearchText, hasSearchedExamined)}
-                        
-                        {loading ? (
-                            <div style={{ textAlign: 'center', margin: '40px 0' }}>
-                                <Spin size="large" />
-                            </div>
-                        ) : (
-                            hasSearchedExamined && (
-                                <Table 
-                                    style={{ margin: '0 10px 0 10px' }}
-                                    columns={columns}
-                                    dataSource={data}
-                                    rowKey={(record) => record.id}
-                                    locale={{ emptyText: 'Không tìm thấy dữ liệu' }}
-                                />
-                            )
-                        )}
-                    </TabPane>
-                    
-                    <TabPane tab="Đã tư vấn" key="consulted">
-                        {renderSearchBar('consulted', consultedSearchText, setConsultedSearchText, hasSearchedConsulted)}
-                        
-                        {loading ? (
-                            <div style={{ textAlign: 'center', margin: '40px 0' }}>
-                                <Spin size="large" />
-                            </div>
-                        ) : (
-                            hasSearchedConsulted && (
-                                <Table 
-                                    style={{ margin: '0 10px 0 10px' }}
-                                    columns={columns}
-                                    dataSource={data}
-                                    rowKey={(record) => record.id}
-                                    locale={{ emptyText: 'Không tìm thấy dữ liệu' }}
-                                />
-                            )
-                        )}
-                    </TabPane>
-                    
-                    <TabPane tab="Không đến" key="absent">
-                        {renderSearchBar('absent', absentSearchText, setAbsentSearchText, hasSearchedAbsent)}
-                        
-                        {loading ? (
-                            <div style={{ textAlign: 'center', margin: '40px 0' }}>
-                                <Spin size="large" />
-                            </div>
-                        ) : (
-                            hasSearchedAbsent && (
-                                <Table 
-                                    style={{ margin: '0 10px 0 10px' }}
-                                    columns={columns}
-                                    dataSource={data}
-                                    rowKey={(record) => record.id}
-                                    locale={{ emptyText: 'Không tìm thấy dữ liệu' }}
-                                />
-                            )
-                        )}
-                    </TabPane>
-                </Tabs>
-            </Content>
-            <Outlet />
-        </Layout>
+                        )
+                    )}
+                </TabPane>
+            </Tabs>
+        </>
     )
 }
-export default PatientList
+export default LabTechnicianPatientList 
