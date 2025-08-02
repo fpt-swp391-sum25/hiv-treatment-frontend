@@ -28,7 +28,7 @@ const registerAPI = (values) => {
         gender: values.gender,
         dateOfBirth: values.dob.format('YYYY-MM-DD'),
         email: values.email,
-        phone: values.phoneNumber,
+        phoneNumber: values.phoneNumber,
         address: values.address,
         username: values.username,
         password: values.newPassword
