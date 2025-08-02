@@ -273,25 +273,6 @@ const AppointmentList = () => {
             }
         },
         {
-            title: 'Thanh toán',
-            dataIndex: 'paymentStatus',
-            key: 'paymentStatus',
-            render: (paymentStatus) => {
-                let color, label;
-                switch (paymentStatus) {
-                    case 'Thanh toán thành công':
-                        color = 'green'; label = 'Đã thanh toán'; break;
-                    case 'Thanh toán thất bại':
-                        color = 'red'; label = 'Thanh toán thất bại'; break;
-                    case 'Chờ thanh toán':
-                        color = 'gold'; label = 'Đang chờ'; break;
-                    default:
-                        color = 'default'; label = 'Chưa thanh toán';
-                }
-                return <Tag color={color}>{label}</Tag>;
-            }
-        },
-        {
             title: '',
             key: 'action',
             render: (_, record) => {

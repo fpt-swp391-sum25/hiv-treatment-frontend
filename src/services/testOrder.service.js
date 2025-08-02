@@ -5,12 +5,13 @@ const deleteTestOrderAPI = (testOrderId) => {
     return axios.delete(URL_BACKEND)
 }
 
-const createTestOrderAPI = (type, note, expectedResultTime, healthRecordId) => {
+const createTestOrderAPI = (name, note, expectedResultTime, healthRecordId, testTypeId) => {
     const testOrderData = {
-        type,
+        name,
         note,
         expectedResultTime,
         healthRecordId,
+        testTypeId
     }
     const URL_BACKEND = '/api/test-order'
     return axios.post(URL_BACKEND, testOrderData)

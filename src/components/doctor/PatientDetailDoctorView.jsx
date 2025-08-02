@@ -316,14 +316,10 @@ const PatientDetailDoctorView = () => {
       >
         <Form layout="vertical">
           <Form.Item label="Loại xét nghiệm">
-            <Select
+             <Input
               value={currentTestType}
-              onChange={(value) => setCurrentTestType(value)}
-              options={testTypes.map(item => ({
-                label: item.testTypeName,
-                value: item.testTypeName  
-              }))}
-              placeholder="Chọn loại xét nghiệm"
+              onChange={e => setCurrentTestType(e.target.value)}
+              placeholder="Nhập loại xét nghiệm"
             />
             <Button
               type="dashed"
@@ -332,7 +328,7 @@ const PatientDetailDoctorView = () => {
               onClick={() => {
                 if (currentTestType) {
                   setNewTestTypes(prev => [...prev, currentTestType]);
-                  setCurrentTestType("");
+                  setCurrentTestType({ name: "", typeId: null });
                 }
               }}
             >
@@ -372,7 +368,7 @@ const PatientDetailDoctorView = () => {
               <p><strong>Tên:</strong> {test.name}</p>
             </Col>
             <Col span={6}>
-              <p><strong>Loại:</strong> {test.type.testTypeName}</p>
+              <p><strong>Loại:</strong> {test.type?.testTypeName || 'Chưa có'}</p>
             </Col>
             <Col span={6}>
               <p><strong>Kết quả:</strong> {test.result} {test.unit}</p>
