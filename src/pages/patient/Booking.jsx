@@ -451,15 +451,8 @@ const Booking = () => {
                                 <Form.Item
                                     name="paymentMethod"
                                     label="Hình thức thanh toán"
-                                    initialValue="online"
-                                    rules={[{ required: true, message: 'Vui lòng chọn hình thức thanh toán' }]}
-                                >
-                                    <Select>
-                                        <Option value="online">Thanh toán trực tuyến</Option>
-                                        <Option value="cash">Thanh toán bằng tiền mặt</Option>
-                                    </Select>
                                     rules={[{ required: true, message: "Vui lòng chọn hình thức thanh toán" }]}
-                                
+                                >
                                     <Radio.Group className="payment-block-group" style={{ width: "100%" }}>
                                         {paymentOptions.map(opt => (
                                             <label

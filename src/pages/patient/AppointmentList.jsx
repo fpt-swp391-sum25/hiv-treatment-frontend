@@ -236,14 +236,40 @@ const AppointmentList = () => {
             dataIndex: 'status',
             key: 'status',
             render: (status) => {
-                let color = 'default';
+                let color = 'default', label;
                 switch (status) {
-                    case 'Đang chờ thanh toán': color = 'gold'; break;
-                    case 'Đang hoạt động': color = 'green'; break;
-                    case 'Thanh toán thất bại': color = 'red'; break;
+                    case 'Đã hủy': color = 'gold'; label = 'Lịch hẹn đã bị hủy'; break;
+                    case 'Đang hoạt động': color = 'green'; label = 'Đang hoạt động'; break;
                     default: color = 'default';
                 }
-                return <Tag color={color}>{status}</Tag>;
+                return <Tag color={color}>{label}</Tag>;
+            }
+        },
+        {
+            title: 'Phương thức thanh toán',
+            dataIndex: 'paymentDes',
+            key: 'paymentDes',
+
+        },
+        {
+            title: 'Thanh toán',
+            dataIndex: 'paymentStatus',
+            key: 'paymentStatus',
+            render: (paymentStatus) => {
+                let color, label;
+                switch (paymentStatus) {
+                    case 'Thanh toán thành công':
+                        color = 'green'; label = 'Đã thanh toán'; break;
+                    case 'Đã thanh toán':
+                        color = 'green'; label = 'Đã thanh toán'; break;
+                    case 'Thanh toán thất bại':
+                        color = 'red'; label = 'Thanh toán thất bại'; break;
+                    case 'Chờ thanh toán':
+                        color = 'gold'; label = 'Đang chờ thanh toán'; break;
+                    default:
+                        color = 'default'; label = 'Chưa thanh toán';
+                }
+                return <Tag color={color}>{label}</Tag>;
             }
         },
         {
@@ -273,7 +299,7 @@ const AppointmentList = () => {
                 const appointmentDateTime = dayjs(`${record.date} ${record.slot}`, 'DD-MM-YYYY HH:mm')
                 const now = dayjs()
                 const canCancel = appointmentDateTime.diff(now, 'hour') >= minCancelHour;
-                if (paymentStatus === 'Thanh toán thất bại' || (paymentDes === 'ONLINE' && paymentStatus === 'Chờ thanh toán')) {
+                if (paymentStatus === 'Thanh toán thất bại' || (paymentDes === 'VNPay' && paymentStatus === 'Chờ thanh toán')) {
                     return (
                         <Popconfirm
                             title="Thanh toán lại?"
@@ -327,7 +353,7 @@ const AppointmentList = () => {
                         )
                     }
                 }
-                if (paymentDes === 'ONLINE' && paymentStatus === 'Thanh toán thành công' && status === 'Đang hoạt động') {
+                if (paymentDes === 'VNPay' && paymentStatus === 'Thanh toán thành công' && status === 'Đang hoạt động') {
                     if (canCancel) {
 
                         return (
