@@ -13,7 +13,7 @@ import MedicalReport from './MedicalReport/MedicalReport';
 import dayjs from 'dayjs';
 import { exportToExcel, formatStaffDataForExport, formatPaymentDataForExport, getStaffData, getPaymentStats } from '../../../services/report.service';
 import { PAYMENT_STATUS, EXPORT_TYPES } from '../../../types/report.types';
-import './Reports.css';
+import '../../../styles/manager/Reports.css';
 
 const { RangePicker } = DatePicker;
 

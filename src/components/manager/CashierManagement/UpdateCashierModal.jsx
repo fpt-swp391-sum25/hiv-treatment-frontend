@@ -4,41 +4,39 @@ import { UploadOutlined, UserOutlined, DeleteOutlined } from '@ant-design/icons'
 import moment from 'moment';
 import { updateUserAPI } from '../../../services/user.service';
 
-const UpdateLabTechnicianModal = ({ visible, labTechnician, onCancel, onSuccess }) => {
+const UpdateCashierModal = ({ visible, cashier, onCancel, onSuccess }) => {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
     const [avatarBase64, setAvatarBase64] = useState(null);
     const [isAvatarRemoved, setIsAvatarRemoved] = useState(false);
 
-    // Tính avatar preview theo logic giống trang ManagerProfile
     const avatarPreview = avatarBase64
     ?? (isAvatarRemoved ? ''
-    : labTechnician?.avatar
-        ? labTechnician.avatar.startsWith('data:')
-            ? labTechnician.avatar
-            : `data:image/png;base64,${labTechnician.avatar}`
+    : cashier?.avatar
+        ? cashier.avatar.startsWith('data:')
+            ? cashier.avatar
+            : `data:image/png;base64,${cashier.avatar}`
         : '');
 
 
     useEffect(() => {
-        if (visible && labTechnician) {
-            console.log("Avatar from backend:", labTechnician.avatar);
+        if (visible && cashier) {
+            console.log("Avatar from backend:", cashier.avatar);
 
             form.setFieldsValue({
-                fullName: labTechnician.fullName || '',
-                email: labTechnician.email || '',
-                phone: labTechnician.phone || '',
-                gender: labTechnician.gender || '',
-                address: labTechnician.address || '',
-                status: labTechnician.status || '',
-                dateOfBirth: labTechnician.dateOfBirth ? moment(labTechnician.dateOfBirth, 'YYYY-MM-DD') : null
+                fullName: cashier.fullName || '',
+                email: cashier.email || '',
+                phone: cashier.phone || '',
+                gender: cashier.gender || 'MALE',
+                address: cashier.address || '',
+                status: cashier.status || 'ACTIVE',
+                dateOfBirth: cashier.dateOfBirth ? moment(cashier.dateOfBirth, 'YYYY-MM-DD') : null
             });
 
-            // Reset avatar state
             setAvatarBase64(null);
             setIsAvatarRemoved(false);
         }
-    }, [visible, labTechnician, form]);
+    }, [visible, cashier, form]);
 
     const handleAvatarChange = (file) => {
         const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
@@ -60,7 +58,7 @@ const UpdateLabTechnicianModal = ({ visible, labTechnician, onCancel, onSuccess 
         };
         reader.readAsDataURL(file);
 
-        return false; // Ngăn không upload thật sự
+        return false; 
     };
 
     const handleRemoveAvatar = () => {
@@ -84,12 +82,12 @@ const UpdateLabTechnicianModal = ({ visible, labTechnician, onCancel, onSuccess 
                 avatar: isAvatarRemoved ? '' : avatarBase64 !== null ? avatarBase64 : undefined
             };
 
-            await updateUserAPI(labTechnician.id, updateData);
-            message.success('Cập nhật thông tin kỹ thuật viên phòng thí nghiệm thành công');
+            await updateUserAPI(cashier.id, updateData);
+            message.success('Cập nhật thông tin thu ngân thành công');
             if (onSuccess) onSuccess();
         } catch (error) {
             console.error('Lỗi cập nhật:', error);
-            message.error('Không thể cập nhật thông tin kỹ thuật viên phòng thí nghiệ');
+            message.error('Không thể cập nhật thông tin thu ngân');
         } finally {
             setLoading(false);
         }
@@ -97,7 +95,7 @@ const UpdateLabTechnicianModal = ({ visible, labTechnician, onCancel, onSuccess 
 
     return (
         <Modal
-            title="Cập nhật thông tin kỹ thuật viên phòng thí nghiệm"
+            title="Cập nhật thông tin thu ngân"
             open={visible}
             onCancel={onCancel}
             footer={[
@@ -150,8 +148,9 @@ const UpdateLabTechnicianModal = ({ visible, labTechnician, onCancel, onSuccess 
                 </Form.Item>
                 <Form.Item name="status" label="Trạng thái" rules={[{ required: true, message: 'Vui lòng chọn trạng thái' }]}>
                     <Select>
-                        <Select.Option value="Đang hoạt động">Đang hoạt động</Select.Option>
-                        <Select.Option value="Tạm khóa">Tạm khóa</Select.Option>
+                        <Select.Option value="ACTIVE">Đang hoạt động</Select.Option>
+                        <Select.Option value="INACTIVE">Không hoạt động</Select.Option>
+                        <Select.Option value="SUSPENDED">Tạm khóa</Select.Option>
                     </Select>
                 </Form.Item>
             </Form>
@@ -159,4 +158,4 @@ const UpdateLabTechnicianModal = ({ visible, labTechnician, onCancel, onSuccess 
     );
 };
 
-export default UpdateLabTechnicianModal;
+export default UpdateCashierModal;

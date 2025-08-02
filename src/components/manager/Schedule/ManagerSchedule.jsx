@@ -7,10 +7,10 @@ import { Row, Col, Form, Spinner } from 'react-bootstrap';
 import { notification } from 'antd';
 import { BsCalendarPlus } from 'react-icons/bs';
 import moment from 'moment';
-import './CustomButtons.css';
-import './Schedule.css';
-import { ScheduleStatus, StatusMapping } from '../../../types/schedule.types';
+import { StatusMapping } from '../../../types/schedule.types';
 import { checkBackendConnection, createScheduleAPI, deleteScheduleAPI, getAllSchedulesAPI, updateScheduleAPI } from '../../../services/schedule.service';
+import '../../../styles/manager/ManagerSchedule.css';
+import '../../../styles/manager/CustomButtons.css';
 
 const ManagerSchedule = () => {
     const [showForm, setShowForm] = useState(false);

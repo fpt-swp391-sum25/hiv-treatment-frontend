@@ -33,12 +33,11 @@ import {
     useNavigate
 } from "react-router-dom";
 import appLogo from '../../assets/appLogo.png'
-import '../manager/Layout/ManagerHeader.css'
 import {
     getNotificationsByUserId,
     updateNotification
 } from "../../services/notification.service";
-
+import '../../styles/manager/ManagerHeader.css';
 
 const { Header } = Layout
 const { Text } = Typography

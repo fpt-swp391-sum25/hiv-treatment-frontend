@@ -25,6 +25,7 @@ import dayjs from 'dayjs';
 import { createNotification } from "../../services/notification.service";
 import { fetchHealthRecordByScheduleIdAPI, fetchTestOrderByHealthRecordIdAPI, updateHealthRecordAPI } from "../../services/health-record.service.js";
 import { updateTestOrderAPI } from "../../services/testOrder.service.js";
+import { getAllTestTypes } from "../../services/testtype.service.js";
 
 
 const PatientDetail = () => {
@@ -32,27 +33,32 @@ const PatientDetail = () => {
   const [healthRecordData, setHealthRecordData] = useState({})
   const [testOrderData, setTestOrderData] = useState([])
   const [isUpdateTestOrderModalOpen, setIsUpdateTestOrderModalOpen] = useState(false)
+  const [testTypes, setTestTypes] = useState([]);
 
   const { id } = useParams()
   const { Title } = Typography
   const navigate = useNavigate()
 
   useEffect(() => {
-    loadData()
-  }, [])
+    loadData();
+  }, []);
 
   const loadData = async () => {
     try {
-      const healthRecord = (await fetchHealthRecordByScheduleIdAPI(id)).data
+      const healthRecord = (await fetchHealthRecordByScheduleIdAPI(id)).data;
       if (healthRecord) {
-        setHealthRecordData(healthRecord)
-        const testOrderRes = await fetchTestOrderByHealthRecordIdAPI(healthRecord.id)
-        setTestOrderData(testOrderRes.data || [])
+        setHealthRecordData(healthRecord);
+        const testOrderRes = await fetchTestOrderByHealthRecordIdAPI(healthRecord.id);
+        setTestOrderData(testOrderRes.data || []);
       }
+
+      const testTypeList = await getAllTestTypes();
+      setTestTypes(testTypeList);
     } catch (error) {
-      console.error("Lỗi khi tải dữ liệu:", error)
+      console.error("Lỗi khi tải dữ liệu:", error);
     }
-  }
+  };
+
 
   const handleInputChange = (event) => {
     const { name, value } = event.target
@@ -99,7 +105,7 @@ const PatientDetail = () => {
         )
 
         if (
-          (healthRecordData.hivStatus === "Dương tính" 
+          (healthRecordData.hivStatus === "Dương tính"
             || healthRecordData.hivStatus === "Âm tính"
             || healthRecordData.hivStatus === "Chưa xác định") &&
           allResultsFilled
@@ -138,7 +144,7 @@ const PatientDetail = () => {
   return (
     <div style={{ margin: '0 10vw' }}>
       <Space direction="vertical" style={{ width: "100%" }}>
-        <Button onClick={() => navigate(-1)}>← Quay lại</Button>
+        <Button onClick={() => navigate(-2)}>← Quay lại</Button>
         <Title level={3} style={{ textAlign: "center", width: "100%" }}>
           Chi tiết ca khám
         </Title>
@@ -176,22 +182,28 @@ const PatientDetail = () => {
       {testOrderData.map((test) => (
         <Card key={test.id} style={{ marginTop: 16 }}>
           <Row gutter="5vw">
-            <Col span={8}>
-              <p><strong>Loại:</strong> {test.type}</p>
+            <Col span={6}>
+              <p><strong>Tên:</strong> {test.name}</p>
             </Col>
-            <Col span={8}>
+            <Col span={6}>
+              <p><strong>Loại:</strong> {test.type?.testTypeName}</p>
+            </Col>
+            <Col span={6}>
               <p><strong>Kết quả:</strong> {test.result} {test.unit}</p>
             </Col>
-            <Col span={8}>
+          </Row>
+
+          <Row gutter="5vw">
+            <Col span={6}>
               <p><strong>Ghi chú:</strong> {test.note}</p>
             </Col>
-            <Col span={8}>
+            <Col span={6}>
               <p><strong>Thời gian dự kiến:</strong> {formatDate(test.expectedResultTime)}</p>
             </Col>
-            <Col span={8}>
+            <Col span={6}>
               <p><strong>Thời gian nhận kết quả:</strong> {formatDate(test.actualResultTime)}</p>
             </Col>
-            <Col span={8}>
+            <Col span={6}>
               <Space>
                 <EditOutlined
                   style={{ color: 'orange', cursor: 'pointer' }}
@@ -210,9 +222,14 @@ const PatientDetail = () => {
         isUpdateTestOrderModalOpen={isUpdateTestOrderModalOpen}
         setIsUpdateTestOrderModalOpen={setIsUpdateTestOrderModalOpen}
         dataUpdate={dataUpdate}
+        testTypes={testTypes}
         onPreviewUpdate={(updatedTest) => {
           setTestOrderData((prev) =>
-            prev.map((test) => test.id === updatedTest.id ? updatedTest : test)
+            prev.map((test) =>
+              test.id === updatedTest.id
+                ? { ...test, ...updatedTest }
+                : test
+            )
           )
         }}
       />

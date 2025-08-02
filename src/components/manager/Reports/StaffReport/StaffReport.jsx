@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, Table, Spin, Statistic, Select, Input, Space, Button, Typography, Divider, DatePicker, Tag, Alert } from 'antd';
 import { UserOutlined, TeamOutlined, FilterOutlined, SearchOutlined, ReloadOutlined, FileExcelOutlined, FilePdfOutlined, DownloadOutlined, MedicineBoxOutlined, ExperimentOutlined, SettingOutlined } from '@ant-design/icons';
-import { getStaffData, formatStaffDataForExport, exportToExcel } from '../../../../services/report.service';
+import { getStaffData, exportToExcel } from '../../../../services/report.service';
 import { STAFF_ROLES } from '../../../../types/report.types';
-import './StaffReport.css';
 import dayjs from 'dayjs';
+import '../../../../styles/manager/StaffReport.css';
 
 const { Option } = Select;
 const { Search } = Input;

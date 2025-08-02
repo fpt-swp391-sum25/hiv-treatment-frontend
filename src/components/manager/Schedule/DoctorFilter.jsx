@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Form, Spinner, InputGroup, Dropdown } from 'react-bootstrap';
 import { BsSearch, BsChevronDown } from 'react-icons/bs';
-import './DoctorFilter.css';
 import { fetchAllDoctorsAPI } from '../../../services/user.service';
+import '../../../styles/manager/DoctorFilter.css';
 
 const DoctorFilter = ({ selectedDoctor, onDoctorSelect }) => {
   const [doctors, setDoctors] = useState([]);

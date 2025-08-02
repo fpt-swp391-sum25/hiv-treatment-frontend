@@ -1,92 +1,74 @@
 import { useState, useEffect } from 'react';
-import { Table, Space, Button, Row, Col, Card, Statistic, Select, Input, Alert } from 'antd';
+import { Table, Space, Button, Row, Col, Card, Statistic, Input, Alert } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
-import UpdateLabTechnicianModal from './UpdateLabTechnicianModal';
-import { fetchAllLabTechniciansAPI } from '../../../services/user.service';
+import UpdateCashierModal from './UpdateCashierModal';
+import { fetchAllCashiersAPI } from '../../../services/user.service'; 
 import '../../../styles/manager/DoctorManagement.css';
 
-const LabTechnicianManagement = () => {
-    const [selectedLabTechnician, setSelectedLabTechnician] = useState(null);
+const CashierManagement = () => {
+    const [selectedCashier, setSelectedCashier] = useState(null);
     const [isUpdateModalVisible, setIsUpdateModalVisible] = useState(false);
-    const [selectedLabTechnicianId] = useState('all');
     const [searchText, setSearchText] = useState('');
-
-    const [labTechnicians, setLabTechnicians] = useState([]);
+    const [cashiers, setCashiers] = useState([]);
     const [loading, setLoading] = useState(false);
     const [apiError, setApiError] = useState(null);
 
-    const loadLabTechnicians = async () => {
+    const loadCashiers = async () => {
         setLoading(true);
         setApiError(null);
         try {
-            const response = await fetchAllLabTechniciansAPI();
+            const response = await fetchAllCashiersAPI();
             let processedData = [];
             if (Array.isArray(response)) {
                 processedData = response;
-            } else if (response && Array.isArray(response.data)) {
-                processedData = response.data;
-            } else if (response && response.data && Array.isArray(response.data.content)) {
+            } else if (response?.data?.content) {
                 processedData = response.data.content;
-            } else {
-                console.warn('Unexpected response format:', response);
-                processedData = [];
+            } else if (response?.data) {
+                processedData = response.data;
             }
 
-            const mappedData = processedData.map(tech => {
-                console.log('Original tech gender:', tech.gender); 
-                return {
-                    id: tech.id,
-                    fullName: tech.fullName || '',
-                    email: tech.email || '',
-                    phone: tech.phoneNumber || '',
-                    status: tech.accountStatus || 'ACTIVE',
-                    gender: tech.gender || '', 
-                    address: tech.address || '',
-                    avatar: tech.avatar || '',
-                    dateOfBirth: tech.dateOfBirth || '',
-                    username: tech.username || '',
-                    createdAt: tech.createdAt || '',
-                    isVerified: tech.isVerified || false
-                };
-            });
+            const mapped = processedData.map(c => ({
+                id: c.id,
+                fullName: c.fullName || '',
+                email: c.email || '',
+                phone: c.phoneNumber || '',
+                status: c.accountStatus || 'ACTIVE',
+                gender: c.gender || '',
+                address: c.address || '',
+                avatar: c.avatar || '',
+                dateOfBirth: c.dateOfBirth || '',
+                username: c.username || '',
+                createdAt: c.createdAt || '',
+                isVerified: c.isVerified || false
+            }));
 
-            console.log('Mapped lab technicians data:', mappedData);
-
-            setLabTechnicians(mappedData);
+            setCashiers(mapped);
         } catch (error) {
-            console.error('Error fetching lab technicians:', error);
-            setApiError('Không thể tải dữ liệu nhân viên. Vui lòng thử lại sau.');
-            setLabTechnicians([]);
+            console.error('Error fetching cashiers:', error);
+            setApiError('Không thể tải dữ liệu thu ngân. Vui lòng thử lại sau.');
+            setCashiers([]);
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        loadLabTechnicians();
+        loadCashiers();
     }, []);
 
-    const handleUpdateLabTechnician = (technician) => {
-        setSelectedLabTechnician(technician);
+    const handleUpdateCashier = (cashier) => {
+        setSelectedCashier(cashier);
         setIsUpdateModalVisible(true);
     };
 
     const handleUpdateSuccess = () => {
-        loadLabTechnicians();
+        loadCashiers();
         setIsUpdateModalVisible(false);
     };
 
-    const filteredLabTechnicians = labTechnicians ? labTechnicians.filter((tech) => {
-        const matchTechnician = selectedLabTechnicianId === 'all' || (tech.id && tech.id.toString() === selectedLabTechnicianId.toString());
-        const matchName = tech.fullName && tech.fullName.toLowerCase().includes(searchText.toLowerCase());
-        return matchTechnician && matchName;
-    }) : [];
-
-    const AccountStatus = {
-        ACTIVE: 'ACTIVE',
-        INACTIVE: 'INACTIVE',
-        SUSPENDED: 'SUSPENDED'
-    };
+    const filteredCashiers = cashiers.filter(c =>
+        c.fullName?.toLowerCase().includes(searchText.toLowerCase())
+    );
 
     const columns = [
         {
@@ -129,7 +111,7 @@ const LabTechnicianManagement = () => {
             width: '15%',
             render: (_, record) => (
                 <Space size="small">
-                    <Button type="primary" size="small" onClick={() => handleUpdateLabTechnician(record)}>
+                    <Button type="primary" size="small" onClick={() => handleUpdateCashier(record)}>
                         Cập nhật
                     </Button>
                 </Space>
@@ -154,8 +136,8 @@ const LabTechnicianManagement = () => {
                 <Col xs={24}>
                     <Card>
                         <Statistic
-                            title="Tổng số kỹ thuật viên phòng thí nghiệm"
-                            value={filteredLabTechnicians.length}
+                            title="Tổng số thu ngân"
+                            value={filteredCashiers.length}
                             prefix={<UserOutlined />}
                         />
                     </Card>
@@ -177,22 +159,22 @@ const LabTechnicianManagement = () => {
 
             <Table
                 columns={columns}
-                dataSource={filteredLabTechnicians}
+                dataSource={filteredCashiers}
                 rowKey="id"
                 loading={loading}
                 pagination={{ pageSize: 10 }}
                 locale={{
-                    emptyText: loading ? 'Đang tải dữ liệu...' : 'Không có dữ liệu nhân viên'
+                    emptyText: loading ? 'Đang tải dữ liệu...' : 'Không có dữ liệu thu ngân'
                 }}
                 scroll={{ x: 'max-content' }}
                 size="middle"
                 bordered
-                responsive={true}
+                responsive
             />
 
-            <UpdateLabTechnicianModal
+            <UpdateCashierModal
                 visible={isUpdateModalVisible}
-                labTechnician={selectedLabTechnician}
+                cashier={selectedCashier}
                 onCancel={() => setIsUpdateModalVisible(false)}
                 onSuccess={handleUpdateSuccess}
             />
@@ -200,4 +182,4 @@ const LabTechnicianManagement = () => {
     );
 };
 
-export default LabTechnicianManagement;
+export default CashierManagement;

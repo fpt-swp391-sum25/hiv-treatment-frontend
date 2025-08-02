@@ -1,32 +1,33 @@
 import axios from './axios.customize'
 
 const deleteTestOrderAPI = (testOrderId) => {
-    const URL_BACKEND = `/api/test-order/${testOrderId}`
-    return axios.delete(URL_BACKEND)
+  const URL_BACKEND = `/api/test-order/${testOrderId}`
+  return axios.delete(URL_BACKEND)
 }
 
-const createTestOrderAPI = (type, note, expectedResultTime, healthRecordId) => {
-    const testOrderData = {
-        type,
-        note,
-        expectedResultTime,
-        healthRecordId,
-    }
-    const URL_BACKEND = '/api/test-order'
-    return axios.post(URL_BACKEND, testOrderData)
+const createTestOrderAPI = (name, note, expectedResultTime, healthRecordId, testTypeId) => {
+  const testOrderData = {
+    name,
+    note,
+    expectedResultTime,
+    healthRecordId,
+    testTypeId
+  }
+  const URL_BACKEND = '/api/test-order'
+  return axios.post(URL_BACKEND, testOrderData)
 }
 
 const updateTestOrderAPI = (testOrderId, type, result, unit, note, expectedResultTime, actualResultTime) => {
-    const testOrderData = {
-        type,
-        result,
-        unit,
-        note,
-        expectedResultTime,
-        actualResultTime
-    }
-    const URL_BACKEND = `/api/test-order/${testOrderId}`
-    return axios.put(URL_BACKEND, testOrderData)
+  const testOrderData = {
+    testTypeId: type.id,
+    result,
+    unit,
+    note,
+    expectedResultTime,
+    actualResultTime
+  }
+  const URL_BACKEND = `/api/test-order/${testOrderId}`
+  return axios.put(URL_BACKEND, testOrderData)
 }
 
 const getTestOrdersByHealthRecordIdAPI = (healthRecordId) => {
@@ -42,10 +43,10 @@ const undoTestOrderPaymentAPI = (healthRecordId) => {
 }
 
 export {
-    deleteTestOrderAPI,
-    createTestOrderAPI,
-    updateTestOrderAPI,
-    getTestOrdersByHealthRecordIdAPI,
-    confirmTestOrderPaymentAPI,
-    undoTestOrderPaymentAPI
+  deleteTestOrderAPI,
+  createTestOrderAPI,
+  updateTestOrderAPI,
+  getTestOrdersByHealthRecordIdAPI,
+  confirmTestOrderPaymentAPI,
+  undoTestOrderPaymentAPI
 }

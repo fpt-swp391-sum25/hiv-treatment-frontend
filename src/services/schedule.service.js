@@ -314,6 +314,55 @@ const searchSchedulesByNameAPI = (name) => {
   })
 }
   
+const bulkUpdateScheduleByDoctorAndDateAPI = async (doctorId, date, updatedFields) => {
+    return axios.put(`/api/schedule/bulk-update`, {
+        doctorId,
+        date,
+        ...updatedFields
+    });
+};
+
+const bulkDeleteSchedulesByDoctorAndDateAPI = async (doctorId, date) => {
+    return axios.delete(`/api/schedule/bulk-delete`, {
+        params: {
+            doctorId,
+            date
+        }
+    });
+};
+
+const updateScheduleStatusAPI = (scheduleId, newStatus) => {
+    const URL_BACKEND = `/api/schedule/${scheduleId}/status`;
+    console.log(">>>>>>>>>>>>>>" + scheduleId)
+    return axios.put(URL_BACKEND, { status: newStatus });
+};
+
+export const getPatientsByScheduleAPI = async (scheduleId) => {
+    try {
+        const response = await axios.get(`/api/schedule/${scheduleId}/patients`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching patients by schedule:', error);
+        throw error;
+    }
+};
+
+export const getSchedulesByDoctorDateAndSlotAPI = async (doctorId, date, slot) => {
+    try {
+        const response = await axios.get('/api/schedule', {
+            params: {
+                doctorId,
+                date,
+                slot
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching schedules:', error);
+        throw error;
+    }
+};
+
 export {
     fetchAllPatientScheduleAPI,
     fetchAllScheduleAPI,
@@ -334,5 +383,8 @@ export {
     getSlotCountsAPI,
     checkBackendConnection,
     updateScheduleAPI,
-    searchSchedulesByNameAPI
+    searchSchedulesByNameAPI,
+    bulkUpdateScheduleByDoctorAndDateAPI,
+    bulkDeleteSchedulesByDoctorAndDateAPI,
+    updateScheduleStatusAPI,
 }

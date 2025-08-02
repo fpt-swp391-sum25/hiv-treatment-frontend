@@ -2,18 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { Modal, Button, Form, Row, Col, Spinner } from 'react-bootstrap';
 import { notification } from 'antd';
 import { ScheduleStatus, SlotTimes, StatusMapping } from '../../../types/schedule.types';
-import './ScheduleForm.css';
 import moment from 'moment';
 import { BsPerson, BsCalendarCheck, BsDoorOpen, BsClock, BsLayersFill, BsArrowRepeat, BsPersonPlus } from 'react-icons/bs';
 import { fetchAllDoctorsAPI } from '../../../services/user.service';
+import '../../../styles/manager/ScheduleForm.css';
 
 const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCreated, existingSchedules, onShowToast }) => {
     const [doctors, setDoctors] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [showConfirmation, setShowConfirmation] = useState(false);
-
-    // States for searchable doctor dropdown
     const [doctorSearchTerm, setDoctorSearchTerm] = useState('');
     const [showDoctorDropdown, setShowDoctorDropdown] = useState(false);
     const [filteredDoctors, setFilteredDoctors] = useState([]);
@@ -29,13 +27,11 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         roomCode: '101',
         scheduleType: 'single',
         shiftType: 'morning',
-        maxPatients: 3 // Thêm trường số lượng bệnh nhân tối đa, mặc định là 3
+        maxPatients: 3
     });
 
-    // Sử dụng SlotTimes từ schedule.types.js
     const timeSlots = SlotTimes;
 
-    // Định nghĩa ca sáng và ca chiều
     const morningShiftSlots = timeSlots.filter(slot =>
         ['08:00:00', '09:00:00', '10:00:00', '11:00:00'].includes(slot.value)
     );
@@ -51,7 +47,6 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         }
     }, [show, selectedDate, selectedDoctor]);
 
-    // Update filtered doctors when doctors list changes
     useEffect(() => {
         setFilteredDoctors(doctors);
     }, [doctors]);
@@ -60,11 +55,7 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         setLoading(true);
         setError(null);
         try {
-            console.log('ScheduleForm: Fetching doctors from API...');
             const response = await fetchAllDoctorsAPI();
-            console.log('ScheduleForm: API response for doctors:', response);
-
-            // Kiểm tra cấu trúc response để xác định nơi chứa dữ liệu
             let doctorsData = [];
 
             if (response && response.data) {
@@ -75,18 +66,9 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                 doctorsData = response;
             }
 
-            // Đảm bảo doctorsData là một mảng
             const doctorsList = Array.isArray(doctorsData) ? doctorsData : [];
-
-            console.log('ScheduleForm: Doctors data after processing:', doctorsList);
-
             if (doctorsList.length > 0) {
-                // Chuyển đổi dữ liệu từ API để phù hợp với cấu trúc component
                 const formattedDoctors = doctorsList.map(doctor => {
-                    // Log để kiểm tra cấu trúc dữ liệu
-                    console.log('ScheduleForm: Doctor data structure:', doctor);
-
-                    // Xử lý các trường hợp khác nhau của cấu trúc dữ liệu
                     const id = doctor.id || doctor.userId || doctor.user_id;
                     const name = doctor.full_name || doctor.fullName || doctor.name || doctor.username || `BS. ${id}`;
 
@@ -95,12 +77,9 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                         name: name
                     };
                 });
-
-                console.log('ScheduleForm: Formatted doctors:', formattedDoctors);
                 setDoctors(formattedDoctors);
-                setFilteredDoctors(formattedDoctors); // Initialize filtered doctors
+                setFilteredDoctors(formattedDoctors); 
 
-                // Nếu có selectedDoctor, tự động chọn bác sĩ đó
                 if (selectedDoctor) {
                     const doctor = formattedDoctors.find(d => d.id.toString() === selectedDoctor.toString());
                     if (doctor) {
@@ -109,16 +88,14 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                             doctorId: doctor.id,
                             doctorName: doctor.name
                         }));
-                        setDoctorSearchTerm(doctor.name); // Set search term to selected doctor name
+                        setDoctorSearchTerm(doctor.name);
                     }
                 }
             } else {
-                console.log('ScheduleForm: No doctor data received');
                 setDoctors([]);
                 setError('Không có dữ liệu bác sĩ');
             }
-        } catch (error) {
-            console.error('ScheduleForm: Error fetching doctors:', error);
+        } catch {
             setDoctors([]);
             setError('Không thể kết nối đến server');
         } finally {
@@ -141,13 +118,11 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             maxPatients: 3
         });
 
-        // Reset search states
         setDoctorSearchTerm('');
         setShowDoctorDropdown(false);
         setFilteredDoctors(doctors);
     };
 
-    // Filter doctors based on search term
     const filterDoctors = (searchTerm) => {
         if (!searchTerm.trim()) {
             setFilteredDoctors(doctors);
@@ -159,15 +134,13 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         }
     };
 
-    // Handle doctor search input change
     const handleDoctorSearchChange = (e) => {
         const searchTerm = e.target.value;
         setDoctorSearchTerm(searchTerm);
         filterDoctors(searchTerm);
         setShowDoctorDropdown(true);
-        setSelectedDoctorIndex(-1); // Reset keyboard selection
+        setSelectedDoctorIndex(-1); 
 
-        // Clear selection if search term doesn't match any doctor exactly or is empty
         const exactMatch = doctors.find(doctor =>
             doctor.name.toLowerCase() === searchTerm.toLowerCase()
         );
@@ -180,7 +153,6 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         }
     };
 
-    // Handle doctor selection from dropdown
     const handleDoctorSelect = (doctor) => {
         setFormData(prev => ({
             ...prev,
@@ -191,10 +163,8 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         setShowDoctorDropdown(false);
     };
 
-    // Handle input focus
     const handleDoctorInputFocus = () => {
         setShowDoctorDropdown(true);
-        // If no search term, show all doctors
         if (!doctorSearchTerm.trim()) {
             setFilteredDoctors(doctors);
         } else {
@@ -202,7 +172,6 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         }
     };
 
-    // Handle input blur (with delay to allow for clicks)
     const handleDoctorInputBlur = () => {
         setTimeout(() => {
             setShowDoctorDropdown(false);
@@ -210,7 +179,6 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         }, 200);
     };
 
-    // Handle clear doctor selection
     const handleClearDoctorSelection = () => {
         setDoctorSearchTerm('');
         setFormData(prev => ({
@@ -223,16 +191,14 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         setFilteredDoctors(doctors);
     };
 
-    // Handle date field click to open date picker
     const handleDateFieldClick = () => {
         const dateInput = document.querySelector('input[name="date"]');
         if (dateInput) {
             dateInput.focus();
-            dateInput.showPicker?.(); // Modern browsers support showPicker()
+            dateInput.showPicker?.();
         }
     };
 
-    // Handle schedule type option click
     const handleScheduleTypeClick = (type) => {
         setFormData(prev => ({
             ...prev,
@@ -240,7 +206,6 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         }));
     };
 
-    // Handle shift type option click
     const handleShiftTypeClick = (type) => {
         setFormData(prev => ({
             ...prev,
@@ -248,7 +213,6 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         }));
     };
 
-    // Handle keyboard navigation
     const handleDoctorKeyDown = (e) => {
         if (!showDoctorDropdown) return;
 
@@ -283,16 +247,10 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
-
-        // Cập nhật formData
         let updatedValue = type === 'checkbox' ? checked : value;
 
-        // Xử lý đặc biệt cho trường roomCode
         if (name === 'roomCode') {
-            // Chỉ cho phép nhập số
             updatedValue = value.replace(/[^0-9]/g, '');
-
-            // Giới hạn độ dài
             if (updatedValue.length > 3) {
                 updatedValue = updatedValue.slice(0, 3);
             }
@@ -305,7 +263,6 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
 
         setFormData(updatedFormData);
 
-        // Nếu thay đổi bác sĩ, cập nhật doctorName
         if (name === 'doctorId') {
             const selectedDoc = doctors.find(doc => doc.id.toString() === value.toString());
             if (selectedDoc) {
@@ -319,24 +276,17 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         }
     };
 
-    // Hàm chuyển đổi thứ sang tiếng Việt
     const formatVietnameseDay = (date) => {
         const weekdays = [
             'Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư',
             'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'
         ];
-        const dayOfWeek = moment(date).day(); // 0 = Chủ nhật, 1 = Thứ hai, ...
+        const dayOfWeek = moment(date).day();
         return weekdays[dayOfWeek];
     };
 
-    // Validation function
     const validateForm = () => {
-        console.group('Schedule Form Validation');
-        console.log('Form data:', formData);
-
         if (!formData.doctorId) {
-            console.error('Missing doctorId');
-            console.groupEnd();
             notification.error({
                 message: 'Lỗi',
                 description: 'Vui lòng chọn bác sĩ từ danh sách',
@@ -347,8 +297,6 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         }
 
         if (formData.scheduleType === 'single' && !formData.slot) {
-            console.error('Missing slot for single schedule');
-            console.groupEnd();
             notification.error({
                 message: 'Lỗi',
                 description: 'Vui lòng chọn khung giờ làm việc',
@@ -358,10 +306,7 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             return false;
         }
 
-        // Kiểm tra ngày
         if (!formData.date) {
-            console.error('Missing date');
-            console.groupEnd();
             notification.error({
                 message: 'Lỗi',
                 description: 'Vui lòng chọn ngày',
@@ -371,10 +316,7 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             return false;
         }
 
-        // Kiểm tra ngày có phải là quá khứ không
         if (moment(formData.date).isBefore(moment(), 'day')) {
-            console.error('Date is in the past', formData.date);
-            console.groupEnd();
             notification.error({
                 message: 'Lỗi',
                 description: 'Không thể đặt lịch cho ngày đã qua!',
@@ -384,10 +326,7 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             return false;
         }
 
-        // Kiểm tra ngày có phải Chủ nhật không
-        if (moment(formData.date).day() === 0) { // 0 = Chủ nhật
-            console.error('Cannot schedule on Sunday', formData.date);
-            console.groupEnd();
+        if (moment(formData.date).day() === 0) {
             notification.error({
                 message: 'Lỗi',
                 description: 'Không thể đặt lịch vào Chủ nhật!',
@@ -397,10 +336,7 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             return false;
         }
 
-        // Kiểm tra số phòng
         if (!formData.roomCode || formData.roomCode.trim() === '') {
-            console.error('Missing room code');
-            console.groupEnd();
             notification.error({
                 message: 'Lỗi',
                 description: 'Vui lòng nhập số phòng',
@@ -409,30 +345,16 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             });
             return false;
         }
-
-        console.log('Form validation successful');
-        console.groupEnd();
         return true;
     };
 
-    // Function to actually create the schedule
     const createSchedule = () => {
-        console.group('Schedule Creation');
-        console.log('Creating schedule with form data:', formData);
-
-        // Đảm bảo maxPatients là số hợp lệ từ 1 đến 5
         const maxPatients = Math.min(Math.max(parseInt(formData.maxPatients) || 1, 1), 5);
-        console.log('Using maxPatients value:', maxPatients);
-
-        // Xử lý đặt lịch theo ca hoặc theo khung giờ đơn
         if (formData.scheduleType === 'shift') {
-            // Đặt lịch theo ca (nhiều khung giờ)
             const shiftSlots = formData.shiftType === 'morning' ? morningShiftSlots : afternoonShiftSlots;
             const schedules = [];
 
-            // Tạo lịch cho từng khung giờ trong ca
             for (const slotObj of shiftSlots) {
-                // Kiểm tra trùng lịch
                 const conflictingSchedules = existingSchedules.filter(schedule =>
                     schedule.date === formData.date &&
                     schedule.doctorId.toString() === formData.doctorId.toString() &&
@@ -443,7 +365,6 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                     const selectedDoc = doctors.find(doc => doc.id.toString() === formData.doctorId.toString());
                     const doctorName = selectedDoc ? selectedDoc.name : '';
 
-                    // Tạo nhiều lịch theo số lượng bệnh nhân tối đa
                     for (let i = 0; i < maxPatients; i++) {
                         const newSchedule = {
                             doctorId: formData.doctorId,
@@ -455,7 +376,7 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                             type: null,
                             patient_id: null,
                             shiftType: formData.shiftType,
-                            maxPatients: maxPatients // Lưu thông tin để frontend biết đây là phần của nhóm maxPatients
+                            maxPatients: maxPatients 
                         };
 
                         schedules.push(newSchedule);
@@ -470,12 +391,9 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                 }
             }
 
-            // Nếu có lịch tuần lặp lại
             if (formData.repeatWeekly && formData.repeatCount > 1) {
                 for (let weekIndex = 1; weekIndex < formData.repeatCount; weekIndex++) {
                     const newDate = moment(formData.date).add(weekIndex * 7, 'days').format('YYYY-MM-DD');
-
-                    // Tạo lịch cho từng khung giờ trong ca cho các tuần lặp lại
                     for (const slotObj of shiftSlots) {
                         const conflictingSchedules = existingSchedules.filter(schedule =>
                             schedule.date === newDate &&
@@ -487,7 +405,6 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                             const selectedDoc = doctors.find(doc => doc.id.toString() === formData.doctorId.toString());
                             const doctorName = selectedDoc ? selectedDoc.name : '';
 
-                            // Tạo nhiều lịch theo số lượng bệnh nhân tối đa
                             for (let i = 0; i < maxPatients; i++) {
                                 const newSchedule = {
                                     doctorId: formData.doctorId,
@@ -499,7 +416,7 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                                     type: null,
                                     patient_id: null,
                                     shiftType: formData.shiftType,
-                                    maxPatients: maxPatients // Lưu thông tin để frontend biết đây là phần của nhóm maxPatients
+                                    maxPatients: maxPatients 
                                 };
 
                                 schedules.push(newSchedule);
@@ -509,9 +426,7 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                 }
             }
 
-            // Thông báo số lịch được tạo
             if (schedules.length > 0) {
-                console.log(`Creating ${schedules.length} schedules for shift:`, schedules);
                 setTimeout(() => {
                     onScheduleCreated(schedules);
                 }, 0);
@@ -524,8 +439,6 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                 });
             }
         } else {
-            // Đặt lịch theo khung giờ đơn
-            // Kiểm tra trùng lịch
             const conflictingSchedules = existingSchedules.filter(schedule =>
                 schedule.date === formData.date &&
                 schedule.doctorId.toString() === formData.doctorId.toString() &&
@@ -533,8 +446,6 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
             );
 
             if (conflictingSchedules.length > 0) {
-                console.error('Schedule conflicts with existing schedules', conflictingSchedules);
-                console.groupEnd();
                 notification.error({
                     message: 'Lỗi',
                     description: 'Bác sĩ đã có lịch vào khung giờ này!',
@@ -543,14 +454,10 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                 });
                 return;
             }
-
-            // Tạo nhiều lịch theo số lượng bệnh nhân tối đa
             const selectedDoc = doctors.find(doc => doc.id.toString() === formData.doctorId.toString());
             const doctorName = selectedDoc ? selectedDoc.name : '';
-
             const schedules = [];
 
-            // Tạo maxPatients lịch trống
             for (let i = 0; i < maxPatients; i++) {
                 const newSchedule = {
                     doctorId: formData.doctorId,
@@ -561,34 +468,24 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                     roomCode: formData.roomCode,
                     type: null,
                     patient_id: null,
-                    maxPatients: maxPatients // Lưu thông tin để frontend biết đây là phần của nhóm maxPatients
+                    maxPatients: maxPatients 
                 };
-
                 schedules.push(newSchedule);
             }
-
-            console.log(`Creating ${maxPatients} schedules for single slot:`, schedules);
             setTimeout(() => {
                 onScheduleCreated(schedules);
             }, 0);
         }
-
-        console.groupEnd();
         onHide();
     };
 
-    // Handle form submission - now shows confirmation dialog
     const handleSubmit = (e) => {
         e.preventDefault();
-
-        // Validate form first
         if (validateForm()) {
-            // Show confirmation dialog
             setShowConfirmation(true);
         }
     };
 
-    // Handle confirmation
     const handleConfirmCreate = () => {
         setShowConfirmation(false);
         createSchedule();
@@ -628,7 +525,6 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                     )}
 
                     <Form onSubmit={handleSubmit}>
-                        {/* Section: Thông tin cơ bản */}
                         <div className="schedule-section mb-3">
                             <h6 className="section-title">Thông tin cơ bản</h6>
                             <div className="section-content">
@@ -784,7 +680,6 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                             </div>
                         </div>
 
-                        {/* Section: Kiểu đặt lịch */}
                         <div className="schedule-section mb-3">
                             <h6 className="section-title">Kiểu đặt lịch</h6>
                             <div className="section-content">
@@ -911,7 +806,6 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                             </div>
                         </div>
 
-                        {/* Section: Tùy chọn lặp lại */}
                         <div className="schedule-section">
                             <h6 className="section-title">Tùy chọn lặp lại</h6>
                             <div className="section-content">
@@ -981,7 +875,6 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
                 </Modal.Footer>
             </Modal>
 
-            {/* Confirmation Modal */}
             <Modal
                 show={showConfirmation}
                 onHide={handleCancelCreate}
@@ -1067,5 +960,4 @@ const ScheduleForm = ({ show, onHide, selectedDate, selectedDoctor, onScheduleCr
         </>
     );
 };
-
 export default ScheduleForm;

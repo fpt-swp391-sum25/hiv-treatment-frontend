@@ -1,17 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Row, Col, Tabs, Spin, Empty, message, Table, Card } from 'antd';
 import {
-  UserOutlined,
-  CheckCircleOutlined,
-  ExperimentOutlined
-} from '@ant-design/icons';
-import {
   getStaffStatistics,
   getAppointmentStatistics
 } from '../../../services/statistics.service';
-import { getMedicalReportData } from '../../../services/report.service';
-import './Dashboard.css';
-import KPICard from './KPICard';
 import DashboardFilters from './DashboardFilters';
 import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
@@ -20,6 +12,7 @@ import MonthlyTrendChart from './MonthlyTrendChart';
 import { fetchAccountByRoleAPI, fetchAllDoctorsAPI } from '../../../services/user.service';
 import { getAllSchedulesAPI } from '../../../services/schedule.service';
 import { getHealthRecordByDoctorIdAPI } from '../../../services/health-record.service';
+import '../../../styles/manager/Dashboard.css';
 
 dayjs.extend(isBetween);
 
@@ -30,11 +23,6 @@ const Dashboard = () => {
   const [statistics, setStatistics] = useState({
     staff: null,
     appointments: null
-  });
-
-  const [medicalStats, setMedicalStats] = useState({
-    totalAppointments: 0,
-    totalTestOrders: 0
   });
 
   const [filters, setFilters] = useState({
@@ -162,24 +150,6 @@ const Dashboard = () => {
     };
 
     loadDoctors();
-  }, []);
-
-  useEffect(() => {
-    const fetchMedicalStats = async () => {
-      try {
-        const response = await getMedicalReportData();
-        if (response && response.statistics) {
-          setMedicalStats({
-            totalAppointments: response.statistics.totalAppointments || 0,
-            totalTestOrders: response.statistics.totalTestOrders || 0
-          });
-        }
-      } catch (error) {
-        console.error('Error fetching medical statistics:', error);
-      }
-    };
-
-    fetchMedicalStats();
   }, []);
 
   const fetchStaffStatistics = useCallback(async () => {
@@ -448,44 +418,6 @@ const Dashboard = () => {
 
     return (
       <>
-        <Row gutter={[16, 16]} justify="center" style={{ marginBottom: '32px' }}>
-          <Col xs={24} sm={12} md={12} lg={12}>
-            <KPICard
-              title="Tổng số bác sĩ"
-              value={stats.doctors?.total || 0}
-              type="primary"
-              icon={<UserOutlined />}
-            />
-          </Col>
-          <Col xs={24} sm={12} md={12} lg={12}>
-            <KPICard
-              title="Tổng số ca khám/tư vấn đã thực hiện"
-              value={medicalStats.totalAppointments || 0}
-              type="success"
-              icon={<CheckCircleOutlined />}
-            />
-          </Col>
-        </Row>
-
-        <Row gutter={[16, 16]} justify="center">
-          <Col xs={24} sm={12} md={12} lg={12}>
-            <KPICard
-              title="Tổng số kĩ thuật viên"
-              value={stats.labTechnicians?.total || 0}
-              type="warning"
-              icon={<UserOutlined />}
-            />
-          </Col>
-          <Col xs={24} sm={12} md={12} lg={12}>
-            <KPICard
-              title="Tổng số xét nghiệm đã thực hiện"
-              value={medicalStats.totalTestOrders || 0}
-              type="success"
-              icon={<ExperimentOutlined />}
-            />
-          </Col>
-        </Row>
-
         <Row gutter={[16, 16]} style={{ marginTop: '24px' }}>
           <Col xs={24}>
             <Card title="Hiệu suất làm việc của bác sĩ">
