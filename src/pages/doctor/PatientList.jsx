@@ -1,14 +1,27 @@
 import {
+<<<<<<< HEAD
     Layout, 
     Button, 
     Table, 
     Typography, 
     Input,
+=======
+    Layout,
+    Button,
+    Table,
+    Typography,
+    Input,
+    DatePicker,
+    Select,
+    Row,
+    Col,
+>>>>>>> 70baec012cef2effb1020c616f7fab9bd7b1b3f4
     Tabs,
     message,
     Space,
     Spin
 } from "antd";
+<<<<<<< HEAD
 import { 
     useState, 
     useEffect, 
@@ -25,10 +38,30 @@ import {
 } from "../../components/context/AuthContext";
 import { 
     fetchScheduleByDoctorIdAPI 
+=======
+import {
+    useState,
+    useEffect,
+    useContext
+} from "react";
+import {
+    Outlet,
+    useNavigate
+} from "react-router-dom";
+import dayjs from 'dayjs';
+import 'dayjs/locale/vi';
+import viVN from 'antd/es/date-picker/locale/vi_VN';
+import {
+    AuthContext
+} from "../../components/context/AuthContext";
+import {
+    fetchScheduleByDoctorIdAPI
+>>>>>>> 70baec012cef2effb1020c616f7fab9bd7b1b3f4
 } from "../../services/schedule.service";
-import { 
-    fetchUsersAPI 
+import {
+    fetchUsersAPI
 } from "../../services/user.service";
+<<<<<<< HEAD
 import { 
     fetchHealthRecordByScheduleIdAPI 
 } from "../../services/health-record.service";
@@ -39,6 +72,16 @@ dayjs.locale('vi');
 
 dayjs.locale('vi')
 
+=======
+import {
+    fetchHealthRecordByScheduleIdAPI
+} from "../../services/health-record.service";
+import {
+    getPaymentByScheduleIdAPI
+} from "../../services/payment.service";
+dayjs.locale('vi');
+
+>>>>>>> 70baec012cef2effb1020c616f7fab9bd7b1b3f4
 const { Content } = Layout
 const { Title } = Typography
 const { TabPane } = Tabs
@@ -64,7 +107,11 @@ const PatientList = () => {
             const matchesText =
                 normalizeString(item.fullName).includes(normalizeString(searchText)) ||
                 normalizeString(item.patientCode).includes(normalizeString(searchText))
+<<<<<<< HEAD
             
+=======
+
+>>>>>>> 70baec012cef2effb1020c616f7fab9bd7b1b3f4
             return matchesText
         })
         setFilteredData(filtered)
@@ -89,6 +136,7 @@ const PatientList = () => {
                 // Chỉ lấy các lịch có bệnh nhân
                 return schedule.patient && schedule.patient.id
             })
+<<<<<<< HEAD
 
             const healthRecordPromises = waitingSchedules.map(item =>
                 fetchHealthRecordByScheduleIdAPI(item.id).then(
@@ -96,6 +144,15 @@ const PatientList = () => {
                 ).catch(() => ({ scheduleId: item.id, data: null }))
             )
             
+            const paymentPromises = waitingSchedules.map(item =>
+=======
+
+            const healthRecordPromises = waitingSchedules.map(item =>
+                fetchHealthRecordByScheduleIdAPI(item.id).then(
+                    res => ({ scheduleId: item.id, data: res.data })
+                ).catch(() => ({ scheduleId: item.id, data: null }))
+            )
+
             const paymentPromises = waitingSchedules.map(item =>
                 getPaymentByScheduleIdAPI(item.id).then(
                     res => ({ scheduleId: item.id, data: res.data })
@@ -111,7 +168,7 @@ const PatientList = () => {
                 const matchedPatient = patientList.find(p => p.id === item.patient.id)
                 const matchedHealthRecord = healthRecords.find(hr => hr.scheduleId === item.id)
                 const matchedPayment = payments.find(p => p.scheduleId === item.id)
-                
+
                 return {
                     id: item.id,
                     ...item,
@@ -123,6 +180,69 @@ const PatientList = () => {
                 }
             }).filter(item => item.treatmentStatus === 'Đang chờ khám')
 
+            setData(mergedData)
+        } catch (error) {
+            message.error("Lỗi khi tải dữ liệu bệnh nhân đang chờ khám")
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const loadTabData = async (tabKey, searchValue = '') => {
+        setLoading(true)
+        try {
+            const [scheduleRes, patientRes] = await Promise.all([
+                fetchScheduleByDoctorIdAPI(user.id),
+                fetchUsersAPI(),
+            ])
+
+            const scheduleList = scheduleRes?.data || []
+            const patientList = patientRes?.data || []
+
+            // Chỉ lấy các lịch có bệnh nhân
+            const validSchedules = scheduleList.filter(schedule =>
+                schedule.patient && schedule.patient.id
+            )
+
+            const healthRecordPromises = validSchedules.map(item =>
+                fetchHealthRecordByScheduleIdAPI(item.id).then(
+                    res => ({ scheduleId: item.id, data: res.data })
+                ).catch(() => ({ scheduleId: item.id, data: null }))
+            )
+
+            const paymentPromises = validSchedules.map(item =>
+>>>>>>> 70baec012cef2effb1020c616f7fab9bd7b1b3f4
+                getPaymentByScheduleIdAPI(item.id).then(
+                    res => ({ scheduleId: item.id, data: res.data })
+                ).catch(() => ({ scheduleId: item.id, data: null }))
+            )
+
+            const [healthRecords, payments] = await Promise.all([
+                Promise.all(healthRecordPromises),
+                Promise.all(paymentPromises)
+            ])
+
+<<<<<<< HEAD
+            const mergedData = waitingSchedules.map((item) => {
+=======
+            const mergedData = validSchedules.map((item) => {
+>>>>>>> 70baec012cef2effb1020c616f7fab9bd7b1b3f4
+                const matchedPatient = patientList.find(p => p.id === item.patient.id)
+                const matchedHealthRecord = healthRecords.find(hr => hr.scheduleId === item.id)
+                const matchedPayment = payments.find(p => p.scheduleId === item.id)
+
+                return {
+                    id: item.id,
+                    ...item,
+                    patientCode: matchedPatient?.displayId || 'N/A',
+                    avatar: matchedPatient?.avatar || '',
+                    fullName: matchedPatient?.fullName || 'Chưa rõ tên',
+                    treatmentStatus: matchedHealthRecord?.data?.treatmentStatus || 'Chưa cập nhật',
+                    paymentStatus: matchedPayment?.data?.status || 'Chưa thanh toán',
+                }
+            }).filter(item => item.treatmentStatus === 'Đang chờ khám')
+
+<<<<<<< HEAD
             setData(mergedData)
         } catch (error) {
             message.error("Lỗi khi tải dữ liệu bệnh nhân đang chờ khám")
@@ -203,6 +323,31 @@ const PatientList = () => {
             if (searchValue) {
                 const normalizedSearch = normalizeString(searchValue)
                 result = filteredByStatus.filter(item => 
+=======
+            // Lọc theo trạng thái điều trị tương ứng với tab
+            let statusFilter = ''
+            switch (tabKey) {
+                case 'examined':
+                    statusFilter = 'Đã khám'
+                    break
+                case 'consulted':
+                    statusFilter = 'Đã tư vấn'
+                    break
+                case 'absent':
+                    statusFilter = 'Không đến'
+                    break
+                default:
+                    statusFilter = 'Đang chờ khám'
+            }
+
+            // Lọc theo trạng thái và từ khóa tìm kiếm
+            const filteredByStatus = mergedData.filter(item => item.treatmentStatus === statusFilter)
+
+            let result = filteredByStatus
+            if (searchValue) {
+                const normalizedSearch = normalizeString(searchValue)
+                result = filteredByStatus.filter(item =>
+>>>>>>> 70baec012cef2effb1020c616f7fab9bd7b1b3f4
                     normalizeString(item.fullName).includes(normalizedSearch) ||
                     normalizeString(item.patientCode).includes(normalizedSearch)
                 )
@@ -358,13 +503,22 @@ const PatientList = () => {
                 onPressEnter={() => handleSearch(tabKey, searchValue)}
             />
             <Space>
+<<<<<<< HEAD
                 <Button 
                     type="primary" 
+=======
+                <Button
+                    type="primary"
+>>>>>>> 70baec012cef2effb1020c616f7fab9bd7b1b3f4
                     onClick={() => handleSearch(tabKey, searchValue)}
                 >
                     Tìm kiếm
                 </Button>
+<<<<<<< HEAD
                 <Button 
+=======
+                <Button
+>>>>>>> 70baec012cef2effb1020c616f7fab9bd7b1b3f4
                     onClick={() => handleSearch(tabKey, '')}
                 >
                     Hiển thị tất cả
@@ -377,14 +531,24 @@ const PatientList = () => {
         <Layout>
             <Content>
                 <div style={{
+<<<<<<< HEAD
                     display: 'flex', 
                     justifyContent: 'space-between',
                     padding: '15px', 
+=======
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    padding: '15px',
+>>>>>>> 70baec012cef2effb1020c616f7fab9bd7b1b3f4
                     margin: '0 0 0 10px'
                 }}>
                     <Title>Danh sách bệnh nhân</Title>
                 </div>
+<<<<<<< HEAD
                 
+=======
+
+>>>>>>> 70baec012cef2effb1020c616f7fab9bd7b1b3f4
                 <Tabs defaultActiveKey="waiting" onChange={handleTabChange}>
                     <TabPane tab="Đang chờ khám" key="waiting">
                         <div style={{ margin: '0 10px 15px 10px' }}>
@@ -395,13 +559,21 @@ const PatientList = () => {
                                 style={{ width: '100%', maxWidth: '400px' }}
                             />
                         </div>
+<<<<<<< HEAD
                         
+=======
+
+>>>>>>> 70baec012cef2effb1020c616f7fab9bd7b1b3f4
                         {loading ? (
                             <div style={{ textAlign: 'center', margin: '40px 0' }}>
                                 <Spin size="large" />
                             </div>
                         ) : (
+<<<<<<< HEAD
                             <Table 
+=======
+                            <Table
+>>>>>>> 70baec012cef2effb1020c616f7fab9bd7b1b3f4
                                 style={{ margin: '0 10px 0 10px' }}
                                 columns={columns}
                                 dataSource={waitingList}
@@ -410,17 +582,28 @@ const PatientList = () => {
                             />
                         )}
                     </TabPane>
+<<<<<<< HEAD
                     
                     <TabPane tab="Đã khám" key="examined">
                         {renderSearchBar('examined', examinedSearchText, setExaminedSearchText, hasSearchedExamined)}
                         
+=======
+
+                    <TabPane tab="Đã khám" key="examined">
+                        {renderSearchBar('examined', examinedSearchText, setExaminedSearchText, hasSearchedExamined)}
+
+>>>>>>> 70baec012cef2effb1020c616f7fab9bd7b1b3f4
                         {loading ? (
                             <div style={{ textAlign: 'center', margin: '40px 0' }}>
                                 <Spin size="large" />
                             </div>
                         ) : (
                             hasSearchedExamined && (
+<<<<<<< HEAD
                                 <Table 
+=======
+                                <Table
+>>>>>>> 70baec012cef2effb1020c616f7fab9bd7b1b3f4
                                     style={{ margin: '0 10px 0 10px' }}
                                     columns={columns}
                                     dataSource={data}
@@ -430,17 +613,28 @@ const PatientList = () => {
                             )
                         )}
                     </TabPane>
+<<<<<<< HEAD
                     
                     <TabPane tab="Đã tư vấn" key="consulted">
                         {renderSearchBar('consulted', consultedSearchText, setConsultedSearchText, hasSearchedConsulted)}
                         
+=======
+
+                    <TabPane tab="Đã tư vấn" key="consulted">
+                        {renderSearchBar('consulted', consultedSearchText, setConsultedSearchText, hasSearchedConsulted)}
+
+>>>>>>> 70baec012cef2effb1020c616f7fab9bd7b1b3f4
                         {loading ? (
                             <div style={{ textAlign: 'center', margin: '40px 0' }}>
                                 <Spin size="large" />
                             </div>
                         ) : (
                             hasSearchedConsulted && (
+<<<<<<< HEAD
                                 <Table 
+=======
+                                <Table
+>>>>>>> 70baec012cef2effb1020c616f7fab9bd7b1b3f4
                                     style={{ margin: '0 10px 0 10px' }}
                                     columns={columns}
                                     dataSource={data}
@@ -450,17 +644,28 @@ const PatientList = () => {
                             )
                         )}
                     </TabPane>
+<<<<<<< HEAD
                     
                     <TabPane tab="Không đến" key="absent">
                         {renderSearchBar('absent', absentSearchText, setAbsentSearchText, hasSearchedAbsent)}
                         
+=======
+
+                    <TabPane tab="Không đến" key="absent">
+                        {renderSearchBar('absent', absentSearchText, setAbsentSearchText, hasSearchedAbsent)}
+
+>>>>>>> 70baec012cef2effb1020c616f7fab9bd7b1b3f4
                         {loading ? (
                             <div style={{ textAlign: 'center', margin: '40px 0' }}>
                                 <Spin size="large" />
                             </div>
                         ) : (
                             hasSearchedAbsent && (
+<<<<<<< HEAD
                                 <Table 
+=======
+                                <Table
+>>>>>>> 70baec012cef2effb1020c616f7fab9bd7b1b3f4
                                     style={{ margin: '0 10px 0 10px' }}
                                     columns={columns}
                                     dataSource={data}
