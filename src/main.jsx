@@ -30,6 +30,7 @@ import AccountLabTechnicians from './pages/admin/AccountLabTechnicians';
 import AccountCashiers from './pages/admin/AccountCashiers'
 import AccountPatients from './pages/admin/AccountPatients';
 import AdminSystemConfig from './pages/admin/AdminSystemConfig'
+import AdminTestTypes from './pages/admin/AdminTestTypes'
 
 // Import for manager pages
 import ManagerPage from './pages/manager/ManagerPage';
@@ -280,6 +281,13 @@ const router = createBrowserRouter([
       {
         path: '/admin/patients',
         element: (<PrivateRoute children={<AccountPatients />} requiredRole={['ADMIN']} />),
+        errorElement: <Errors />,
+      },
+      {
+        path: '/admin/test-types',
+        element: (
+          <PrivateRoute children={<AdminTestTypes />} requiredRole={['ADMIN']} />
+        ),
         errorElement: <Errors />,
       },
       {

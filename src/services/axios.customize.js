@@ -38,14 +38,17 @@ instance.interceptors.response.use(function (response) {
     if (error.response) {
         // The request was made and the server responded with a status code
         // that falls out of the range of 2xx
-        console.error('Error response status:', error.response.status);
-        console.error('Error response headers:', error.response.headers);
-        console.error('Error response data:', error.response.data);
-        console.error('Request that caused the error:', {
-            method: error.config?.method?.toUpperCase(),
-            url: error.config?.url,
-            data: error.config?.data
-        });
+        // Chỉ log lỗi nếu không phải lỗi 400 (constraint violation)
+        if (error.response.status !== 400) {
+            console.error('Error response status:', error.response.status);
+            console.error('Error response headers:', error.response.headers);
+            console.error('Error response data:', error.response.data);
+            console.error('Request that caused the error:', {
+                method: error.config?.method?.toUpperCase(),
+                url: error.config?.url,
+                data: error.config?.data
+            });
+        }
 
         // Chỉ thông báo lỗi xác thực, không tự động chuyển hướng
         if (error.response.status === 403) {
