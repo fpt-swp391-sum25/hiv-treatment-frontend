@@ -1,43 +1,46 @@
 import {
-    Layout, 
-    Button, 
-    Table, 
-    Typography, 
+    Layout,
+    Button,
+    Table,
+    Typography,
     Input,
+    DatePicker,
+    Select,
+    Row,
+    Col,
     Tabs,
     message,
     Space,
     Spin
 } from "antd";
-import { 
-    useState, 
-    useEffect, 
-    useContext 
+import {
+    useState,
+    useEffect,
+    useContext
 } from "react";
-import { 
-    Outlet, 
-    useNavigate 
+import {
+    Outlet,
+    useNavigate
 } from "react-router-dom";
 import dayjs from 'dayjs';
 import 'dayjs/locale/vi';
-import { 
-    AuthContext 
+import viVN from 'antd/es/date-picker/locale/vi_VN';
+import {
+    AuthContext
 } from "../../components/context/AuthContext";
-import { 
-    fetchScheduleByDoctorIdAPI 
+import {
+    fetchScheduleByDoctorIdAPI
 } from "../../services/schedule.service";
-import { 
-    fetchUsersAPI 
+import {
+    fetchUsersAPI
 } from "../../services/user.service";
-import { 
-    fetchHealthRecordByScheduleIdAPI 
+import {
+    fetchHealthRecordByScheduleIdAPI
 } from "../../services/health-record.service";
-import { 
-    getPaymentByScheduleIdAPI 
+import {
+    getPaymentByScheduleIdAPI
 } from "../../services/payment.service";
 dayjs.locale('vi');
-
-dayjs.locale('vi')
 
 const { Content } = Layout
 const { Title } = Typography
@@ -64,7 +67,7 @@ const PatientList = () => {
             const matchesText =
                 normalizeString(item.fullName).includes(normalizeString(searchText)) ||
                 normalizeString(item.patientCode).includes(normalizeString(searchText))
-            
+
             return matchesText
         })
         setFilteredData(filtered)
@@ -95,7 +98,7 @@ const PatientList = () => {
                     res => ({ scheduleId: item.id, data: res.data })
                 ).catch(() => ({ scheduleId: item.id, data: null }))
             )
-            
+
             const paymentPromises = waitingSchedules.map(item =>
                 getPaymentByScheduleIdAPI(item.id).then(
                     res => ({ scheduleId: item.id, data: res.data })
@@ -111,7 +114,7 @@ const PatientList = () => {
                 const matchedPatient = patientList.find(p => p.id === item.patient.id)
                 const matchedHealthRecord = healthRecords.find(hr => hr.scheduleId === item.id)
                 const matchedPayment = payments.find(p => p.scheduleId === item.id)
-                
+
                 return {
                     id: item.id,
                     ...item,
@@ -143,7 +146,7 @@ const PatientList = () => {
             const patientList = patientRes?.data || []
 
             // Chỉ lấy các lịch có bệnh nhân
-            const validSchedules = scheduleList.filter(schedule => 
+            const validSchedules = scheduleList.filter(schedule =>
                 schedule.patient && schedule.patient.id
             )
 
@@ -152,7 +155,7 @@ const PatientList = () => {
                     res => ({ scheduleId: item.id, data: res.data })
                 ).catch(() => ({ scheduleId: item.id, data: null }))
             )
-            
+
             const paymentPromises = validSchedules.map(item =>
                 getPaymentByScheduleIdAPI(item.id).then(
                     res => ({ scheduleId: item.id, data: res.data })
@@ -168,7 +171,7 @@ const PatientList = () => {
                 const matchedPatient = patientList.find(p => p.id === item.patient.id)
                 const matchedHealthRecord = healthRecords.find(hr => hr.scheduleId === item.id)
                 const matchedPayment = payments.find(p => p.scheduleId === item.id)
-                
+
                 return {
                     id: item.id,
                     ...item,
@@ -198,11 +201,11 @@ const PatientList = () => {
 
             // Lọc theo trạng thái và từ khóa tìm kiếm
             const filteredByStatus = mergedData.filter(item => item.treatmentStatus === statusFilter)
-            
+
             let result = filteredByStatus
             if (searchValue) {
                 const normalizedSearch = normalizeString(searchValue)
-                result = filteredByStatus.filter(item => 
+                result = filteredByStatus.filter(item =>
                     normalizeString(item.fullName).includes(normalizedSearch) ||
                     normalizeString(item.patientCode).includes(normalizedSearch)
                 )
@@ -358,13 +361,13 @@ const PatientList = () => {
                 onPressEnter={() => handleSearch(tabKey, searchValue)}
             />
             <Space>
-                <Button 
-                    type="primary" 
+                <Button
+                    type="primary"
                     onClick={() => handleSearch(tabKey, searchValue)}
                 >
                     Tìm kiếm
                 </Button>
-                <Button 
+                <Button
                     onClick={() => handleSearch(tabKey, '')}
                 >
                     Hiển thị tất cả
@@ -377,14 +380,14 @@ const PatientList = () => {
         <Layout>
             <Content>
                 <div style={{
-                    display: 'flex', 
+                    display: 'flex',
                     justifyContent: 'space-between',
-                    padding: '15px', 
+                    padding: '15px',
                     margin: '0 0 0 10px'
                 }}>
                     <Title>Danh sách bệnh nhân</Title>
                 </div>
-                
+
                 <Tabs defaultActiveKey="waiting" onChange={handleTabChange}>
                     <TabPane tab="Đang chờ khám" key="waiting">
                         <div style={{ margin: '0 10px 15px 10px' }}>
@@ -395,13 +398,13 @@ const PatientList = () => {
                                 style={{ width: '100%', maxWidth: '400px' }}
                             />
                         </div>
-                        
+
                         {loading ? (
                             <div style={{ textAlign: 'center', margin: '40px 0' }}>
                                 <Spin size="large" />
                             </div>
                         ) : (
-                            <Table 
+                            <Table
                                 style={{ margin: '0 10px 0 10px' }}
                                 columns={columns}
                                 dataSource={waitingList}
@@ -410,17 +413,17 @@ const PatientList = () => {
                             />
                         )}
                     </TabPane>
-                    
+
                     <TabPane tab="Đã khám" key="examined">
                         {renderSearchBar('examined', examinedSearchText, setExaminedSearchText, hasSearchedExamined)}
-                        
+
                         {loading ? (
                             <div style={{ textAlign: 'center', margin: '40px 0' }}>
                                 <Spin size="large" />
                             </div>
                         ) : (
                             hasSearchedExamined && (
-                                <Table 
+                                <Table
                                     style={{ margin: '0 10px 0 10px' }}
                                     columns={columns}
                                     dataSource={data}
@@ -430,17 +433,17 @@ const PatientList = () => {
                             )
                         )}
                     </TabPane>
-                    
+
                     <TabPane tab="Đã tư vấn" key="consulted">
                         {renderSearchBar('consulted', consultedSearchText, setConsultedSearchText, hasSearchedConsulted)}
-                        
+
                         {loading ? (
                             <div style={{ textAlign: 'center', margin: '40px 0' }}>
                                 <Spin size="large" />
                             </div>
                         ) : (
                             hasSearchedConsulted && (
-                                <Table 
+                                <Table
                                     style={{ margin: '0 10px 0 10px' }}
                                     columns={columns}
                                     dataSource={data}
@@ -450,17 +453,17 @@ const PatientList = () => {
                             )
                         )}
                     </TabPane>
-                    
+
                     <TabPane tab="Không đến" key="absent">
                         {renderSearchBar('absent', absentSearchText, setAbsentSearchText, hasSearchedAbsent)}
-                        
+
                         {loading ? (
                             <div style={{ textAlign: 'center', margin: '40px 0' }}>
                                 <Spin size="large" />
                             </div>
                         ) : (
                             hasSearchedAbsent && (
-                                <Table 
+                                <Table
                                     style={{ margin: '0 10px 0 10px' }}
                                     columns={columns}
                                     dataSource={data}
