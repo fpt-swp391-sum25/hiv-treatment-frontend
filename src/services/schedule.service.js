@@ -333,8 +333,103 @@ const bulkDeleteSchedulesByDoctorAndDateAPI = async (doctorId, date) => {
 
 const updateScheduleStatusAPI = (scheduleId, newStatus) => {
     const URL_BACKEND = `/api/schedule/${scheduleId}/status`;
-    console.log(">>>>>>>>>>>>>>" + scheduleId)
-    return axios.put(URL_BACKEND, { status: newStatus });
+    const requestBody = { status: newStatus };
+    
+    console.log(`🔄 [API] Updating schedule ${scheduleId} status to: "${newStatus}"`);
+    console.log(`📤 [API] Request URL: ${URL_BACKEND}`);
+    console.log(`📤 [API] Request body:`, requestBody);
+    
+    // Explicit headers để đảm bảo đúng format
+    const config = {
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+    };
+    
+    console.log(`📤 [API] Request headers:`, config.headers);
+    
+    return axios.put(URL_BACKEND, requestBody, config)
+        .then(response => {
+            console.log(`✅ [API] Raw response:`, response);
+            console.log(`✅ [API] Response status: ${response.status}`);
+            console.log(`✅ [API] Response data:`, response.data);
+            console.log(`✅ [API] Response headers:`, response.headers);
+            
+            // Handle cả trường hợp Backend trả về empty response
+            if (response.status === 200) {
+                if (response.data?.message) {
+                    console.log(`✅ [API] Backend message: ${response.data.message}`);
+                } else {
+                    console.log(`✅ [API] Backend returned empty response body (this is OK)`);
+                }
+            }
+            
+            return response;
+        })
+        .catch(error => {
+            console.error(`❌ [API] Error updating schedule status:`, error);
+            
+            if (error.response) {
+                console.error(`❌ [API] Error details:`, {
+                    status: error.response.status,
+                    statusText: error.response.statusText,
+                    data: error.response.data,
+                    headers: error.response.headers,
+                    url: URL_BACKEND,
+                    requestBody: requestBody,
+                    requestHeaders: config.headers
+                });
+            } else if (error.request) {
+                console.error(`❌ [API] No response received:`, error.request);
+            } else {
+                console.error(`❌ [API] Request setup error:`, error.message);
+            }
+            
+            throw error;
+        });
+};
+
+// Test function để debug request format
+const testUpdateScheduleStatusAPI = async (scheduleId, newStatus) => {
+    console.log(`🧪 [TEST] Testing update schedule status API`);
+    console.log(`🧪 [TEST] Schedule ID: ${scheduleId}`);
+    console.log(`🧪 [TEST] New Status: "${newStatus}"`);
+    
+    // Test với fetch API để so sánh
+    const url = `${axios.defaults.baseURL || 'http://localhost:8080'}/api/schedule/${scheduleId}/status`;
+    const requestBody = { status: newStatus };
+    
+    console.log(`🧪 [TEST] Full URL: ${url}`);
+    console.log(`🧪 [TEST] Request body:`, JSON.stringify(requestBody));
+    
+    try {
+        const fetchResponse = await fetch(url, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(requestBody)
+        });
+        
+        console.log(`🧪 [TEST] Fetch response status: ${fetchResponse.status}`);
+        console.log(`🧪 [TEST] Fetch response headers:`, Object.fromEntries(fetchResponse.headers.entries()));
+        
+        const responseText = await fetchResponse.text();
+        console.log(`🧪 [TEST] Fetch response text:`, responseText);
+        
+        if (fetchResponse.ok) {
+            console.log(`✅ [TEST] Fetch API works! Issue is with axios configuration`);
+        } else {
+            console.log(`❌ [TEST] Both fetch and axios fail - Backend issue`);
+        }
+        
+        return fetchResponse;
+    } catch (error) {
+        console.error(`❌ [TEST] Fetch API error:`, error);
+        throw error;
+    }
 };
 
 export const getPatientsByScheduleAPI = async (scheduleId) => {
@@ -387,4 +482,5 @@ export {
     bulkUpdateScheduleByDoctorAndDateAPI,
     bulkDeleteSchedulesByDoctorAndDateAPI,
     updateScheduleStatusAPI,
+    testUpdateScheduleStatusAPI,
 }

@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
-    Row, Col, Card, Table, Button, Select, Space, Typography, Spin, Statistic, Tag, Tooltip, Input
+    Row, Col, Card, Table, Button, Select, Space, Typography, Spin, Statistic, Tag, Input
 } from 'antd';
 import {
-    FileExcelOutlined, FilePdfOutlined, DollarCircleOutlined,
+    FileExcelOutlined, DollarCircleOutlined,
     CheckCircleOutlined, ClockCircleOutlined, ExceptionOutlined,
-    FilterOutlined, ReloadOutlined
+    ReloadOutlined
 } from '@ant-design/icons';
 import {
     getPaymentStats, calculateTotalRevenue,
@@ -34,7 +34,7 @@ const FinancialReport = ({ dateRange, onError, onDateRangeChange }) => {
         searchText: ''
     });
 
-    const [showFilters, setShowFilters] = useState(false);
+
 
     useEffect(() => {
         fetchPaymentData();
@@ -76,62 +76,6 @@ const FinancialReport = ({ dateRange, onError, onDateRangeChange }) => {
         exportToExcel(formattedData, 'BaoCaoTaiChinh');
     };
 
-    const handleExportPDF = async () => {
-        try {
-            if (!paymentData.completed?.length) {
-                onError?.(new Error('Không có dữ liệu để xuất báo cáo'));
-                return;
-            }
-
-            const { default: jsPDF } = await import('jspdf');
-            const { default: autoTable } = await import('jspdf-autotable');
-
-            const doc = new jsPDF();
-            const title = 'BÁO CÁO TÀI CHÍNH';
-            doc.setFontSize(18);
-            doc.text(title, 14, 22);
-
-            const reportDate = dayjs().format('DD/MM/YYYY HH:mm');
-            const reportPeriod = dateRange?.length === 2
-                ? `${dateRange[0].format('DD/MM/YYYY')} - ${dateRange[1].format('DD/MM/YYYY')}`
-                : 'Tất cả thời gian';
-
-            doc.setFontSize(12);
-            doc.text(`Thời gian xuất báo cáo: ${reportDate}`, 14, 32);
-            doc.text(`Khoảng thời gian báo cáo: ${reportPeriod}`, 14, 40);
-            doc.text(`Tổng doanh thu: ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(statistics.totalRevenue)}`, 14, 48);
-
-            const formattedData = formatPaymentDataForExport(paymentData.completed);
-            const headers = Object.keys(formattedData[0]);
-            const data = formattedData.map(item => Object.values(item));
-
-            autoTable(doc, {
-                startY: 56,
-                head: [headers],
-                body: data,
-                theme: 'grid',
-                styles: { fontSize: 8, cellPadding: 2, lineColor: [0, 0, 0], lineWidth: 0.1 },
-                headStyles: { fillColor: [41, 128, 185], textColor: 255, fontStyle: 'bold' },
-                alternateRowStyles: { fillColor: [245, 245, 245] }
-            });
-
-            const pdfFileName = `BaoCaoTaiChinh_${dayjs().format('YYYYMMDD_HHmmss')}.pdf`;
-            doc.save(pdfFileName);
-
-        } catch (error) {
-            console.error('Error exporting PDF:', error);
-            onError?.(new Error('Không thể xuất báo cáo PDF. Vui lòng thử lại sau.'));
-        }
-    };
-
-    const statistics = {
-        totalRevenue: calculateTotalRevenue(paymentData.completed),
-        totalCompleted: paymentData.completed.length,
-        totalPending: paymentData.pending.length,
-        totalFailed: paymentData.failed.length,
-        totalTransactions: paymentData.completed.length + paymentData.pending.length + paymentData.failed.length
-    };
-
     const allPayments = [...paymentData.completed, ...paymentData.pending, ...paymentData.failed].sort((a, b) => (Number(a.id) || 0) - (Number(b.id) || 0));
 
     const filteredPayments = allPayments.filter(payment => {
@@ -165,11 +109,11 @@ const FinancialReport = ({ dateRange, onError, onDateRangeChange }) => {
         return true;
     });
 
-    const handleFilterChange = (key, value) => {
+    const handleFilterChange = useCallback((key, value) => {
         setFilters(prev => ({ ...prev, [key]: value }));
-    };
+    }, []);
 
-    const TransactionsTable = () => {
+    const TransactionsTable = useCallback(() => {
         const columns = [
             { title: 'Mã giao dịch', dataIndex: 'id', key: 'id', width: '10%', sorter: (a, b) => Number(a.id) - Number(b.id), defaultSortOrder: 'ascend' },
             { title: 'Thời gian', dataIndex: 'time', key: 'time', width: '15%', render: (date) => dayjs(date).format('DD/MM/YYYY HH:mm'), sorter: (a, b) => dayjs(a.time).valueOf() - dayjs(b.time).valueOf() },
@@ -199,42 +143,37 @@ const FinancialReport = ({ dateRange, onError, onDateRangeChange }) => {
         ];
 
         return (
-            <Card
-                title={<Space><span>Danh sách giao dịch</span><Tag color="blue">{filteredPayments.length} giao dịch</Tag></Space>}
-                className="table-card"
-                extra={
-                    <Space>
-                        <Tooltip title="Hiển thị/Ẩn bộ lọc">
-                            <Button icon={<FilterOutlined />} onClick={() => setShowFilters(!showFilters)} type={showFilters ? "primary" : "default"}>Bộ lọc</Button>
-                        </Tooltip>
-                        <Search placeholder="Tìm kiếm giao dịch" allowClear value={filters.searchText} onChange={e => handleFilterChange('searchText', e.target.value)} style={{ width: 200 }} />
-                    </Space>
-                }
-            >
-                <Table
-                    columns={columns}
-                    dataSource={filteredPayments}
-                    rowKey="id"
-                    pagination={{
-                        pageSize: 10,
-                        showSizeChanger: true,
-                        showTotal: (total) => `Tổng số ${total} giao dịch`
-                    }}
-                    summary={pageData => {
-                        const total = pageData
-                            .filter(p => ['Thanh toán thành công', 'Đã thanh toán'].includes(p.status))
-                            .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
-                        return (
-                            <Table.Summary.Row>
-                                <Table.Summary.Cell index={0} colSpan={5}><strong>Tổng</strong></Table.Summary.Cell>
-                                <Table.Summary.Cell index={1}><strong>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(total)}</strong></Table.Summary.Cell>
-                                <Table.Summary.Cell index={2}></Table.Summary.Cell>
-                            </Table.Summary.Row>
-                        );
-                    }}
-                />
-            </Card>
+            <Table
+                columns={columns}
+                dataSource={filteredPayments}
+                rowKey="id"
+                pagination={{
+                    pageSize: 10,
+                    showSizeChanger: true,
+                    showTotal: (total) => `Tổng số ${total} giao dịch`
+                }}
+                summary={pageData => {
+                    const total = pageData
+                        .filter(p => ['Thanh toán thành công', 'Đã thanh toán'].includes(p.status))
+                        .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+                    return (
+                        <Table.Summary.Row>
+                            <Table.Summary.Cell index={0} colSpan={5}><strong>Tổng</strong></Table.Summary.Cell>
+                            <Table.Summary.Cell index={1}><strong>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(total)}</strong></Table.Summary.Cell>
+                            <Table.Summary.Cell index={2}></Table.Summary.Cell>
+                        </Table.Summary.Row>
+                    );
+                }}
+            />
         );
+    }, [filteredPayments]);
+
+    const statistics = {
+        totalRevenue: calculateTotalRevenue(filteredPayments.filter(p => ['Thanh toán thành công', 'Đã thanh toán'].includes(p.status))),
+        totalCompleted: filteredPayments.filter(p => ['Thanh toán thành công', 'Đã thanh toán'].includes(p.status)).length,
+        totalPending: filteredPayments.filter(p => p.status === 'Chờ thanh toán').length,
+        totalFailed: filteredPayments.filter(p => p.status === 'Thanh toán thất bại').length,
+        totalTransactions: filteredPayments.length
     };
 
     return (
@@ -252,7 +191,6 @@ const FinancialReport = ({ dateRange, onError, onDateRangeChange }) => {
                     <Col span={8} style={{ textAlign: 'right' }}>
                         <Space>
                             <Button icon={<FileExcelOutlined />} onClick={handleExportExcel}>Xuất Excel</Button>
-                            <Button icon={<FilePdfOutlined />} onClick={handleExportPDF}>Xuất PDF</Button>
                         </Space>
                     </Col>
                 </Row>
@@ -293,7 +231,22 @@ const FinancialReport = ({ dateRange, onError, onDateRangeChange }) => {
                 </Row>
 
                 {/* Bảng giao dịch */}
-                <TransactionsTable />
+                <Card
+                    title={<Space><span>Danh sách giao dịch</span><Tag color="blue">{filteredPayments.length} giao dịch</Tag></Space>}
+                    className="table-card"
+                    extra={
+                        <Search 
+                            placeholder="Tìm kiếm theo mã giao dịch, tên bệnh nhân, bác sĩ..." 
+                            allowClear 
+                            value={filters.searchText} 
+                            onChange={e => handleFilterChange('searchText', e.target.value)} 
+                            style={{ width: 350 }}
+                            enterButton
+                        />
+                    }
+                >
+                    <TransactionsTable />
+                </Card>
             </div>
         </Spin>
     );

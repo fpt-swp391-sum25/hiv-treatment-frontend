@@ -4,7 +4,6 @@ import {
     BarChartOutlined, 
     DollarCircleOutlined,
     FileExcelOutlined,
-    PrinterOutlined,
     MedicineBoxOutlined
 } from '@ant-design/icons';
 import StaffReport from './StaffReport/StaffReport';
@@ -70,7 +69,7 @@ const Reports = () => {
             const reportDate = dayjs().format('DD/MM/YYYY HH:mm');
             const reportPeriod = `${dateRange[0].format('DD/MM/YYYY')} - ${dateRange[1].format('DD/MM/YYYY')}`;
             
-            // Xuất báo cáo theo định dạng
+            // Xuất báo cáo Excel
             if (type === 'excel') {
                 // Thêm metadata cho báo cáo
                 const reportMetadata = [
@@ -81,52 +80,6 @@ const Reports = () => {
                 ];
                 
                 await exportToExcel([...reportMetadata, ...exportData], fileName);
-                setError(null);
-            } else if (type === 'pdf') {
-                // Import động jsPDF và jsPDF-autotable để tránh lỗi khi khởi tạo ứng dụng
-                const { default: jsPDF } = await import('jspdf');
-                const { default: autoTable } = await import('jspdf-autotable');
-                
-                const doc = new jsPDF();
-                
-                // Tiêu đề báo cáo
-                const title = activeTab === 'staff' ? 'BÁO CÁO NHÂN SỰ' : 'BÁO CÁO TÀI CHÍNH';
-                doc.setFontSize(18);
-                doc.text(title, 14, 22);
-                
-                // Thông tin báo cáo
-                doc.setFontSize(12);
-                doc.text(`Thời gian xuất báo cáo: ${reportDate}`, 14, 32);
-                doc.text(`Khoảng thời gian báo cáo: ${reportPeriod}`, 14, 40);
-                
-                // Tạo bảng dữ liệu
-                const headers = Object.keys(exportData[0]);
-                const data = exportData.map(item => Object.values(item));
-                
-                autoTable(doc, {
-                    startY: 50,
-                    head: [headers],
-                    body: data,
-                    theme: 'grid',
-                    styles: {
-                        fontSize: 10,
-                        cellPadding: 3,
-                        lineColor: [0, 0, 0],
-                        lineWidth: 0.1,
-                    },
-                    headStyles: {
-                        fillColor: [41, 128, 185],
-                        textColor: 255,
-                        fontStyle: 'bold'
-                    },
-                    alternateRowStyles: {
-                        fillColor: [245, 245, 245]
-                    }
-                });
-                
-                // Lưu file PDF
-                const pdfFileName = `${fileName}_${dayjs().format('YYYYMMDD_HHmmss')}.pdf`;
-                doc.save(pdfFileName);
                 setError(null);
             }
         } catch (error) {

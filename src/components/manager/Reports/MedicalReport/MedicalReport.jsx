@@ -2,17 +2,19 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Card, Statistic, Row, Col, Tabs, Button, 
   Space, DatePicker, Spin, Empty, Table, Tag,
-  Divider, Typography, Alert, List, Descriptions
+  Divider, Typography, Alert, List, Descriptions, Input
 } from 'antd';
 import {
   FileSearchOutlined, ExperimentOutlined, MedicineBoxOutlined, TeamOutlined,
-  FilterOutlined, FileExcelOutlined, FilePdfOutlined, UserOutlined, CalendarOutlined, UpOutlined, DownOutlined
+  UserOutlined, CalendarOutlined, UpOutlined, DownOutlined,
+  EyeOutlined, EyeInvisibleOutlined, SearchOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import { getMedicalReportData, exportMedicalReportToExcel } from '../../../../services/report.service';
+import { getMedicalReportData } from '../../../../services/report.service';
+import ReportFilters from '../ReportFilters';
 import '../../../../styles/manager/MedicalReport.css';
 
-const { RangePicker } = DatePicker;
+
 const { Text, Title } = Typography;
 
 // Constants
@@ -25,8 +27,7 @@ const HIV_COLORS = {
 const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(false);
-  const [exportLoading, setExportLoading] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
+
   const [reportData, setReportData] = useState({
     reports: [],
     statistics: {
@@ -44,6 +45,12 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
   // State cho tab Patient Appointments
   const [expandedPatientIds, setExpandedPatientIds] = useState([]);
   const [expandedRecordIds, setExpandedRecordIds] = useState({});
+  
+  // State cho việc ẩn/hiện bộ lọc
+  const [showFilters, setShowFilters] = useState(false);
+  
+  // State cho search bệnh nhân
+  const [searchPatientName, setSearchPatientName] = useState('');
 
   // Memoized values
   const hivStatistics = useMemo(() => {
@@ -118,6 +125,18 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
     return Object.values(patientAppointments);
   }, [reportData.reports]);
 
+  // Filtered patient list based on search
+  const filteredPatientList = useMemo(() => {
+    if (!searchPatientName.trim()) {
+      return patientList;
+    }
+    
+    return patientList.filter(item => 
+      item.patient.fullName?.toLowerCase().includes(searchPatientName.toLowerCase()) ||
+      item.patient.id?.toString().includes(searchPatientName)
+    );
+  }, [patientList, searchPatientName]);
+
   // Handlers
   const handleDateRangeChange = (dates) => {
     if (onDateRangeChange) {
@@ -145,126 +164,9 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
     }
   }, [dateRange, onError]);
 
-  const handleExportExcel = async () => {
-    setExportLoading(true);
-    try {
-      const startDate = dateRange?.[0]?.format('YYYY-MM-DD');
-      const endDate = dateRange?.[1]?.format('YYYY-MM-DD');
-      
-      await exportMedicalReportToExcel(startDate, endDate);
-    } catch (error) {
-      console.error('Error exporting medical report:', error);
-      onError?.(error);
-    } finally {
-      setExportLoading(false);
-    }
-  };
 
-  // Xuất báo cáo PDF
-  const handleExportPDF = async () => {
-    setExportLoading(true);
-    try {
-      const { statistics } = reportData;
-      
-      // Import động jsPDF và jsPDF-autotable để tránh lỗi khi khởi tạo ứng dụng
-      const { default: jsPDF } = await import('jspdf');
-      const { default: autoTable } = await import('jspdf-autotable');
-      
-      const doc = new jsPDF();
-      
-      // Tiêu đề báo cáo
-      const title = 'BÁO CÁO Y TẾ';
-      doc.setFontSize(18);
-      doc.text(title, 14, 22);
-      
-      // Thông tin báo cáo
-      const reportDate = dayjs().format('DD/MM/YYYY HH:mm');
-      const reportPeriod = dateRange && dateRange.length === 2 
-          ? `${dateRange[0].format('DD/MM/YYYY')} - ${dateRange[1].format('DD/MM/YYYY')}` 
-          : 'Tất cả thời gian';
-          
-      doc.setFontSize(12);
-      doc.text(`Thời gian xuất báo cáo: ${reportDate}`, 14, 32);
-      doc.text(`Khoảng thời gian báo cáo: ${reportPeriod}`, 14, 40);
-      
-      // Thống kê tổng quan
-      doc.setFontSize(14);
-      doc.text('THỐNG KÊ TỔNG QUAN', 14, 52);
-      
-      // Tạo bảng thống kê tổng quan
-      const overviewData = [
-        ['Tổng số lịch hẹn đã hoàn thành', statistics.totalAppointments || 0],
-        ['Tổng số xét nghiệm đã thực hiện', statistics.totalTestOrders || 0],
-        ['Tổng số phác đồ điều trị', statistics.totalRegimens || 0],
-        ['Tổng số bệnh nhân', statistics.totalPatients || 0],
-        ['Tổng số ca dương tính HIV', statistics.totalPositiveHIV || 0],
-        ['Tổng số ca âm tính HIV', statistics.totalNegativeHIV || 0],
-      ];
-      
-      autoTable(doc, {
-        startY: 56,
-        head: [['Chỉ số', 'Giá trị']],
-        body: overviewData,
-        theme: 'grid',
-        styles: {
-          fontSize: 10,
-          cellPadding: 3,
-        },
-        headStyles: {
-          fillColor: [41, 128, 185],
-          textColor: 255,
-          fontStyle: 'bold'
-        }
-      });
-      
-      // Thêm thống kê HIV nếu có dữ liệu
-      if (statistics.hivTrends && statistics.hivTrends.length > 0) {
-        const finalY = doc.lastAutoTable.finalY || 150;
-        
-        doc.setFontSize(14);
-        doc.text('THỐNG KÊ HIV THEO THÁNG', 14, finalY + 10);
-        
-        const hivData = statistics.hivTrends.map(trend => [
-          trend.month,
-          trend.positive,
-          trend.negative,
-          trend.unknown,
-          trend.total,
-          `${Math.round((trend.positive / (trend.positive + trend.negative || 1)) * 100)}%`
-        ]);
-        
-        autoTable(doc, {
-          startY: finalY + 14,
-          head: [['Tháng', 'Dương tính', 'Âm tính', 'Không xác định', 'Tổng số', 'Tỷ lệ dương tính']],
-          body: hivData,
-          theme: 'grid',
-          styles: {
-            fontSize: 8,
-            cellPadding: 2,
-          },
-          headStyles: {
-            fillColor: [41, 128, 185],
-            textColor: 255,
-            fontStyle: 'bold'
-          }
-        });
-      }
-      
-      // Lưu file PDF
-      const pdfFileName = `BaoCaoYTe_${dayjs().format('YYYYMMDD_HHmmss')}.pdf`;
-      doc.save(pdfFileName);
-      
-    } catch (error) {
-      console.error('Error exporting PDF:', error);
-      onError?.(new Error('Không thể xuất báo cáo PDF. Vui lòng thử lại sau.'));
-    } finally {
-      setExportLoading(false);
-    }
-  };
 
-  const toggleFilters = () => {
-    setShowFilters(!showFilters);
-  };
+
 
   // Toggle mở rộng cho bệnh nhân
   const togglePatientExpand = (patientId) => {
@@ -369,7 +271,7 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
           <Col span={24}>
             <Card title="Tổng quan tình hình HIV">
               <p>
-                Trong khoảng thời gian báo cáo, đã ghi nhận tổng cộng <Text strong>{statistics.totalPositiveHIV + statistics.totalNegativeHIV}</Text> xét nghiệm HIV, 
+                Hệ thống đã ghi nhận tổng cộng <Text strong>{statistics.totalPositiveHIV + statistics.totalNegativeHIV}</Text> xét nghiệm HIV, 
                 trong đó có <Text strong style={{ color: '#ff4d4f' }}>{statistics.totalPositiveHIV}</Text> ca dương tính 
                 và <Text strong style={{ color: '#52c41a' }}>{statistics.totalNegativeHIV}</Text> ca âm tính.
               </p>
@@ -401,8 +303,7 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
           <div className="report-content">
             <Title level={4}>Tóm tắt</Title>
             <p>
-              Trong khoảng thời gian từ {dateRange?.[0]?.format('DD/MM/YYYY') || 'đầu kỳ'} đến {dateRange?.[1]?.format('DD/MM/YYYY') || 'cuối kỳ'}, 
-              đã thực hiện tổng cộng <Text strong>{totalHIVTests}</Text> xét nghiệm HIV.
+              Hệ thống đã thực hiện tổng cộng <Text strong>{totalHIVTests}</Text> xét nghiệm HIV.
             </p>
             
             <Row gutter={[16, 16]}>
@@ -522,19 +423,33 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
     
     return (
       <div className="patient-appointments-tab">
-        <Row gutter={[16, 16]}>
-          <Col span={24}>
+        <Row gutter={[16, 16]} style={{ marginBottom: 16 }} align="middle">
+          <Col span={12}>
             <Statistic 
               title="Tổng số bệnh nhân" 
-              value={patientList.length} 
+              value={searchPatientName.trim() ? `${filteredPatientList.length}/${patientList.length}` : patientList.length}
               suffix="bệnh nhân" 
-              style={{ marginBottom: 16 }}
+            />
+          </Col>
+          <Col span={12} style={{ textAlign: 'right' }}>
+            <Input.Search
+              placeholder="Tìm kiếm theo tên bệnh nhân hoặc mã bệnh nhân..."
+              allowClear
+              enterButton={<SearchOutlined />}
+              value={searchPatientName}
+              onChange={(e) => setSearchPatientName(e.target.value)}
+              style={{ maxWidth: 400 }}
             />
           </Col>
         </Row>
         
         <List
-          dataSource={patientList}
+          dataSource={filteredPatientList}
+          locale={{
+            emptyText: searchPatientName.trim() 
+              ? `Không tìm thấy bệnh nhân nào với từ khóa "${searchPatientName}"` 
+              : "Không có dữ liệu bệnh nhân"
+          }}
           renderItem={item => (
             <Card 
               className="patient-card"
@@ -676,49 +591,37 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
 
   return (
       <div className="medical-report-container">
-        <div className="report-actions">
-        <Space>
+
+                {/* Chỉ hiển thị bộ lọc cho tab "Lịch sử bệnh nhân" */}
+                {activeTab === 'patient-appointments' && (
+                  <div style={{ marginBottom: 16 }}>
+                    <Space style={{ marginBottom: showFilters ? 16 : 0 }}>
               <Button
-                icon={<FilterOutlined />}
-            onClick={toggleFilters}
-              >
-                Bộ lọc
-              </Button>
-              <Button
-                icon={<FileExcelOutlined />}
-                onClick={handleExportExcel}
-            loading={exportLoading}
-              >
-                Xuất Excel
-              </Button>
-              <Button
-            icon={<FilePdfOutlined />}
-            onClick={handleExportPDF}
-            loading={exportLoading}
+                        icon={showFilters ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+                        onClick={() => setShowFilters(!showFilters)}
           >
-            Xuất PDF
+                        {showFilters ? 'Ẩn bộ lọc' : 'Hiện bộ lọc'}
               </Button>
         </Space>
-      </div>
 
           {showFilters && (
-        <Card className="filter-card">
-          <Space direction="vertical" style={{ width: '100%' }}>
-            <div>
-              <Text strong>Khoảng thời gian:</Text>
-              <div style={{ marginTop: 8 }}>
-                <RangePicker 
-                  value={dateRange}
-                  onChange={handleDateRangeChange}
-                  style={{ width: '100%' }}
+                      <ReportFilters
+                          onFilterChange={({ filterType, selectedDate }) => {
+                              if (selectedDate) {
+                                  const start = dayjs(selectedDate);
+                                  let end = start.endOf(filterType);
+                                  onDateRangeChange([start, end]);
+                              } else {
+                                  onDateRangeChange(null);
+                              }
+                          }}
+                          initialFilters={{
+                              filterType: 'month',
+                              selectedDate: dateRange?.[0]?.toISOString() || null,
+                          }}
                 />
-              </div>
+                    )}
             </div>
-            <Button type="primary" onClick={loadReportData}>
-                    Áp dụng
-                  </Button>
-          </Space>
-            </Card>
       )}
 
       <Spin spinning={loading}>

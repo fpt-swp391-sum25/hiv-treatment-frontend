@@ -9,7 +9,8 @@ import {
     bulkUpdateScheduleByDoctorAndDateAPI,
     bulkDeleteSchedulesByDoctorAndDateAPI,  
     updateScheduleStatusAPI,
-    getSchedulesByDoctorDateAndSlotAPI
+    getSchedulesByDoctorDateAndSlotAPI,
+    testUpdateScheduleStatusAPI
 } from '../../../services/schedule.service';
 import '../../../styles/manager/ScheduleDetail.css';
 import axios from 'axios';
@@ -122,8 +123,6 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
 
 
     const showDeleteConfirmation = () => {
-            console.log("Clicked Quản lý slot");
-
         const currentPatients = formData.currentPatients || 0;
         if (currentPatients > 0) {
             showSubSlotsModal();
@@ -210,41 +209,38 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                 currentSchedule.slot
             );
             
-            // Lấy thông tin bệnh nhân cho các schedule có patientId
-            const schedulesWithPatientInfo = await Promise.all(
-                schedules.map(async sched => {
-                    if (!sched.patientId) return sched;
-                    
-                    try {
-                        const patientResponse = await axios.get(`/api/users/${sched.patientId}`);
-                        return {
-                            ...sched,
-                            patientName: patientResponse.data.full_name
-                        };
-                    } catch (error) {
-                        console.error('Error fetching patient info:', error);
-                        return sched;
-                    }
-                })
-            );
+            // Xử lý dữ liệu - Backend đã trả về đầy đủ thông tin patient
+            const processedSchedules = schedules.map((sched, index) => {
+                // Backend trả về patient as object, không phải ID
+                const hasPatient = !!(sched.patient && sched.patient.id);
+                const patientInfo = sched.patient || null;
+                
+                return {
+                    ...sched,
+                    // Chỉ lấy thông tin cần thiết: tên và ID
+                    patientId: patientInfo?.id || null,
+                    patientName: patientInfo?.fullName || null,
+                    hasPatientInfo: hasPatient
+                };
+            });
             
-            return Array.isArray(schedulesWithPatientInfo) ? schedulesWithPatientInfo : [];
+            return Array.isArray(processedSchedules) ? processedSchedules : [];
         } catch (error) {
-            console.error('Lỗi khi lấy danh sách lịch:', error);
+            console.error('Lỗi khi lấy danh sách lịch trong slot:', error);
             return [];
         }
     };
 
     const generateSubSlots = async () => {
         const schedules = await fetchSchedulesInSameSlot(schedule.id);
-        console.log('Schedules in same slot:', schedules);
         
         const isPastDate = moment(schedule.date).isBefore(moment().startOf('day'));
         const maxPatients = formData.maxPatients || 5;
 
         // Tạo danh sách các slot đã có lịch
         const filledSlots = schedules.map((sched, index) => {
-            const hasPatient = !!sched.patientId;
+            // Sử dụng dữ liệu đã được normalized
+            const hasPatient = sched.hasPatientInfo;
             const status = sched.status === 'Đã hủy'
                 ? 'Đã hủy'
                 : hasPatient
@@ -366,27 +362,90 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
 
             setProcessingSubSlot(subSlot.id);
 
-            const response = await updateScheduleStatusAPI(subSlot.id, { status: "Đã hủy" });
+            console.log(`🔄 Starting cancel process for schedule ${subSlot.id}`);
+            
+            // Thử axios trước
+            try {
+                console.log(`🔄 Trying axios method...`);
+                const response = await updateScheduleStatusAPI(subSlot.id, "Đã hủy");
 
-            if (response.data || response.status === 200) {
-                notification.success({
-                    message: 'Thành công',
-                    description: `Đã hủy lịch cho ${subSlot.patientName}`,
-                    placement: 'topRight',
-                    duration: 4
-                });
+                if (response.status === 200) {
+                    console.log(`✅ Axios success - Status: ${response.status}, Data:`, response.data);
+                    
+                    notification.success({
+                        message: 'Thành công',
+                        description: `Đã hủy lịch cho ${subSlot.patientName}`,
+                        placement: 'topRight',
+                        duration: 4
+                    });
 
-                await showSubSlotsModal();
-                if (onRefreshData) await onRefreshData();
-            } else {
-                throw new Error(`Unexpected cancel response: ${response.status}`);
+                    await showSubSlotsModal();
+                    if (onRefreshData) await onRefreshData();
+                    return;
+                }
+            } catch (axiosError) {
+                console.error(`❌ Axios failed:`, axiosError);
+                
+                // Fallback: Thử fetch API
+                console.log(`🔄 Trying fetch API fallback...`);
+                try {
+                    const fetchResponse = await testUpdateScheduleStatusAPI(subSlot.id, "Đã hủy");
+                    
+                    if (fetchResponse.ok) {
+                        console.log(`✅ Fetch API success!`);
+                        
+                        notification.success({
+                            message: 'Thành công',
+                            description: `Đã hủy lịch cho ${subSlot.patientName}`,
+                            placement: 'topRight',
+                            duration: 4
+                        });
+
+                        await showSubSlotsModal();
+                        if (onRefreshData) await onRefreshData();
+                        return;
+                    }
+                } catch (fetchError) {
+                    console.error(`❌ Fetch API also failed:`, fetchError);
+                    throw axiosError; // Throw original axios error
+                }
             }
+
+            throw new Error(`Unexpected response status`);
+
         } catch (error) {
+            console.error('❌ Lỗi khi hủy lịch:', error);
+            
+            let errorMessage = 'Có lỗi xảy ra khi hủy lịch';
+            
+            if (error.response) {
+                const status = error.response.status;
+                const data = error.response.data;
+                
+                switch (status) {
+                    case 404:
+                        errorMessage = 'Không tìm thấy lịch hẹn để hủy';
+                        break;
+                    case 400:
+                        errorMessage = data?.message || 'Dữ liệu không hợp lệ';
+                        break;
+                    case 500:
+                        errorMessage = 'Lỗi server, vui lòng thử lại sau';
+                        break;
+                    default:
+                        errorMessage = data?.message || `Lỗi ${status}: ${error.response.statusText}`;
+                }
+                
+                console.error(`❌ API Error ${status}:`, data);
+            } else if (error.message) {
+                errorMessage = error.message;
+            }
+            
             notification.error({
-                message: 'Lỗi',
-                description: 'Có lỗi xảy ra khi hủy lịch',
+                message: 'Lỗi hủy lịch',
+                description: errorMessage,
                 placement: 'topRight',
-                duration: 4
+                duration: 5
             });
         } finally {
             setProcessingSubSlot(null);
@@ -771,8 +830,9 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                                         </div>
                                         <div>
                                             <div className="fw-bold">
-                                                {subSlot.hasPatient ? subSlot.patientName : ' Slot trống'}
+                                                {subSlot.hasPatient ? subSlot.patientName : 'Slot trống'}
                                             </div>
+                                            
                                             <small className="text-muted">
                                                 Trạng thái: <span className={
                                                     subSlot.status === 'Đã hủy' ? 'text-secondary fw-bold' :
