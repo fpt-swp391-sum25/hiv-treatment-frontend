@@ -34,8 +34,8 @@ const getTestOrdersByHealthRecordIdAPI = (healthRecordId) => {
   return axios.get(`/api/test-order/health-record-id/${healthRecordId}`);
 }
 
-const confirmTestOrderPaymentAPI = (healthRecordId) => {
-  return axios.put(`/api/test-order/success/${healthRecordId}`);
+const confirmTestOrderPaymentAPI = (healthRecordId, totalPrice) => {
+  return axios.put(`/api/test-order/success/${healthRecordId}`, { totalPrice });
 }
 
 const undoTestOrderPaymentAPI = (healthRecordId) => {

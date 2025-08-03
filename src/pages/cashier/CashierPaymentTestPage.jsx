@@ -36,9 +36,9 @@ export default function CashierPaymentTestPage() {
             const testOrdersRes = await getTestOrdersByHealthRecordIdAPI(schedule.id);
             const testOrders = testOrdersRes.data;
             const isPaid = testOrders.length > 0 && testOrders.every(order => order.paymentStatus === 'Đã thanh toán');
-            return { ...schedule, isPaid, testOrders };          
+            return { ...schedule, isPaid, testOrders };
           } catch {
-            return { ...schedule, isPaid: false, testOrders  };
+            return { ...schedule, isPaid: false, testOrders };
           }
         })
       );
@@ -47,7 +47,7 @@ export default function CashierPaymentTestPage() {
 
       const filteredSchedules = enhancedSchedules.filter(schedule =>
         schedule.patient?.id != null && schedule.testOrders?.length > 0
-      );      
+      );
 
       setSchedules(filteredSchedules);
 
@@ -69,9 +69,9 @@ export default function CashierPaymentTestPage() {
             const testOrdersRes = await getTestOrdersByHealthRecordIdAPI(schedule.id);
             const testOrders = testOrdersRes.data;
             const isPaid = testOrders.length > 0 && testOrders.every(order => order.paymentStatus === 'Đã thanh toán');
-            return { ...schedule, isPaid, testOrders };          
+            return { ...schedule, isPaid, testOrders };
           } catch {
-            return { ...schedule, isPaid : false, testOrders };          
+            return { ...schedule, isPaid: false, testOrders };
           }
         })
       );
@@ -80,7 +80,7 @@ export default function CashierPaymentTestPage() {
 
       const filteredSchedules = enhancedSchedules.filter(schedule =>
         schedule.patient?.id != null && schedule.testOrders?.length > 0
-      );      
+      );
 
       setSchedules(filteredSchedules);
     } catch {
@@ -113,7 +113,7 @@ export default function CashierPaymentTestPage() {
       cancelText: 'Hủy',
       onOk: async () => {
         try {
-          await confirmTestOrderPaymentAPI(selectedSchedule.id);
+          await confirmTestOrderPaymentAPI(selectedSchedule.id, totalPrice);
           message.success('Thanh toán thành công');
 
           const res = await searchSchedulesByNameAPI(search);
@@ -122,7 +122,7 @@ export default function CashierPaymentTestPage() {
               const testOrdersRes = await getTestOrdersByHealthRecordIdAPI(schedule.id);
               const testOrders = testOrdersRes.data;
               const isPaid = testOrders.length > 0 && testOrders.every(order => order.paymentStatus === 'Đã thanh toán');
-              return { ...schedule, isPaid, testOrders };          
+              return { ...schedule, isPaid, testOrders };
             })
           );
           setSchedules(enhancedSchedules);
@@ -157,7 +157,7 @@ export default function CashierPaymentTestPage() {
               const testOrdersRes = await getTestOrdersByHealthRecordIdAPI(schedule.id);
               const testOrders = testOrdersRes.data;
               const isPaid = testOrders.length > 0 && testOrders.every(order => order.paymentStatus === 'Đã thanh toán');
-              return { ...schedule, isPaid, testOrders };          
+              return { ...schedule, isPaid, testOrders };
             })
           );
           setSchedules(enhancedSchedules);
@@ -232,7 +232,7 @@ export default function CashierPaymentTestPage() {
                     <Text strong>Bệnh nhân:</Text> {schedule.patient?.fullName || 'N/A'}<br />
                     <Text strong>Ngày:</Text> {formatDate(schedule.date)}<br />
                     <Text strong>Giờ:</Text> {formatTime(schedule.slot)}<br />
-                   <Text strong>Trạng thái:</Text>{' '}
+                    <Text strong>Trạng thái:</Text>{' '}
                     {record.isPaid ? (
                       <Tag color="green">Đã thanh toán</Tag>
                     ) : (
@@ -290,4 +290,3 @@ export default function CashierPaymentTestPage() {
     </div>
   );
 }
-  
