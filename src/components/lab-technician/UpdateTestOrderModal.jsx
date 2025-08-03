@@ -1,7 +1,7 @@
 import { Input, Modal, DatePicker, Select, message } from "antd";
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
-import { getAllTestTypes } from "../../services/testtype.service"; 
+import { getAllTestTypes } from "../../services/testtype.service";
 
 const UpdateTestOrderModal = (props) => {
   const {
@@ -12,7 +12,8 @@ const UpdateTestOrderModal = (props) => {
   } = props;
 
   const [id, setId] = useState("");
-  const [type, setType] = useState(null);
+  const [type, setType] = useState({});
+  const [typeId, setTypeId] = useState('')
   const [result, setResult] = useState("");
   const [unit, setUnit] = useState("");
   const [note, setNote] = useState("");
@@ -42,6 +43,7 @@ const UpdateTestOrderModal = (props) => {
     if (dataUpdate) {
       setId(dataUpdate.id ?? "");
       setType(dataUpdate.type ?? null);
+      setTypeId(dataUpdate.type?.id ?? "");
       setResult(dataUpdate.result ?? "");
       setUnit(dataUpdate.unit ?? "");
       setNote(dataUpdate.note ?? "");
@@ -58,10 +60,16 @@ const UpdateTestOrderModal = (props) => {
     }
   }, [dataUpdate]);
 
+  const handleTypeChange = (value) => {
+    setType(testTypes.find(item => item.id === value))
+    setTypeId(value);
+  };
+
   const handleUpdate = () => {
     const updatedData = {
       id,
-      type,
+      testTypeId: typeId,
+      type: testTypes.find(item => item.id === typeId),
       result,
       unit,
       note,
@@ -99,10 +107,7 @@ const UpdateTestOrderModal = (props) => {
           showSearch
           style={{ width: "100%" }}
           value={type?.id}
-          onChange={(id) => {
-            const selected = testTypes.find(item => item.id === id);
-            setType(selected);
-          }}
+          onChange={handleTypeChange}
           options={testTypes.map((item) => ({
             label: item.testTypeName,
             value: item.id,
