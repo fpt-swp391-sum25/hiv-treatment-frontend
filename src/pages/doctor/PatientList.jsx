@@ -67,11 +67,6 @@ const PatientList = () => {
             const matchesText =
                 normalizeString(item.fullName).includes(normalizeString(searchText)) ||
                 normalizeString(item.patientCode).includes(normalizeString(searchText))
-<<<<<<< HEAD
-            
-=======
-
->>>>>>> 70baec012cef2effb1020c616f7fab9bd7b1b3f4
             return matchesText
         })
         setFilteredData(filtered)
@@ -171,11 +166,7 @@ const PatientList = () => {
                 Promise.all(paymentPromises)
             ])
 
-<<<<<<< HEAD
-            const mergedData = waitingSchedules.map((item) => {
-=======
             const mergedData = validSchedules.map((item) => {
->>>>>>> 70baec012cef2effb1020c616f7fab9bd7b1b3f4
                 const matchedPatient = patientList.find(p => p.id === item.patient.id)
                 const matchedHealthRecord = healthRecords.find(hr => hr.scheduleId === item.id)
                 const matchedPayment = payments.find(p => p.scheduleId === item.id)

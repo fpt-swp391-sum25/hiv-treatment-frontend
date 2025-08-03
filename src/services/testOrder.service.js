@@ -6,17 +6,6 @@ const deleteTestOrderAPI = (testOrderId) => {
 }
 
 const createTestOrderAPI = (name, note, expectedResultTime, healthRecordId, testTypeId) => {
-<<<<<<< HEAD
-    const testOrderData = {
-        name,
-        note,
-        expectedResultTime,
-        healthRecordId,
-        testTypeId
-    }
-    const URL_BACKEND = '/api/test-order'
-    return axios.post(URL_BACKEND, testOrderData)
-=======
   const testOrderData = {
     name,
     note,
@@ -26,7 +15,6 @@ const createTestOrderAPI = (name, note, expectedResultTime, healthRecordId, test
   }
   const URL_BACKEND = '/api/test-order'
   return axios.post(URL_BACKEND, testOrderData)
->>>>>>> 70baec012cef2effb1020c616f7fab9bd7b1b3f4
 }
 
 const updateTestOrderAPI = (testOrderId, type, result, unit, note, expectedResultTime, actualResultTime) => {
