@@ -16,8 +16,8 @@ export default function CashierTransactionHistoryPage() {
 
   const fetchSchedulesWithDetails = async () => {
     if (!search.trim()) {
-        message.warning('Vui lòng nhập tên bệnh nhân để tìm kiếm');
-        return;
+      message.warning('Vui lòng nhập tên bệnh nhân để tìm kiếm');
+      return;
     }
     setLoading(true);
     try {
@@ -48,7 +48,7 @@ export default function CashierTransactionHistoryPage() {
       );
 
       setSchedules(detailedSchedules);
-      setCurrentPage(1); 
+      setCurrentPage(1);
     } catch (error) {
       console.error('Lỗi khi tìm kiếm:', error);
       message.error('Lỗi khi lấy dữ liệu');
@@ -57,8 +57,31 @@ export default function CashierTransactionHistoryPage() {
     }
   };
 
-  const renderPaymentTag = (paid) =>
-    paid ? <Tag color="green">Đã thanh toán</Tag> : <Tag color="orange">Chưa thanh toán</Tag>;
+  const renderPaymentTag = (schedulePaid, testOrders) => {
+    const unpaidOrders = testOrders
+      .filter(order => !(order.paymentStatus === 'Đã thanh toán'))
+      .map(order => order.name)
+      .filter(Boolean);
+    if (!schedulePaid && unpaidOrders.length === 0) {
+      return <Tag color="orange">Lịch khám chưa thanh toán</Tag>;
+    }
+    if (schedulePaid && unpaidOrders.length > 0) {
+      return (
+        <Tag color="orange">
+          Xét nghiệm {unpaidOrders.join(', ')} chưa thanh toán
+        </Tag>
+      );
+    }
+    if (!schedulePaid && unpaidOrders.length > 0) {
+      return (
+        <Tag color="orange">
+          Lịch khám và xét nghiệm chưa thanh toán
+        </Tag>
+      );
+    }
+    return <Tag color="green">Đã thanh toán</Tag>;
+  };
+
 
   const formatCurrency = (number) =>
     number?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) || '0 ₫';
@@ -95,10 +118,12 @@ export default function CashierTransactionHistoryPage() {
 
       {pagedSchedules.map((schedule) => {
         const { testOrders, payment } = schedule;
-        const allPaid = testOrders.length > 0 && testOrders.every((o) => o.paymentStatus === 'Đã thanh toán');
+        const schedulePaid = payment?.status === 'Đã thanh toán' || payment?.status === 'Thanh toán thành công'
+        const testOrderPaid = testOrders.length > 0 && testOrders.every((o) => o.paymentStatus === 'Đã thanh toán');
         const testTotal = testOrders.reduce((sum, order) => sum + (order.type?.testTypePrice || 0), 0);
         const examFee = payment?.amount || 0;
         const total = testTotal + examFee;
+        const allPaid = schedulePaid && testOrderPaid
 
         return (
           <Card key={schedule.id} title={`Lịch hẹn ngày ${formatDate(schedule.date)} - Giờ ${formatTime(schedule.slot)}`} style={{ marginBottom: 24 }}>
@@ -106,7 +131,6 @@ export default function CashierTransactionHistoryPage() {
             <Text strong>Loại:</Text> {schedule.type || 'N/A'} <br />
             <Text strong>Giá tiền:</Text> {formatCurrency(payment?.amount) || 'Không xác định'} <br />
             <Text strong>Phương thức thanh toán:</Text> {payment?.description || 'Không xác định'} <br />
-            <Text strong>Trạng thái thanh toán:</Text> {renderPaymentTag(allPaid)} <br />
 
             <Divider />
 
@@ -116,8 +140,7 @@ export default function CashierTransactionHistoryPage() {
                   <div key={order.id} style={{ marginBottom: 12 }}>
                     <Text><strong>Tên:</strong> {order.name}</Text> <br />
                     <Text><strong>Loại:</strong> {order.type?.testTypeName || 'Không xác định'}</Text> <br />
-                    <Text><strong>Giá:</strong> {formatCurrency(order.type?.testTypePrice)}</Text> <br />
-                    <Text><strong>Trạng thái:</strong> {renderPaymentTag(order.paymentStatus === 'Đã thanh toán')}</Text>
+
                     <Divider />
                   </div>
                 ))}
@@ -127,9 +150,9 @@ export default function CashierTransactionHistoryPage() {
             )}
 
             <Divider />
-
+            <Text><strong>Trạng thái:</strong> {renderPaymentTag(schedulePaid, testOrders)}</Text>
             {(testTotal > 0 || examFee > 0) && (
-              <Text strong style={{ fontSize: 16 }}>
+              <Text strong style={{ fontSize: 16, padding: 15 }}>
                 Tổng tiền: {formatCurrency(total)}
               </Text>
             )}
