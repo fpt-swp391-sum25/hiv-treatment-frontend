@@ -59,6 +59,7 @@ const Admin = () => {
         '/admin/lab-technicians': 'Kỹ thuật viên',
         '/admin/cashiers': 'Thu ngân',
         '/admin/patients': 'Bệnh nhân',
+        '/admin/test-types': 'Loại xét nghiệm',
         '/admin/system-config': 'Cài đặt hệ thống',
     }
 
