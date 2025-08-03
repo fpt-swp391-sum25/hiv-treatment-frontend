@@ -16,7 +16,6 @@ export const STAFF_ROLES = {
 
 // Report Export Types
 export const EXPORT_TYPES = {
-    PDF: 'PDF',
     EXCEL: 'EXCEL'
 };
 
