@@ -4,12 +4,13 @@ import { message, notification } from 'antd';
 import { ScheduleStatus, SlotTimes, StatusMapping } from '../../../types/schedule.types';
 import moment from 'moment';
 import { BsCalendarWeek, BsClock, BsDoorOpen, BsPerson, BsBriefcase, BsPersonPlus, BsList, BsPersonDash } from 'react-icons/bs';
-import {
-    deleteScheduleAPI,
+import { 
+    deleteScheduleAPI, 
     bulkUpdateScheduleByDoctorAndDateAPI,
-    bulkDeleteSchedulesByDoctorAndDateAPI,
+    bulkDeleteSchedulesByDoctorAndDateAPI,  
     updateScheduleStatusAPI,
-    getSchedulesByDoctorDateAndSlotAPI
+    getSchedulesByDoctorDateAndSlotAPI,
+    testUpdateScheduleStatusAPI
 } from '../../../services/schedule.service';
 import '../../../styles/manager/ScheduleDetail.css';
 import axios from 'axios';
@@ -24,23 +25,16 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
         slot: '',
         roomCode: '',
         original_status: ScheduleStatus.AVAILABLE,
-        currentPatients: 0,
-        maxPatients: 5
+        currentPatients: 0, 
+        maxPatients: 5 
     });
     const [loading, setLoading] = useState(false);
     const [confirmDelete, setConfirmDelete] = useState(false);
     const [deleting, setDeleting] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-    const [selectedSchedule, setSelectedSchedule] = useState(null);
-    const [schedules, setSchedules] = useState([]);
-
-    // State cho modal quản lý sub-slots
     const [showSubSlots, setShowSubSlots] = useState(false);
     const [subSlots, setSubSlots] = useState([]);
     const [loadingSubSlots, setLoadingSubSlots] = useState(false);
-    const [processingSubSlot, setProcessingSubSlot] = useState(null); // ID của sub-slot đang xử lý
-
-    // State cho confirmation hủy sub-slot
+    const [processingSubSlot, setProcessingSubSlot] = useState(null); 
     const [showCancelConfirm, setShowCancelConfirm] = useState(false);
     const [selectedSubSlotToCancel, setSelectedSubSlotToCancel] = useState(null);
     const [processingCancel, setProcessingCancel] = useState(false);
@@ -56,9 +50,9 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                 status: schedule.status,
                 slot: schedule.slot || '08:00:00',
                 roomCode: schedule.roomCode || '',
-                original_status: schedule.original_status,
+                original_status: schedule.original_status, 
                 type: schedule.type,
-                currentPatients: schedule.currentPatients || 0,
+                currentPatients: schedule.currentPatients || 0, 
                 maxPatients: schedule.maxPatients || 5
             });
         }
@@ -100,7 +94,7 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
         setLoading(true);
         try {
             if (!formData.roomCode) {
-                formData.roomCode = '101';
+                formData.roomCode = '101'; 
             }
             const beStatus = formData.original_status || StatusMapping[formData.status] || formData.status;
             let title = `${formData.doctorName} - ${formData.slot.substring(0, 5)} - P.${formData.roomCode}`;
@@ -129,8 +123,6 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
 
 
     const showDeleteConfirmation = () => {
-        console.log("Clicked Quản lý slot");
-
         const currentPatients = formData.currentPatients || 0;
         if (currentPatients > 0) {
             showSubSlotsModal();
@@ -209,49 +201,46 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
         try {
             const currentSchedule = schedule;
             if (!currentSchedule) return [];
-
+            
             // Gọi API lấy tất cả schedule cùng ngày, giờ, bác sĩ
             const schedules = await getSchedulesByDoctorDateAndSlotAPI(
                 currentSchedule.doctorId,
                 currentSchedule.date,
                 currentSchedule.slot
             );
-
-            // Lấy thông tin bệnh nhân cho các schedule có patientId
-            const schedulesWithPatientInfo = await Promise.all(
-                schedules.map(async sched => {
-                    if (!sched.patientId) return sched;
-
-                    try {
-                        const patientResponse = await axios.get(`/api/users/${sched.patientId}`);
-                        return {
-                            ...sched,
-                            patientName: patientResponse.data.full_name
-                        };
-                    } catch (error) {
-                        console.error('Error fetching patient info:', error);
-                        return sched;
-                    }
-                })
-            );
-
-            return Array.isArray(schedulesWithPatientInfo) ? schedulesWithPatientInfo : [];
+            
+            // Xử lý dữ liệu - Backend đã trả về đầy đủ thông tin patient
+            const processedSchedules = schedules.map((sched, index) => {
+                // Backend trả về patient as object, không phải ID
+                const hasPatient = !!(sched.patient && sched.patient.id);
+                const patientInfo = sched.patient || null;
+                
+                return {
+                    ...sched,
+                    // Chỉ lấy thông tin cần thiết: tên và ID
+                    patientId: patientInfo?.id || null,
+                    patientName: patientInfo?.fullName || null,
+                    hasPatientInfo: hasPatient
+                };
+            });
+            
+            return Array.isArray(processedSchedules) ? processedSchedules : [];
         } catch (error) {
-            console.error('Lỗi khi lấy danh sách lịch:', error);
+            console.error('Lỗi khi lấy danh sách lịch trong slot:', error);
             return [];
         }
     };
 
     const generateSubSlots = async () => {
         const schedules = await fetchSchedulesInSameSlot(schedule.id);
-        console.log('Schedules in same slot:', schedules);
-
+        
         const isPastDate = moment(schedule.date).isBefore(moment().startOf('day'));
         const maxPatients = formData.maxPatients || 5;
 
         // Tạo danh sách các slot đã có lịch
         const filledSlots = schedules.map((sched, index) => {
-            const hasPatient = !!sched.patientId;
+            // Sử dụng dữ liệu đã được normalized
+            const hasPatient = sched.hasPatientInfo;
             const status = sched.status === 'Đã hủy'
                 ? 'Đã hủy'
                 : hasPatient
@@ -293,19 +282,19 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
     };
 
     const showSubSlotsModal = async () => {
-        if (!schedule || !schedule.id) {
-            notification.error({
-                message: 'Lỗi',
-                description: 'Không thể mở quản lý slot do thiếu thông tin lịch',
-                placement: 'topRight',
-                duration: 3
-            });
-            return;
-        }
+    if (!schedule || !schedule.id) {
+        notification.error({
+            message: 'Lỗi',
+            description: 'Không thể mở quản lý slot do thiếu thông tin lịch',
+            placement: 'topRight',
+            duration: 3
+        });
+        return;
+    }
 
-        setLoadingSubSlots(true);
+    setLoadingSubSlots(true);
         try {
-            const slots = await generateSubSlots();
+            const slots = await generateSubSlots(); 
             setSubSlots(slots);
             setShowSubSlots(true);
         } catch (error) {
@@ -332,13 +321,13 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
         setTimeout(() => {
             setSubSlots([]);
             setLoadingSubSlots(false);
-        }, 300);
+        }, 300); 
     };
 
     const showCancelSubSlotConfirmation = (subSlot) => {
         setSelectedSubSlotToCancel(subSlot);
         setShowCancelConfirm(true);
-        setProcessingSubSlot(null);
+        setProcessingSubSlot(null); 
     };
 
     const cancelSubSlotConfirmation = () => {
@@ -348,7 +337,7 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
 
     const confirmCancelSubSlot = async () => {
         if (selectedSubSlotToCancel) {
-            setProcessingCancel(true);
+            setProcessingCancel(true); 
             try {
                 await handleCancelSubSlotWithCancelAPI(selectedSubSlotToCancel);
             } finally {
@@ -373,27 +362,90 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
 
             setProcessingSubSlot(subSlot.id);
 
-            const response = await updateScheduleStatusAPI(subSlot.id, { status: "Đã hủy" });
+            console.log(`🔄 Starting cancel process for schedule ${subSlot.id}`);
+            
+            // Thử axios trước
+            try {
+                console.log(`🔄 Trying axios method...`);
+                const response = await updateScheduleStatusAPI(subSlot.id, "Đã hủy");
 
-            if (response.data || response.status === 200) {
-                notification.success({
-                    message: 'Thành công',
-                    description: `Đã hủy lịch cho ${subSlot.patientName}`,
-                    placement: 'topRight',
-                    duration: 4
-                });
+                if (response.status === 200) {
+                    console.log(`✅ Axios success - Status: ${response.status}, Data:`, response.data);
+                    
+                    notification.success({
+                        message: 'Thành công',
+                        description: `Đã hủy lịch cho ${subSlot.patientName}`,
+                        placement: 'topRight',
+                        duration: 4
+                    });
 
-                await showSubSlotsModal();
-                if (onRefreshData) await onRefreshData();
-            } else {
-                throw new Error(`Unexpected cancel response: ${response.status}`);
+                    await showSubSlotsModal();
+                    if (onRefreshData) await onRefreshData();
+                    return;
+                }
+            } catch (axiosError) {
+                console.error(`❌ Axios failed:`, axiosError);
+                
+                // Fallback: Thử fetch API
+                console.log(`🔄 Trying fetch API fallback...`);
+                try {
+                    const fetchResponse = await testUpdateScheduleStatusAPI(subSlot.id, "Đã hủy");
+                    
+                    if (fetchResponse.ok) {
+                        console.log(`✅ Fetch API success!`);
+                        
+                        notification.success({
+                            message: 'Thành công',
+                            description: `Đã hủy lịch cho ${subSlot.patientName}`,
+                            placement: 'topRight',
+                            duration: 4
+                        });
+
+                        await showSubSlotsModal();
+                        if (onRefreshData) await onRefreshData();
+                        return;
+                    }
+                } catch (fetchError) {
+                    console.error(`❌ Fetch API also failed:`, fetchError);
+                    throw axiosError; // Throw original axios error
+                }
             }
+
+            throw new Error(`Unexpected response status`);
+
         } catch (error) {
+            console.error('❌ Lỗi khi hủy lịch:', error);
+            
+            let errorMessage = 'Có lỗi xảy ra khi hủy lịch';
+            
+            if (error.response) {
+                const status = error.response.status;
+                const data = error.response.data;
+                
+                switch (status) {
+                    case 404:
+                        errorMessage = 'Không tìm thấy lịch hẹn để hủy';
+                        break;
+                    case 400:
+                        errorMessage = data?.message || 'Dữ liệu không hợp lệ';
+                        break;
+                    case 500:
+                        errorMessage = 'Lỗi server, vui lòng thử lại sau';
+                        break;
+                    default:
+                        errorMessage = data?.message || `Lỗi ${status}: ${error.response.statusText}`;
+                }
+                
+                console.error(`❌ API Error ${status}:`, data);
+            } else if (error.message) {
+                errorMessage = error.message;
+            }
+            
             notification.error({
-                message: 'Lỗi',
-                description: 'Có lỗi xảy ra khi hủy lịch',
+                message: 'Lỗi hủy lịch',
+                description: errorMessage,
                 placement: 'topRight',
-                duration: 4
+                duration: 5
             });
         } finally {
             setProcessingSubSlot(null);
@@ -460,7 +512,7 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
             'Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư',
             'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'
         ];
-        const dayOfWeek = moment(date).day();
+        const dayOfWeek = moment(date).day(); 
         return weekdays[dayOfWeek];
     };
 
@@ -550,14 +602,14 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                                     <Col md={6} className="d-flex align-items-center mb-2">
                                         <BsPersonPlus className="text-success me-2" size={20} />
                                         <div>
-                                            <div className="text-muted small">Số bệnh nhân</div>
-                                            <Badge
-                                                bg={formData.currentPatients >= formData.maxPatients ? 'danger' :
-                                                    formData.currentPatients > 0 ? 'warning' : 'success'}
-                                                className="p-2"
-                                            >
-                                                {formData.currentPatients} / {formData.maxPatients}
-                                            </Badge>
+                                        <div className="text-muted small">Số bệnh nhân</div>
+                                        <Badge
+                                            bg={formData.currentPatients >= formData.maxPatients ? 'danger' :
+                                            formData.currentPatients > 0 ? 'warning' : 'success'}
+                                            className="p-2"
+                                        >
+                                            {formData.currentPatients} / {formData.maxPatients}
+                                        </Badge>
                                         </div>
                                     </Col>
                                 </Row>
@@ -778,8 +830,9 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                                         </div>
                                         <div>
                                             <div className="fw-bold">
-                                                {subSlot.hasPatient ? subSlot.patientName : ' Slot trống'}
+                                                {subSlot.hasPatient ? subSlot.patientName : 'Slot trống'}
                                             </div>
+                                            
                                             <small className="text-muted">
                                                 Trạng thái: <span className={
                                                     subSlot.status === 'Đã hủy' ? 'text-secondary fw-bold' :
@@ -822,22 +875,22 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                                             </Button>
                                         )}
                                         {subSlot.canDelete && !subSlot.isVirtualSlot && (
-                                            <Button
-                                                variant="outline-danger"
-                                                size="sm"
-                                                onClick={() => handleDeleteSubSlot(subSlot)}
-                                                disabled={processingSubSlot === subSlot.id}
-                                            >
-                                                {processingSubSlot === subSlot.id ? (
-                                                    <>
-                                                        <Spinner animation="border" size="sm" className="me-1" />
-                                                        Đang xóa...
-                                                    </>
-                                                ) : (
-                                                    'Xóa slot'
-                                                )}
-                                            </Button>
-                                        )}
+                                        <Button
+                                            variant="outline-danger"
+                                            size="sm"
+                                            onClick={() => handleDeleteSubSlot(subSlot)}
+                                            disabled={processingSubSlot === subSlot.id}
+                                        >
+                                            {processingSubSlot === subSlot.id ? (
+                                                <>
+                                                    <Spinner animation="border" size="sm" className="me-1" />
+                                                    Đang xóa...
+                                                </>
+                                            ) : (
+                                                'Xóa slot'
+                                            )}
+                                        </Button>
+                                    )}
                                     </div>
                                 </div>
                             ))}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, Table, Spin, Statistic, Select, Input, Space, Button, Typography, Divider, DatePicker, Tag, Alert } from 'antd';
-import { UserOutlined, TeamOutlined, FilterOutlined, SearchOutlined, ReloadOutlined, FileExcelOutlined, FilePdfOutlined, DownloadOutlined, MedicineBoxOutlined, ExperimentOutlined, SettingOutlined } from '@ant-design/icons';
+import { UserOutlined, TeamOutlined, FilterOutlined, SearchOutlined, ReloadOutlined, FileExcelOutlined, DownloadOutlined, MedicineBoxOutlined, ExperimentOutlined, SettingOutlined } from '@ant-design/icons';
 import { getStaffData, exportToExcel } from '../../../../services/report.service';
 import { STAFF_ROLES } from '../../../../types/report.types';
 import dayjs from 'dayjs';
@@ -283,85 +283,7 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
         exportToExcel(formattedData, reportTitle);
     };
     
-    // Xuất PDF
-    const handleExportPDF = async () => {
-        try {
-            const staffList = getStaffList();
-            
-            if (staffList.length === 0) {
-                onError?.(new Error('Không có dữ liệu để xuất báo cáo'));
-                return;
-            }
-            
-            // Import động jsPDF và jsPDF-autotable để tránh lỗi khi khởi tạo ứng dụng
-            const { default: jsPDF } = await import('jspdf');
-            const { default: autoTable } = await import('jspdf-autotable');
-            
-            const doc = new jsPDF();
-            
-            // Tiêu đề báo cáo
-            const title = 'BÁO CÁO NHÂN SỰ';
-            doc.setFontSize(18);
-            doc.text(title, 14, 22);
-            
-            // Thông tin báo cáo
-            const reportDate = dayjs().format('DD/MM/YYYY HH:mm');
-            const reportPeriod = dateRange && dateRange.length === 2 
-                ? `${dateRange[0].format('DD/MM/YYYY')} - ${dateRange[1].format('DD/MM/YYYY')}`
-                : 'Tất cả thời gian';
-                
-            doc.setFontSize(12);
-            doc.text(`Thời gian xuất báo cáo: ${reportDate}`, 14, 32);
-            doc.text(`Khoảng thời gian báo cáo: ${reportPeriod}`, 14, 40);
-            
-            // Chuẩn bị dữ liệu cho bảng
-            const formattedData = staffList.map((staff, index) => ({
-                'STT': index + 1,
-                'Họ tên': staff.fullName || '',
-                'Vai trò': staff.role === STAFF_ROLES.DOCTOR ? 'Bác sĩ' : 
-                          staff.role === STAFF_ROLES.LAB_TECHNICIAN ? 'Kỹ thuật viên' : 'Quản lý',
-                'Email': staff.email || '',
-                'Số điện thoại': staff.phoneNumber || '',
-                'Ngày tham gia': staff.created_at ? dayjs(staff.created_at).format('DD/MM/YYYY') : 'N/A'
-            }));
-            
-            // Tạo bảng dữ liệu
-            const headers = Object.keys(formattedData[0]);
-            const data = formattedData.map(item => Object.values(item));
-            
-            autoTable(doc, {
-                startY: 50,
-                head: [headers],
-                body: data,
-                theme: 'grid',
-                styles: {
-                    fontSize: 10,
-                    cellPadding: 3,
-                    lineColor: [0, 0, 0],
-                    lineWidth: 0.1,
-                },
-                headStyles: {
-                    fillColor: [41, 128, 185],
-                    textColor: 255,
-                    fontStyle: 'bold'
-                },
-                alternateRowStyles: {
-                    fillColor: [245, 245, 245]
-                }
-            });
-            
-            // Lưu file PDF
-            const reportTitle = activeTab === 'doctors' ? 'BaoCaoNhanSu_BacSi' : 
-                              activeTab === 'labTechnicians' ? 'BaoCaoNhanSu_KyThuatVien' : 
-                              activeTab === 'managers' ? 'BaoCaoNhanSu_QuanLy' : 'BaoCaoNhanSu_TatCa';
-            const pdfFileName = `${reportTitle}_${dayjs().format('YYYYMMDD_HHmmss')}.pdf`;
-            doc.save(pdfFileName);
-            
-        } catch (error) {
-            console.error('Error exporting PDF:', error);
-            onError?.(new Error('Không thể xuất báo cáo PDF. Vui lòng thử lại sau.'));
-        }
-    };
+
 
     return (
         <Spin spinning={loading}>
@@ -384,12 +306,6 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
                                 type="primary"
                             >
                                 Xuất Excel
-                            </Button>
-                            <Button 
-                                icon={<FilePdfOutlined />}
-                                onClick={handleExportPDF}
-                            >
-                                Xuất PDF
                             </Button>
                             <Button
                                 icon={<FilterOutlined />}
