@@ -60,6 +60,7 @@ export default function CashierPaymentTestPage() {
       );
 
       setSchedules(filteredSchedules);
+      return filteredSchedules;
     } catch {
       message.error('Không thể tải danh sách lịch hẹn');
     }
@@ -94,6 +95,7 @@ export default function CashierPaymentTestPage() {
       );
 
       setSchedules(filteredSchedules);
+      return filteredSchedules;
     } catch {
       message.error('Không thể tải tất cả lịch hẹn');
     }
@@ -127,14 +129,23 @@ export default function CashierPaymentTestPage() {
         try {
           const healthRecord = await fetchHealthRecordByScheduleIdAPI(selectedSchedule.id);
           await confirmTestOrderPaymentAPI(healthRecord.data.id, totalPrice);
+
+          let updatedSchedules;
           if (!search.trim()) {
-            fetchAllSchedules()
-            return;
+            updatedSchedules = await fetchAllSchedules();
+          } else {
+            updatedSchedules = await fetchSchedules();
           }
-          fetchSchedules()
+
+          const updated = updatedSchedules.find(s => s.id === selectedSchedule.id);
+          if (updated) {
+            setSelectedSchedule(updated);
+            setIsPaid(updated.isPaid);
+          }
+
           message.success('Thanh toán thành công');
         } catch {
-          message.error('Thanh toán thất bại');
+          message.error('Tải dữ liệu thất bại');
         }
       }
     });
@@ -150,13 +161,21 @@ export default function CashierPaymentTestPage() {
         try {
           const healthRecord = await fetchHealthRecordByScheduleIdAPI(selectedSchedule.id);
           await undoTestOrderPaymentAPI(healthRecord.data.id);
-          message.success('Hoàn tác thanh toán thành công');
-          if (!search.trim()) {
-            fetchAllSchedules()
-            return;
-          }
-          fetchSchedules()
 
+          let updatedSchedules;
+          if (!search.trim()) {
+            updatedSchedules = await fetchAllSchedules();
+          } else {
+            updatedSchedules = await fetchSchedules();
+          }
+
+          const updated = updatedSchedules.find(s => s.id === selectedSchedule.id);
+          if (updated) {
+            setSelectedSchedule(updated);
+            setIsPaid(updated.isPaid);
+          }
+
+          message.success('Hoàn tác thanh toán thành công');
         } catch {
           message.error('Hoàn tác thất bại');
         }
