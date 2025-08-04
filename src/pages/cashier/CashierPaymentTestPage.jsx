@@ -3,9 +3,10 @@ import { Input, Button, Card, message, Typography, Space, Divider, Modal, Tag, L
 import {
   searchSchedulesByNameAPI,
   getAllSchedulesAPI,
-  
+
 } from '../../services/schedule.service';
 import {
+  fetchHealthRecordByScheduleIdAPI,
   healthRecordService
 } from '../../services/health-record.service';
 import {
@@ -37,17 +38,15 @@ export default function CashierPaymentTestPage() {
       const enhancedSchedules = await Promise.all(
         res.data.map(async (schedule) => {
           try {
-            const healthRecord = await healthRecordService.getHealthRecordByScheduleId(schedule.id);
-            if (!healthRecord) return { ...schedule, isPaid: false, testOrders: [], healthRecordId: null };
-
-            const testOrdersRes = await getTestOrdersByHealthRecordIdAPI(healthRecord.id);
+            const healthRecord = await fetchHealthRecordByScheduleIdAPI(schedule.id);
+            const testOrdersRes = await getTestOrdersByHealthRecordIdAPI(healthRecord.data.id);
             const testOrders = testOrdersRes.data;
             const isPaid = testOrders.length > 0 && testOrders.every(order => order.paymentStatus === 'Đã thanh toán');
 
             return { ...schedule, isPaid, testOrders, healthRecordId: healthRecord.id };
 
           } catch {
-            return { ...schedule, isPaid: false, testOrders };
+            return { ...schedule, isPaid: false, testOrders: [] };
           }
         })
       );
@@ -73,17 +72,15 @@ export default function CashierPaymentTestPage() {
       const enhancedSchedules = await Promise.all(
         res.data.map(async (schedule) => {
           try {
-            const healthRecord = await healthRecordService.getHealthRecordByScheduleId(schedule.id);
-            if (!healthRecord) return { ...schedule, isPaid: false, testOrders: [], healthRecordId: null };
-
-            const testOrdersRes = await getTestOrdersByHealthRecordIdAPI(healthRecord.id);
+            const healthRecord = await fetchHealthRecordByScheduleIdAPI(schedule.id);
+            const testOrdersRes = await getTestOrdersByHealthRecordIdAPI(healthRecord.data.id);
             const testOrders = testOrdersRes.data;
             const isPaid = testOrders.length > 0 && testOrders.every(order => order.paymentStatus === 'Đã thanh toán');
 
             return { ...schedule, isPaid, testOrders, healthRecordId: healthRecord.id };
 
           } catch {
-            return { ...schedule, isPaid: false, testOrders };
+            return { ...schedule, isPaid: false, testOrders: [] };
           }
         })
       );
@@ -102,9 +99,10 @@ export default function CashierPaymentTestPage() {
     }
   };
 
-  const fetchTestOrders = async (healthRecordId) => {
+  const fetchTestOrders = async (scheduleId) => {
     try {
-      const res = await getTestOrdersByHealthRecordIdAPI(healthRecordId);
+      const healthRecord = await fetchHealthRecordByScheduleIdAPI(scheduleId);
+      const res = await getTestOrdersByHealthRecordIdAPI(healthRecord.data.id);
       setTestOrders(res.data);
       const total = res.data.reduce((sum, order) => sum + (order.type?.testTypePrice || 0), 0);
       setTotalPrice(total);
@@ -127,42 +125,16 @@ export default function CashierPaymentTestPage() {
       cancelText: 'Hủy',
       onOk: async () => {
         try {
-          await confirmTestOrderPaymentAPI(selectedSchedule.id, totalPrice);
+          const healthRecord = await fetchHealthRecordByScheduleIdAPI(selectedSchedule.id);
+          await confirmTestOrderPaymentAPI(healthRecord.data.id, totalPrice);
+          if (!search.trim()) {
+            fetchAllSchedules()
+            return;
+          }
+          fetchSchedules()
           message.success('Thanh toán thành công');
         } catch {
           message.error('Thanh toán thất bại');
-        }
-
-        try {
-          const res = await searchSchedulesByNameAPI(search);
-          const enhancedSchedules = await Promise.all(
-            res.data.map(async (schedule) => {
-              const healthRecord = await healthRecordService.getHealthRecordByScheduleId(schedule.id);
-              if (!healthRecord) return { ...schedule, isPaid: false, testOrders: [], healthRecordId: null };
-
-              const testOrdersRes = await getTestOrdersByHealthRecordIdAPI(healthRecord.id);
-              const testOrders = testOrdersRes.data;
-              const isPaid = testOrders.length > 0 && testOrders.every(order => order.paymentStatus === 'Đã thanh toán');
-
-              return { ...schedule, isPaid, testOrders, healthRecordId: healthRecord.id };
-
-            })
-          );
-          enhancedSchedules.sort((a, b) => new Date(b.date) - new Date(a.date));
-          const filteredSchedules = enhancedSchedules.filter(schedule =>
-            schedule.patient?.id != null &&
-            Array.isArray(schedule.testOrders) &&
-            schedule.testOrders.length > 0
-          );
-          setSchedules(filteredSchedules);
-          const updated = enhancedSchedules.find(s => s.id === selectedSchedule.id);
-          if (updated) {
-            setSelectedSchedule(updated);
-            fetchTestOrders(updated.id);
-            setIsPaid(updated.isPaid);
-          }
-        } catch {
-          message.error('Tải dữ liệu thất bại');
         }
       }
     });
@@ -176,38 +148,15 @@ export default function CashierPaymentTestPage() {
       cancelText: 'Hủy',
       onOk: async () => {
         try {
-          await undoTestOrderPaymentAPI(selectedSchedule.id);
+          const healthRecord = await fetchHealthRecordByScheduleIdAPI(selectedSchedule.id);
+          await undoTestOrderPaymentAPI(healthRecord.data.id);
           message.success('Hoàn tác thanh toán thành công');
-
-          const res = await searchSchedulesByNameAPI(search);
-          const enhancedSchedules = await Promise.all(
-            res.data.map(async (schedule) => {
-              const healthRecord = await healthRecordService.getHealthRecordByScheduleId(schedule.id);
-              if (!healthRecord) return { ...schedule, isPaid: false, testOrders: [], healthRecordId: null };
-
-              const testOrdersRes = await getTestOrdersByHealthRecordIdAPI(healthRecord.id);
-              const testOrders = testOrdersRes.data;
-              const isPaid = testOrders.length > 0 && testOrders.every(order => order.paymentStatus === 'Đã thanh toán');
-
-              return { ...schedule, isPaid, testOrders, healthRecordId: healthRecord.id };
-
-            })
-          );
-          enhancedSchedules.sort((a, b) => new Date(b.date) - new Date(a.date));
-          const filteredSchedules = enhancedSchedules.filter(schedule =>
-            schedule.patient?.id != null &&
-            Array.isArray(schedule.testOrders) &&
-            schedule.testOrders.length > 0
-          );
-
-          setSchedules(filteredSchedules);
-
-          const updated = enhancedSchedules.find(s => s.id === selectedSchedule.id);
-          if (updated) {
-            setSelectedSchedule(updated);
-            fetchTestOrders(updated.id);
-            setIsPaid(updated.isPaid);
+          if (!search.trim()) {
+            fetchAllSchedules()
+            return;
           }
+          fetchSchedules()
+
         } catch {
           message.error('Hoàn tác thất bại');
         }
