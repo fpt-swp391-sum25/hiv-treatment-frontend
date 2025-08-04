@@ -333,13 +333,21 @@ const bulkDeleteSchedulesByDoctorAndDateAPI = async (doctorId, date) => {
 
 const updateScheduleStatusAPI = (scheduleId, newStatus) => {
     const URL_BACKEND = `/api/schedule/${scheduleId}/status`;
-    console.log(">>>>>>>>>>>>>>" + scheduleId)
-    return axios.put(URL_BACKEND, { status: newStatus });
+    const requestBody = { status: newStatus };
+    
+    const config = {
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+    };
+    
+    return axios.put(URL_BACKEND, requestBody, config);
 };
 
 export const getPatientsByScheduleAPI = async (scheduleId) => {
     try {
-        const response = await axios.get(`/api/schedule/${scheduleId}/patients`);
+                                                                                                                                                                                                                                                                                                                                                                                                    const                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        response = await axios.get(`/api/schedule/${scheduleId}/patients`);
         return response.data;
     } catch (error) {
         console.error('Error fetching patients by schedule:', error);
@@ -350,7 +358,7 @@ export const getPatientsByScheduleAPI = async (scheduleId) => {
 export const getSchedulesByDoctorDateAndSlotAPI = async (doctorId, date, slot) => {
     try {
         const response = await axios.get('/api/schedule', {
-            params: {
+            params: {                                                                                                                           
                 doctorId,
                 date,
                 slot

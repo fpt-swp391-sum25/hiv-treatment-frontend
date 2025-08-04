@@ -9,8 +9,7 @@ import {
     bulkUpdateScheduleByDoctorAndDateAPI,
     bulkDeleteSchedulesByDoctorAndDateAPI,  
     updateScheduleStatusAPI,
-    getSchedulesByDoctorDateAndSlotAPI,
-    testUpdateScheduleStatusAPI
+    getSchedulesByDoctorDateAndSlotAPI
 } from '../../../services/schedule.service';
 import '../../../styles/manager/ScheduleDetail.css';
 import axios from 'axios';
@@ -362,59 +361,22 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
 
             setProcessingSubSlot(subSlot.id);
 
-            console.log(`🔄 Starting cancel process for schedule ${subSlot.id}`);
-            
-            // Thử axios trước
-            try {
-                console.log(`🔄 Trying axios method...`);
-                const response = await updateScheduleStatusAPI(subSlot.id, "Đã hủy");
+            const response = await updateScheduleStatusAPI(subSlot.id, "Đã hủy");
 
-                if (response.status === 200) {
-                    console.log(`✅ Axios success - Status: ${response.status}, Data:`, response.data);
-                    
-                    notification.success({
-                        message: 'Thành công',
-                        description: `Đã hủy lịch cho ${subSlot.patientName}`,
-                        placement: 'topRight',
-                        duration: 4
-                    });
+            if (response.status === 200) {
+                notification.success({
+                    message: 'Thành công',
+                    description: `Đã hủy lịch cho ${subSlot.patientName}`,
+                    placement: 'topRight',
+                    duration: 4
+                });
 
-                    await showSubSlotsModal();
-                    if (onRefreshData) await onRefreshData();
-                    return;
-                }
-            } catch (axiosError) {
-                console.error(`❌ Axios failed:`, axiosError);
-                
-                // Fallback: Thử fetch API
-                console.log(`🔄 Trying fetch API fallback...`);
-                try {
-                    const fetchResponse = await testUpdateScheduleStatusAPI(subSlot.id, "Đã hủy");
-                    
-                    if (fetchResponse.ok) {
-                        console.log(`✅ Fetch API success!`);
-                        
-                        notification.success({
-                            message: 'Thành công',
-                            description: `Đã hủy lịch cho ${subSlot.patientName}`,
-                            placement: 'topRight',
-                            duration: 4
-                        });
-
-                        await showSubSlotsModal();
-                        if (onRefreshData) await onRefreshData();
-                        return;
-                    }
-                } catch (fetchError) {
-                    console.error(`❌ Fetch API also failed:`, fetchError);
-                    throw axiosError; // Throw original axios error
-                }
+                await showSubSlotsModal();
+                if (onRefreshData) await onRefreshData();
             }
 
-            throw new Error(`Unexpected response status`);
-
         } catch (error) {
-            console.error('❌ Lỗi khi hủy lịch:', error);
+            console.error('Lỗi khi hủy lịch:', error);
             
             let errorMessage = 'Có lỗi xảy ra khi hủy lịch';
             
@@ -435,8 +397,6 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                     default:
                         errorMessage = data?.message || `Lỗi ${status}: ${error.response.statusText}`;
                 }
-                
-                console.error(`❌ API Error ${status}:`, data);
             } else if (error.message) {
                 errorMessage = error.message;
             }
