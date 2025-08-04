@@ -67,7 +67,6 @@ const PatientList = () => {
             const matchesText =
                 normalizeString(item.fullName).includes(normalizeString(searchText)) ||
                 normalizeString(item.patientCode).includes(normalizeString(searchText))
-
             return matchesText
         })
         setFilteredData(filtered)
@@ -181,7 +180,7 @@ const PatientList = () => {
                     treatmentStatus: matchedHealthRecord?.data?.treatmentStatus || 'Chưa cập nhật',
                     paymentStatus: matchedPayment?.data?.status || 'Chưa thanh toán',
                 }
-            })
+            }).filter(item => item.treatmentStatus === 'Đang chờ khám')
 
             // Lọc theo trạng thái điều trị tương ứng với tab
             let statusFilter = ''
@@ -387,7 +386,6 @@ const PatientList = () => {
                 }}>
                     <Title>Danh sách bệnh nhân</Title>
                 </div>
-
                 <Tabs defaultActiveKey="waiting" onChange={handleTabChange}>
                     <TabPane tab="Đang chờ khám" key="waiting">
                         <div style={{ margin: '0 10px 15px 10px' }}>
@@ -398,7 +396,6 @@ const PatientList = () => {
                                 style={{ width: '100%', maxWidth: '400px' }}
                             />
                         </div>
-
                         {loading ? (
                             <div style={{ textAlign: 'center', margin: '40px 0' }}>
                                 <Spin size="large" />

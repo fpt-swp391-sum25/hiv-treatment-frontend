@@ -11,7 +11,8 @@ import {
 import { 
   BarChartOutlined, 
   TeamOutlined, 
-  SettingOutlined 
+  SettingOutlined,
+  ExperimentOutlined
 } from '@ant-design/icons';
 
 const { Sider } = Layout
@@ -59,6 +60,12 @@ const AdminSidebar = () => {
     },
     {
       key: '8',
+      label: <NavLink to='/admin/test-types'>Loại xét nghiệm</NavLink>,
+      icon: <ExperimentOutlined />,
+      path: '/admin/test-types'
+    },
+    {
+      key: '9',
       label: <NavLink to='/admin/system-config'>Cài đặt hệ thống</NavLink>,
       icon: < SettingOutlined />,
       path: '/admin/system-config'
