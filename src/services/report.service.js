@@ -684,7 +684,7 @@ export const getMedicalReportData = async (filters = {}) => {
 
     const healthRecordsResults = await Promise.allSettled(healthRecordsPromises);
     const healthRecords = healthRecordsResults
-      .filter(result => result.status === 'fulfilled' && result.value !== null)
+      .filter(result => result.status === 'fulfilled' && result.value && typeof result.value === 'object')
       .map(result => result.value);
 
     // 4. Lấy test results cho các health records
@@ -703,10 +703,13 @@ export const getMedicalReportData = async (filters = {}) => {
 
     // 5. Tính toán các số liệu thống kê
     // Đếm số lịch hẹn có treatmentStatus = "Đã khám"
-    const completedAppointments = healthRecords.filter(record => {
+    const completedAppointments = healthRecords
+    .filter(record => record && (record.treatmentStatus || record.treatment_status))
+    .filter(record => {
       const status = record.treatmentStatus || record.treatment_status;
       return status === "Đã khám";
     }).length;
+
 
     // Đếm số xét nghiệm đã thực hiện từ bảng test_result
     const testsPerformed = allTestOrders.length;
@@ -722,17 +725,17 @@ export const getMedicalReportData = async (filters = {}) => {
     // 6.1 Thu thập ID bệnh nhân từ health records
     healthRecords.forEach(record => {
       // Đếm số bệnh nhân duy nhất
-      let patientId = null;
-      if (record.patient && record.patient.id) {
-        patientId = record.patient.id;
-        patientIds.add(patientId);
-      } else if (record.schedule && record.schedule.patientId) {
-        patientId = record.schedule.patientId;
+      const patientId =
+        record?.patient?.id ||
+        record?.schedule?.patientId ||
+        null;
+
+      if (patientId) {
         patientIds.add(patientId);
       }
 
       // Đếm ca dương tính/âm tính HIV
-      const hivStatus = record.hivStatus || record.hiv_status;
+      const hivStatus = record?.hivStatus || record?.hiv_status;
       if (hivStatus === "Dương tính" || hivStatus === "Positive") {
         totalPositiveHIV++;
       } else if (hivStatus === "Âm tính" || hivStatus === "Negative") {
@@ -755,8 +758,10 @@ export const getMedicalReportData = async (filters = {}) => {
     // 7. Chuẩn bị dữ liệu báo cáo
     const reports = healthRecords.map(healthRecord => {
       // Tìm lịch hẹn tương ứng
-      const scheduleId = healthRecord.scheduleId ||
-        (healthRecord.schedule ? healthRecord.schedule.id : null);
+      if (!healthRecord || typeof healthRecord !== 'object') return null;
+      const scheduleId = healthRecord?.scheduleId ||
+        healthRecord?.schedule?.id || null;
+      ;
       const schedule = schedules.find(s => s.id === scheduleId) || {};
 
       // Tìm các test orders tương ứng
