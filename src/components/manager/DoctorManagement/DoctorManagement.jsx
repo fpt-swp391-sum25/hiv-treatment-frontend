@@ -45,6 +45,11 @@ const DoctorManagement = () => {
         loadDoctors();
     }, []);
 
+    const handleUpdateSuccess = () => {
+        setIsProfileDetailVisible(false);
+        loadDoctors();
+    };
+
     const handleViewProfile = async (doctor) => {
         try {
             console.log('Lấy thông tin chi tiết của bác sĩ có ID:', doctor.id);
@@ -89,7 +94,7 @@ const DoctorManagement = () => {
         }
     };
 
-   const handleEditProfile = async (doctor) => {
+    const handleEditProfile = async (doctor) => {
         console.log('Edit profile button clicked, opening modal for doctor:', doctor);
         setDetailLoading(true);
         try {
@@ -244,6 +249,7 @@ const DoctorManagement = () => {
                     onCancel={() => setIsProfileDetailVisible(false)}
                     loading={detailLoading}
                     onEditProfile={handleEditProfile}
+                    onSuccess={handleUpdateSuccess}
                 />
             )}
         </div>

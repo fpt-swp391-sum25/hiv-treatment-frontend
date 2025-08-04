@@ -34,10 +34,10 @@ const UpdateDoctorModal = ({ visible, doctor, onCancel, onSuccess }) => {
     (isAvatarRemoved
       ? ''
       : doctor?.avatar
-      ? doctor.avatar.startsWith('data:')
-        ? doctor.avatar
-        : `data:image/png;base64,${doctor.avatar}`
-      : '');
+        ? doctor.avatar.startsWith('data:')
+          ? doctor.avatar
+          : `data:image/png;base64,${doctor.avatar}`
+        : '');
 
   useEffect(() => {
     if (visible && doctor) {
@@ -91,42 +91,42 @@ const UpdateDoctorModal = ({ visible, doctor, onCancel, onSuccess }) => {
 
   const handleSubmit = async () => {
     try {
-        const values = await form.validateFields();
-        setLoading(true);
+      const values = await form.validateFields();
+      setLoading(true);
 
-        const updateUserPayload = {
-            fullName: values.fullName,
-            email: values.email,
-            phoneNumber: values.phone,
-            gender: values.gender,
-            address: values.address,
-            dateOfBirth: values.dateOfBirth
-            ? values.dateOfBirth.format('YYYY-MM-DD')
-            : null,
-            accountStatus: values.status,
-            avatar: isAvatarRemoved
-            ? ''
-            : avatarBase64 !== null
+      const updateUserPayload = {
+        fullName: values.fullName,
+        email: values.email,
+        phoneNumber: values.phone,
+        gender: values.gender,
+        address: values.address,
+        dateOfBirth: values.dateOfBirth
+          ? values.dateOfBirth.format('YYYY-MM-DD')
+          : null,
+        accountStatus: values.status,
+        avatar: isAvatarRemoved
+          ? ''
+          : avatarBase64 !== null
             ? avatarBase64
             : undefined,
-        };
+      };
 
-        await updateUserAPI(doctor.id, updateUserPayload);
+      await updateUserAPI(doctor.id, updateUserPayload);
 
-        const profilePayload = {
-            licenseNumber: values.licenseNumber,
-            startYear: values.startYear,
-            qualifications: values.qualifications,
-            background: values.background,
-            biography: values.biography,
-            doctorId: doctor.id,
-        };
+      const profilePayload = {
+        licenseNumber: values.licenseNumber,
+        startYear: values.startYear,
+        qualifications: values.qualifications,
+        background: values.background,
+        biography: values.biography,
+        doctorId: doctor.id,
+      };
 
-        await updateDoctorProfileAPI(doctor.id, profilePayload);
-        message.success('Cập nhật thông tin bác sĩ thành công');
+      await updateDoctorProfileAPI(doctor.doctorProfileId, profilePayload);
+      message.success('Cập nhật thông tin bác sĩ thành công');
 
-        onSuccess?.();
-        onCancel?.();
+      onSuccess?.();
+      onCancel?.();
     } catch (error) {
       console.error(error);
       message.error('Đã xảy ra lỗi khi cập nhật bác sĩ');
@@ -152,7 +152,7 @@ const UpdateDoctorModal = ({ visible, doctor, onCancel, onSuccess }) => {
           loading={loading}
           onClick={handleSubmit}
         >
-            Cập nhật
+          Cập nhật
         </Button>,
       ]}
     >
@@ -167,7 +167,7 @@ const UpdateDoctorModal = ({ visible, doctor, onCancel, onSuccess }) => {
               <Avatar
                 key={avatarPreview || 'empty-avatar'}
                 size={100}
-                src={avatarPreview}
+                src={avatarPreview || null}
                 icon={!avatarPreview && <UserOutlined />}
               />
               <Upload showUploadList={false} beforeUpload={handleAvatarChange}>

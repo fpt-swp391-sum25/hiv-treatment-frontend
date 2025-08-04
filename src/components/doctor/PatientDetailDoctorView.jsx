@@ -52,8 +52,8 @@ import {
   createTestOrderAPI,
   deleteTestOrderAPI
 } from "../../services/testOrder.service.js";
-import { 
-  getAllTestTypes 
+import {
+  getAllTestTypes
 } from "../../services/testtype.service.js";
 
 const PatientDetailDoctorView = () => {
@@ -325,7 +325,7 @@ const PatientDetailDoctorView = () => {
       >
         <Form layout="vertical">
           <Form.Item label="Loại xét nghiệm">
-             <Input
+            <Input
               value={currentTestType}
               onChange={e => setCurrentTestType(e.target.value)}
               placeholder="Nhập loại xét nghiệm"
@@ -338,6 +338,7 @@ const PatientDetailDoctorView = () => {
                 if (currentTestType) {
                   setNewTestTypes(prev => [...prev, currentTestType]);
                   setCurrentTestType({ name: "", typeId: null });
+                  setCurrentTestType('')
                 }
               }}
             >
@@ -373,7 +374,7 @@ const PatientDetailDoctorView = () => {
       {testOrderData.map((test) => (
         <Card key={test.id} style={{ marginTop: 16 }}>
           <Row gutter={5 + "vw"} align="middle">
-             <Col span={6}>
+            <Col span={6}>
               <p><strong>Tên:</strong> {test.name}</p>
             </Col>
             <Col span={6}>
@@ -397,12 +398,12 @@ const PatientDetailDoctorView = () => {
                   month: '2-digit',
                   year: 'numeric',
                   hour12: false,
-                  }).format(new Date(test.expectedResultTime))
-                  : ''
-                }</p>
-              </Col>
-             <Col span={6}>
-                <p><strong>Thời gian nhận kết quả:</strong> {test.actualResultTime && !isNaN(new Date(test.actualResultTime))
+                }).format(new Date(test.expectedResultTime))
+                : ''
+              }</p>
+            </Col>
+            <Col span={6}>
+              <p><strong>Thời gian nhận kết quả:</strong> {test.actualResultTime && !isNaN(new Date(test.actualResultTime))
                 ? new Intl.DateTimeFormat('vi-VN', {
                   hour: '2-digit',
                   minute: '2-digit',
