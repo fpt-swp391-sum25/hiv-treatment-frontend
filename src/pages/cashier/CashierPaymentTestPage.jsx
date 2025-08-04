@@ -3,7 +3,11 @@ import { Input, Button, Card, message, Typography, Space, Divider, Modal, Tag, L
 import {
   searchSchedulesByNameAPI,
   getAllSchedulesAPI,
+  
 } from '../../services/schedule.service';
+import {
+  healthRecordService
+} from '../../services/health-record.service';
 import {
   getTestOrdersByHealthRecordIdAPI,
   confirmTestOrderPaymentAPI,
@@ -33,10 +37,15 @@ export default function CashierPaymentTestPage() {
       const enhancedSchedules = await Promise.all(
         res.data.map(async (schedule) => {
           try {
-            const testOrdersRes = await getTestOrdersByHealthRecordIdAPI(schedule.id);
+            const healthRecord = await healthRecordService.getHealthRecordByScheduleId(schedule.id);
+            if (!healthRecord) return { ...schedule, isPaid: false, testOrders: [], healthRecordId: null };
+
+            const testOrdersRes = await getTestOrdersByHealthRecordIdAPI(healthRecord.id);
             const testOrders = testOrdersRes.data;
             const isPaid = testOrders.length > 0 && testOrders.every(order => order.paymentStatus === 'Đã thanh toán');
-            return { ...schedule, isPaid, testOrders };
+
+            return { ...schedule, isPaid, testOrders, healthRecordId: healthRecord.id };
+
           } catch {
             return { ...schedule, isPaid: false, testOrders };
           }
@@ -46,14 +55,12 @@ export default function CashierPaymentTestPage() {
       enhancedSchedules.sort((a, b) => new Date(b.date) - new Date(a.date));
 
       const filteredSchedules = enhancedSchedules.filter(schedule =>
-        schedule.patient?.id != null && schedule.testOrders?.length > 0
+        schedule.patient?.id != null &&
+        Array.isArray(schedule.testOrders) &&
+        schedule.testOrders.length > 0
       );
 
       setSchedules(filteredSchedules);
-
-      if (enhancedSchedules.length === 0) {
-        message.info('Không tìm thấy dữ liệu');
-      }
     } catch {
       message.error('Không thể tải danh sách lịch hẹn');
     }
@@ -66,10 +73,15 @@ export default function CashierPaymentTestPage() {
       const enhancedSchedules = await Promise.all(
         res.data.map(async (schedule) => {
           try {
-            const testOrdersRes = await getTestOrdersByHealthRecordIdAPI(schedule.id);
+            const healthRecord = await healthRecordService.getHealthRecordByScheduleId(schedule.id);
+            if (!healthRecord) return { ...schedule, isPaid: false, testOrders: [], healthRecordId: null };
+
+            const testOrdersRes = await getTestOrdersByHealthRecordIdAPI(healthRecord.id);
             const testOrders = testOrdersRes.data;
             const isPaid = testOrders.length > 0 && testOrders.every(order => order.paymentStatus === 'Đã thanh toán');
-            return { ...schedule, isPaid, testOrders };
+
+            return { ...schedule, isPaid, testOrders, healthRecordId: healthRecord.id };
+
           } catch {
             return { ...schedule, isPaid: false, testOrders };
           }
@@ -79,7 +91,9 @@ export default function CashierPaymentTestPage() {
       enhancedSchedules.sort((a, b) => new Date(b.date) - new Date(a.date));
 
       const filteredSchedules = enhancedSchedules.filter(schedule =>
-        schedule.patient?.id != null && schedule.testOrders?.length > 0
+        schedule.patient?.id != null &&
+        Array.isArray(schedule.testOrders) &&
+        schedule.testOrders.length > 0
       );
 
       setSchedules(filteredSchedules);
@@ -115,18 +129,32 @@ export default function CashierPaymentTestPage() {
         try {
           await confirmTestOrderPaymentAPI(selectedSchedule.id, totalPrice);
           message.success('Thanh toán thành công');
+        } catch {
+          message.error('Thanh toán thất bại');
+        }
 
+        try {
           const res = await searchSchedulesByNameAPI(search);
           const enhancedSchedules = await Promise.all(
             res.data.map(async (schedule) => {
-              const testOrdersRes = await getTestOrdersByHealthRecordIdAPI(schedule.id);
+              const healthRecord = await healthRecordService.getHealthRecordByScheduleId(schedule.id);
+              if (!healthRecord) return { ...schedule, isPaid: false, testOrders: [], healthRecordId: null };
+
+              const testOrdersRes = await getTestOrdersByHealthRecordIdAPI(healthRecord.id);
               const testOrders = testOrdersRes.data;
               const isPaid = testOrders.length > 0 && testOrders.every(order => order.paymentStatus === 'Đã thanh toán');
-              return { ...schedule, isPaid, testOrders };
+
+              return { ...schedule, isPaid, testOrders, healthRecordId: healthRecord.id };
+
             })
           );
-          setSchedules(enhancedSchedules);
-
+          enhancedSchedules.sort((a, b) => new Date(b.date) - new Date(a.date));
+          const filteredSchedules = enhancedSchedules.filter(schedule =>
+            schedule.patient?.id != null &&
+            Array.isArray(schedule.testOrders) &&
+            schedule.testOrders.length > 0
+          );
+          setSchedules(filteredSchedules);
           const updated = enhancedSchedules.find(s => s.id === selectedSchedule.id);
           if (updated) {
             setSelectedSchedule(updated);
@@ -134,7 +162,7 @@ export default function CashierPaymentTestPage() {
             setIsPaid(updated.isPaid);
           }
         } catch {
-          message.error('Thanh toán thất bại');
+          message.error('Tải dữ liệu thất bại');
         }
       }
     });
@@ -154,13 +182,25 @@ export default function CashierPaymentTestPage() {
           const res = await searchSchedulesByNameAPI(search);
           const enhancedSchedules = await Promise.all(
             res.data.map(async (schedule) => {
-              const testOrdersRes = await getTestOrdersByHealthRecordIdAPI(schedule.id);
+              const healthRecord = await healthRecordService.getHealthRecordByScheduleId(schedule.id);
+              if (!healthRecord) return { ...schedule, isPaid: false, testOrders: [], healthRecordId: null };
+
+              const testOrdersRes = await getTestOrdersByHealthRecordIdAPI(healthRecord.id);
               const testOrders = testOrdersRes.data;
               const isPaid = testOrders.length > 0 && testOrders.every(order => order.paymentStatus === 'Đã thanh toán');
-              return { ...schedule, isPaid, testOrders };
+
+              return { ...schedule, isPaid, testOrders, healthRecordId: healthRecord.id };
+
             })
           );
-          setSchedules(enhancedSchedules);
+          enhancedSchedules.sort((a, b) => new Date(b.date) - new Date(a.date));
+          const filteredSchedules = enhancedSchedules.filter(schedule =>
+            schedule.patient?.id != null &&
+            Array.isArray(schedule.testOrders) &&
+            schedule.testOrders.length > 0
+          );
+
+          setSchedules(filteredSchedules);
 
           const updated = enhancedSchedules.find(s => s.id === selectedSchedule.id);
           if (updated) {
