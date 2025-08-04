@@ -75,7 +75,7 @@ const AdminTestTypes = () => {
   const handleModalOk = async () => {
     try {
       const values = await form.validateFields()
-      
+
       if (editingTestType) {
         // Update existing test type
         await updateTestTypeAPI(editingTestType.id, values)
@@ -91,7 +91,7 @@ const AdminTestTypes = () => {
           description: "Loại xét nghiệm mới đã được tạo.",
         })
       }
-      
+
       setIsModalVisible(false)
       form.resetFields()
       loadTestTypes()
@@ -104,14 +104,14 @@ const AdminTestTypes = () => {
     try {
       const result = await checkTestTypeDeletableAPI(id);
       // Kiểm tra nếu result có chứa thông báo lỗi về constraint violation
-      if ( result.data.message.includes('TEST TYPE ALREADY IN USED')) {
+      if (result.data.message.includes('TEST TYPE ALREADY IN USED')) {
         notification.error({
           message: "Không thể xóa",
           description: "Không thể xóa loại xét nghiệm vì đang được sử dụng.",
         })
         return // Dừng lại, không thực hiện xóa
       }
-      
+
       await deleteTestTypeAPI(id)
       notification.success({
         message: "Xóa thành công",
@@ -127,7 +127,7 @@ const AdminTestTypes = () => {
         })
         return // Dừng lại, không thực hiện xóa
       }
-      
+
       // Các lỗi khác
       notification.error({
         message: "Lỗi xóa",
@@ -215,9 +215,6 @@ const AdminTestTypes = () => {
           rowKey="id"
           pagination={{
             pageSize: 10,
-            showSizeChanger: true,
-            showQuickJumper: true,
-            showTotal: (total, range) => `${range[0]}-${range[1]} của ${total} loại xét nghiệm`,
           }}
         />
       </Card>
