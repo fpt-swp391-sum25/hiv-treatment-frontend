@@ -4,6 +4,7 @@ import { getTestOrdersByHealthRecordIdAPI } from '../../services/testOrder.servi
 import { getPaymentByScheduleIdAPI } from '../../services/payment.service';
 import dayjs from 'dayjs';
 import { searchSchedulesByNameAPI } from '../../services/schedule.service';
+import { fetchHealthRecordByScheduleIdAPI } from '../../services/health-record.service';
 
 const { Title, Text } = Typography;
 
@@ -34,18 +35,32 @@ export default function CashierTransactionHistoryPage() {
 
       const detailedSchedules = await Promise.all(
         allSchedules.map(async (schedule) => {
-          const [testRes, paymentRes] = await Promise.all([
-            getTestOrdersByHealthRecordIdAPI(schedule.id),
-            getPaymentByScheduleIdAPI(schedule.id),
-          ]);
+          try {
+            const [healthRecordRes, paymentRes] = await Promise.all([
+              fetchHealthRecordByScheduleIdAPI(schedule.id),
+              getPaymentByScheduleIdAPI(schedule.id),
+            ]);
 
-          return {
-            ...schedule,
-            testOrders: testRes.data || [],
-            payment: paymentRes.data || null,
-          };
+            const healthRecord = healthRecordRes.data;
+
+            let testOrdersRes = { data: [] };
+            if (healthRecord?.id) {
+              testOrdersRes = await getTestOrdersByHealthRecordIdAPI(healthRecord.id);
+            }
+
+            return {
+              ...schedule,
+              testOrders: testOrdersRes.data || [],
+              payment: paymentRes.data || null,
+              healthRecord,
+            };
+          } catch (error) {
+            console.error('Lỗi khi lấy chi tiết lịch khám:', error);
+            return schedule;
+          }
         })
       );
+
 
       setSchedules(detailedSchedules);
       setCurrentPage(1);

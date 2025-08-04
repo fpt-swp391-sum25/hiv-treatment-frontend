@@ -149,7 +149,6 @@ const FinancialReport = ({ dateRange, onError, onDateRangeChange }) => {
                 rowKey="id"
                 pagination={{
                     pageSize: 10,
-                    showSizeChanger: true,
                     showTotal: (total) => `Tổng số ${total} giao dịch`
                 }}
                 summary={pageData => {
@@ -235,11 +234,11 @@ const FinancialReport = ({ dateRange, onError, onDateRangeChange }) => {
                     title={<Space><span>Danh sách giao dịch</span><Tag color="blue">{filteredPayments.length} giao dịch</Tag></Space>}
                     className="table-card"
                     extra={
-                        <Search 
-                            placeholder="Tìm kiếm theo mã giao dịch, tên bệnh nhân, bác sĩ..." 
-                            allowClear 
-                            value={filters.searchText} 
-                            onChange={e => handleFilterChange('searchText', e.target.value)} 
+                        <Search
+                            placeholder="Tìm kiếm theo mã giao dịch, tên bệnh nhân, bác sĩ..."
+                            allowClear
+                            value={filters.searchText}
+                            onChange={e => handleFilterChange('searchText', e.target.value)}
                             style={{ width: 350 }}
                             enterButton
                         />

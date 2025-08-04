@@ -1,6 +1,7 @@
 import {
   useParams,
-  useNavigate
+  useNavigate,
+  useLocation
 } from "react-router-dom";
 import {
   useState,
@@ -51,8 +52,8 @@ import {
   createTestOrderAPI,
   deleteTestOrderAPI
 } from "../../services/testOrder.service.js";
-import { 
-  getAllTestTypes 
+import {
+  getAllTestTypes
 } from "../../services/testtype.service.js";
 
 const PatientDetailDoctorView = () => {
@@ -72,6 +73,10 @@ const PatientDetailDoctorView = () => {
   const { Title, Text } = Typography;
   const [testTypes, setTestTypes] = useState([]);
   const navigate = useNavigate();
+
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const tab = searchParams.get("tab");
 
   useEffect(() => {
     loadData();
@@ -225,7 +230,11 @@ const PatientDetailDoctorView = () => {
   return (
     <div style={{ margin: '0 10vw' }}>
       <Space direction="vertical" style={{ margin: '15px 0 0 0', width: "100%" }}>
-        <Button type="primary" className="custom-yellow-btn" onClick={() => navigate(-1)}>
+        <Button
+          type="primary"
+          className="custom-yellow-btn"
+          onClick={() => navigate(`/doctor/patients?tab=${tab || 'waiting'}`)}
+        >
           Quay lại
         </Button>
         <Title level={3} style={{ textAlign: "center" }}>
@@ -316,7 +325,7 @@ const PatientDetailDoctorView = () => {
       >
         <Form layout="vertical">
           <Form.Item label="Loại xét nghiệm">
-             <Input
+            <Input
               value={currentTestType}
               onChange={e => setCurrentTestType(e.target.value)}
               placeholder="Nhập loại xét nghiệm"
@@ -329,6 +338,7 @@ const PatientDetailDoctorView = () => {
                 if (currentTestType) {
                   setNewTestTypes(prev => [...prev, currentTestType]);
                   setCurrentTestType({ name: "", typeId: null });
+                  setCurrentTestType('')
                 }
               }}
             >
@@ -364,7 +374,7 @@ const PatientDetailDoctorView = () => {
       {testOrderData.map((test) => (
         <Card key={test.id} style={{ marginTop: 16 }}>
           <Row gutter={5 + "vw"} align="middle">
-             <Col span={6}>
+            <Col span={6}>
               <p><strong>Tên:</strong> {test.name}</p>
             </Col>
             <Col span={6}>
@@ -388,12 +398,12 @@ const PatientDetailDoctorView = () => {
                   month: '2-digit',
                   year: 'numeric',
                   hour12: false,
-                  }).format(new Date(test.expectedResultTime))
-                  : ''
-                }</p>
-              </Col>
-             <Col span={6}>
-                <p><strong>Thời gian nhận kết quả:</strong> {test.actualResultTime && !isNaN(new Date(test.actualResultTime))
+                }).format(new Date(test.expectedResultTime))
+                : ''
+              }</p>
+            </Col>
+            <Col span={6}>
+              <p><strong>Thời gian nhận kết quả:</strong> {test.actualResultTime && !isNaN(new Date(test.actualResultTime))
                 ? new Intl.DateTimeFormat('vi-VN', {
                   hour: '2-digit',
                   minute: '2-digit',

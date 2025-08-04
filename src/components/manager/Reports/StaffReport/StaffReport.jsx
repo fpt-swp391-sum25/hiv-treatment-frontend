@@ -19,7 +19,7 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
         labTechnicians: [],
         managers: []
     });
-    
+
     // State cho bộ lọc
     const [activeTab, setActiveTab] = useState('all'); // 'all', 'doctors', 'labTechnicians', 'managers'
 
@@ -28,21 +28,21 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
     }, [dateRange]);
 
     const fetchStaffData = async () => {
-            try {
+        try {
             setLoading(true);
-                const data = await getStaffData();
+            const data = await getStaffData();
             setStaffData({
                 doctors: Array.isArray(data.doctors) ? data.doctors : [],
                 labTechnicians: Array.isArray(data.labTechnicians) ? data.labTechnicians : [],
                 managers: Array.isArray(data.managers) ? data.managers : []
             });
-            } catch (error) {
-                console.error('Error fetching staff data:', error);
+        } catch (error) {
+            console.error('Error fetching staff data:', error);
             onError(error);
-            } finally {
-                setLoading(false);
-            }
-        };
+        } finally {
+            setLoading(false);
+        }
+    };
 
     // Xử lý thay đổi khoảng thời gian
     const handleDateRangeChange = (dates) => {
@@ -128,7 +128,7 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
     // Tạo danh sách nhân viên cho bảng dựa trên tab đang chọn và dateRange
     const getStaffList = () => {
         let allStaff = [];
-        
+
         // Lấy dữ liệu theo tab
         switch (activeTab) {
             case 'doctors':
@@ -147,31 +147,31 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
                     ...staffData.managers.map(mgr => ({ ...mgr, role: STAFF_ROLES.MANAGER }))
                 ];
         }
-        
+
         // Lọc theo dateRange (cột "Ngày tham gia" - created_at)
         // CHỈ lọc khi có dateRange được chọn
         if (dateRange && dateRange.length === 2) {
             const [startDate, endDate] = dateRange;
-            
+
             allStaff = allStaff.filter(staff => {
                 // Nếu không có ngày tham gia, bỏ qua khi lọc theo thời gian
                 if (!staff.created_at) return false;
-                
+
                 const staffJoinDate = dayjs(staff.created_at);
                 const start = dayjs(startDate).startOf('day');
                 const end = dayjs(endDate).endOf('day');
-                
+
                 return staffJoinDate.isBetween(start, end, null, '[]'); // [] means inclusive
             });
         }
         // Nếu KHÔNG có dateRange, hiển thị TẤT CẢ nhân viên (bao gồm cả những người không có created_at)
-        
+
         return allStaff;
     };
-    
+
     // Danh sách nhân viên hiển thị (đã lọc hoặc tất cả)
     const staffList = getStaffList();
-    
+
     // Thống kê dựa trên dữ liệu hiển thị
     const statistics = {
         totalDoctors: staffList.filter(staff => staff.role === STAFF_ROLES.DOCTOR).length,
@@ -186,34 +186,34 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
     // Xuất Excel
     const handleExportExcel = () => {
         const staffList = getStaffList();
-        
+
         if (staffList.length === 0) {
             onError?.(new Error('Không có dữ liệu để xuất báo cáo'));
             return;
         }
-        
+
         const formattedData = staffList.map(staff => ({
             'STT': '',  // Sẽ được điền sau
             'Họ tên': staff.fullName || '',
-            'Vai trò': staff.role === STAFF_ROLES.DOCTOR ? 'Bác sĩ' : 
-                       staff.role === STAFF_ROLES.LAB_TECHNICIAN ? 'Kỹ thuật viên' : 'Quản lý',
+            'Vai trò': staff.role === STAFF_ROLES.DOCTOR ? 'Bác sĩ' :
+                staff.role === STAFF_ROLES.LAB_TECHNICIAN ? 'Kỹ thuật viên' : 'Quản lý',
             'Email': staff.email || '',
             'Số điện thoại': staff.phoneNumber || '',
             'Ngày tham gia': staff.created_at ? dayjs(staff.created_at).format('DD/MM/YYYY') : 'N/A'
         }));
-        
+
         // Thêm STT
         formattedData.forEach((item, index) => {
             item['STT'] = index + 1;
         });
-        
-        const reportTitle = activeTab === 'doctors' ? 'BaoCaoNhanSu_BacSi' : 
-                           activeTab === 'labTechnicians' ? 'BaoCaoNhanSu_KyThuatVien' : 
-                           activeTab === 'managers' ? 'BaoCaoNhanSu_QuanLy' : 'BaoCaoNhanSu_TatCa';
-                           
+
+        const reportTitle = activeTab === 'doctors' ? 'BaoCaoNhanSu_BacSi' :
+            activeTab === 'labTechnicians' ? 'BaoCaoNhanSu_KyThuatVien' :
+                activeTab === 'managers' ? 'BaoCaoNhanSu_QuanLy' : 'BaoCaoNhanSu_TatCa';
+
         exportToExcel(formattedData, reportTitle);
     };
-    
+
 
 
     return (
@@ -224,14 +224,14 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
                     <Col span={16}>
                         <Title level={2}>Báo cáo nhân sự</Title>
                         <Text type="secondary">
-                            Kỳ báo cáo: {dateRange && dateRange.length === 2 
+                            Kỳ báo cáo: {dateRange && dateRange.length === 2
                                 ? `${dateRange[0].format('DD/MM/YYYY')} - ${dateRange[1].format('DD/MM/YYYY')}`
                                 : 'Tất cả thời gian'}
                         </Text>
                     </Col>
                     <Col span={8} style={{ textAlign: 'right' }}>
                         <Space>
-                            <Button 
+                            <Button
                                 icon={<FileExcelOutlined />}
                                 onClick={handleExportExcel}
                                 type="primary"
@@ -306,25 +306,25 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
 
                 {/* Tab lọc theo vai trò */}
                 <div className="staff-tabs">
-                    <Button 
+                    <Button
                         type={activeTab === 'all' ? 'primary' : 'default'}
                         onClick={() => setActiveTab('all')}
                     >
                         Tất cả nhân viên
                     </Button>
-                    <Button 
+                    <Button
                         type={activeTab === 'doctors' ? 'primary' : 'default'}
                         onClick={() => setActiveTab('doctors')}
                     >
                         Bác sĩ
                     </Button>
-                    <Button 
+                    <Button
                         type={activeTab === 'labTechnicians' ? 'primary' : 'default'}
                         onClick={() => setActiveTab('labTechnicians')}
                     >
                         Kỹ thuật viên
                     </Button>
-                    <Button 
+                    <Button
                         type={activeTab === 'managers' ? 'primary' : 'default'}
                         onClick={() => setActiveTab('managers')}
                     >
@@ -337,9 +337,9 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
                     title={
                         <Space>
                             <span>Danh sách {
-                                activeTab === 'doctors' ? 'bác sĩ' : 
-                                activeTab === 'labTechnicians' ? 'kỹ thuật viên' : 
-                                activeTab === 'managers' ? 'quản lý' : 'nhân viên'
+                                activeTab === 'doctors' ? 'bác sĩ' :
+                                    activeTab === 'labTechnicians' ? 'kỹ thuật viên' :
+                                        activeTab === 'managers' ? 'quản lý' : 'nhân viên'
                             }</span>
                             <Tag color="blue">{staffList.length} nhân viên</Tag>
                         </Space>
@@ -347,36 +347,35 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
                     className="table-card"
                 >
                     {staffList.length > 0 ? (
-                    <Table
-                        columns={columns}
-                        dataSource={staffList}
-                        rowKey="id"
-                        pagination={{
-                            pageSize: 10,
-                            showSizeChanger: true,
-                            showTotal: (total) => `Tổng số ${total} nhân viên`
-                        }}
-                        bordered
-                        size="middle"
-                    />
-                ) : (
-                    <Alert
-                        message="Không có dữ liệu"
-                        description={
-                            dateRange && dateRange.length === 2 
-                                ? `Không tìm thấy nhân viên nào tham gia trong khoảng thời gian ${dateRange[0].format('DD/MM/YYYY')} - ${dateRange[1].format('DD/MM/YYYY')}. Hãy thử mở rộng khoảng thời gian hoặc bỏ bộ lọc để xem tất cả nhân viên.`
-                                : staffData.doctors.length + staffData.labTechnicians.length + staffData.managers.length === 0
-                                    ? "Chưa có nhân viên nào trong hệ thống."
-                                    : "Không tìm thấy nhân viên nào phù hợp với điều kiện lọc."
-                        }
-                        type="info"
-                        showIcon
-                    />
-                )}
-            </Card>
-        </div>
-    </Spin>
-);
+                        <Table
+                            columns={columns}
+                            dataSource={staffList}
+                            rowKey="id"
+                            pagination={{
+                                pageSize: 10,
+                                showTotal: (total) => `Tổng số ${total} nhân viên`
+                            }}
+                            bordered
+                            size="middle"
+                        />
+                    ) : (
+                        <Alert
+                            message="Không có dữ liệu"
+                            description={
+                                dateRange && dateRange.length === 2
+                                    ? `Không tìm thấy nhân viên nào tham gia trong khoảng thời gian ${dateRange[0].format('DD/MM/YYYY')} - ${dateRange[1].format('DD/MM/YYYY')}. Hãy thử mở rộng khoảng thời gian hoặc bỏ bộ lọc để xem tất cả nhân viên.`
+                                    : staffData.doctors.length + staffData.labTechnicians.length + staffData.managers.length === 0
+                                        ? "Chưa có nhân viên nào trong hệ thống."
+                                        : "Không tìm thấy nhân viên nào phù hợp với điều kiện lọc."
+                            }
+                            type="info"
+                            showIcon
+                        />
+                    )}
+                </Card>
+            </div>
+        </Spin>
+    );
 };
 
 export default StaffReport;
