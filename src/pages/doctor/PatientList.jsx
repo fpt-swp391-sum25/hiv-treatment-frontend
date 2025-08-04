@@ -14,6 +14,7 @@ import {
     Spin
 } from "antd";
 import {
+    useMemo,
     useState,
     useEffect,
     useContext
@@ -50,7 +51,6 @@ const PatientList = () => {
     const { user } = useContext(AuthContext)
     const [data, setData] = useState([])
     const [searchText, setSearchText] = useState('')
-    const [filteredData, setFilteredData] = useState([])
     const [activeTab, setActiveTab] = useState("waiting")
     const [loading, setLoading] = useState(false)
     const [hasSearchedExamined, setHasSearchedExamined] = useState(false)
@@ -62,15 +62,24 @@ const PatientList = () => {
 
     const navigate = useNavigate()
 
-    useEffect(() => {
-        const filtered = data.filter(item => {
+    const normalizeString = (str) => {
+    return str
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim()
+    }
+
+    const filteredData = useMemo(() => {
+        return data.filter(item => {
             const matchesText =
                 normalizeString(item.fullName).includes(normalizeString(searchText)) ||
                 normalizeString(item.patientCode).includes(normalizeString(searchText))
             return matchesText
         })
-        setFilteredData(filtered)
     }, [searchText, data])
+
 
     useEffect(() => {
         loadWaitingData()
@@ -180,7 +189,7 @@ const PatientList = () => {
                     treatmentStatus: matchedHealthRecord?.data?.treatmentStatus || 'Chưa cập nhật',
                     paymentStatus: matchedPayment?.data?.status || 'Chưa thanh toán',
                 }
-            }).filter(item => item.treatmentStatus === 'Đang chờ khám')
+            })
 
             // Lọc theo trạng thái điều trị tương ứng với tab
             let statusFilter = ''
@@ -249,15 +258,6 @@ const PatientList = () => {
 
     const handleViewDetail = (record) => {
         navigate(`/doctor/patients/${record.id}`)
-    }
-
-    const normalizeString = (str) => {
-        return str
-            .toLowerCase()
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .replace(/\s+/g, ' ')
-            .trim()
     }
 
     const columns = [
