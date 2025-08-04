@@ -3,8 +3,9 @@ import { DatePicker, Button, Row, Col, Space, Card, Radio } from 'antd';
 import { ReloadOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import '../../../styles/manager/ReportFilter.css';
+import { TeamOutlined } from '@ant-design/icons';
 
-const ReportFilters = ({ onFilterChange, initialFilters = {} }) => {
+const ReportFilters = ({ onFilterChange, initialFilters = {}, showShowAllButton = false }) => {
   const [filterType, setFilterType] = useState(initialFilters.filterType || 'month'); // month | quarter | year
   const [selectedDate, setSelectedDate] = useState(initialFilters.selectedDate ? dayjs(initialFilters.selectedDate) : null);
 
@@ -58,10 +59,12 @@ const ReportFilters = ({ onFilterChange, initialFilters = {} }) => {
   };
 
   useEffect(() => {
-    if (!initialFilters.selectedDate) {
-      const today = dayjs();
-      const formattedDate = formatSelectedDateForAPI(today, filterType);
-      setSelectedDate(today);
+    // CHỈ set dateRange khi có initialFilters.selectedDate
+    // KHÔNG tự động set dateRange khi load để hiển thị tất cả dữ liệu
+    if (initialFilters.selectedDate) {
+      const date = dayjs(initialFilters.selectedDate);
+      setSelectedDate(date);
+      const formattedDate = formatSelectedDateForAPI(date, filterType);
       onFilterChange({
         filterType,
         selectedDate: formattedDate,
@@ -103,7 +106,27 @@ const ReportFilters = ({ onFilterChange, initialFilters = {} }) => {
           </div>
         </Col>
 
-        <Col xs={24} sm={24} md={8} lg={6} xl={5} style={{ textAlign: 'center' }}>
+        {showShowAllButton && (
+          <Col xs={24} sm={12} md={6} lg={5} xl={4} style={{ textAlign: 'center' }}>
+            <Button 
+              type="primary"
+              icon={<TeamOutlined />} 
+              onClick={() => {
+                setFilterType('month');
+                setSelectedDate(null);
+                onFilterChange({
+                  filterType: 'month',
+                  selectedDate: null,
+                });
+              }}
+              className="filter-show-all-button"
+            >
+              Hiển thị tất cả
+            </Button>
+          </Col>
+        )}
+
+        <Col xs={24} sm={12} md={6} lg={5} xl={4} style={{ textAlign: 'center' }}>
           <Button 
             icon={<ReloadOutlined />} 
             onClick={handleReset}

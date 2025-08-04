@@ -166,6 +166,23 @@
   border-radius: 4px;
 }
 
+.filter-show-all-button {
+  margin-top: 24px;
+  height: 38px;
+  padding: 0 20px;
+  border-radius: 4px;
+  background: linear-gradient(135deg, #1890ff, #40a9ff);
+  border: none;
+  box-shadow: 0 2px 4px rgba(24, 144, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+.filter-show-all-button:hover {
+  background: linear-gradient(135deg, #40a9ff, #1890ff);
+  box-shadow: 0 4px 8px rgba(24, 144, 255, 0.4);
+  transform: translateY(-1px);
+}
+
 /* Styles cho charts */
 .chart-container {
   width: 100%;

@@ -3,6 +3,7 @@ import { Row, Col, Card, Table, Spin, Statistic, Select, Input, Space, Button, T
 import { UserOutlined, TeamOutlined, FilterOutlined, SearchOutlined, ReloadOutlined, FileExcelOutlined, DownloadOutlined, MedicineBoxOutlined, ExperimentOutlined, SettingOutlined } from '@ant-design/icons';
 import { getStaffData, exportToExcel } from '../../../../services/report.service';
 import { STAFF_ROLES } from '../../../../types/report.types';
+import ReportFilters from '../ReportFilters';
 import dayjs from 'dayjs';
 import '../../../../styles/manager/StaffReport.css';
 
@@ -20,12 +21,6 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
     });
     
     // State cho bộ lọc
-    const [filters, setFilters] = useState({
-        role: 'ALL',
-        searchText: '',
-    });
-    const [showFilters, setShowFilters] = useState(false);
-    const [selectedDatePreset, setSelectedDatePreset] = useState('all');
     const [activeTab, setActiveTab] = useState('all'); // 'all', 'doctors', 'labTechnicians', 'managers'
 
     useEffect(() => {
@@ -49,79 +44,11 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
             }
         };
 
-    // Tính toán thống kê
-    const statistics = {
-        totalDoctors: staffData.doctors.length,
-        totalLabTechs: staffData.labTechnicians.length,
-        totalManagers: staffData.managers.length,
-        totalStaff: staffData.doctors.length + staffData.labTechnicians.length + staffData.managers.length,
-    };
-
     // Xử lý thay đổi khoảng thời gian
     const handleDateRangeChange = (dates) => {
         // Gọi hàm callback để cập nhật dateRange ở component cha
         if (typeof onDateRangeChange === 'function') {
             onDateRangeChange(dates);
-        }
-    };
-    
-    // Xử lý thay đổi preset khoảng thời gian
-    const handleDatePresetChange = (value) => {
-        setSelectedDatePreset(value);
-        
-        let start, end;
-        const today = dayjs();
-        
-        switch (value) {
-            case 'today':
-                start = today.startOf('day');
-                end = today.endOf('day');
-                break;
-            case 'yesterday':
-                start = today.subtract(1, 'day').startOf('day');
-                end = today.subtract(1, 'day').endOf('day');
-                break;
-            case 'thisWeek':
-                start = today.startOf('week');
-                end = today.endOf('week');
-                break;
-            case 'lastWeek':
-                start = today.subtract(1, 'week').startOf('week');
-                end = today.subtract(1, 'week').endOf('week');
-                break;
-            case 'thisMonth':
-                start = today.startOf('month');
-                end = today.endOf('month');
-                break;
-            case 'lastMonth':
-                start = today.subtract(1, 'month').startOf('month');
-                end = today.subtract(1, 'month').endOf('month');
-                break;
-            case 'thisQuarter':
-                start = today.startOf('quarter');
-                end = today.endOf('quarter');
-                break;
-            case 'lastQuarter':
-                start = today.subtract(1, 'quarter').startOf('quarter');
-                end = today.subtract(1, 'quarter').endOf('quarter');
-                break;
-            case 'thisYear':
-                start = today.startOf('year');
-                end = today.endOf('year');
-                break;
-            case 'lastYear':
-                start = today.subtract(1, 'year').startOf('year');
-                end = today.subtract(1, 'year').endOf('year');
-                break;
-            default:
-                // 'all' - không áp dụng bộ lọc ngày
-                start = null;
-                end = null;
-        }
-        
-        // Gọi hàm callback để cập nhật dateRange ở component cha
-        if (typeof onDateRangeChange === 'function' && start && end) {
-            onDateRangeChange([start, end]);
         }
     };
 
@@ -198,58 +125,62 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
         }
     };
 
-    // Tạo danh sách nhân viên cho bảng dựa trên tab đang chọn
+    // Tạo danh sách nhân viên cho bảng dựa trên tab đang chọn và dateRange
     const getStaffList = () => {
+        let allStaff = [];
+        
+        // Lấy dữ liệu theo tab
         switch (activeTab) {
             case 'doctors':
-                return staffData.doctors.map(doc => ({ ...doc, role: STAFF_ROLES.DOCTOR }));
+                allStaff = staffData.doctors.map(doc => ({ ...doc, role: STAFF_ROLES.DOCTOR }));
+                break;
             case 'labTechnicians':
-                return staffData.labTechnicians.map(tech => ({ ...tech, role: STAFF_ROLES.LAB_TECHNICIAN }));
+                allStaff = staffData.labTechnicians.map(tech => ({ ...tech, role: STAFF_ROLES.LAB_TECHNICIAN }));
+                break;
             case 'managers':
-                return staffData.managers.map(mgr => ({ ...mgr, role: STAFF_ROLES.MANAGER }));
+                allStaff = staffData.managers.map(mgr => ({ ...mgr, role: STAFF_ROLES.MANAGER }));
+                break;
             default:
-                return [
-        ...staffData.doctors.map(doc => ({ ...doc, role: STAFF_ROLES.DOCTOR })),
-        ...staffData.labTechnicians.map(tech => ({ ...tech, role: STAFF_ROLES.LAB_TECHNICIAN })),
-        ...staffData.managers.map(mgr => ({ ...mgr, role: STAFF_ROLES.MANAGER }))
-    ];
-        }
-    };
-    
-    // Lọc danh sách nhân viên theo bộ lọc
-    const filteredStaffList = getStaffList().filter(staff => {
-        // Lọc theo vai trò
-        if (filters.role !== 'ALL' && staff.role !== filters.role) {
-            return false;
+                allStaff = [
+                    ...staffData.doctors.map(doc => ({ ...doc, role: STAFF_ROLES.DOCTOR })),
+                    ...staffData.labTechnicians.map(tech => ({ ...tech, role: STAFF_ROLES.LAB_TECHNICIAN })),
+                    ...staffData.managers.map(mgr => ({ ...mgr, role: STAFF_ROLES.MANAGER }))
+                ];
         }
         
-        // Lọc theo từ khóa tìm kiếm
-        if (filters.searchText) {
-            const searchLower = filters.searchText.toLowerCase();
-            return (
-                (staff.fullName && staff.fullName.toLowerCase().includes(searchLower)) ||
-                (staff.email && staff.email.toLowerCase().includes(searchLower)) ||
-                (staff.phoneNumber && staff.phoneNumber.toLowerCase().includes(searchLower))
-            );
+        // Lọc theo dateRange (cột "Ngày tham gia" - created_at)
+        // CHỈ lọc khi có dateRange được chọn
+        if (dateRange && dateRange.length === 2) {
+            const [startDate, endDate] = dateRange;
+            
+            allStaff = allStaff.filter(staff => {
+                // Nếu không có ngày tham gia, bỏ qua khi lọc theo thời gian
+                if (!staff.created_at) return false;
+                
+                const staffJoinDate = dayjs(staff.created_at);
+                const start = dayjs(startDate).startOf('day');
+                const end = dayjs(endDate).endOf('day');
+                
+                return staffJoinDate.isBetween(start, end, null, '[]'); // [] means inclusive
+            });
         }
+        // Nếu KHÔNG có dateRange, hiển thị TẤT CẢ nhân viên (bao gồm cả những người không có created_at)
         
-        return true;
-    });
-    
-    // Xử lý thay đổi bộ lọc
-    const handleFilterChange = (key, value) => {
-        setFilters(prev => ({
-            ...prev,
-            [key]: value
-        }));
+        return allStaff;
     };
     
-    // Reset bộ lọc
-    const resetFilters = () => {
-        setFilters({
-            role: 'ALL',
-            searchText: '',
-        });
+    // Danh sách nhân viên hiển thị (đã lọc hoặc tất cả)
+    const staffList = getStaffList();
+    
+    // Thống kê dựa trên dữ liệu hiển thị
+    const statistics = {
+        totalDoctors: staffList.filter(staff => staff.role === STAFF_ROLES.DOCTOR).length,
+        totalLabTechs: staffList.filter(staff => staff.role === STAFF_ROLES.LAB_TECHNICIAN).length,
+        totalManagers: staffList.filter(staff => staff.role === STAFF_ROLES.MANAGER).length,
+        totalStaff: staffList.length,
+        // Thêm thông tin về việc lọc
+        isFiltered: dateRange && dateRange.length === 2,
+        originalTotal: staffData.doctors.length + staffData.labTechnicians.length + staffData.managers.length
     };
 
     // Xuất Excel
@@ -307,95 +238,27 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
                             >
                                 Xuất Excel
                             </Button>
-                            <Button
-                                icon={<FilterOutlined />}
-                                onClick={() => setShowFilters(!showFilters)}
-                                type={showFilters ? "primary" : "default"}
-                            >
-                                Bộ lọc
-                            </Button>
                         </Space>
                     </Col>
                 </Row>
 
-                {/* Bộ lọc */}
-                {showFilters && (
-                    <Card className="filters-container">
-                        <Row gutter={[16, 16]}>
-                            <Col span={24}>
-                                <Space direction="vertical" style={{ width: '100%' }}>
-                                    <Typography.Text strong>Khoảng thời gian</Typography.Text>
-                                    <Space>
-                                        <RangePicker
-                                            value={dateRange}
-                                            onChange={handleDateRangeChange}
-                                            format="DD/MM/YYYY"
-                                            placeholder={['Từ ngày', 'Đến ngày']}
-                                            allowClear
-                                        />
-                                        <Select
-                                            value={selectedDatePreset} 
-                                            onChange={handleDatePresetChange}
-                                            style={{ width: 150 }}
-                                        >
-                                            <Option value="all">Tất cả thời gian</Option>
-                                            <Option value="today">Hôm nay</Option>
-                                            <Option value="yesterday">Hôm qua</Option>
-                                            <Option value="thisWeek">Tuần này</Option>
-                                            <Option value="lastWeek">Tuần trước</Option>
-                                            <Option value="thisMonth">Tháng này</Option>
-                                            <Option value="lastMonth">Tháng trước</Option>
-                                            <Option value="thisQuarter">Quý này</Option>
-                                            <Option value="lastQuarter">Quý trước</Option>
-                                            <Option value="thisYear">Năm nay</Option>
-                                            <Option value="lastYear">Năm trước</Option>
-                                        </Select>
-                                    </Space>
-                                </Space>
-                            </Col>
-                            <Col span={24}>
-                                <Divider style={{ margin: '12px 0' }} />
-                            </Col>
-                            <Col xs={24} sm={12} md={8} lg={6}>
-                                <Typography.Text strong>Vai trò</Typography.Text>
-                                <Select
-                                    value={filters.role}
-                                    onChange={value => handleFilterChange('role', value)}
-                                    style={{ width: '100%', marginTop: 8 }}
-                                >
-                                    <Option value="ALL">Tất cả vai trò</Option>
-                                    <Option value={STAFF_ROLES.DOCTOR}>Bác sĩ</Option>
-                                    <Option value={STAFF_ROLES.LAB_TECHNICIAN}>Kỹ thuật viên</Option>
-                                    <Option value={STAFF_ROLES.MANAGER}>Quản lý</Option>
-                                </Select>
-                            </Col>
-                            <Col xs={24} sm={12} md={8} lg={6}>
-                                <Typography.Text strong>Tìm kiếm</Typography.Text>
-                                <Search
-                                    placeholder="Tìm kiếm nhân viên"
-                                    value={filters.searchText}
-                                    onChange={e => handleFilterChange('searchText', e.target.value)}
-                                    style={{ width: '100%', marginTop: 8 }}
-                                    allowClear
-                                />
-                            </Col>
-                            <Col span={24} style={{ textAlign: 'right', marginTop: 8 }}>
-                                <Space>
-                                    <Button icon={<ReloadOutlined />} onClick={resetFilters}>
-                                        Đặt lại bộ lọc
-                                    </Button>
-                                    <Button 
-                                        type="primary" 
-                                        icon={<FilterOutlined />} 
-                                        onClick={() => setShowFilters(false)}
-                                    >
-                                        Áp dụng
-                                    </Button>
-                                </Space>
-                            </Col>
-                        </Row>
-                    </Card>
-                )}
+                {/* Bộ lọc thời gian từ FinancialReport */}
+                <ReportFilters
+                    onFilterChange={({ filterType, selectedDate }) => {
+                        if (selectedDate) {
+                            const start = dayjs(selectedDate);
+                            let end = start.endOf(filterType);
+                            onDateRangeChange([start, end]);
+                        } else {
+                            onDateRangeChange(null);
+                        }
+                    }}
+                    initialFilters={{
+                        filterType: 'month',
+                        selectedDate: dateRange?.[0]?.toISOString() || null,
+                    }}
+                    showShowAllButton={true}
+                />
 
                 {/* Thống kê tổng quan */}
                 <Row gutter={[16, 16]} className="statistics-row">
@@ -478,45 +341,42 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
                                 activeTab === 'labTechnicians' ? 'kỹ thuật viên' : 
                                 activeTab === 'managers' ? 'quản lý' : 'nhân viên'
                             }</span>
-                            <Tag color="blue">{filteredStaffList.length} nhân viên</Tag>
+                            <Tag color="blue">{staffList.length} nhân viên</Tag>
                         </Space>
                     }
                     className="table-card"
-                    extra={
-                        <Button 
-                            type="primary" 
-                            icon={<DownloadOutlined />} 
-                            onClick={handleExportExcel}
-                        >
-                            Xuất danh sách
-                        </Button>
-                    }
                 >
-                    {filteredStaffList.length > 0 ? (
+                    {staffList.length > 0 ? (
                     <Table
                         columns={columns}
-                        dataSource={filteredStaffList}
+                        dataSource={staffList}
                         rowKey="id"
                         pagination={{
                             pageSize: 10,
                             showSizeChanger: true,
                             showTotal: (total) => `Tổng số ${total} nhân viên`
                         }}
-                            bordered
-                            size="middle"
-                        />
-                    ) : (
-                        <Alert
-                            message="Không có dữ liệu"
-                            description="Không tìm thấy nhân viên nào phù hợp với điều kiện lọc."
-                            type="info"
-                            showIcon
-                        />
-                    )}
-                </Card>
-            </div>
-        </Spin>
-    );
+                        bordered
+                        size="middle"
+                    />
+                ) : (
+                    <Alert
+                        message="Không có dữ liệu"
+                        description={
+                            dateRange && dateRange.length === 2 
+                                ? `Không tìm thấy nhân viên nào tham gia trong khoảng thời gian ${dateRange[0].format('DD/MM/YYYY')} - ${dateRange[1].format('DD/MM/YYYY')}. Hãy thử mở rộng khoảng thời gian hoặc bỏ bộ lọc để xem tất cả nhân viên.`
+                                : staffData.doctors.length + staffData.labTechnicians.length + staffData.managers.length === 0
+                                    ? "Chưa có nhân viên nào trong hệ thống."
+                                    : "Không tìm thấy nhân viên nào phù hợp với điều kiện lọc."
+                        }
+                        type="info"
+                        showIcon
+                    />
+                )}
+            </Card>
+        </div>
+    </Spin>
+);
 };
 
-export default StaffReport; 
+export default StaffReport;
