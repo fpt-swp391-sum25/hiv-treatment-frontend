@@ -105,7 +105,7 @@ const PatientDetail = () => {
         )
 
         if (
-          (healthRecordData.hivStatus === "Dương tính" 
+          (healthRecordData.hivStatus === "Dương tính"
             || healthRecordData.hivStatus === "Âm tính"
             || healthRecordData.hivStatus === "Chưa xác định") &&
           allResultsFilled
@@ -222,10 +222,14 @@ const PatientDetail = () => {
         isUpdateTestOrderModalOpen={isUpdateTestOrderModalOpen}
         setIsUpdateTestOrderModalOpen={setIsUpdateTestOrderModalOpen}
         dataUpdate={dataUpdate}
-        testTypes={testTypes} 
+        testTypes={testTypes}
         onPreviewUpdate={(updatedTest) => {
           setTestOrderData((prev) =>
-            prev.map((test) => test.id === updatedTest.id ? updatedTest : test)
+            prev.map((test) =>
+              test.id === updatedTest.id
+                ? { ...test, ...updatedTest }
+                : test
+            )
           )
         }}
       />
