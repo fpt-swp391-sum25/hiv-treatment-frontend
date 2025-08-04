@@ -1,10 +1,11 @@
 import {
   useParams,
-  useNavigate
+  useNavigate,
+  useLocation,
 } from "react-router-dom"
 import {
   useState,
-  useEffect
+  useEffect,
 } from "react"
 import {
   Typography,
@@ -35,6 +36,8 @@ const PatientDetail = () => {
   const [isUpdateTestOrderModalOpen, setIsUpdateTestOrderModalOpen] = useState(false)
   const [testTypes, setTestTypes] = useState([]);
 
+  const location = useLocation();
+  const fromTab = location.state?.fromTab;
   const { id } = useParams()
   const { Title } = Typography
   const navigate = useNavigate()
@@ -144,7 +147,15 @@ const PatientDetail = () => {
   return (
     <div style={{ margin: '0 10vw' }}>
       <Space direction="vertical" style={{ width: "100%" }}>
-        <Button onClick={() => navigate(-2)}>← Quay lại</Button>
+        <Button onClick={() => {
+          if (fromTab) {
+            navigate(`/lab-technician?tab=${fromTab}`);
+          } else {
+            navigate(-1);
+          }
+        }}>
+          ← Quay lại
+        </Button>
         <Title level={3} style={{ textAlign: "center", width: "100%" }}>
           Chi tiết ca khám
         </Title>
