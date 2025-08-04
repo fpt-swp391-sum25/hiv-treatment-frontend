@@ -14,6 +14,7 @@ instance.interceptors.request.use(function (config) {
     if (typeof window !== "undefined" && window && window.localStorage && window.localStorage.getItem('access_token')) {
         const token = window.localStorage.getItem('access_token');
         config.headers.Authorization = 'Bearer ' + token;
+        config.headers['Content-Type'] = 'application/json;charset=UTF-8';
     }
     return config;
 }, function (error) {

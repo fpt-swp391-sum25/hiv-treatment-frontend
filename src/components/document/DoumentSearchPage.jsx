@@ -37,7 +37,7 @@ const ResourceSearchPage = () => {
             const dateB = new Date(b.createdAt || b.created_at || 0);
             return dateB - dateA; // newest first
           });
-          
+
           setDocuments(sortedDocuments);
           setFilteredDocs(sortedDocuments);
           // Get picture for document
@@ -83,10 +83,11 @@ const ResourceSearchPage = () => {
     const inputValue = e.target.value;
     setSearchTerm(inputValue);
     const term = normalizeString(inputValue.toLowerCase());
+    console.log(">>>>>>>>>>>>>>>>>>>>>>>", documents)
     const filtered = documents.filter(
       (doc) =>
         normalizeString(doc.title).includes(term) ||
-        normalizeString(doc.author ? doc.author : '').toLowerCase().includes(term) ||
+        normalizeString(doc.doctor.fullName ? doc.doctor.fullName : '').toLowerCase().includes(term) ||
         normalizeString(doc.content ? doc.content : '').toLowerCase().includes(term)
     );
     // Maintain sort order (newest first) when searching

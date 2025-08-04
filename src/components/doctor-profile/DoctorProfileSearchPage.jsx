@@ -54,15 +54,26 @@ const DoctorsSearchPage = () => {
     }
   };
 
+  const normalizeString = (str) => {
+    return str
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  };
+
   // Filter doctors based on search term
   const filteredDoctors = mergedDoctors.filter((doctors) =>
-    doctors.fullName.toLowerCase().includes(searchTerm.toLowerCase())
+    normalizeString(doctors.fullName).includes(normalizeString(searchTerm))
   );
 
   useEffect(() => {
     // Scroll to top when the component mounts
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
+
+
 
   return (
     <section className="doctor-section" id="doctors-top">

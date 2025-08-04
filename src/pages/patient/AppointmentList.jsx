@@ -75,7 +75,7 @@ const AppointmentList = () => {
         setLoading(true);
         try {
             const response = await fetchAllPatientScheduleAPI(user.id);
-            const today = dayjs().startOf('day');
+            const now = dayjs()
             const sorted = response.data
                 .map(item => ({
                     ...item,
@@ -86,7 +86,7 @@ const AppointmentList = () => {
                 }))
                 .filter(item => {
                     const scheduleDate = dayjs(`${item.date} ${item.slot}`, 'DD-MM-YYYY HH:mm');
-                    return scheduleDate.isSame(today, 'day') || scheduleDate.isAfter(today);
+                    return scheduleDate.isAfter(now);
                 })
                 .sort((a, b) => {
                     const dateA = dayjs(`${a.date} ${a.slot}`, 'DD-MM-YYYY HH:mm');

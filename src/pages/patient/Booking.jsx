@@ -214,8 +214,18 @@ const Booking = () => {
                 : await fetchScheduleByDateAPI(dayjs(date).format('YYYY-MM-DD'));
             if (response.data) {
                 setAvailableSchedules(response.data);
+                const now = dayjs()
+                let filteredData = response.data;
 
-                const grouped = response.data.reduce((acc, schedule) => {
+                if (dayjs(date).isSame(now, 'day')) {
+                    filteredData = filteredData.filter(schedule => {
+                        const slotStart = schedule.slot.split('-')[0];
+                        const slotDateTime = dayjs(`${dayjs(date).format('YYYY-MM-DD')} ${slotStart}`, 'YYYY-MM-DD HH:mm');
+                        return slotDateTime.isAfter(now);
+                    });
+                }
+
+                const grouped = filteredData.reduce((acc, schedule) => {
                     const startTime = schedule.slot.split('-')[0];
                     if (!acc[startTime]) {
                         acc[startTime] = {
@@ -226,6 +236,7 @@ const Booking = () => {
                     acc[startTime].slots.push(schedule);
                     return acc;
                 }, {});
+
 
                 // Sắp xếp theo startTime
                 const sorted = Object.keys(grouped)
