@@ -13,7 +13,8 @@ import {
     useEffect
 } from "react";
 import {
-    useNavigate
+    useNavigate,
+    useLocation,
 } from "react-router-dom";
 import {
     DatePicker
@@ -26,6 +27,7 @@ import {
 import {
     fetchUsersAPI
 } from "../../services/user.service";
+import queryString from "query-string"; 
 
 const { Title } = Typography
 const { Option } = Select
@@ -44,6 +46,13 @@ const LabTechnicianPatientList = () => {
     const [pendingFiltered, setPendingFiltered] = useState([])
     const [historyFiltered, setHistoryFiltered] = useState([])
     const navigate = useNavigate()
+    const location = useLocation();
+    const parsedQuery = queryString.parse(location.search);
+    const [activeTab, setActiveTab] = useState(parsedQuery.tab || "pending");
+
+  useEffect(() => {
+      setActiveTab(parsedQuery.tab || "pending");
+  }, [location.search]);
 
     useEffect(() => {
         loadData()
@@ -140,8 +149,10 @@ const LabTechnicianPatientList = () => {
     const historySlotOptions = Array.from(new Set(historyList.map(item => item.slot))).filter(Boolean)
 
     const handleViewDetail = (record) => {
-        navigate(`/lab-technician/patient-detail/${record.id}`)
-    }
+        navigate(`/lab-technician/patient-detail/${record.id}`, {
+            state: { fromTab: activeTab }  
+        });
+    };
 
     const normalizeString = (str) => {
         return str
@@ -208,7 +219,13 @@ const LabTechnicianPatientList = () => {
             <div style={{ display: 'flex', justifyContent: 'space-between', padding: '15px' }}>
                 <Title>Danh sách bệnh nhân</Title>
             </div>
-            <Tabs defaultActiveKey="pending">
+           <Tabs
+                activeKey={activeTab}
+                onChange={(key) => {
+                    setActiveTab(key);
+                    navigate(`?tab=${key}`);
+                }}
+            >
                 <TabPane tab="Đang chờ xử lý" key="pending">
                     <Row gutter={16} style={{ marginBottom: 16 }}>
                         <Col span={6}>

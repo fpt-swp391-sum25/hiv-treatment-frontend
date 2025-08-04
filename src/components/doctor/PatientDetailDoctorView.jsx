@@ -1,6 +1,7 @@
 import {
   useParams,
-  useNavigate
+  useNavigate,
+  useLocation
 } from "react-router-dom";
 import {
   useState,
@@ -72,6 +73,10 @@ const PatientDetailDoctorView = () => {
   const { Title, Text } = Typography;
   const [testTypes, setTestTypes] = useState([]);
   const navigate = useNavigate();
+
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const tab = searchParams.get("tab");
 
   useEffect(() => {
     loadData();
@@ -225,7 +230,11 @@ const PatientDetailDoctorView = () => {
   return (
     <div style={{ margin: '0 10vw' }}>
       <Space direction="vertical" style={{ margin: '15px 0 0 0', width: "100%" }}>
-        <Button type="primary" className="custom-yellow-btn" onClick={() => navigate(-1)}>
+        <Button
+          type="primary"
+          className="custom-yellow-btn"
+          onClick={() => navigate(`/doctor/patients?tab=${tab || 'waiting'}`)}
+        >
           Quay lại
         </Button>
         <Title level={3} style={{ textAlign: "center" }}>

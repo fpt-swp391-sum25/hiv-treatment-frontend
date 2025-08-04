@@ -21,7 +21,8 @@ import {
 } from "react";
 import {
     Outlet,
-    useNavigate
+    useNavigate,
+    useSearchParams 
 } from "react-router-dom";
 import dayjs from 'dayjs';
 import 'dayjs/locale/vi';
@@ -59,6 +60,16 @@ const PatientList = () => {
     const [examinedSearchText, setExaminedSearchText] = useState('')
     const [consultedSearchText, setConsultedSearchText] = useState('')
     const [absentSearchText, setAbsentSearchText] = useState('')
+
+    const [searchParams] = useSearchParams();
+    const tabParam = searchParams.get("tab");
+
+    useEffect(() => {
+        if (tabParam) {
+            setActiveTab(tabParam);
+            handleTabChange(tabParam);
+        }
+    }, [tabParam]);
 
     const navigate = useNavigate()
 
@@ -257,7 +268,7 @@ const PatientList = () => {
     }
 
     const handleViewDetail = (record) => {
-        navigate(`/doctor/patients/${record.id}`)
+        navigate(`/doctor/patients/${record.id}?tab=${activeTab}`);
     }
 
     const columns = [
@@ -386,7 +397,7 @@ const PatientList = () => {
                 }}>
                     <Title>Danh sách bệnh nhân</Title>
                 </div>
-                <Tabs defaultActiveKey="waiting" onChange={handleTabChange}>
+                <Tabs activeKey={activeTab} onChange={handleTabChange}>
                     <TabPane tab="Đang chờ khám" key="waiting">
                         <div style={{ margin: '0 10px 15px 10px' }}>
                             <Input
