@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
-  Card, Statistic, Row, Col, Tabs, Button, 
+  Card, Statistic, Row, Col, Tabs, Button,
   Space, DatePicker, Spin, Empty, Table, Tag,
   Divider, Typography, Alert, List, Descriptions, Input
 } from 'antd';
@@ -40,13 +40,22 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
       hivTrends: []
     }
   });
-  
+
+  const normalizeString = (str) => {
+    return (str || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  };
+
   // State cho tab Patient Appointments
   const [expandedPatientIds, setExpandedPatientIds] = useState([]);
   const [expandedRecordIds, setExpandedRecordIds] = useState({});
-  
 
-  
+
+
   // State cho search bệnh nhân
   const [searchPatientName, setSearchPatientName] = useState('');
 
@@ -54,10 +63,10 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
   const hivStatistics = useMemo(() => {
     const { totalPositiveHIV = 0, totalNegativeHIV = 0 } = reportData.statistics;
     const totalHIVTests = totalPositiveHIV + totalNegativeHIV;
-    const positiveRate = totalHIVTests > 0 
-      ? Math.round((totalPositiveHIV / totalHIVTests) * 100) 
+    const positiveRate = totalHIVTests > 0
+      ? Math.round((totalPositiveHIV / totalHIVTests) * 100)
       : 0;
-    
+
     return {
       totalHIVTests,
       positiveRate
@@ -67,21 +76,21 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
   // Filtered HIV trends based on dateRange
   const filteredHivTrends = useMemo(() => {
     const { hivTrends = [] } = reportData.statistics;
-    
+
     // Nếu không có dateRange, trả về tất cả dữ liệu
     if (!dateRange || !dateRange[0] || !dateRange[1]) {
       return hivTrends;
     }
-    
+
     const startDate = dayjs(dateRange[0]);
     const endDate = dayjs(dateRange[1]);
-    
+
     return hivTrends.filter(trend => {
       if (!trend.month) return false;
-      
+
       // Parse month từ format "2025-06" thành dayjs object
       const trendDate = dayjs(trend.month + '-01'); // Thêm ngày để tạo date hợp lệ
-      
+
       // Kiểm tra xem tháng có nằm trong khoảng dateRange không
       return trendDate.isBetween(startDate, endDate, 'month', '[]');
     });
@@ -98,7 +107,7 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
         positiveRate: 0
       };
     }
-    
+
     const totals = filteredHivTrends.reduce((acc, trend) => {
       acc.totalPositiveHIV += trend.positive || 0;
       acc.totalNegativeHIV += trend.negative || 0;
@@ -109,12 +118,12 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
       totalNegativeHIV: 0,
       totalUnknownHIV: 0
     });
-    
+
     const totalHIVTests = totals.totalPositiveHIV + totals.totalNegativeHIV + totals.totalUnknownHIV;
-    const positiveRate = totalHIVTests > 0 
-      ? Math.round((totals.totalPositiveHIV / totalHIVTests) * 100) 
+    const positiveRate = totalHIVTests > 0
+      ? Math.round((totals.totalPositiveHIV / totalHIVTests) * 100)
       : 0;
-    
+
     return {
       ...totals,
       totalHIVTests,
@@ -125,20 +134,20 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
   // Filtered reports based on dateRange
   const filteredReports = useMemo(() => {
     const { reports = [] } = reportData;
-    
+
     // Nếu không có dateRange, trả về tất cả dữ liệu
     if (!dateRange || !dateRange[0] || !dateRange[1]) {
       return reports;
     }
-    
+
     const startDate = dayjs(dateRange[0]);
     const endDate = dayjs(dateRange[1]);
-    
+
     return reports.filter(report => {
       if (!report || !report.schedule || !report.schedule.date) return false;
-      
+
       const appointmentDate = dayjs(report.schedule.date);
-      
+
       // Kiểm tra xem ngày hẹn có nằm trong khoảng dateRange không
       return appointmentDate.isBetween(startDate, endDate, 'day', '[]');
     });
@@ -156,30 +165,30 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
         totalNegativeHIV: 0
       };
     }
-    
+
     // Tính toán các thống kê từ filteredReports
     let totalAppointments = 0;
     const patientIds = new Set();
-    
+
     filteredReports.forEach(report => {
       const healthRecord = report.healthRecord || {};
       const schedule = report.schedule || {};
-      
+
       // Đếm lịch hẹn đã hoàn thành
       if (healthRecord.treatment_status === "Đã khám" || healthRecord.treatmentStatus === "Đã khám") {
         totalAppointments++;
       }
-      
+
       // Đếm bệnh nhân unique
       const patientId = schedule.patient?.id || schedule.patientId;
       if (patientId) {
         patientIds.add(patientId);
       }
     });
-    
+
     // Sử dụng cùng nguồn dữ liệu như tab "Thống kê HIV" để tính số xét nghiệm và HIV
     const { totalHIVTests, totalPositiveHIV, totalNegativeHIV } = filteredHivStatistics;
-    
+
     return {
       totalAppointments,
       totalTestOrders: totalHIVTests, // Sử dụng từ filteredHivStatistics
@@ -193,7 +202,7 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
   // Memoized patient list
   const patientList = useMemo(() => {
     const reports = filteredReports;
-    
+
     if (!reports || !Array.isArray(reports) || reports.length === 0) {
       return [];
     }
@@ -201,16 +210,16 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
     // Group appointments by patient
     const patientAppointments = reports.reduce((acc, report) => {
       if (!report) return acc;
-      
+
       const schedule = report.schedule || {};
       const healthRecord = report.healthRecord || {};
-      
+
       // Lấy thông tin bệnh nhân từ schedule
       const patient = schedule.patient || {};
       const patientId = patient.id || schedule.patientId;
-      
+
       if (!patientId) return acc;
-      
+
       if (!acc[patientId]) {
         acc[patientId] = {
           patient: {
@@ -225,7 +234,7 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
           appointments: []
         };
       }
-      
+
       acc[patientId].appointments.push({
         id: healthRecord.id || `temp-${Math.random()}`,
         scheduleId: schedule.id,
@@ -242,7 +251,7 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
         weight: healthRecord.weight,
         testOrders: report.testOrders || []
       });
-      
+
       return acc;
     }, {});
 
@@ -254,10 +263,10 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
     if (!searchPatientName.trim()) {
       return patientList;
     }
-    
-    return patientList.filter(item => 
-      item.patient.fullName?.toLowerCase().includes(searchPatientName.toLowerCase()) ||
-      item.patient.id?.toString().includes(searchPatientName)
+
+    return patientList.filter(item =>
+      normalizeString(item.patient.fullName?.toLowerCase()).includes(normalizeString(searchPatientName.toLowerCase())) ||
+      normalizeString(item.patient.id?.toString()).includes(normalizeString(searchPatientName))
     );
   }, [patientList, searchPatientName]);
 
@@ -273,7 +282,7 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
     try {
       const startDate = dateRange?.[0]?.format('YYYY-MM-DD');
       const endDate = dateRange?.[1]?.format('YYYY-MM-DD');
-      
+
       // Truyền đúng tham số dưới dạng object filters
       const response = await getMedicalReportData({
         startDate,
@@ -296,8 +305,8 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
 
   // Toggle mở rộng cho bệnh nhân
   const togglePatientExpand = (patientId) => {
-    setExpandedPatientIds(prev => 
-      prev.includes(patientId) 
+    setExpandedPatientIds(prev =>
+      prev.includes(patientId)
         ? prev.filter(id => id !== patientId)
         : [...prev, patientId]
     );
@@ -310,7 +319,7 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
       const updatedRecords = patientRecords.includes(recordId)
         ? patientRecords.filter(id => id !== recordId)
         : [...patientRecords, recordId];
-      
+
       return {
         ...prev,
         [patientId]: updatedRecords
@@ -402,8 +411,8 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
                   <>Trong khoảng thời gian từ <Text strong>{dayjs(dateRange[0]).format('DD/MM/YYYY')}</Text> đến <Text strong>{dayjs(dateRange[1]).format('DD/MM/YYYY')}</Text>, h</>
                 ) : (
                   <>H</>
-                )}ệ thống đã ghi nhận tổng cộng <Text strong>{statistics.totalPositiveHIV + statistics.totalNegativeHIV}</Text> xét nghiệm HIV, 
-                trong đó có <Text strong style={{ color: '#ff4d4f' }}>{statistics.totalPositiveHIV}</Text> ca dương tính 
+                )}ệ thống đã ghi nhận tổng cộng <Text strong>{statistics.totalPositiveHIV + statistics.totalNegativeHIV}</Text> xét nghiệm HIV,
+                trong đó có <Text strong style={{ color: '#ff4d4f' }}>{statistics.totalPositiveHIV}</Text> ca dương tính
                 và <Text strong style={{ color: '#52c41a' }}>{statistics.totalNegativeHIV}</Text> ca âm tính.
               </p>
               <p>
@@ -420,13 +429,13 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
   // Render HIV Statistics Tab
   const renderHIVStatisticsTab = () => {
     const { statistics } = reportData;
-    
+
     // Sử dụng dữ liệu đã được filter và tính toán lại
     const { totalHIVTests, totalPositiveHIV, totalNegativeHIV } = filteredHivStatistics;
-    
+
     // Kiểm tra dữ liệu HIV trends đã được filter
     const hasValidTrends = Array.isArray(filteredHivTrends) && filteredHivTrends.length > 0;
-    
+
     return (
       <div className="hiv-statistics-tab">
         {/* Báo cáo tổng quan HIV */}
@@ -436,7 +445,7 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
             <p>
               Hệ thống đã thực hiện tổng cộng <Text strong>{totalHIVTests}</Text> xét nghiệm HIV.
             </p>
-            
+
             <Row gutter={[16, 16]}>
               <Col xs={24} md={8}>
                 <Statistic
@@ -462,13 +471,13 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
                 />
               </Col>
             </Row>
-            
+
             <Divider />
-            
+
             {/* Đã loại bỏ phần Phân tích chi tiết theo yêu cầu */}
           </div>
         </Card>
-        
+
         {/* Bảng phân tích theo tháng */}
         {hasValidTrends ? (
           <Card title="Phân tích chi tiết theo tháng" style={{ marginTop: 16 }}>
@@ -514,7 +523,7 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
                 {
                   title: 'Tỷ lệ dương tính',
                   key: 'positiveRate',
-        render: (_, record) => {
+                  render: (_, record) => {
                     // Tính tổng số ca bao gồm cả ca chưa xác định
                     const total = record.positive + record.negative + record.unknown;
                     const rate = total > 0 ? Math.round((record.positive / total) * 100) : 0;
@@ -529,12 +538,12 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
             <Empty description="Không có dữ liệu HIV trong khoảng thời gian đã chọn" />
           </Card>
         )}
-        
+
         {/* Khuyến nghị */}
         <Card title="Khuyến nghị" style={{ marginTop: 16 }}>
           <div className="recommendation-content">
             {/* Đã loại bỏ khung cảnh báo theo yêu cầu */}
-            
+
             <p>
               <Text strong>Khuyến nghị hành động:</Text>
             </p>
@@ -544,7 +553,7 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
               <li>Tăng cường các hoạt động truyền thông về phòng chống HIV/AIDS</li>
               <li>Theo dõi sát sao các ca dương tính mới để đảm bảo tiếp cận điều trị sớm</li>
             </ul>
-        </div>
+          </div>
         </Card>
       </div>
     );
@@ -555,15 +564,15 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
     if (!patientList.length) {
       return <Empty description="Không có dữ liệu lịch sử bệnh nhân" />;
     }
-    
+
     return (
       <div className="patient-appointments-tab">
         <Row gutter={[16, 16]} style={{ marginBottom: 16 }} align="middle">
           <Col span={12}>
-            <Statistic 
-              title="Tổng số bệnh nhân" 
+            <Statistic
+              title="Tổng số bệnh nhân"
               value={searchPatientName.trim() ? `${filteredPatientList.length}/${patientList.length}` : patientList.length}
-              suffix="bệnh nhân" 
+              suffix="bệnh nhân"
             />
           </Col>
           <Col span={12} style={{ textAlign: 'right' }}>
@@ -577,22 +586,22 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
             />
           </Col>
         </Row>
-        
+
         <List
           dataSource={filteredPatientList}
           locale={{
-            emptyText: searchPatientName.trim() 
-              ? `Không tìm thấy bệnh nhân nào với từ khóa "${searchPatientName}"` 
+            emptyText: searchPatientName.trim()
+              ? `Không tìm thấy bệnh nhân nào với từ khóa "${searchPatientName}"`
               : "Không có dữ liệu bệnh nhân"
           }}
           renderItem={item => (
-            <Card 
+            <Card
               className="patient-card"
               title={
                 <div style={{ cursor: 'pointer' }} onClick={() => togglePatientExpand(item.patient.id)}>
                   <UserOutlined /> {item.patient.fullName || 'Không có tên'}
-                  {expandedPatientIds.includes(item.patient.id) ? 
-                    <UpOutlined style={{ marginLeft: 8 }} /> : 
+                  {expandedPatientIds.includes(item.patient.id) ?
+                    <UpOutlined style={{ marginLeft: 8 }} /> :
                     <DownOutlined style={{ marginLeft: 8 }} />
                   }
                 </div>
@@ -607,22 +616,22 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
                 <Descriptions.Item label="Giới tính">{item.patient.gender || 'N/A'}</Descriptions.Item>
                 <Descriptions.Item label="Số lần khám">{item.appointments.length}</Descriptions.Item>
               </Descriptions>
-              
+
               {expandedPatientIds.includes(item.patient.id) && (
                 <>
                   <Divider orientation="left">Lịch sử khám bệnh và kết quả xét nghiệm</Divider>
-                  
-              <List
+
+                  <List
                     dataSource={item.appointments}
                     renderItem={appointment => (
-                      <Card 
-                        className="appointment-card" 
+                      <Card
+                        className="appointment-card"
                         type="inner"
                         title={
                           <div style={{ cursor: 'pointer' }} onClick={() => toggleRecordExpand(item.patient.id, appointment.id)}>
                             <CalendarOutlined /> Ngày khám: {appointment.date ? dayjs(appointment.date).format('DD/MM/YYYY') : 'N/A'}
-                            {expandedRecordIds[item.patient.id]?.includes(appointment.id) ? 
-                              <UpOutlined style={{ marginLeft: 8 }} /> : 
+                            {expandedRecordIds[item.patient.id]?.includes(appointment.id) ?
+                              <UpOutlined style={{ marginLeft: 8 }} /> :
                               <DownOutlined style={{ marginLeft: 8 }} />
                             }
                           </div>
@@ -637,10 +646,10 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
                           <Descriptions.Item label="Loại khám">{appointment.type || 'N/A'}</Descriptions.Item>
                           <Descriptions.Item label="Bác sĩ">{appointment.doctorName || 'N/A'}</Descriptions.Item>
                           <Descriptions.Item label="Trạng thái">
-                            {appointment.treatmentStatus === 'Đã khám' ? 
-                              <Tag color="green">Đã khám</Tag> : 
-                              appointment.treatmentStatus === 'Đang chờ khám' ? 
-                                <Tag color="orange">Đang chờ khám</Tag> : 
+                            {appointment.treatmentStatus === 'Đã khám' ?
+                              <Tag color="green">Đã khám</Tag> :
+                              appointment.treatmentStatus === 'Đang chờ khám' ?
+                                <Tag color="orange">Đang chờ khám</Tag> :
                                 appointment.treatmentStatus === 'Không đến' ?
                                   <Tag color="red">Không đến</Tag> :
                                   <Tag color="default">{appointment.treatmentStatus || 'Chưa xác định'}</Tag>
@@ -649,10 +658,10 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
                           <Descriptions.Item label="Nhóm máu">{appointment.bloodType || 'Chưa xác định'}</Descriptions.Item>
                           <Descriptions.Item label="Cân nặng">{appointment.weight ? `${appointment.weight} kg` : 'Chưa xác định'}</Descriptions.Item>
                           <Descriptions.Item label="HIV">
-                            {appointment.hivStatus === 'Dương tính' || appointment.hivStatus === 'Positive' ? 
-                              <Tag color="red">Dương tính</Tag> : 
-                              appointment.hivStatus === 'Âm tính' || appointment.hivStatus === 'Negative' ? 
-                                <Tag color="green">Âm tính</Tag> : 
+                            {appointment.hivStatus === 'Dương tính' || appointment.hivStatus === 'Positive' ?
+                              <Tag color="red">Dương tính</Tag> :
+                              appointment.hivStatus === 'Âm tính' || appointment.hivStatus === 'Negative' ?
+                                <Tag color="green">Âm tính</Tag> :
                                 <Tag color="default">{appointment.hivStatus || 'Chưa xác định'}</Tag>
                             }
                           </Descriptions.Item>
@@ -661,12 +670,12 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
                         {expandedRecordIds[item.patient.id]?.includes(appointment.id) && (
                           <div style={{ marginTop: 16 }}>
                             <Divider orientation="left" plain>Kết quả xét nghiệm</Divider>
-                            
+
                             {appointment.testOrders && appointment.testOrders.length > 0 ? (
                               <Table
                                 dataSource={appointment.testOrders}
                                 rowKey={(record, index) => `${appointment.id}-test-${index}`}
-                          size="small"
+                                size="small"
                                 pagination={false}
                                 columns={[
                                   {
@@ -709,12 +718,12 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
                               />
                             ) : (
                               <Empty description="Không có kết quả xét nghiệm" />
-                      )}
-                    </div>
+                            )}
+                          </div>
                         )}
                       </Card>
-                )}
-              />
+                    )}
+                  />
                 </>
               )}
             </Card>
@@ -725,31 +734,31 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
   };
 
   return (
-      <div className="medical-report-container">
+    <div className="medical-report-container">
 
-        {/* Bộ lọc cho tất cả các tab */}
-        <div style={{ marginBottom: 16 }}>
-          <Row gutter={[16, 16]} align="middle">
-            <Col flex="auto">
-              <ReportFilters
-                onFilterChange={({ filterType, selectedDate }) => {
-                  if (selectedDate) {
-                    const start = dayjs(selectedDate);
-                    let end = start.endOf(filterType);
-                    onDateRangeChange([start, end]);
-                  } else {
-                    onDateRangeChange(null);
-                  }
-                }}
-                initialFilters={{
-                  filterType: 'month',
-                  selectedDate: dateRange?.[0]?.toISOString() || null,
-                }}
-              />
-            </Col>
+      {/* Bộ lọc cho tất cả các tab */}
+      <div style={{ marginBottom: 16 }}>
+        <Row gutter={[16, 16]} align="middle">
+          <Col flex="auto">
+            <ReportFilters
+              onFilterChange={({ filterType, selectedDate }) => {
+                if (selectedDate) {
+                  const start = dayjs(selectedDate);
+                  let end = start.endOf(filterType);
+                  onDateRangeChange([start, end]);
+                } else {
+                  onDateRangeChange(null);
+                }
+              }}
+              initialFilters={{
+                filterType: 'month',
+                selectedDate: dateRange?.[0]?.toISOString() || null,
+              }}
+            />
+          </Col>
 
-          </Row>
-        </div>
+        </Row>
+      </div>
 
       <Spin spinning={loading}>
         <Tabs
@@ -775,7 +784,7 @@ const MedicalReport = ({ dateRange, onError, onDateRangeChange }) => {
           ]}
         />
       </Spin>
-      </div>
+    </div>
   );
 };
 

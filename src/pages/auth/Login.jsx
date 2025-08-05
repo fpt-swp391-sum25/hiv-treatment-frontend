@@ -149,7 +149,10 @@ const Login = () => {
             })
         } finally {
             setLoading(false)
+            backToLogin()
+            form.resetFields()
         }
+
     }
 
     const handleGoogleLogin = useGoogleLogin({
@@ -202,6 +205,7 @@ const Login = () => {
     })
 
     const redirectHomePage = () => {
+        backToLogin()
         if (user) {
             if (user.role === "ADMIN") {
                 navigate('/admin')
@@ -220,6 +224,7 @@ const Login = () => {
     }
 
     const handleResend = async () => {
+        setLoading(true)
         const response = await resendVerifyEmailAPI(email)
         if (response.data) {
             notification.success({
@@ -236,6 +241,9 @@ const Login = () => {
                 description: 'Lỗi khi gửi email xác minh'
             })
         }
+        backToLogin()
+        form.resetFields()
+        setLoading(false)
     }
 
     const handleForgotPassword = async () => {
@@ -263,7 +271,16 @@ const Login = () => {
                 description: 'Lỗi khi gửi email đổi mật khẩu'
             })
         }
+        backToLogin()
+        form.resetFields()
         setLoading(false)
+    }
+
+    const backToLogin = () => {
+        setShowForgotPassword(false)
+        setShowResend(false)
+        setError('')
+        setEmail('')
     }
 
     return (
@@ -381,27 +398,25 @@ const Login = () => {
                             label="Tên đăng nhập"
                             name="username"
                             id="username"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
+
                             rules={[{
                                 required: true,
                                 message: 'Hãy nhập tên đăng nhập của bạn'
                             }]}
                         >
-                            <Input placeholder="Tên đăng nhập" />
+                            <Input placeholder="Tên đăng nhập" value={username}
+                                onChange={(e) => setUsername(e.target.value)} />
                         </Form.Item>
 
                         <Form.Item
                             label="Mật khẩu"
                             id="password"
                             name="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+
                             rules={[{ required: true, message: 'Hãy nhập mật khẩu của bạn' }]}
                         >
-                            <Input.Password placeholder="Mật khẩu" onKeyDown={(event) => {
-                                if (event.key === 'Enter') form.submit()
-                            }} />
+                            <Input.Password placeholder="Mật khẩu" value={password}
+                                onChange={(e) => setPassword(e.target.value)} />
                         </Form.Item>
                         <div style={{ textAlign: 'left', marginBottom: '15px', marginTop: '-15px' }}>
                             <Link onClick={() => { setShowForgotPassword(true) }} className='link'> Quên mật khẩu?</Link>
