@@ -62,8 +62,16 @@ const Document = () => {
     fetchDocuments();
   }, []);
 
-  // Display the first 4 documents in list
-  const visibleDocuments = showAll ? documents : documents.slice(0, 4);
+  const shuffleArray = (array) => {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  };
+
+  const visibleDocuments = showAll ? documents : shuffleArray(documents).slice(0, 4);
 
   const showModal = (doc) => {
     setSelectedDoc(doc);
@@ -73,6 +81,8 @@ const Document = () => {
   const handleCancel = () => {
     setModalVisible(false);
   };
+
+
 
   // Display a small brief 70% information of the document
   const getSnippet = (html, maxLength = 70) => {

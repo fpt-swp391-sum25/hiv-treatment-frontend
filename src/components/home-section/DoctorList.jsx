@@ -55,8 +55,17 @@ const DoctorList = () => {
       setLoading(false);
     }
   };
-  // Display the first 4 doctor in list
-  const visibleDoctors = mergedDoctors.slice(0, 4);
+
+  const shuffleArray = (array) => {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  };
+
+  const visibleDoctors = shuffleArray(mergedDoctors).slice(0, 4);
 
   return (
     <section className="doctor-section" id="doctor-section">
