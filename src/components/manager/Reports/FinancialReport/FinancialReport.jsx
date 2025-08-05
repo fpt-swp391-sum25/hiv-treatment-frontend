@@ -40,6 +40,15 @@ const FinancialReport = ({ dateRange, onError, onDateRangeChange }) => {
         fetchPaymentData();
     }, [dateRange]);
 
+    const normalizeString = (str) => {
+        return (str || '')
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/\s+/g, ' ')
+            .trim();
+    };
+
     const fetchPaymentData = async () => {
         try {
             setLoading(true);
@@ -97,12 +106,12 @@ const FinancialReport = ({ dateRange, onError, onDateRangeChange }) => {
         }
 
         if (searchText) {
-            const search = searchText.toLowerCase();
+            const search = normalizeString(searchText.toLowerCase());
             return (
-                payment.id?.toString().toLowerCase().includes(search) ||
-                payment.description?.toLowerCase().includes(search) ||
-                payment.schedule?.patient?.fullName?.toLowerCase().includes(search) ||
-                payment.schedule?.doctor?.fullName?.toLowerCase().includes(search)
+                normalizeString(payment.id?.toString().toLowerCase()).includes(search) ||
+                normalizeString(payment.description?.toLowerCase()).includes(search) ||
+                normalizeString(payment.schedule?.patient?.fullName?.toLowerCase()).includes(search) ||
+                normalizeString(payment.schedule?.doctor?.fullName?.toLowerCase()).includes(search)
             );
         }
 
