@@ -58,7 +58,7 @@ const resendVerifyEmailAPI = (email) => {
     const data = {
         email: email
     }
-    return axios.get(URL_BACKEND, data)
+    return axios.post(URL_BACKEND, data)
 }
 
 const verifyEmailAPI = (token) => {
