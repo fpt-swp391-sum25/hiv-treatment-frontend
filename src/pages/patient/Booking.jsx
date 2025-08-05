@@ -160,7 +160,10 @@ const Booking = () => {
         const doctorId = form.getFieldValue('doctor');
         if (slot) {
             const schedule = availableSchedules.find(
-                (s) => s.slot === slot && (!doctorId || s.doctor.id === doctorId)
+                (s) => s.slot === slot 
+                && (!doctorId || s.doctor.id === doctorId) 
+                && s.status !== 'Đang hoạt động'
+                && s.status !== 'Đã hủy'
             );
             setSelectedSchedule(schedule);
 
@@ -296,7 +299,10 @@ const Booking = () => {
 
             let schedule;
             if (values.doctor) {
-                schedule = selectedSchedules.find((s) => s.doctor.id === values.doctor);
+                schedule = selectedSchedules.find((s) => s.doctor.id === values.doctor
+                && s.status !== 'Đang hoạt động'
+                && s.status !== 'Đã hủy'
+            );
                 if (!schedule) throw new Error('Bác sĩ không có lịch hẹn cho khung giờ này');
             } else {
                 schedule = selectedSchedules[0];
