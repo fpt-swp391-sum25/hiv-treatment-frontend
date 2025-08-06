@@ -32,7 +32,6 @@ const ManagerSchedule = () => {
             if (key.includes('fullcalendar') || key.includes('fc-') ||
                 key.includes('calendar') || key.includes('event') ||
                 key.includes('schedule')) {
-                console.log('Removing from localStorage in ManagerSchedule:', key);
                 localStorage.removeItem(key);
             }
         });
@@ -43,7 +42,6 @@ const ManagerSchedule = () => {
             if (key.includes('fullcalendar') || key.includes('fc-') ||
                 key.includes('calendar') || key.includes('event') ||
                 key.includes('schedule')) {
-                console.log('Removing from sessionStorage in ManagerSchedule:', key);
                 sessionStorage.removeItem(key);
             }
         });
@@ -57,8 +55,8 @@ const ManagerSchedule = () => {
                     // Luôn tải dữ liệu bất kể kết nối thành công hay không
                     fetchSchedules();
                 })
-                .catch(err => {
-                    console.error('Error checking backend connection:', err);
+                .catch(error => {
+                    console.error('Error checking backend connection:', error);
                     // Vẫn đặt backendConnected = true để không chặn UI
                     setBackendConnected(true);
                     // Vẫn tải dữ liệu ngay cả khi kiểm tra kết nối thất bại
@@ -75,34 +73,25 @@ const ManagerSchedule = () => {
 
     const fetchSchedules = async () => {
         setLoading(true);
-        console.log('🔄 [fetchSchedules] Bắt đầu tải dữ liệu lịch...');
-        console.log('🔄 [fetchSchedules] Called by:', new Error().stack.split('\n')[2]); // Log caller
         try {
-            console.log('📡 [fetchSchedules] Gọi API getAllSchedulesAPI...');
             const response = await getAllSchedulesAPI();
-            console.log('✅ [fetchSchedules] Nhận được phản hồi từ API:', response);
 
             // Kiểm tra cấu trúc response để xác định nơi chứa dữ liệu
             let schedulesData = [];
 
             if (response && response.data) {
                 schedulesData = response.data;
-                console.log('📋 Tìm thấy dữ liệu trong response.data:', schedulesData.length, 'lịch');
             } else if (response && Array.isArray(response)) {
                 schedulesData = response;
-                console.log('📋 Tìm thấy dữ liệu mảng trực tiếp trong response:', schedulesData.length, 'lịch');
             } else if (response) {
                 schedulesData = response;
-                console.log('📋 Sử dụng toàn bộ response làm dữ liệu');
             }
 
             // Đảm bảo schedulesData là một mảng
             const schedulesList = Array.isArray(schedulesData) ? schedulesData : [];
 
-            console.log('📊 Dữ liệu lịch sau khi xử lý:', schedulesList.length, 'lịch');
 
             if (schedulesList.length > 0) {
-                console.log('🔍 Bắt đầu nhóm và định dạng lịch...');
                 // Nhóm các lịch theo doctorId + date + slot để đếm số lượng bệnh nhân
                 const slotGroups = {};
 
@@ -135,8 +124,6 @@ const ManagerSchedule = () => {
                     slotGroups[key].schedules.push(schedule);
                 });
 
-                console.log('👥 Nhóm lịch sau khi đếm:', Object.keys(slotGroups).length, 'nhóm');
-
                 // Chọn một lịch đại diện cho mỗi nhóm và thêm thông tin số lượng bệnh nhân
                 const representativeSchedules = [];
 
@@ -152,8 +139,6 @@ const ManagerSchedule = () => {
                     representativeSchedules.push(schedule);
                 });
 
-                console.log('👨‍⚕️ Lịch đại diện đã tạo:', representativeSchedules.length, 'lịch');
-
                 // Đảm bảo tất cả lịch đều có trạng thái là "available" (Làm việc)
                 const updatedSchedulesList = representativeSchedules.map(schedule => ({
                     ...schedule,
@@ -168,20 +153,15 @@ const ManagerSchedule = () => {
                     })
                     .filter(Boolean); // Lọc bỏ các giá trị null
 
-                console.log('✨ Lịch đã định dạng cuối cùng:', formattedSchedules.length, 'lịch');
-
                 // Sử dụng setTimeout để tránh FlushSync error
                 setTimeout(() => {
                     setSchedules(formattedSchedules);
-                    console.log('🎉 Đã cập nhật state với dữ liệu mới');
                 }, 0);
 
                 if (formattedSchedules.length === 0) {
                     showNotification('Không có dữ liệu lịch từ server', 'info');
                 }
             } else {
-                console.log('⚠️ Không nhận được dữ liệu lịch');
-
                 // Sử dụng setTimeout để tránh FlushSync error
                 setTimeout(() => {
                     setSchedules([]);
@@ -210,7 +190,6 @@ const ManagerSchedule = () => {
         } finally {
             setLoading(false);
             setInitialLoadComplete(true);
-            console.log('🏁 Kết thúc quá trình tải dữ liệu lịch');
         }
     };
 
@@ -226,7 +205,6 @@ const ManagerSchedule = () => {
     };
 
     const handleScheduleSelect = (schedule) => {
-        console.log('Selected schedule:', schedule);
 
         // Sử dụng setTimeout để tránh FlushSync error
         setTimeout(() => {
@@ -237,26 +215,20 @@ const ManagerSchedule = () => {
 
     const handleScheduleCreated = async (newSchedule) => {
         try {
-            console.log('Starting to create schedule with data:', newSchedule);
-
             // Nếu đó là một mảng (nhiều lịch), xử lý từng lịch một
             if (Array.isArray(newSchedule)) {
-                console.log('Creating multiple schedules:', newSchedule.length);
                 const createdSchedules = [];
 
                 // Xử lý tuần tự các lịch để tránh race condition
                 for (const schedule of newSchedule) {
                     const scheduleData = prepareScheduleData(schedule);
-                    console.log('Prepared data for API call:', scheduleData);
 
                     try {
                         const response = await createScheduleAPI(scheduleData);
-                        console.log('Create schedule API response:', response);
 
                         if (response && response.data) {
                             const formattedSchedule = formatScheduleFromAPI(response.data);
                             createdSchedules.push(formattedSchedule);
-                            console.log('Successfully created and formatted schedule:', formattedSchedule);
                         } else {
                             console.warn('API returned success but no data for schedule:', scheduleData);
                         }
@@ -279,15 +251,11 @@ const ManagerSchedule = () => {
             } else {
                 // Xử lý một lịch đơn
                 const scheduleData = prepareScheduleData(newSchedule);
-                console.log('Prepared data for API call (single schedule):', scheduleData);
 
                 const response = await createScheduleAPI(scheduleData);
-                console.log('Create schedule API response (single):', response);
 
                 if (response && response.data) {
-                    console.log('API returned data:', response.data);
                     const formattedSchedule = formatScheduleFromAPI(response.data);
-                    console.log('Formatted schedule:', formattedSchedule);
 
                     // Thêm lịch mới vào state
                     setSchedules(prevSchedules => [...prevSchedules, formattedSchedule]);
@@ -318,7 +286,6 @@ const ManagerSchedule = () => {
     // Hàm chuẩn bị dữ liệu lịch để gửi đến API
     const prepareScheduleData = (schedule) => {
         // Chuyển đổi từ dữ liệu form sang định dạng API
-        console.log('Preparing schedule data for API:', schedule);
 
         // Xác định status dựa trên loại thao tác (tạo mới hoặc cập nhật)
         let status;
@@ -352,8 +319,6 @@ const ManagerSchedule = () => {
             console.warn('Invalid schedule data: null or undefined');
             return null;
         }
-
-        console.log('Formatting schedule data:', schedule);
 
         try {
             // Lấy thông tin từ đối tượng schedule
@@ -440,13 +405,8 @@ const ManagerSchedule = () => {
 
     const handleScheduleUpdate = async (updatedSchedule) => {
         try {
-            console.log('=== TIẾN TRÌNH GỌI API CẬP NHẬT ===');
-            console.log('1. Dữ liệu nhận được:', updatedSchedule);
-
             // Kiểm tra kết nối
-            console.log('2. Kiểm tra kết nối đến server...');
             const connectionCheck = await checkBackendConnection();
-            console.log('3. Kết quả kiểm tra kết nối:', connectionCheck);
 
             if (!connectionCheck.success) {
                 console.error('4. Lỗi kết nối:', connectionCheck.error);
@@ -459,27 +419,15 @@ const ManagerSchedule = () => {
                 updatedSchedule.type = updatedSchedule.shiftType;
             }
 
-            console.log('5. Thông tin ca làm việc:', {
-                shiftType: updatedSchedule.shiftType,
-                type: updatedSchedule.type
-            });
-
             // Chuẩn bị dữ liệu để gửi đến API
             const scheduleData = prepareScheduleData(updatedSchedule);
-            console.log('6. Dữ liệu đã chuẩn bị cho API:', scheduleData);
 
             // Gọi API để cập nhật lịch
-            console.log('7. Bắt đầu gọi API với ID:', updatedSchedule.id);
             const response = await updateScheduleAPI(updatedSchedule.id, scheduleData);
-            console.log('8. Phản hồi từ API:', response);
 
             if (response && response.data) {
-                console.log('9. Cập nhật thành công, dữ liệu trả về:', response.data);
-
                 // Nếu API thành công, cập nhật state với dữ liệu từ API
                 const formattedUpdatedSchedule = formatScheduleFromAPI(response.data);
-                console.log('10. Dữ liệu sau khi format:', formattedUpdatedSchedule);
-
                 // Sử dụng setTimeout để tránh FlushSync error
                 setTimeout(() => {
                     setSchedules(prevSchedules =>
@@ -492,7 +440,6 @@ const ManagerSchedule = () => {
 
                     // Làm mới dữ liệu từ server sau khi cập nhật
                     setTimeout(() => {
-                        console.log('11. Làm mới dữ liệu từ server');
                         fetchSchedules();
                     }, 500);
                 }, 0);
@@ -511,21 +458,17 @@ const ManagerSchedule = () => {
             }
             showNotification('Không thể kết nối đến server, vui lòng thử lại sau', 'danger');
         }
-        console.log('=== KẾT THÚC TIẾN TRÌNH CẬP NHẬT ===');
     };
 
     const handleScheduleDelete = async (scheduleId) => {
         try {
             if (!scheduleId) {
-                console.error('Invalid schedule ID:', scheduleId);
                 showNotification('Không thể xóa lịch: ID không hợp lệ', 'danger');
                 return;
             }
 
             // Gọi API để xóa lịch
-            console.log('Deleting schedule with ID:', scheduleId);
             const response = await deleteScheduleAPI(scheduleId);
-            console.log('Delete schedule response:', response);
 
             // Kiểm tra response từ API
             if (response && (response.status === 200 || response.status === 204 || response.data?.message?.includes('success'))) {
@@ -610,7 +553,6 @@ const ManagerSchedule = () => {
         return match;
     }) : [];
 
-    console.log('Filtered schedules to pass to Calendar:', filteredSchedules);
 
     // Hàm hiển thị thông báo Ant Design Notification
     const showNotification = (msg, type = 'success') => {
@@ -658,7 +600,6 @@ const ManagerSchedule = () => {
                 localStorageKeys.forEach(key => {
                     if (key.includes('fullcalendar') || key.includes('fc-') || key.includes('calendar') ||
                         key.includes('event') || key.includes('schedule')) {
-                        console.log('Removing from localStorage:', key);
                         localStorage.removeItem(key);
                     }
                 });
@@ -667,7 +608,6 @@ const ManagerSchedule = () => {
                 sessionStorageKeys.forEach(key => {
                     if (key.includes('fullcalendar') || key.includes('fc-') || key.includes('calendar') ||
                         key.includes('event') || key.includes('schedule')) {
-                        console.log('Removing from sessionStorage:', key);
                         sessionStorage.removeItem(key);
                     }
                 });

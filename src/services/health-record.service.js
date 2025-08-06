@@ -15,7 +15,6 @@ export const healthRecordService = {
 
 const fetchHealthRecordsAPI = () => {
     const URL_BACKEND = '/api/health-record';
-    console.log('Fetching all health records');
     return axios.get(URL_BACKEND);
 };
 

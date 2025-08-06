@@ -11,7 +11,8 @@ export const PAYMENT_STATUS = {
 export const STAFF_ROLES = {
     DOCTOR: 'DOCTOR',
     LAB_TECHNICIAN: 'LAB_TECHNICIAN',
-    MANAGER: 'MANAGER'
+    MANAGER: 'MANAGER',
+    CASHIER: 'CASHIER',
 };
 
 // Report Export Types

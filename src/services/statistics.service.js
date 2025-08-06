@@ -40,17 +40,15 @@ export const getStaffStatistics = async (filters = {}) => {
 // Hàm fetch tất cả schedules từ nhiều endpoints
 const fetchAllSchedulesFromMultipleEndpoints = async () => {
   try {
-    console.log('🔍 [MULTI-ENDPOINT] Trying multiple schedule endpoints...');
 
     // Thử endpoint chính trước
     try {
       const mainResponse = await getAllSchedulesAPI();
       if (mainResponse.data && mainResponse.data.length > 0) {
-        console.log('✅ [MULTI-ENDPOINT] Main endpoint successful:', mainResponse.data.length, 'schedules');
         return mainResponse;
       }
     } catch (error) {
-      console.log('⚠️ [MULTI-ENDPOINT] Main endpoint failed, trying alternatives...');
+      console.error(error);
     }
 
     // Thử fetch theo status
@@ -67,14 +65,12 @@ const fetchAllSchedulesFromMultipleEndpoints = async () => {
         ...(cancelledRes.data || [])
       ];
 
-      console.log('✅ [MULTI-ENDPOINT] Status-based fetch successful:', allSchedules.length, 'schedules');
       return { data: allSchedules };
     } catch (error) {
-      console.log('⚠️ [MULTI-ENDPOINT] Status-based fetch failed');
+      console.error(error)
     }
 
     // Fallback: return empty array
-    console.log('❌ [MULTI-ENDPOINT] All endpoints failed, returning empty array');
     return { data: [] };
   } catch (error) {
     console.error('❌ [MULTI-ENDPOINT] Critical error:', error);
@@ -85,30 +81,15 @@ const fetchAllSchedulesFromMultipleEndpoints = async () => {
 // Hàm xử lý thống kê lịch hẹn
 export const getAppointmentStatistics = async (filters = {}) => {
   try {
-    console.log('🔍 [APPOINTMENT STATS] Starting fetch with filters:', filters);
-
     // Gọi các API liên quan đến lịch hẹn
     const [schedulesRes, doctorsRes] = await Promise.all([
       fetchAllSchedulesFromMultipleEndpoints(),
       fetchUsersByRoleAPI('DOCTOR')
     ]);
-
-    console.log('📊 [APPOINTMENT STATS] Raw API responses:');
-    console.log('- Schedules response:', schedulesRes);
-    console.log('- Doctors response:', doctorsRes);
-
     const schedules = schedulesRes.data || [];
     const doctors = doctorsRes.data || [];
-
-    console.log('📋 [APPOINTMENT STATS] Processed data:');
-    console.log('- Schedules count:', schedules.length);
-    console.log('- Doctors count:', doctors.length);
-    console.log('- Sample schedule:', schedules[0]);
-
     // Xử lý và tính toán thống kê lịch hẹn
     const result = processAppointmentStatistics(schedules, doctors, filters);
-    console.log('✅ [APPOINTMENT STATS] Final result:', result);
-
     return result;
   } catch (error) {
     console.error('❌ [APPOINTMENT STATS] Error fetching appointment statistics:', error);
@@ -170,20 +151,11 @@ const processStaffStatistics = (doctors, labTechnicians, schedules, filters) => 
 
 // Xử lý thống kê lịch hẹn
 const processAppointmentStatistics = (schedules, doctors, filters) => {
-  console.log('🔄 [PROCESS APPOINTMENT] Starting processing...');
-  console.log('- Input schedules:', schedules.length);
-  console.log('- Input doctors:', doctors.length);
-  console.log('- Filters:', filters);
-
   // Xử lý filter
   const filteredSchedules = filterDataByDateRange(schedules, filters);
-  console.log('📅 [PROCESS APPOINTMENT] After date filter:', filteredSchedules.length);
-
   // Log sample schedule statuses
   if (filteredSchedules.length > 0) {
-    console.log('📋 [PROCESS APPOINTMENT] Sample schedule statuses:');
     filteredSchedules.slice(0, 5).forEach((schedule, index) => {
-      console.log(`  ${index + 1}. Status: "${schedule.status}", Date: ${schedule.date}`);
     });
   }
 
@@ -371,8 +343,6 @@ const calculateMonthlyTrend = (schedules) => {
 };
 
 export const fetchStaffStatisticsAPI = (filters = {}) => {
-  console.log('Fetching staff statistics with filters:', filters);
-
   return Promise.all([
     fetchAllDoctorsAPI(),
     fetchUsersByRoleAPI('LAB_TECHNICIAN'),
@@ -463,7 +433,6 @@ export const fetchStaffStatisticsAPI = (filters = {}) => {
 };
 
 export const fetchAppointmentStatisticsAPI = (filters = {}) => {
-  console.log('Fetching appointment statistics with filters:', filters);
 
   return Promise.all([
     getAllSchedulesAPI(),

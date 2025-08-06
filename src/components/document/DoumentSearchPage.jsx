@@ -70,7 +70,7 @@ const ResourceSearchPage = () => {
             setDocuments(sortedData);
             setFilteredDocs(sortedData);
           })
-          .catch((err) => console.error('Lỗi tải dữ liệu:', err));
+          .catch((error) => console.error('Lỗi tải dữ liệu:', error));
       } finally {
         setLoading(false);
       }
@@ -83,7 +83,6 @@ const ResourceSearchPage = () => {
     const inputValue = e.target.value;
     setSearchTerm(inputValue);
     const term = normalizeString(inputValue.toLowerCase());
-    console.log(">>>>>>>>>>>>>>>>>>>>>>>", documents)
     const filtered = documents.filter(
       (doc) =>
         normalizeString(doc.title).includes(term) ||

@@ -21,7 +21,6 @@ const UpdateCashierModal = ({ visible, cashier, onCancel, onSuccess }) => {
 
     useEffect(() => {
         if (visible && cashier) {
-            console.log("Avatar from backend:", cashier.avatar);
 
             form.setFieldsValue({
                 fullName: cashier.fullName || '',

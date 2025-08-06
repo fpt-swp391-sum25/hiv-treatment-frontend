@@ -85,7 +85,6 @@ const Dashboard = () => {
               formattedDate
             );
 
-            console.log(healthRecordRes)
             const records = healthRecordRes?.data || [];
 
             const stats = records.reduce((acc, record) => {
@@ -134,7 +133,6 @@ const Dashboard = () => {
     const loadDoctors = async () => {
       try {
         const response = await fetchAllDoctorsAPI();
-        console.log('Doctors API response:', response);
         if (response && response.data) {
           const doctorsList = response.data.map(doctor => {
             return {
@@ -275,7 +273,6 @@ const Dashboard = () => {
 
       if (selectedDate) {
         const { startDate, endDate } = getDateRangeFromFilter(selectedDate, filterType);
-        console.log("Filtering schedules from", startDate, "to", endDate);
 
         filteredSchedules = schedules.filter(schedule => {
           if (!schedule.date) return false;
@@ -283,7 +280,6 @@ const Dashboard = () => {
           return scheduleDate.isBetween(startDate, endDate, 'day', '[]');
         });
 
-        console.log("Filtered schedules:", filteredSchedules.length, "out of", schedules.length);
       }
 
       const monthlyData = Array(12).fill().map(() => ({
@@ -369,14 +365,12 @@ const Dashboard = () => {
           break;
       }
 
-      console.log(`Dữ liệu xu hướng theo ${filters.period}:`, data.monthlyTrend);
     } catch (error) {
       console.error('Lỗi khi xử lý dữ liệu xu hướng lịch hẹn:', error);
     }
   };
 
   useEffect(() => {
-    console.log('Effect triggered - activeTab:', activeTab, 'filters:', filters);
     switch (activeTab) {
       case 'staff':
         fetchStaffStatistics();
@@ -397,7 +391,6 @@ const Dashboard = () => {
   ]);
 
   const handleFilterChange = useCallback((newFilters) => {
-    console.log('Filters changed:', newFilters);
     setFilters(prevFilters => ({
       ...prevFilters,
       period: newFilters.filterType || prevFilters.period,
@@ -421,9 +414,9 @@ const Dashboard = () => {
         <Row gutter={[16, 16]} style={{ marginTop: '24px' }}>
           <Col xs={24}>
             <Card title="Hiệu suất làm việc của bác sĩ">
-              <div className="chart-container" style={{ height: '300px' }}>
+              <div className="chart-container" >
                 {stats.doctors?.schedulesPerDoctor && stats.doctors.schedulesPerDoctor.length > 0 ? (
-                  <div style={{ height: '100%', overflowY: 'auto', padding: '8px' }}>
+                  <div style={{ padding: '8px', paddingBottom: '16px' }}>
                     <Table
                       dataSource={stats.doctors.schedulesPerDoctor.map((doctor, index) => ({
                         ...doctor,
@@ -468,7 +461,7 @@ const Dashboard = () => {
                         },
                       ]}
                       size="small"
-                      pagination={{ pageSize: 5 }}
+                      pagination={{ pageSize: 10 }}
                     />
                   </div>
                 ) : (
