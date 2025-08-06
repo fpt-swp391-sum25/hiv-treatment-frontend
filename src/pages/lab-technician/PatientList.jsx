@@ -70,23 +70,32 @@ const LabTechnicianPatientList = () => {
             const scheduleList = scheduleRes?.data || []
             const patientList = patientRes?.data || []
 
-            const mergedData = scheduleList.map((item) => {
-                const patientId = item.patient?.id
-                const matchedPatient = patientList.find(p => p.id === patientId)
-                return {
-                    id: item.id,
-                    ...item,
-                    patientCode: matchedPatient?.displayId || 'N/A',
-                    avatar: matchedPatient?.avatar || '',
-                    fullName: matchedPatient?.fullName || 'Chưa rõ tên',
-                }
-            }).filter(item => item.patientCode !== 'N/A' && item.fullName !== 'Chưa rõ tên' && item.date && item.slot)
+            const mergedData = scheduleList
+                .filter(item => item.status && item.status !== 'Đã hủy') 
+                .map((item) => {
+                    const patientId = item.patient?.id
+                    const matchedPatient = patientList.find(p => p.id === patientId)
+                    return {
+                        id: item.id,
+                        ...item,
+                        patientCode: matchedPatient?.displayId || 'N/A',
+                        avatar: matchedPatient?.avatar || '',
+                        fullName: matchedPatient?.fullName || 'Chưa rõ tên',
+                    }
+                })
+                .filter(item =>
+                    item.patientCode !== 'N/A' &&
+                    item.fullName !== 'Chưa rõ tên' &&
+                    item.date &&
+                    item.slot
+                )
 
             setData(mergedData)
         } catch (error) {
             console.error("Lỗi khi tải dữ liệu:", error)
         }
     }
+
 
     // Split into 2 arrays: pending (now or future), history (before today)
     const today = dayjs().startOf('day')

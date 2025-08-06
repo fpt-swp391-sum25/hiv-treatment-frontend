@@ -316,7 +316,7 @@ const PatientList = () => {
             key: 'paymentStatus',
             render: (status) => {
                 switch (status) {
-                    case 'Thanh toán thành công':
+                    case 'Thanh toán thành công':
                         return <span style={{ color: '#52c41a' }}>{status}</span>
                     case 'Đã thanh toán':
                         return <span style={{ color: '#52c41a' }}>{status}</span>
