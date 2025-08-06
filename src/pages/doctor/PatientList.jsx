@@ -109,7 +109,7 @@ const PatientList = () => {
 
             const waitingSchedules = scheduleList.filter(schedule => {
                 // Chỉ lấy các lịch có bệnh nhân
-                return schedule.patient && schedule.patient.id
+                return schedule.patient && schedule.patient.id && schedule.status == 'Đang hoạt động'
             })
 
             const healthRecordPromises = waitingSchedules.map(item =>
