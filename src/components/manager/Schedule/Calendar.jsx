@@ -35,7 +35,6 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
     
     // Debug: Ghi log events để kiểm tra
     useEffect(() => {
-        console.log('Calendar received events:', validEvents);
     }, [validEvents]);
     
     // Cập nhật danh sách các ngày trong tuần hiện tại
@@ -49,7 +48,6 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
             }
             
             setCurrentWeekDays(days);
-            console.log('Current week days:', days);
         }
     }, [view, currentDate]);
     
@@ -144,7 +142,6 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
         
         return validEvents.map(event => {
             // Debug: Ghi log từng sự kiện
-            console.log('Processing event:', event);
             
             // Tạo đối tượng date từ date và slot
             const eventDate = event.date;
@@ -283,7 +280,6 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
         if (calendarRef.current) {
             const calendarApi = calendarRef.current.getApi();
             calendarApi.removeAllEvents();
-            console.log('All events cleared from calendar');
         }
     }, []);
 
@@ -298,7 +294,6 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
                     localStorageKeys.forEach(key => {
                         if (key.includes('fullcalendar') || key.includes('fc-') || key.includes('calendar') || 
                             key.includes('event') || key.includes('schedule')) {
-                            console.log('Removing from localStorage:', key);
                             localStorage.removeItem(key);
                         }
                     });
@@ -314,7 +309,6 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
                     sessionStorageKeys.forEach(key => {
                         if (key.includes('fullcalendar') || key.includes('fc-') || key.includes('calendar') || 
                             key.includes('event') || key.includes('schedule')) {
-                            console.log('Removing from sessionStorage:', key);
                             sessionStorage.removeItem(key);
                         }
                     });
@@ -328,7 +322,6 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
                 clearLocalStorage();
                 clearSessionStorage();
                 
-                console.log('All FullCalendar storage cleared');
             } catch (error) {
                 console.error('Error clearing storage:', error);
             }
@@ -339,7 +332,6 @@ const Calendar = ({ events = [], onDateSelect, onEventSelect }) => {
     const forceRerender = useCallback(() => {
         setCalendarKey(prevKey => {
             const newKey = Date.now();
-            console.log('Forcing calendar re-render with new key:', newKey);
             return newKey;
         });
     }, []);

@@ -6,7 +6,8 @@ import {
     Select,
     Row,
     Col,
-    Tabs
+    Tabs,
+    message
 } from "antd";
 import {
     useState,
@@ -49,6 +50,7 @@ const LabTechnicianPatientList = () => {
     const location = useLocation();
     const parsedQuery = queryString.parse(location.search);
     const [activeTab, setActiveTab] = useState(parsedQuery.tab || "pending");
+    const [hasSearchedHistory, setHasSearchedHistory] = useState(false)
 
   useEffect(() => {
       setActiveTab(parsedQuery.tab || "pending");
@@ -122,6 +124,11 @@ const LabTechnicianPatientList = () => {
     }, [pendingSearchName, pendingSlotFilter, pendingDateFilter, data])
 
     useEffect(() => {
+        if (!hasSearchedHistory) {
+            setHistoryFiltered([]); 
+            return;
+        }
+
         let filtered = historyList
         if (historySearchName) {
             filtered = filtered.filter(item =>
@@ -142,7 +149,8 @@ const LabTechnicianPatientList = () => {
             return dateTimeB.localeCompare(dateTimeA)
         })
         setHistoryFiltered(filtered)
-    }, [historySearchName, historySlotFilter, historyDateFilter, data])
+    }, [historySearchName, historySlotFilter, historyDateFilter, data, hasSearchedHistory])
+
 
     // Get list for each tab
     const pendingSlotOptions = Array.from(new Set(pendingList.map(item => item.slot))).filter(Boolean)
@@ -273,13 +281,17 @@ const LabTechnicianPatientList = () => {
                                 value={historySearchName}
                                 onChange={e => setHistorySearchName(e.target.value)}
                                 allowClear
+                                onPressEnter={() => setHasSearchedHistory(true)} // Tìm khi Enter
                             />
                         </Col>
                         <Col span={3}>
                             <Select
                                 placeholder="Lọc theo ca khám"
                                 value={historySlotFilter || undefined}
-                                onChange={value => setHistorySlotFilter(value)}
+                                onChange={value => {
+                                    setHistorySlotFilter(value);
+                                    setHasSearchedHistory(true);
+                                }}
                                 allowClear
                                 style={{ width: '100%' }}
                             >
@@ -294,15 +306,50 @@ const LabTechnicianPatientList = () => {
                             <DatePicker
                                 placeholder="Lọc theo ngày khám"
                                 value={historyDateFilter}
-                                onChange={setHistoryDateFilter}
+                                onChange={(value) => {
+                                    setHistoryDateFilter(value);
+                                    setHasSearchedHistory(true);
+                                }}
                                 allowClear
                                 style={{ width: '100%' }}
                                 locale={viVN}
                                 format="DD/MM/YYYY"
                             />
                         </Col>
+                        <Col>
+                            <Button
+                                type="primary"
+                                onClick={() => {
+                                    if (!historySearchName.trim()) {
+                                        message.warning('Vui lòng nhập tên bệnh nhân để tìm kiếm');
+                                        return;
+                                    }
+                                    setHasSearchedHistory(true);
+                                }}
+                            >
+                                Tìm kiếm
+                            </Button>
+                            <Button
+                                style={{ marginLeft: 8 }}
+                                onClick={() => {
+                                    setHistorySearchName('');
+                                    setHistorySlotFilter('');
+                                    setHistoryDateFilter(null);
+                                    setHasSearchedHistory(true);
+                                }}
+                            >
+                                Hiển thị tất cả
+                            </Button>
+                        </Col>
                     </Row>
-                    <Table columns={columns} dataSource={historyFiltered} rowKey={(record) => record.id} />
+
+                    {hasSearchedHistory && (
+                        <Table
+                            columns={columns}
+                            dataSource={historyFiltered}
+                            rowKey={(record) => record.id}
+                        />
+                    )}
                 </TabPane>
             </Tabs>
         </>

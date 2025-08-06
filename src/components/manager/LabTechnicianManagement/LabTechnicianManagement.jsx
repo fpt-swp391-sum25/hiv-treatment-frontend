@@ -33,7 +33,6 @@ const LabTechnicianManagement = () => {
             }
 
             const mappedData = processedData.map(tech => {
-                console.log('Original tech gender:', tech.gender); 
                 return {
                     id: tech.id,
                     fullName: tech.fullName || '',
@@ -49,8 +48,6 @@ const LabTechnicianManagement = () => {
                     isVerified: tech.isVerified || false
                 };
             });
-
-            console.log('Mapped lab technicians data:', mappedData);
 
             setLabTechnicians(mappedData);
         } catch (error) {

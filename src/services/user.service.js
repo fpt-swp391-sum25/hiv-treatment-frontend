@@ -15,7 +15,6 @@ const fetchAccountByRoleAPI = (role) => {
     // Đảm bảo role được viết hoa theo yêu cầu của BE
     const uppercaseRole = role.toUpperCase();
     const URL_BACKEND = `/api/user/${uppercaseRole}`;
-    console.log(`Fetching accounts with role ${uppercaseRole} from: ${URL_BACKEND}`);
     return axios.get(URL_BACKEND);
 }
 
@@ -61,7 +60,6 @@ const updateProfileAPI = (values) => {
 }
 
 const updateUserAPI = (id, updateData) => {
-    console.log(">>>>>>>>>>>>>>" + updateData.avatar)
     const URL_BACKEND = `/api/user/${id}`;
     return axios.put(URL_BACKEND, updateData)
 }
@@ -72,25 +70,21 @@ const fetchUsersByRoleAPI = (role) => {
     // Endpoint sử dụng đúng với backend API
     const URL_BACKEND = `/api/user/${uppercaseRole}`;
 
-    console.log(`Fetching users with role ${uppercaseRole} from: ${URL_BACKEND}`);
     return axios.get(URL_BACKEND);
 }
 
 const fetchAllLabTechniciansAPI = () => {
     const URL_BACKEND = '/api/user/LAB_TECHNICIAN';
-    console.log('Calling API to fetch lab technicians from:', URL_BACKEND);
     return axios.get(URL_BACKEND);
 }
 
 const fetchUsersByRoleAndStatusAPI = (role, status) => {
     const URL_BACKEND = `/api/user/${role.toUpperCase()}/account-status/${status}`;
-    console.log(`Fetching ${role} users with status ${status} from:`, URL_BACKEND);
     return axios.get(URL_BACKEND);
 };
 
 const fetchUsersByRoleAndVerificationAPI = (role, isVerified) => {
     const URL_BACKEND = `/api/user/${role.toUpperCase()}/mail-verification-status/${isVerified}`;
-    console.log(`Fetching ${role} users with verification ${isVerified} from:`, URL_BACKEND);
     return axios.get(URL_BACKEND);
 };
 

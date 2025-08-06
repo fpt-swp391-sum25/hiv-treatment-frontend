@@ -52,54 +52,6 @@ const Reports = () => {
         setTimeout(() => setError(null), 5000);
     };
 
-    const handleExport = async (type) => {
-        setLoading(true);
-        try {
-            console.log(`Exporting ${activeTab} report as ${type}`);
-            
-            // Lấy dữ liệu theo loại báo cáo
-            let exportData = [];
-            let fileName = '';
-            
-            if (activeTab === 'staff') {
-                const staffData = await getStaffData();
-                exportData = formatStaffDataForExport(staffData);
-                fileName = 'BaoCaoNhanSu';
-            } else if (activeTab === 'financial') {
-                const payments = await getPaymentStats(PAYMENT_STATUS.COMPLETED);
-                exportData = formatPaymentDataForExport(payments);
-                fileName = 'BaoCaoTaiChinh';
-            }
-            
-            if (exportData.length === 0) {
-                throw new Error('Không có dữ liệu để xuất báo cáo');
-            }
-            
-            // Thêm thông tin ngày xuất báo cáo
-            const reportDate = dayjs().format('DD/MM/YYYY HH:mm');
-            const reportPeriod = `${dateRange[0].format('DD/MM/YYYY')} - ${dateRange[1].format('DD/MM/YYYY')}`;
-            
-            // Xuất báo cáo Excel
-            if (type === 'excel') {
-                // Thêm metadata cho báo cáo
-                const reportMetadata = [
-                    { 'Tiêu đề': activeTab === 'staff' ? 'BÁO CÁO NHÂN SỰ' : 'BÁO CÁO TÀI CHÍNH' },
-                    { 'Thời gian xuất báo cáo': reportDate },
-                    { 'Khoảng thời gian báo cáo': reportPeriod },
-                    { '': '' } // Dòng trống để ngăn cách
-                ];
-                
-                await exportToExcel([...reportMetadata, ...exportData], fileName);
-                setError(null);
-            }
-        } catch (error) {
-            console.error('Error exporting report:', error);
-            handleError(error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
     const handleTabChange = (key) => {
         setLoading(true);
         setActiveTab(key);

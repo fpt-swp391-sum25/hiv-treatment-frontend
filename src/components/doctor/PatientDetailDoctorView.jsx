@@ -351,12 +351,13 @@ const PatientDetailDoctorView = () => {
             ) : (
               <ul>
                 {newTestTypes.map((type, index) => (
-                  <li key={index}>
-                    {type}
+                  <li key={index} style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
+                    <span style={{ flex: 1 }}>{type}</span>
                     <Button
-                      type="link"
+                      type="default"
                       danger
                       size="small"
+                      style={{ borderColor: 'red', color: 'red', marginLeft: 12 }}
                       onClick={() =>
                         setNewTestTypes(newTestTypes.filter((_, i) => i !== index))
                       }

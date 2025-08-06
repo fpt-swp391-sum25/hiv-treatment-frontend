@@ -21,13 +21,10 @@ const DoctorManagement = () => {
         setError(null);
         try {
             const response = await fetchAllDoctorsAPI();
-            console.log('Doctors API response:', response);
 
             if (Array.isArray(response)) {
-                response.forEach(doctor => console.log('Doctor gender:', doctor.gender));
                 setDoctors(response);
             } else if (response && Array.isArray(response.data)) {
-                response.data.forEach(doctor => console.log('Doctor gender:', doctor.gender));
                 setDoctors(response.data);
             } else {
                 setDoctors([]);
@@ -52,11 +49,9 @@ const DoctorManagement = () => {
 
     const handleViewProfile = async (doctor) => {
         try {
-            console.log('Lấy thông tin chi tiết của bác sĩ có ID:', doctor.id);
             setDetailLoading(true);
 
             const basicInfoRes = await fetchDoctorByIdAPI(doctor.id);
-            console.log('Thông tin cơ bản bác sĩ:', basicInfoRes);
 
             let combinedData = doctor;
 
@@ -69,7 +64,6 @@ const DoctorManagement = () => {
 
             try {
                 const profileRes = await fetchDoctorProfileByDoctorIdAPI(doctor.id);
-                console.log('Thông tin doctor_profile:', profileRes);
 
                 if (profileRes && profileRes.data) {
                     combinedData = {
@@ -95,7 +89,6 @@ const DoctorManagement = () => {
     };
 
     const handleEditProfile = async (doctor) => {
-        console.log('Edit profile button clicked, opening modal for doctor:', doctor);
         setDetailLoading(true);
         try {
             const doctorRes = await fetchDoctorByIdAPI(doctor.id);

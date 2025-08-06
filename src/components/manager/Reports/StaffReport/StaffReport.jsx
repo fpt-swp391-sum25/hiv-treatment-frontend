@@ -17,11 +17,12 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
     const [staffData, setStaffData] = useState({
         doctors: [],
         labTechnicians: [],
-        managers: []
+        managers: [],
+        cashiers: []
     });
 
     // State cho bộ lọc
-    const [activeTab, setActiveTab] = useState('all'); // 'all', 'doctors', 'labTechnicians', 'managers'
+    const [activeTab, setActiveTab] = useState('all'); 
 
     useEffect(() => {
         fetchStaffData();
@@ -34,7 +35,8 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
             setStaffData({
                 doctors: Array.isArray(data.doctors) ? data.doctors : [],
                 labTechnicians: Array.isArray(data.labTechnicians) ? data.labTechnicians : [],
-                managers: Array.isArray(data.managers) ? data.managers : []
+                managers: Array.isArray(data.managers) ? data.managers : [],
+                cashiers: Array.isArray(data.cashiers) ? data.cashiers : []
             });
         } catch (error) {
             console.error('Error fetching staff data:', error);
@@ -85,6 +87,8 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
                         return <Tag color="green">Kỹ thuật viên</Tag>;
                     case STAFF_ROLES.MANAGER:
                         return <Tag color="purple">Quản lý</Tag>;
+                    case STAFF_ROLES.CASHIER:
+                        return <Tag color="gold">Thu ngân</Tag>;
                     default:
                         return role;
                 }
@@ -120,6 +124,8 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
                 return <ExperimentOutlined style={{ color: '#52c41a' }} />;
             case STAFF_ROLES.MANAGER:
                 return <SettingOutlined style={{ color: '#722ed1' }} />;
+            case STAFF_ROLES.CASHIER:
+                return <UserOutlined style={{ color: '#faad14' }} />; 
             default:
                 return <UserOutlined />;
         }
@@ -140,11 +146,15 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
             case 'managers':
                 allStaff = staffData.managers.map(mgr => ({ ...mgr, role: STAFF_ROLES.MANAGER }));
                 break;
+            case 'cashiers':
+                allStaff = staffData.cashiers.map(c => ({ ...c, role: STAFF_ROLES.CASHIER }));
+                break;
             default:
                 allStaff = [
                     ...staffData.doctors.map(doc => ({ ...doc, role: STAFF_ROLES.DOCTOR })),
                     ...staffData.labTechnicians.map(tech => ({ ...tech, role: STAFF_ROLES.LAB_TECHNICIAN })),
-                    ...staffData.managers.map(mgr => ({ ...mgr, role: STAFF_ROLES.MANAGER }))
+                    ...staffData.managers.map(mgr => ({ ...mgr, role: STAFF_ROLES.MANAGER })),
+                    ...staffData.cashiers.map(c => ({ ...c, role: STAFF_ROLES.CASHIER })) // 🆕
                 ];
         }
 
@@ -177,10 +187,11 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
         totalDoctors: staffList.filter(staff => staff.role === STAFF_ROLES.DOCTOR).length,
         totalLabTechs: staffList.filter(staff => staff.role === STAFF_ROLES.LAB_TECHNICIAN).length,
         totalManagers: staffList.filter(staff => staff.role === STAFF_ROLES.MANAGER).length,
+        totalCashiers: staffList.filter(staff => staff.role === STAFF_ROLES.CASHIER).length,
         totalStaff: staffList.length,
         // Thêm thông tin về việc lọc
         isFiltered: dateRange && dateRange.length === 2,
-        originalTotal: staffData.doctors.length + staffData.labTechnicians.length + staffData.managers.length
+        originalTotal: staffData.doctors.length + staffData.labTechnicians.length + staffData.managers.length + staffData.cashiers.length
     };
 
     // Xuất Excel
@@ -196,7 +207,9 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
             'STT': '',  // Sẽ được điền sau
             'Họ tên': staff.fullName || '',
             'Vai trò': staff.role === STAFF_ROLES.DOCTOR ? 'Bác sĩ' :
-                staff.role === STAFF_ROLES.LAB_TECHNICIAN ? 'Kỹ thuật viên' : 'Quản lý',
+                staff.role === STAFF_ROLES.LAB_TECHNICIAN ? 'Kỹ thuật viên' :
+                staff.role === STAFF_ROLES.MANAGER ? 'Quản lý' :
+                staff.role === STAFF_ROLES.CASHIER ? 'Thu ngân' : '',
             'Email': staff.email || '',
             'Số điện thoại': staff.phoneNumber || '',
             'Ngày tham gia': staff.created_at ? dayjs(staff.created_at).format('DD/MM/YYYY') : 'N/A'
@@ -209,12 +222,11 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
 
         const reportTitle = activeTab === 'doctors' ? 'BaoCaoNhanSu_BacSi' :
             activeTab === 'labTechnicians' ? 'BaoCaoNhanSu_KyThuatVien' :
-                activeTab === 'managers' ? 'BaoCaoNhanSu_QuanLy' : 'BaoCaoNhanSu_TatCa';
-
+            activeTab === 'managers' ? 'BaoCaoNhanSu_QuanLy' :
+            activeTab === 'cashiers' ? 'BaoCaoNhanSu_ThuNgan' :
+            'BaoCaoNhanSu_TatCa';
         exportToExcel(formattedData, reportTitle);
     };
-
-
 
     return (
         <Spin spinning={loading}>
@@ -261,8 +273,8 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
                 />
 
                 {/* Thống kê tổng quan */}
-                <Row gutter={[16, 16]} className="statistics-row">
-                    <Col xs={24} sm={12} md={6}>
+                <Row gutter={[16, 16]} className="statistics-row" justify="space-between" align="middle">
+                    <Col xs={12} sm={6} md={4}>
                         <Card className="statistic-card">
                             <Statistic
                                 title="Tổng số nhân viên"
@@ -272,7 +284,7 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
                             />
                         </Card>
                     </Col>
-                    <Col xs={24} sm={12} md={6}>
+                    <Col xs={12} sm={6} md={4}>
                         <Card className="statistic-card" onClick={() => setActiveTab('doctors')}>
                             <Statistic
                                 title="Bác sĩ"
@@ -282,7 +294,7 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
                             />
                         </Card>
                     </Col>
-                    <Col xs={24} sm={12} md={6}>
+                    <Col xs={12} sm={6} md={4}>
                         <Card className="statistic-card" onClick={() => setActiveTab('labTechnicians')}>
                             <Statistic
                                 title="Kỹ thuật viên"
@@ -292,7 +304,17 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
                             />
                         </Card>
                     </Col>
-                    <Col xs={24} sm={12} md={6}>
+                    <Col xs={12} sm={6} md={4}>
+                        <Card className="statistic-card" onClick={() => setActiveTab('cashiers')}>
+                            <Statistic
+                                title="Thu ngân"
+                                value={statistics.totalCashiers}
+                                prefix={<UserOutlined />}
+                                valueStyle={{ color: '#faad14' }}
+                            />
+                        </Card>
+                    </Col>
+                    <Col xs={12} sm={6} md={4}>
                         <Card className="statistic-card" onClick={() => setActiveTab('managers')}>
                             <Statistic
                                 title="Quản lý"
@@ -325,6 +347,12 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
                         Kỹ thuật viên
                     </Button>
                     <Button
+                        type={activeTab === 'cashiers' ? 'primary' : 'default'}
+                        onClick={() => setActiveTab('cashiers')}
+                    >
+                        Thu ngân
+                    </Button>
+                    <Button
                         type={activeTab === 'managers' ? 'primary' : 'default'}
                         onClick={() => setActiveTab('managers')}
                     >
@@ -338,8 +366,10 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
                         <Space>
                             <span>Danh sách {
                                 activeTab === 'doctors' ? 'bác sĩ' :
-                                    activeTab === 'labTechnicians' ? 'kỹ thuật viên' :
-                                        activeTab === 'managers' ? 'quản lý' : 'nhân viên'
+                                activeTab === 'labTechnicians' ? 'kỹ thuật viên' :
+                                activeTab === 'managers' ? 'quản lý' :
+                                activeTab === 'cashiers' ? 'thu ngân' :
+                                'nhân viên'
                             }</span>
                             <Tag color="blue">{staffList.length} nhân viên</Tag>
                         </Space>
@@ -364,7 +394,7 @@ const StaffReport = ({ dateRange, onError, onDateRangeChange }) => {
                             description={
                                 dateRange && dateRange.length === 2
                                     ? `Không tìm thấy nhân viên nào tham gia trong khoảng thời gian ${dateRange[0].format('DD/MM/YYYY')} - ${dateRange[1].format('DD/MM/YYYY')}. Hãy thử mở rộng khoảng thời gian hoặc bỏ bộ lọc để xem tất cả nhân viên.`
-                                    : staffData.doctors.length + staffData.labTechnicians.length + staffData.managers.length === 0
+                                    : staffData.doctors.length + staffData.labTechnicians.length + staffData.managers.length + staffData.cashiers.length === 0
                                         ? "Chưa có nhân viên nào trong hệ thống."
                                         : "Không tìm thấy nhân viên nào phù hợp với điều kiện lọc."
                             }

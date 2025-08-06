@@ -49,9 +49,7 @@ const debugRequest = (endpoint, method, data) => {
         timestamp: new Date().toISOString()
     };
 
-    console.log(`%c🔍 API Request: ${method} ${endpoint}`, 'color: blue; font-weight: bold');
     console.table(debugInfo);
-    if (data) console.log('Request Payload:', data);
 
     return debugInfo;
 };
@@ -64,7 +62,6 @@ const createScheduleAPI = (scheduleData) => {
 
     // Xác định số lượng bệnh nhân tối đa
     const maxPatients = Math.min(Math.max(parseInt(scheduleData.maxPatients) || 1, 1), 5);
-    console.log(`🔢 [API] Creating schedule with maxPatients = ${maxPatients}`);
 
     // Đảm bảo scheduleData có định dạng đúng theo yêu cầu của BE
     const baseFormattedData = {
@@ -81,29 +78,15 @@ const createScheduleAPI = (scheduleData) => {
     if (!baseFormattedData.date || !baseFormattedData.slot || !baseFormattedData.doctorId) {
         console.error('❌ [API] Missing required fields for schedule creation:', baseFormattedData);
         return Promise.reject(new Error('Thiếu thông tin cần thiết để tạo lịch'));
-    }
-
-    console.log('📝 [API] Base formatted data:', baseFormattedData);
-
-    // Thêm một số giá trị để debug
-    console.log('🔍 [API] Debug values:', {
-        'doctorId type': typeof baseFormattedData.doctorId,
-        'doctorId value': baseFormattedData.doctorId,
-        'slot format': baseFormattedData.slot.match(/^\d{2}:\d{2}:\d{2}$/) ? 'valid' : 'invalid',
-        'date format': baseFormattedData.date.match(/^\d{4}-\d{2}-\d{2}$/) ? 'valid' : 'invalid',
-        'patient_id': baseFormattedData.patient_id === null ? 'explicitly null' : baseFormattedData.patient_id,
-        'maxPatients': maxPatients
-    });
+    }   
 
     // Tạo mảng promises để lưu các lời hứa tạo lịch
     const createPromises = [];
 
     // Tạo nhiều lịch theo số lượng maxPatients
     for (let i = 0; i < maxPatients; i++) {
-        console.log(`🔄 [API] Creating schedule ${i + 1}/${maxPatients}`);
         const promise = axios.post(URL_BACKEND, baseFormattedData)
             .then(response => {
-                console.log(`✅ [API] Created schedule ${i + 1}/${maxPatients}:`, response.data);
                 return response;
             })
             .catch(error => {
@@ -121,7 +104,6 @@ const createScheduleAPI = (scheduleData) => {
     // Trả về promise tổng hợp từ tất cả các lời hứa
     return Promise.all(createPromises)
         .then(responses => {
-            console.log(`✅ [API] Successfully created ${responses.length} schedules`);
             // Trả về response đầu tiên để tương thích với code hiện tại
             return responses[0];
         })
@@ -134,21 +116,17 @@ const createScheduleAPI = (scheduleData) => {
 const getAllSchedulesAPI = () => {
     // Sử dụng endpoint chính thức từ API documentation
     const URL_BACKEND = '/api/schedule/list';
-    console.log('🔗 [API] Fetching schedules from:', URL_BACKEND);
 
     return axios.get(URL_BACKEND)
         .then(response => {
-            console.log('✅ [API] Schedule list response:', response);
             return response;
         })
         .catch(error => {
             console.error('❌ [API] Error fetching from /api/schedule/list:', error);
-            console.log('🔄 [API] Trying fallback endpoint /api/schedule...');
 
             // If the first endpoint fails, try the fallback
             return axios.get('/api/schedule')
                 .then(response => {
-                    console.log('✅ [API] Fallback schedule response:', response);
                     return response;
                 })
                 .catch(fallbackError => {
@@ -166,25 +144,21 @@ const getSchedulesByDoctorAPI = (doctorId) => {
 // API functions sử dụng endpoints từ documentation
 const getSchedulesByStatusAPI = (status) => {
     const URL_BACKEND = `/api/schedule/status/${status}`;
-    console.log('🔗 [API] Fetching schedules by status:', status, 'from:', URL_BACKEND);
     return axios.get(URL_BACKEND);
 }
 
 const getSchedulesByTypeAPI = (type) => {
     const URL_BACKEND = `/api/schedule/type/${type}`;
-    console.log('🔗 [API] Fetching schedules by type:', type, 'from:', URL_BACKEND);
     return axios.get(URL_BACKEND);
 }
 
 const getSchedulesByDateAPI = (date) => {
     const URL_BACKEND = `/api/schedule/date/${date}`;
-    console.log('🔗 [API] Fetching schedules by date:', date, 'from:', URL_BACKEND);
     return axios.get(URL_BACKEND);
 }
 
 const getSchedulesByPatientAPI = (patientId) => {
     const URL_BACKEND = `/api/schedule/patient-id/${patientId}`;
-    console.log('🔗 [API] Fetching schedules by patient:', patientId, 'from:', URL_BACKEND);
     return axios.get(URL_BACKEND);
 }
 
@@ -196,7 +170,6 @@ const deleteScheduleAPI = (scheduleId) => {
 // API mới để kiểm tra các slot khả dụng của bác sĩ trong ngày
 const checkAvailableSlotsAPI = (doctorId, date) => {
     const URL_BACKEND = `/api/schedule/available-slots?doctorId=${doctorId}&date=${date}`;
-    console.log(`Checking available slots for doctor ${doctorId} on date ${date}`);
     return axios.get(URL_BACKEND);
 };
 
@@ -204,11 +177,9 @@ const checkAvailableSlotsAPI = (doctorId, date) => {
 const checkBackendConnection = () => {
     // Thay đổi endpoint từ /api/health sang /api/schedule/list
     const URL_BACKEND = '/api/schedule/list';
-    console.log('Checking backend connection...');
 
-    return axios.get(URL_BACKEND, { timeout: 5000 }) // Thêm timeout 5 giây
+    return axios.get(URL_BACKEND, { timeout: 5000 }) 
         .then(response => {
-            console.log('Backend connection successful');
             return { success: true, data: response.data };
         })
         .catch(error => {
@@ -222,17 +193,14 @@ const checkBackendConnection = () => {
 // Hàm để lấy số lượng bệnh nhân trong mỗi slot
 const getSlotCountsAPI = (doctorId, date) => {
     const URL_BACKEND = `/api/schedule/slot-counts?doctorId=${doctorId}&date=${date}`;
-    console.log(`🔍 [API] Fetching slot counts for doctor ${doctorId} on date ${date}`);
 
     return axios.get(URL_BACKEND)
         .then(response => {
-            console.log('✅ [API] Slot counts response:', response);
             return response;
         })
         .catch(error => {
             console.error('❌ [API] Error fetching slot counts:', error);
             // Nếu API không tồn tại, tạo một cách thủ công từ danh sách lịch
-            console.log('🔄 [API] Trying to calculate slot counts from schedules...');
 
             // Lấy tất cả lịch của bác sĩ trong ngày
             return getSchedulesByDoctorAPI(doctorId)
@@ -254,7 +222,6 @@ const getSlotCountsAPI = (doctorId, date) => {
                         }
                     });
 
-                    console.log('✅ [API] Calculated slot counts:', slotCounts);
                     return { data: slotCounts };
                 })
                 .catch(fallbackError => {
@@ -265,14 +232,9 @@ const getSlotCountsAPI = (doctorId, date) => {
 };
 
 const updateScheduleAPI = async (scheduleId, scheduleData) => {
-    console.log('=== BẮT ĐẦU QUY TRÌNH CẬP NHẬT LỊCH ===');
-    console.log('1. Thông tin cập nhật:', { scheduleId, ...scheduleData });
-
     try {
         // 1. Xóa lịch cũ
-        console.log('2. Tiến hành xóa lịch cũ:', scheduleId);
         await deleteScheduleAPI(scheduleId);
-        console.log('3. Đã xóa lịch cũ thành công');
 
         // 2. Tạo lịch mới với thông tin đã cập nhật
         const createData = {
@@ -284,14 +246,10 @@ const updateScheduleAPI = async (scheduleId, scheduleData) => {
             type: null
         };
 
-        console.log('4. Tạo lịch mới với dữ liệu:', createData);
         const createResponse = await createScheduleAPI(createData);
-        console.log('5. Tạo lịch mới thành công:', createResponse.data);
 
         // 3. Refresh danh sách lịch
-        console.log('6. Lấy danh sách lịch mới nhất');
         const updatedList = await getAllSchedulesAPI();
-        console.log('7. Hoàn tất cập nhật');
 
         return updatedList;
     } catch (error) {

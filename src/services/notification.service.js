@@ -2,7 +2,6 @@ import axios from './axios.customize';
 
 // Tạo notification mới
 export const createNotification = (data) => {
-    console.log("DEBUG | data:", data);
   return axios.post('/api/notification', data);
 };
 

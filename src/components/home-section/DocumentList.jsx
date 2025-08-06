@@ -54,7 +54,7 @@ const Document = () => {
         fetch('/api/documents.json')
           .then((res) => res.json())
           .then((data) => setDocuments(data))
-          .catch((err) => console.error('Lỗi tải dữ liệu local:', err));
+          .catch((error) => console.error('Lỗi tải dữ liệu local:', error));
       } finally {
         setLoading(false);
       }

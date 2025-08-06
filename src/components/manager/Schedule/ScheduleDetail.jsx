@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Modal, Button, Form, Row, Col, Spinner, Badge } from 'react-bootstrap';
-import { message, notification } from 'antd';
+import { Divider, message, notification } from 'antd';
 import { ScheduleStatus, SlotTimes, StatusMapping } from '../../../types/schedule.types';
 import moment from 'moment';
 import { BsCalendarWeek, BsClock, BsDoorOpen, BsPerson, BsBriefcase, BsPersonPlus, BsList, BsPersonDash } from 'react-icons/bs';
@@ -700,7 +700,7 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                 <Modal.Header closeButton className="bg-light">
                     <Modal.Title>
                         <BsList className="me-2" />
-                        Quản lý từng ca khám
+                        Quản lí từng ca khám
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body style={{ position: 'relative' }}>
@@ -713,54 +713,48 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                     </div>
 
                     {showCancelConfirm && selectedSubSlotToCancel && (
-                        <div className="confirmation-overlay">
-                            <div className="confirmation-card">
-                                <div className="confirmation-header">
-                                    <div className="confirmation-icon">
-                                        <BsPersonDash size={24} />
-                                    </div>
-                                    <h5 className="confirmation-title">Xác nhận hủy lịch</h5>
-                                </div>
+                        <div style={{ padding: '24px', background: '#fff', borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
+                                <BsPersonDash size={24} style={{ marginRight: 8, color: '#ff4d4f' }} />
+                                <h5 style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>Xác nhận hủy lịch</h5>
+                            </div>
 
-                                <div className="confirmation-body">
-                                    <p className="confirmation-question">
-                                        Bạn có chắc chắn muốn hủy lịch của
-                                    </p>
-                                    <div className="patient-info">
-                                        <strong>{selectedSubSlotToCancel.patientName}</strong>
-                                        <span className="slot-badge">Slot {selectedSubSlotToCancel.slotNumber}</span>
-                                    </div>
-                                    <p className="confirmation-warning">
-                                        Thao tác này không thể hoàn tác
-                                    </p>
+                            <div style={{ marginBottom: 16 }}>
+                                <p style={{ marginBottom: 8 }}>
+                                    Bạn có chắc chắn muốn hủy lịch của
+                                </p>
+                                <div style={{ fontWeight: 'bold', fontSize: 16 }}>
+                                    {selectedSubSlotToCancel.patientName}
                                 </div>
+                                <p style={{ marginTop: 8, color: '#ff4d4f' }}>
+                                    Thao tác này không thể hoàn tác
+                                </p>
+                            </div>
 
-                                <div className="confirmation-actions">
-                                    <button
-                                        className="btn-cancel-action"
-                                        onClick={cancelSubSlotConfirmation}
-                                        disabled={processingSubSlot !== null}
-                                    >
-                                        Hủy bỏ
-                                    </button>
-                                    <button
-                                        className="btn-confirm-action"
-                                        onClick={confirmCancelSubSlot}
-                                        disabled={processingCancel}
-                                    >
-                                        {processingCancel ? (
-                                            <>
-                                                <Spinner animation="border" size="sm" className="me-1" />
-                                                Đang hủy...
-                                            </>
-                                        ) : (
-                                            'Xác nhận hủy'
-                                        )}
-                                    </button>
-                                </div>
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+                                <Button
+                                    onClick={cancelSubSlotConfirmation}
+                                    disabled={processingSubSlot !== null}
+                                >
+                                    Hủy bỏ
+                                </Button>
+
+                                <Button
+                                    type="primary"
+                                    danger
+                                    onClick={confirmCancelSubSlot}
+                                    disabled={processingCancel}
+                                    loading={processingCancel}
+                                >
+                                    Xác nhận hủy
+                                </Button>
                             </div>
                         </div>
                     )}
+
+
+                    <Divider>
+                    </Divider>
 
                     {loadingSubSlots ? (
                         <div className="text-center py-4">
@@ -785,12 +779,12 @@ const ScheduleDetail = ({ show, onHide, schedule, onUpdate, onDelete, onShowToas
                                                 }
                                                 className="p-2"
                                             >
-                                                Slot {subSlot.slotNumber}
+                                                Bệnh nhân {subSlot.slotNumber}
                                             </Badge>
                                         </div>
                                         <div>
                                             <div className="fw-bold">
-                                                {subSlot.hasPatient ? subSlot.patientName : 'Slot trống'}
+                                                {subSlot.hasPatient ? subSlot.patientName : 'Chưa có'}
                                             </div>
                                             
                                             <small className="text-muted">
