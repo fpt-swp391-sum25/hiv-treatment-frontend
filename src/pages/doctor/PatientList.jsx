@@ -318,6 +318,8 @@ const PatientList = () => {
                 switch (status) {
                     case 'Thanh toán thành công':
                         return <span style={{ color: '#52c41a' }}>{status}</span>
+                    case 'Thanh toán thành công':
+                        return <span style={{ color: '#52c41a' }}>{status}</span>
                     case 'Đã thanh toán':
                         return <span style={{ color: '#52c41a' }}>{status}</span>
                     case 'Đang xử lý':
