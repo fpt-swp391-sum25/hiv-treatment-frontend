@@ -202,6 +202,9 @@ const PatientDetail = () => {
             <Col span={6}>
               <p><strong>Kết quả:</strong> {test.result} {test.unit}</p>
             </Col>
+            <Col span={6}>
+              <p><strong>Trạng thái:</strong> {test.paymentStatus}</p>
+            </Col>
           </Row>
 
           <Row gutter="5vw">
