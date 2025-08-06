@@ -282,20 +282,29 @@ const AppointmentList = () => {
                 const canCancel = appointmentDateTime.diff(now, 'hour') >= minCancelHour;
                 if (paymentStatus === 'Thanh toán thất bại' || (paymentDes === 'VNPay' && paymentStatus === 'Chờ thanh toán')) {
                     return (
-                        <Popconfirm
-                            title="Thanh toán lại?"
-                            description="Bạn có chắc muốn thanh toán lại?"
-                            onConfirm={() => handleRetryPayment(record.id)}
-                            okText="Có"
-                            cancelText="Không"
-                        >
-                            <Button
-                                type="default"
+                        <>
+                            <Popconfirm
+                                title="Thanh toán lại?"
+                                description="Bạn có chắc muốn thanh toán lại?"
+                                onConfirm={() => handleRetryPayment(record.id)}
+                                okText="Có"
+                                cancelText="Không"
                             >
-                                Thanh toán lại
+                                <Button
+                                    type="default"
+                                >
+                                    Thanh toán lại
+                                </Button>
+                            </Popconfirm>
+                            <Button
+                                style={{ marginLeft: 15 }}
+                                className="custom-delete-btn"
+                                icon={<DeleteOutlined />}
+                                onClick={() => showCancelModal(record)}
+                            >
+                                Huỷ
                             </Button>
-                        </Popconfirm>
-
+                        </>
                     );
                 }
                 if (paymentDes === 'Tiền mặt' && paymentStatus === 'Chờ thanh toán' && status === 'Đang hoạt động') {
