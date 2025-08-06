@@ -87,70 +87,48 @@ const Login = () => {
     const handleLogin = async () => {
         setLoading(true)
         setError('')
-        try {
-            const response = await loginAPI(username, password)
 
-            if (response.data && response.data.token) {
-                // Save token to local storage
-                localStorage.setItem('access_token', response.data.token)
-                setUser(response.data)
+        const response = await loginAPI(username, password)
 
-                // Navigate to right page by role
-                if (response.data.role === 'ADMIN') {
-                    navigate('/admin')
-                } else if (response.data.role === 'LAB_TECHNICIAN') {
-                    navigate('/lab-technician')
-                } else if (response.data.role === 'DOCTOR') {
-                    navigate('/doctor')
-                } else if (response.data.role === 'MANAGER') {
-                    navigate('/manager')
-                } else if (response.data.role === 'CASHIER') {
-                    navigate('/cashier')
-                } else {
-                    navigate('/')
-                }
+        if (response.data && response.data.token) {
+            // Save token to local storage
+            localStorage.setItem('access_token', response.data.token)
+            setUser(response.data)
 
-                notification.success({
-                    message: "Đăng nhập thành công",
-                    showProgress: true,
-                    pauseOnHover: true,
-                    description: `Xin chào, ${response.data.fullName || username}!`
-                })
+            // Navigate to right page by role
+            if (response.data.role === 'ADMIN') {
+                navigate('/admin')
+            } else if (response.data.role === 'LAB_TECHNICIAN') {
+                navigate('/lab-technician')
+            } else if (response.data.role === 'DOCTOR') {
+                navigate('/doctor')
+            } else if (response.data.role === 'MANAGER') {
+                navigate('/manager')
+            } else if (response.data.role === 'CASHIER') {
+                navigate('/cashier')
             } else {
-                if (response.status === 403
-                    && response.message.includes('NOT VERIFIED')) {
-                    setError('Tài khoản chưa xác minh email')
-                    setShowResend(true)
-                } else if (response.status === 403
-                    && response.message.includes('UNACTIVE')) {
-                    setError('Tài khoản của bạn đã bị tạm khóa')
-                } else {
-                    setError('Thông tin đăng nhập không hợp lệ.')
-                }
-            }
-        } catch (error) {
-            console.error('Login error:', error)
-
-            if (error.response) {
-                const errorMessage = error.response.data?.message
-                    || 'Thông tin đăng nhập không hợp lệ!'
-                setError(errorMessage)
-            } else {
-                setError('Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng.')
+                navigate('/')
             }
 
-            notification.error({
-                message: "Lỗi đăng nhập",
+            notification.success({
+                message: "Đăng nhập thành công",
                 showProgress: true,
                 pauseOnHover: true,
-                description: error.response?.data?.message
-                    || 'Thông tin đăng nhập không hợp lệ!'
+                description: `Xin chào, ${response.data.fullName || username}!`
             })
-        } finally {
-            setLoading(false)
-            backToLogin()
-            form.resetFields()
+        } else {
+            if (response.status === 403
+                && response.message.includes('NOT VERIFIED')) {
+                setError('Tài khoản chưa xác minh email')
+                setShowResend(true)
+            } else if (response.status === 403
+                && response.message.includes('UNACTIVE')) {
+                setError('Tài khoản của bạn đã bị tạm khóa')
+            } else {
+                setError('Thông tin đăng nhập không hợp lệ.')
+            }
         }
+        setLoading(false)
 
     }
 
