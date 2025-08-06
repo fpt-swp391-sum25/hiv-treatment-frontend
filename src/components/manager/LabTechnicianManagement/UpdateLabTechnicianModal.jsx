@@ -22,7 +22,6 @@ const UpdateLabTechnicianModal = ({ visible, labTechnician, onCancel, onSuccess 
 
     useEffect(() => {
         if (visible && labTechnician) {
-            console.log("Avatar from backend:", labTechnician.avatar);
 
             form.setFieldsValue({
                 fullName: labTechnician.fullName || '',

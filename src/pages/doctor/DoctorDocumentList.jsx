@@ -122,6 +122,14 @@ const DoctorDocumentList = () => {
   const handleDelete = async (id) => {
     setLoading(true)
     try {
+        // Lấy danh sách ảnh liên quan
+      const images = await getDocumentImagesByDocumentId(id);
+
+        // Xóa từng ảnh
+      for (const image of images.data) {
+        await deleteDocumentImage(image.id);
+      }
+        // Xóa document
       await deleteDocument(id)
       message.success('Xóa document thành công')
       fetchDocuments()
@@ -234,18 +242,20 @@ const DoctorDocumentList = () => {
         message.success('Document updated successfully')
       } else {
         const res = await createDocument(cleanedValues, user?.id)
-        documentId = res.data?.id || null
-        message.success('Tạo mới document thành công')
-        if (!documentId) {
-          await fetchDocuments()
-          const latest = documents[0]
-          documentId = latest?.id
+
+        let documentId
+        const match = res?.data?.message?.match(/ID:\s*(\d+)/)
+        if (match && match[1]) {
+          documentId = parseInt(match[1], 10)
+        } else {
+          throw new Error('Không thể lấy ID từ phản hồi của backend.')
         }
-      }
-      for (const img of imageList) {
+
+        for (const img of imageList) {
         if (!img.id && documentId) {
           await createDocumentImage({ image: img.image, documentId })
         }
+      }
       }
       setModalOpen(false)
       fetchDocuments()

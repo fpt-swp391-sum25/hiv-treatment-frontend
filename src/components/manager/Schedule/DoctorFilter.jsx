@@ -60,11 +60,7 @@ const DoctorFilter = ({ selectedDoctor, onDoctorSelect }) => {
     setLoading(true);
     setError(null);
     try {
-      console.log('DoctorFilter: Fetching doctors from API...');
       const response = await fetchAllDoctorsAPI();
-
-      console.log('DoctorFilter: API response for doctors:', response);
-
       // Kiểm tra cấu trúc response để xác định nơi chứa dữ liệu
       let doctorsData = [];
 
@@ -79,13 +75,10 @@ const DoctorFilter = ({ selectedDoctor, onDoctorSelect }) => {
       // Đảm bảo doctorsData là một mảng
       const doctorsList = Array.isArray(doctorsData) ? doctorsData : [];
 
-      console.log('DoctorFilter: Doctors data after processing:', doctorsList);
-
       if (doctorsList.length > 0) {
         // Chuyển đổi dữ liệu từ API để phù hợp với cấu trúc component
         const formattedDoctors = doctorsList.map(doctor => {
           // Log để kiểm tra cấu trúc dữ liệu
-          console.log('DoctorFilter: Doctor data structure:', doctor);
 
           // Xử lý các trường hợp khác nhau của cấu trúc dữ liệu
           const id = doctor.id || doctor.userId || doctor.user_id;
@@ -97,11 +90,9 @@ const DoctorFilter = ({ selectedDoctor, onDoctorSelect }) => {
           };
         });
 
-        console.log('DoctorFilter: Formatted doctors:', formattedDoctors);
         setDoctors(formattedDoctors);
         setFilteredDoctors(formattedDoctors);
       } else {
-        console.log('DoctorFilter: No doctor data received');
         setDoctors([]);
         setFilteredDoctors([]);
         setError('Không có dữ liệu bác sĩ');

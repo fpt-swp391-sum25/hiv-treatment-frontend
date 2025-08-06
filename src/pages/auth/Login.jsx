@@ -89,7 +89,6 @@ const Login = () => {
         setError('')
         try {
             const response = await loginAPI(username, password)
-            console.log('Login response:', response)
 
             if (response.data && response.data.token) {
                 // Save token to local storage

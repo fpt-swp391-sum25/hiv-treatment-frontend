@@ -79,14 +79,13 @@ const calculateDoctorPerformance = (doctor, schedules) => {
 // Staff Statistics
 export const getStaffData = async () => {
   try {
-    // 1. Lấy danh sách nhân viên theo role
-    const [doctorsResponse, labTechResponse, managersResponse] = await Promise.all([
+    const [doctorsResponse, labTechResponse, managersResponse, cashiersResponse] = await Promise.all([
       axios.get(`/api/user/DOCTOR`),
       axios.get(`/api/user/LAB_TECHNICIAN`),
-      axios.get(`/api/user/MANAGER`)
+      axios.get(`/api/user/MANAGER`),
+      axios.get(`/api/user/CASHIER`)
     ]);
 
-    // 2. Lấy danh sách lịch hẹn
     let scheduleData = [];
     try {
       const scheduleResponse = await axios.get('/api/schedule/list');
@@ -96,10 +95,8 @@ export const getStaffData = async () => {
       scheduleData = [];
     }
 
-    // 3. Lấy danh sách kết quả xét nghiệm theo từng health record
     let testOrderData = [];
     try {
-      // Lấy danh sách health records từ schedules
       const healthRecordIds = [...new Set(scheduleData.map(schedule => schedule.healthRecordId).filter(Boolean))];
 
       const testOrderPromises = healthRecordIds.map(healthRecordId =>
@@ -118,12 +115,11 @@ export const getStaffData = async () => {
       testOrderData = [];
     }
 
-    // 4. Xử lý và tổng hợp dữ liệu
     const doctors = doctorsResponse.data || [];
     const labTechs = labTechResponse.data || [];
     const managers = managersResponse.data || [];
+    const cashiers = cashiersResponse.data || [];
 
-    // Tính toán thống kê cho bác sĩ
     const doctorStats = doctors.map(doctor => {
       const doctorSchedules = scheduleData.filter(s => s.doctorId === doctor.id);
       const completedSchedules = doctorSchedules.filter(s => s.status === 'COMPLETED');
@@ -141,7 +137,6 @@ export const getStaffData = async () => {
       };
     });
 
-    // Tính toán thống kê cho kỹ thuật viên
     const labTechStats = labTechs.map(tech => {
       const techTestOrders = testOrderData.filter(t => t.technicianId === tech.id);
       const completedTests = techTestOrders.filter(t => t.status === 'COMPLETED');
@@ -159,7 +154,6 @@ export const getStaffData = async () => {
       };
     });
 
-    // Thống kê cho quản lý
     const managerStats = managers.map(manager => ({
       id: manager.id,
       fullName: manager.fullName || manager.name,
@@ -170,12 +164,22 @@ export const getStaffData = async () => {
       created_at: manager.created_at || manager.createdAt
     }));
 
-    // 5. Trả về kết quả với các chỉ số tổng hợp
+    const cashierStats = cashiers.map(cashier => ({
+      id: cashier.id,
+      fullName: cashier.fullName || cashier.name,
+      email: cashier.email,
+      phoneNumber: cashier.phoneNumber,
+      role: 'CASHIER',
+      status: cashier.status || 'ACTIVE',
+      created_at: cashier.created_at || cashier.createdAt
+    }));
+
     return {
       doctors: doctorStats,
       labTechnicians: labTechStats,
       managers: managerStats,
-      totalStaff: doctors.length + labTechs.length + managers.length,
+      cashiers: cashierStats,
+      totalStaff: doctors.length + labTechs.length + managers.length + cashiers.length,
       totalAppointments: scheduleData.length,
       totalTests: testOrderData.length,
       statistics: {
@@ -188,11 +192,11 @@ export const getStaffData = async () => {
 
   } catch (error) {
     console.error('Error in getStaffData:', error);
-    // Trả về dữ liệu rỗng khi có lỗi để tránh crash ứng dụng
     return {
       doctors: [],
       labTechnicians: [],
       managers: [],
+      cashiers: [],
       totalStaff: 0,
       totalAppointments: 0,
       totalTests: 0,
@@ -205,6 +209,7 @@ export const getStaffData = async () => {
     };
   }
 };
+
 
 // Helper function to calculate performance percentage
 const calculatePerformance = (total, completed) => {
